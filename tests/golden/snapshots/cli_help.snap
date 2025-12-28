@@ -1,1 +1,10 @@
-usage:
+usage: orsa [-h] {demo} ...
+
+orsa prototype cli
+
+positional arguments:
+  {demo}
+    demo      run a minimal governed simulator-in-the-loop demo
+
+options:
+  -h, --help  show this help message and exit
