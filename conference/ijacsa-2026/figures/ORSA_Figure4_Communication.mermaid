@@ -1,0 +1,49 @@
+%%{init: {'theme': 'base', 'themeVariables': { 
+  'primaryColor': '#5B7553', 
+  'primaryTextColor': '#F5F2ED', 
+  'primaryBorderColor': '#F5F2ED',
+  'lineColor': '#6B7B6E',
+  'background': '#FDFBF7',
+  'fontSize': '13px'
+}}}%%
+
+flowchart LR
+    subgraph SYNC["<b>Synchronous: Immediate Response</b>"]
+        direction LR
+    end
+    
+    subgraph MAIN[" "]
+        direction LR
+        
+        FE["<b>Frontend</b><br/>Client<br/>───────<br/>Web │ Mobile<br/>↔ WebSocket"]
+        GW["<b>API</b><br/>Gateway<br/>───────<br/>Auth │ Rate Limit<br/>Load Balance"]
+        ORCH["<b>Orchestration</b><br/>Layer<br/>───────<br/>Job Queue<br/>Workflow Engine"]
+        BE["<b>Backend</b><br/>Workers<br/>───────<br/>AI │ Simulation<br/>Data Processing"]
+    end
+    
+    subgraph ASYNC["<b>Asynchronous: Background Processing + Real-time Updates</b>"]
+        direction LR
+    end
+    
+    FE -- "1. POST /jobs" --> GW
+    GW -- "2. job_id" --> FE
+    GW -- "3. Queue Job" --> ORCH
+    ORCH -- "4. Process" --> BE
+    BE -- "5. Complete" --> ORCH
+    ORCH -. "6. WebSocket: Status Update" .-> FE
+    
+    style FE fill:#6B8E6B,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style GW fill:#8B5A3C,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style ORCH fill:#7D6B5D,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style BE fill:#4A5D4F,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    
+    style SYNC fill:#5B7553,stroke:#5B7553,stroke-width:1px,color:#5B7553,opacity:0.15
+    style ASYNC fill:#A67C52,stroke:#A67C52,stroke-width:1px,color:#A67C52,opacity:0.15
+    style MAIN fill:transparent,stroke:none
+    
+    linkStyle 0 stroke:#5B7553,stroke-width:2px
+    linkStyle 1 stroke:#5B7553,stroke-width:2px
+    linkStyle 2 stroke:#A67C52,stroke-width:2px
+    linkStyle 3 stroke:#A67C52,stroke-width:2px
+    linkStyle 4 stroke:#A67C52,stroke-width:2px
+    linkStyle 5 stroke:#A67C52,stroke-width:2px,stroke-dasharray:5
