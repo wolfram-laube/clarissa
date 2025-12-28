@@ -1,0 +1,79 @@
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'fontFamily': 'Georgia, Cambria, serif',
+    'primaryColor': '#7D6B5D',
+    'primaryTextColor': '#F5F2ED',
+    'primaryBorderColor': '#F5F2ED',
+    'lineColor': '#6B7B6E',
+    'background': '#FDFBF7',
+    'fontSize': '13px',
+    'nodeTextColor': '#F5F2ED'
+  }
+}}%%
+
+flowchart LR
+    subgraph TITLE[" "]
+        direction TB
+        T1[" "]
+    end
+
+    IN(("🎤<br/><b>Voice</b><br/><b>Input</b>"))
+    
+    S1["<b>① Speech<br/>Recognition</b><br/>───────<br/><i>Audio → Text</i>"]
+    S2["<b>② Intent<br/>Recognition</b><br/>───────<br/><i>Understand Goal</i>"]
+    S3["<b>③ Entity<br/>Extraction</b><br/>───────<br/><i>Wells, Dates, Params</i>"]
+    S4["<b>④ Asset<br/>Validation</b><br/>───────<br/><i>Database Check</i>"]
+    S5["<b>⑤ Syntax<br/>Generation</b><br/>───────<br/><i>ECLIPSE Keywords</i>"]
+    S6["<b>⑥ Deck<br/>Validation</b><br/>───────<br/><i>Physics Check</i>"]
+    
+    OUT(("📄<br/><b>ECLIPSE</b><br/><b>Deck</b>"))
+
+    IN ==> S1
+    S1 ==> S2
+    S2 ==> S3
+    S3 ==> S4
+    S4 ==> S5
+    S5 ==> S6
+    S6 ==> OUT
+    
+    subgraph VAL["  ✓ Validation at Each Stage  "]
+        direction LR
+        V1(("✓"))
+        V2(("✓"))
+        V3(("✓"))
+        V4(("✓"))
+        V5(("✓"))
+        V6(("✓"))
+    end
+    
+    S1 -.-> V1
+    S2 -.-> V2
+    S3 -.-> V3
+    S4 -.-> V4
+    S5 -.-> V5
+    S6 -.-> V6
+    
+    style TITLE fill:transparent,stroke:none
+    style T1 fill:transparent,stroke:none
+    
+    style IN fill:#7D6B5D,stroke:#F5F2ED,stroke-width:3px,color:#F5F2ED
+    style OUT fill:#996633,stroke:#F5F2ED,stroke-width:3px,color:#F5F2ED
+    
+    style S1 fill:#7D6B5D,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style S2 fill:#8B7355,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style S3 fill:#9A7B4F,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style S4 fill:#A67C52,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style S5 fill:#B8860B,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style S6 fill:#996633,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    
+    style VAL fill:#F0EDE6,stroke:#5B7553,stroke-width:2px,color:#5B7553
+    style V1 fill:#5B7553,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style V2 fill:#5B7553,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style V3 fill:#5B7553,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style V4 fill:#5B7553,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style V5 fill:#5B7553,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style V6 fill:#5B7553,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    
+    linkStyle 0,1,2,3,4,5,6 stroke:#6B7B6E,stroke-width:3px
+    linkStyle 7,8,9,10,11,12 stroke:#5B7553,stroke-width:1px,stroke-dasharray:4
