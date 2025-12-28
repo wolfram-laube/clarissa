@@ -17,11 +17,12 @@ def normalize(s: str) -> str:
     return s
 
 def load_expected(name: str) -> str:
-    return (snapshots_dir() / name).read_text(encoding="utf-8")
+    raw = (snapshots_dir() / name).read_text(encoding="utf-8")
+    return normalize(raw)  # FIX: normalize the expected value too!
 
 def write_expected(name: str, content: str) -> None:
     snapshots_dir().mkdir(parents=True, exist_ok=True)
-    (snapshots_dir() / name).write_text(content, encoding="utf-8")
+    (snapshots_dir() / name).write_text(normalize(content), encoding="utf-8")
 
 def assert_snapshot(actual: str, snapshot_name: str) -> None:
     exp = load_expected(snapshot_name)
@@ -33,4 +34,8 @@ def assert_snapshot(actual: str, snapshot_name: str) -> None:
             tofile=f"actual/{snapshot_name}",
             lineterm=""
         ))
+        # Write diff for CI artifacts
+        diff_dir = snapshots_dir().parent / "diffs"
+        diff_dir.mkdir(parents=True, exist_ok=True)
+        (diff_dir / f"{snapshot_name}.diff").write_text(diff, encoding="utf-8")
         raise AssertionError("Snapshot mismatch:\n" + diff)
