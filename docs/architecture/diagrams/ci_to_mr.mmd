@@ -1,0 +1,10 @@
+sequenceDiagram
+  participant Dev as Developer
+  participant CI as GitLab CI
+  participant MR as Merge Request
+  Dev->>CI: push / update MR
+  CI->>CI: run tests, rerun last-failed
+  CI->>CI: classify flaky vs confirmed
+  CI->>CI: run snapshot_tests + contract_tests
+  CI-->>MR: unified MR note (status + summaries)
+  CI-->>MR: export reports/mr_report.md/html (artifact)

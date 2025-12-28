@@ -1,0 +1,253 @@
+stages:
+  - test
+  - classify
+  - automation
+
+# ----------------------------
+# Anchors (infrastructure hygiene)
+# ----------------------------
+.python_base: &python_base
+  image: python:3.11
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    key: pip-cache
+    paths:
+      - .cache/pip
+
+.install_dev_deps: &install_dev_deps
+  before_script:
+    - python -V
+    - python -m pip install --upgrade pip
+    - python -m pip install -e ".[dev]"
+
+.pytest_run: &pytest_run
+  script:
+    - python -m pytest -q --junitxml=junit.xml
+  artifacts:
+    when: always
+    reports:
+      junit: junit.xml
+    paths:
+      - junit.xml
+      - .pytest_cache/
+
+.rerun_rules: &rerun_rules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_failure
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_failure
+    - when: never
+
+.issue_bot_rules: &issue_bot_rules
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - when: never
+
+.recovery_bot_rules: &recovery_bot_rules
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - when: never
+
+.mr_bot_rules: &mr_bot_rules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - when: never
+
+# ----------------------------
+# Jobs
+# ----------------------------
+tests:
+  stage: test
+  <<: *python_base
+  <<: *install_dev_deps
+  <<: *pytest_run
+
+snapshot_tests:
+  stage: test
+  <<: *python_base
+  <<: *install_dev_deps
+  script:
+    - |
+      set -e
+      python -m pytest -q tests/golden/test_cli_help_snapshot.py tests/golden/test_cli_demo_snapshot.py || EXIT=$?
+      mkdir -p tests/golden
+      if [ -d tests/golden/diffs ] && ls -1 tests/golden/diffs/*.diff >/dev/null 2>&1; then
+        echo '# Snapshot diffs' > tests/golden/summary.md
+        echo '' >> tests/golden/summary.md
+        for f in tests/golden/diffs/*.diff; do
+          echo "## $(basename $f)" >> tests/golden/summary.md
+          echo '```diff' >> tests/golden/summary.md
+          cat "$f" >> tests/golden/summary.md
+          echo '```' >> tests/golden/summary.md
+          echo '' >> tests/golden/summary.md
+        done
+      fi      if [ -n "${EXIT:-}" ]; then exit $EXIT; fi
+  artifacts:
+    when: on_failure
+    paths:
+      - tests/golden/snapshots/
+
+contract_tests:
+  stage: test
+  <<: *python_base
+  <<: *install_dev_deps
+  artifacts:
+    when: on_failure
+    paths:
+      - tests/contracts/summary.md
+      - pytest_contracts.log
+
+  script:
+    - |
+      set -e
+      python -m pytest -q tests/contracts 2>&1 | tee pytest_contracts.log || EXIT=$?
+      python scripts/generate_contract_summary.py || true
+      if [ -n "${EXIT:-}" ]; then exit $EXIT; fi
+
+governance_impact:
+  stage: test
+  <<: *python_base
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - when: never
+  script:
+    - python scripts/detect_governance_impact.py
+  artifacts:
+    when: always
+    paths:
+      - tests/governance/impact.md
+
+mr_report:
+  stage: automation
+  <<: *python_base
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - when: never
+  needs:
+    - job: snapshot_tests
+      artifacts: true
+      optional: true
+    - job: contract_tests
+      artifacts: true
+      optional: true
+    - job: governance_impact
+      artifacts: true
+      optional: true
+  script:
+    - python scripts/generate_mr_report.py
+    - python scripts/render_report_html.py || true
+  artifacts:
+    when: always
+    paths:
+      - reports/mr_report.md
+      - reports/mr_report.html
+
+architecture_graphs:
+  stage: test
+  image: ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:latest
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - when: never
+  script:
+    - node -v
+    - npm -v
+    - npm install -g @mermaid-js/mermaid-cli
+    # Note: mmdc uses headless chromium via puppeteer. If rendering fails due to missing libs in the runner,
+    # keep sources as canonical and treat rendering as best-effort.
+    - bash scripts/render_mermaid.sh || (echo "Mermaid render failed; keeping .mmd sources as canonical." && exit 1)
+  artifacts:
+    when: always
+    paths:
+      - docs/architecture/diagrams/
+      - docs/architecture/rendered/
+  allow_failure: true
+
+tests_rerun:
+  stage: test
+  <<: *python_base
+  <<: *install_dev_deps
+  <<: *rerun_rules
+  needs:
+    - job: tests
+      artifacts: true
+  script:
+    - |
+      set +e
+      # v10: rerun only the previously failing tests (pytest cache is provided via artifacts)
+      python -m pytest -q --last-failed --last-failed-no-failures=none --maxfail=${CI_BOT_RERUN_MAXFAIL:-1} -x --junitxml=junit_rerun.xml
+      CODE=$?
+      echo $CODE > rerun_exit_code.txt
+      # never fail the rerun job; classification decides
+      exit 0
+  artifacts:
+    when: always
+    paths:
+      - junit_rerun.xml
+      - rerun_exit_code.txt
+
+ci_classify:
+  stage: classify
+  <<: *python_base
+  needs:
+    - job: tests
+      artifacts: true
+    - job: tests_rerun
+      artifacts: true
+      optional: true
+  script:
+    - python scripts/ci_classify.py
+  artifacts:
+    reports:
+      dotenv: ci_classify.env
+    paths:
+      - ci_classify.env
+
+ci_flaky_ledger:
+  stage: automation
+  <<: *python_base
+  needs:
+    - job: ci_classify
+      artifacts: true
+  <<: *issue_bot_rules
+  script:
+    - python scripts/gitlab_flaky_ledger_bot.py
+
+ci_issue_on_failure:
+  stage: automation
+  <<: *python_base
+  needs:
+    - job: ci_classify
+      artifacts: true
+  <<: *issue_bot_rules
+  script:
+    - python scripts/gitlab_issue_bot.py
+
+ci_issue_on_recovery:
+  stage: automation
+  <<: *python_base
+  needs:
+    - job: ci_classify
+      artifacts: true
+  <<: *recovery_bot_rules
+  script:
+    - python scripts/gitlab_recovery_bot.py
+
+mr_comment_on_failure:
+  stage: automation
+  <<: *python_base
+  needs:
+    - job: ci_classify
+      artifacts: true
+  <<: *mr_bot_rules
+  script:
+    - python scripts/gitlab_mr_bot.py

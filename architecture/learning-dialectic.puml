@@ -1,0 +1,29 @@
+@startuml
+title ORSA Learning–Governance Dialectic
+
+skinparam Shadowing false
+skinparam defaultTextAlignment left
+
+actor Human as H
+participant "LLM Reasoning" as LLM
+participant "Reinforcement\nLearning" as RL
+participant "Simulators" as SIM
+participant "Governance" as GOV
+
+H -> LLM: Intent / Question
+LLM -> RL: Planned action sequence
+RL -> SIM: Execute actions
+SIM --> RL: Numerical outcomes\n(convergence, stability, errors)
+RL --> LLM: Reward & diagnostics
+LLM -> GOV: Proposed change / recommendation
+GOV --> H: Approval / escalation / denial
+
+note over RL, SIM
+Learning flows from numerical consequences.
+end note
+
+note over GOV, H
+Authority flows from human approval.
+end note
+
+@enduml

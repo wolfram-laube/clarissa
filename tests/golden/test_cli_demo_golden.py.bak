@@ -1,0 +1,12 @@
+import os
+import subprocess
+import sys
+from .util import assert_contains_markers
+
+def test_cli_demo_golden():
+    env = os.environ.copy()
+    env["ORSA_AUTO_APPROVE"] = "1"
+    p = subprocess.run([sys.executable, "-m", "orsa", "demo"], capture_output=True, text=True, env=env)
+    assert p.returncode == 0
+    out = p.stdout + "\n" + p.stderr
+    assert_contains_markers(out, ["[gov]", "[sim]", "[orsa/llm]"])

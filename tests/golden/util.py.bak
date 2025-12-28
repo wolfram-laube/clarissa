@@ -1,0 +1,15 @@
+from __future__ import annotations
+import re
+
+def normalize(s: str) -> str:
+    s = s.lower()
+    s = re.sub(r"https?://\S+", "<url>", s)
+    s = re.sub(r"[0-9a-f]{7,40}", "<sha>", s)
+    s = re.sub(r"/[^\s]+", "<path>", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+def assert_contains_markers(output: str, markers: list[str]) -> None:
+    out = normalize(output)
+    for m in markers:
+        assert m in out, f"missing marker: {m}\noutput: {out}"

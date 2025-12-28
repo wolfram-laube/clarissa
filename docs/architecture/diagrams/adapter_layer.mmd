@@ -1,0 +1,7 @@
+flowchart LR
+  A[ORSA Agent] --> C[Simulator Contract]
+  C --> M[MockSimulator]
+  C --> MRST[MRST Adapter]
+  C --> OPM[OPM Flow Adapter]
+  MRST -. planned .-> MR[MATLAB Runtime]
+  OPM -. planned .-> F[flow executable / container]
