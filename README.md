@@ -1,87 +1,138 @@
-# ORSA – Unified Code & Documentation Repository
+# ORSA – Oxy Reservoir Simulation Agent
 
-This repository contains the ORSA (Oxy Reservoir Simulation Agent) codebase **and** its governing documentation.
-Architecture decisions live in `docs/adr/` and are first-class citizens.
+**A physics-centric AI agent architecture for reservoir simulation.**
 
-## Structure (high level)
-- `src/orsa/` – importable ORSA package (agent, governance, learning, simulator adapters, CLI)
-- `src/orsa_kernel/` – lightweight native simulation kernel package (laboratory, explainability, learning signals)
-- `docs/adr/` – Architecture Decision Records (ADRs)
-- `architecture/` – diagrams (PUML/SVG) and architecture visuals
-- `conference/` – conference artifacts (abstract, keywords, etc.)
-- `experiments/` – exploratory work (may import `orsa`, never the reverse)
-- `scripts/` – operational tooling
+ORSA bridges natural language interaction and domain-specific simulation syntax through governed, simulator-in-the-loop learning.
 
-## Quick start
+## Quick Start
+
 ```bash
-python -m orsa --help
+# Install
+pip install -e ".[dev]"
+
+# Run demo (interactive approval)
 python -m orsa demo
+
+# Run demo (CI mode, auto-approve)
+ORSA_AUTO_APPROVE=1 python -m orsa demo
+
+# Run tests
 pytest -q
 ```
 
-## Control principle
-Learning flows from numerical consequences.
-Authority flows from human approval.
+## Repository Structure
 
+```
+src/orsa/           # Importable ORSA package
+  ├── agent/        # Agent core (reasoning, planning)
+  ├── governance/   # Policy enforcement, approval gates
+  ├── learning/     # RL components (planned)
+  └── simulators/   # Simulator adapters
 
-## CI-friendly demo
-Set `ORSA_AUTO_APPROVE=1` to run the demo without interactive approval.
+src/orsa_kernel/    # Native simulation kernel (laboratory)
 
-## CI philosophy (important)
-ORSA CI is designed as an observability and reporting system, not a strict
-pass/fail gate.
+docs/
+  ├── adr/          # Architecture Decision Records
+  ├── architecture/ # Diagrams (Mermaid)
+  └── simulators/   # Adapter specifications
 
-A green pipeline indicates a healthy system state.
-A red pipeline indicates a signal that requires inspection, not automatic rejection.
+conference/         # Academic artifacts (abstracts, papers)
+experiments/        # Exploratory work (may import orsa)
+scripts/            # CI/CD tooling, bots
+tests/              # Contract tests, golden tests, snapshots
+```
 
-Always consult the MR report for context, including:
-- snapshot (golden) diffs
-- contract test outcomes
-- governance-impact heuristics
+## Core Principles
 
-Details: docs/ci/README.md
+> **Learning flows from numerical consequences.**  
+> **Authority flows from human approval.**
 
+1. **Physics-Centric** (ADR-001): Simulators are first-class learning substrates. Numerical outcomes—not text plausibility—drive feedback.
 
-## Tests
-- Contract tests: `tests/contracts/` enforce simulator adapter invariants.
-- Golden CLI tests: `tests/golden/` ensure stable CLI UX.
-- Update golden markers: `make update-golden`.
+2. **Separation of Roles** (ADR-002): LLM reasoning, RL learning, and governance are architecturally separate for auditability.
 
-### CLI snapshots
-Snapshot-style tests live in `tests/golden/snapshots/`.
-Update them with:
-- `make update-snapshots`
+3. **Signals over Enforcement** (ADR-008): CI detects and reports governance-relevant changes; humans decide and act.
 
-## Dev hygiene
-Optional: enable pre-commit hooks to keep CLI snapshots and fast tests green.
-- `pip install pre-commit`
-- `pre-commit install`
+## Architecture Decision Records
 
-### Snapshot debug artifacts (CI)
-If CLI snapshots mismatch, the test suite writes:
-- `tests/golden/diffs/` (diffs)
-- `tests/golden/actuals/` (actual normalized output)
-CI uploads them from the `snapshot_tests` job.
+| ADR | Title | Status |
+|-----|-------|--------|
+| [001](docs/adr/ADR-001-physics-centric.md) | Physics-Centric, Simulator-in-the-Loop | Accepted |
+| [002](docs/adr/ADR-002-separation-of-roles.md) | Separation of Reasoning, Learning, Governance | Accepted |
+| [003](docs/adr/ADR-003-native-kernel.md) | ORSA-Native Simulation Kernel | Accepted |
+| [005](docs/adr/ADR-005-repo-decomposition.md) | Single Repo Until Stabilization | Accepted |
+| [006](docs/adr/ADR-006-noise-free-ci-artifacts.md) | Noise-free CI Artifacts | Accepted |
+| [007](docs/adr/ADR-007-ci-as-observability-layer.md) | CI as Observability Layer | Accepted |
+| [008](docs/adr/ADR-008-governance-signals-vs-enforcement.md) | Governance Signals vs Enforcement | Accepted |
+| [009](docs/adr/ADR-009-nlp-translation-pipeline.md) | Multi-Stage NLP Translation Pipeline | Proposed |
 
-### v17: CI diff summary
-On snapshot failures, CI creates `tests/golden/summary.md` containing embedded diffs and uploads it as an artifact.
+## Testing
 
-## v20: Unified MR report
-MR comments now embed snapshot diffs, contract failures, and a governance-impact heuristic section.
+```bash
+# All tests
+make test
 
-## v21: Review ergonomics
-Merge Requests now show a status table (snapshots, contracts, governance) and direct CI links.
+# Contract tests (simulator adapter invariants)
+pytest tests/contracts/ -v
 
-## v22: Exportable MR reports
-Generate report artifacts locally:
-- `make mr-report`
-- `make mr-report-html`
-CI creates artifacts on MR pipelines in `reports/`.
+# Snapshot tests (CLI stability)
+pytest tests/golden/ -v
 
-## v23: Casino Royale (diagrams + adapter matrix)
-- Simulator adapter matrix: `docs/simulators/adapter_matrix.md`
-- Mermaid architecture diagrams: `docs/architecture/diagrams/`
-- CI attempts to render SVGs: `docs/architecture/rendered/` (best-effort)
+# Update snapshots after intentional CLI changes
+make update-snapshots
+```
 
-## v24: Diagram gallery
-CI renders Mermaid diagrams and generates a gallery at `docs/architecture/rendered/index.html` (see artifacts).
+## CI/CD
+
+The CI pipeline implements an **observability model** (ADR-007):
+
+- **Test Stage:** Collect evidence (JUnit, snapshots, contracts)
+- **Classify Stage:** Determine verdict (confirmed failure vs flaky)
+- **Automation Stage:** Generate reports, notify via bots
+
+Governance-sensitive changes are **detected and reported**, not automatically blocked (ADR-008).
+
+## Development
+
+```bash
+# Install with dev dependencies
+make dev
+
+# Run linter
+ruff check src/ tests/
+
+# Generate MR report locally
+make mr-report
+make mr-report-html
+```
+
+### Pre-commit Hooks
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+## Simulator Adapters
+
+See [docs/simulators/adapter_matrix.md](docs/simulators/adapter_matrix.md).
+
+| Backend | Status | Notes |
+|---------|--------|-------|
+| MockSimulator | ✅ Implemented | CI-friendly, deterministic |
+| OPM Flow | 🟡 Planned | Open-source, ECLIPSE-compatible |
+| MRST | 🟡 Planned | MATLAB-based, research-friendly |
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+**Key rule:** If a change affects behavior, responsibilities, or safety boundaries, it should reference or introduce an ADR.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.
+
+## License
+
+Proprietary – Oxy / BlauWeiss LLC
