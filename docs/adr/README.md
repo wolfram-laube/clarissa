@@ -17,6 +17,7 @@ ADRs document significant architectural decisions, their rationale, and conseque
 - ADR-005 — Single-Repo Until Architecture Stabilizes (Accepted)
 - ADR-006 — Noise-Free CI Artifacts and Best-Effort Jobs (Accepted)
 - ADR-007 — CI as an Observability Layer (Accepted)
+- ADR-008 — Governance Signals vs Enforcement (Accepted)
 
 ## Cross-References
 ### Architecture Diagrams
@@ -35,3 +36,4 @@ ADRs document significant architectural decisions, their rationale, and conseque
 | Repo strategy | ADR-005 |
 | CI hygiene & developer experience | ADR-006 |
 | CI observability & reporting | ADR-007 |
+| Governance signals & enforcement boundaries | ADR-008 |
