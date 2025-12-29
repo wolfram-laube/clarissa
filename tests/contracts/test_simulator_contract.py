@@ -1,5 +1,5 @@
 import pytest
-from orsa.simulators.mock import MockSimulator
+from clarissa.simulators.mock import MockSimulator
 
 def adapters():
     # Add future adapters here (MRST, OPM) once implemented.

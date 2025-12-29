@@ -1,8 +1,8 @@
-"""Bridge to the ORSA native kernel package (orsa_kernel)."""
+"""Bridge to the CLARISSA native kernel package (clarissa_kernel)."""
 
 from __future__ import annotations
 from . import __version__
-from orsa_kernel.core import NativeKernel
+from clarissa_kernel.core import NativeKernel
 
 
 class KernelBridge(NativeKernel):

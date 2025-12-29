@@ -1,4 +1,4 @@
-"""ORSA Native Simulation Kernel (mock).
+"""CLARISSA Native Simulation Kernel (mock).
 
 This is a laboratory environment for controlled experiments, explainability,
 and learning signal generation. It is not intended to replace production simulators.

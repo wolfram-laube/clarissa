@@ -34,7 +34,7 @@ def api_request(method: str, url: str, token: str, data: Optional[dict] = None) 
     headers = {
         "PRIVATE-TOKEN": token,
         "Content-Type": "application/json",
-        "User-Agent": "orsa-ci-governance-impact/1.0",
+        "User-Agent": "clarissa-ci-governance-impact/1.0",
     }
     body = None
     if data is not None:

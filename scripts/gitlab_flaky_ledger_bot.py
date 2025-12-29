@@ -24,7 +24,7 @@ From classification (dotenv):
   - CI_BOT_FLAKY (must be 1)
 
 Optional env:
-  - CI_BOT_FLAKY_LEDGER_FINGERPRINT  (default: "orsa-ci-flaky-ledger:<branch>")
+  - CI_BOT_FLAKY_LEDGER_FINGERPRINT  (default: "clarissa-ci-flaky-ledger:<branch>")
   - CI_BOT_FLAKY_ESCALATE_AFTER_N    (default: 3)
   - CI_BOT_FLAKY_ESCALATION_LABELS   (default: "ci,ci-flaky-suspected")
   - CI_BOT_FLAKY_ESCALATION_TITLE    (default: "Flaky CI suspected on {project} ({branch})")
@@ -46,7 +46,7 @@ def api_request(method: str, url: str, token: str, data: Optional[dict] = None) 
     headers = {
         "PRIVATE-TOKEN": token,
         "Content-Type": "application/json",
-        "User-Agent": "orsa-ci-flaky-ledger-bot/1.0",
+        "User-Agent": "clarissa-ci-flaky-ledger-bot/1.0",
     }
     body = None
     if data is not None:
@@ -118,8 +118,8 @@ def main() -> int:
     job = env("CI_JOB_NAME", "tests")
     pipeline_id = env("CI_PIPELINE_ID", "")
 
-    ledger_fp = env("CI_BOT_FLAKY_LEDGER_FINGERPRINT", f"orsa-ci-flaky-ledger:{branch}")
-    ledger_mark = marker("orsa-ci-flaky-ledger", ledger_fp)
+    ledger_fp = env("CI_BOT_FLAKY_LEDGER_FINGERPRINT", f"clarissa-ci-flaky-ledger:{branch}")
+    ledger_mark = marker("clarissa-ci-flaky-ledger", ledger_fp)
 
     # 1) Find/create ledger issue
     ledger = find_issue(api, project_id, token, ledger_mark)
@@ -129,7 +129,7 @@ def main() -> int:
         ledger = create_issue(api, project_id, token, title, desc, ["ci"])
 
     ledger_iid = int(ledger["iid"])
-    note_mark = marker("orsa-ci-flaky-ledger-note", f"{branch}:{job}")
+    note_mark = marker("clarissa-ci-flaky-ledger-note", f"{branch}:{job}")
     note = (
         f"{note_mark}\n"
         f"🟡 Flaky CI observed.\n\n"
@@ -152,8 +152,8 @@ def main() -> int:
         return 0
 
     # 3) Escalate: create/update a dedicated flaky issue (deduped)
-    esc_fp = f"orsa-ci-flaky:{job}:{branch}"
-    esc_mark = marker("orsa-ci-flaky", esc_fp)
+    esc_fp = f"clarissa-ci-flaky:{job}:{branch}"
+    esc_mark = marker("clarissa-ci-flaky", esc_fp)
     esc = find_issue(api, project_id, token, esc_mark)
     labels = [s.strip() for s in env("CI_BOT_FLAKY_ESCALATION_LABELS", "ci,ci-flaky-suspected").split(",") if s.strip()]
     title_tpl = env("CI_BOT_FLAKY_ESCALATION_TITLE", "Flaky CI suspected on {project} ({branch})")

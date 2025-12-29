@@ -1,4 +1,4 @@
-from orsa_kernel.core import NativeKernel
+from clarissa_kernel.core import NativeKernel
 
 def test_kernel_explain_contract_has_string():
     k = NativeKernel()

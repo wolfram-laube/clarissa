@@ -20,7 +20,7 @@ Required env (GitLab CI provides most automatically):
   - CI_PIPELINE_ID
 
 Optional env:
-  - CI_BOT_FINGERPRINT                 (dedupe key; default: "orsa-ci:<job>:<branch>")
+  - CI_BOT_FINGERPRINT                 (dedupe key; default: "clarissa-ci:<job>:<branch>")
   - CI_BOT_TITLE                       (issue title template)
   - CI_BOT_LABELS                      (comma-separated labels, default: "ci,ci-failure")
   - CI_BOT_ASSIGNEE_IDS                (comma-separated numeric GitLab user IDs)
@@ -53,7 +53,7 @@ def api_request(method: str, url: str, token: str, data: Optional[dict] = None) 
     headers = {
         "PRIVATE-TOKEN": token,
         "Content-Type": "application/json",
-        "User-Agent": "orsa-ci-issue-bot/1.1",
+        "User-Agent": "clarissa-ci-issue-bot/1.1",
     }
     body = None
     if data is not None:
@@ -92,7 +92,7 @@ def parse_junit_failures(path: str, max_tests: int) -> List[str]:
 
 
 def build_marker(fingerprint: str) -> str:
-    return f"<!-- orsa-ci-bot:{fingerprint} -->"
+    return f"<!-- clarissa-ci-bot:{fingerprint} -->"
 
 
 def project_url(api: str, project_id: str, path: str) -> str:
@@ -181,7 +181,7 @@ def main() -> int:
             print("CI failure not confirmed; skipping issue creation/update.")
         return 0
 
-    fingerprint = env("CI_BOT_FINGERPRINT", f"orsa-ci:{job}:{ref}")
+    fingerprint = env("CI_BOT_FINGERPRINT", f"clarissa-ci:{job}:{ref}")
     marker = build_marker(fingerprint)
 
     silent_mode = env("CI_BOT_SILENT_MODE", "0").strip() == "1"

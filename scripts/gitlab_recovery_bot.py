@@ -17,7 +17,7 @@ Required env:
   - CI_JOB_URL
 
 Optional env:
-  - CI_BOT_FINGERPRINT            (must match the issue bot fingerprint; default: "orsa-ci:tests:<branch>")
+  - CI_BOT_FINGERPRINT            (must match the issue bot fingerprint; default: "clarissa-ci:tests:<branch>")
   - CI_BOT_RECOVERY_LABELS        (comma-separated; default: "ci,recovered")
   - CI_BOT_FLAKY_LABEL            (default: "ci-flaky-suspected")
   - CI_BOT_CLOSE_ON_RECOVERY      ("1" to close issue; default 0)
@@ -45,7 +45,7 @@ def api_request(method: str, url: str, token: str, data: Optional[dict] = None) 
     headers = {
         "PRIVATE-TOKEN": token,
         "Content-Type": "application/json",
-        "User-Agent": "orsa-ci-recovery-bot/1.0",
+        "User-Agent": "clarissa-ci-recovery-bot/1.0",
     }
     body = None
     if data is not None:
@@ -67,7 +67,7 @@ def project_url(api: str, project_id: str, path: str) -> str:
 
 
 def build_marker(fingerprint: str) -> str:
-    return f"<!-- orsa-ci-bot:{fingerprint} -->"
+    return f"<!-- clarissa-ci-bot:{fingerprint} -->"
 
 
 def find_existing_issue(api: str, project_id: str, token: str, marker: str) -> Optional[Dict[str, Any]]:
@@ -102,7 +102,7 @@ def main() -> int:
         return 2
 
     # Fingerprint must match the failure job's fingerprint. Default assumes tests job name.
-    fingerprint = env("CI_BOT_FINGERPRINT", f"orsa-ci:tests:{branch}")
+    fingerprint = env("CI_BOT_FINGERPRINT", f"clarissa-ci:tests:{branch}")
     marker = build_marker(fingerprint)
 
     existing = find_existing_issue(api, project_id, token, marker)

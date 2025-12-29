@@ -17,7 +17,7 @@ def main() -> int:
     out = []
     out.append("<!doctype html><html><head><meta charset='utf-8'>")
     out.append("<meta name='viewport' content='width=device-width, initial-scale=1'>")
-    out.append("<title>ORSA MR Report</title>")
+    out.append("<title>CLARISSA MR Report</title>")
     out.append("<style>body{font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:980px;margin:24px auto;padding:0 16px;line-height:1.35}"
                "code,pre{font-family:ui-monospace,Menlo,Consolas,monospace}pre{padding:12px;border:1px solid #ddd;border-radius:8px;overflow:auto}"
                "table{border-collapse:collapse;width:100%;margin:12px 0}td,th{border:1px solid #ddd;padding:8px}"

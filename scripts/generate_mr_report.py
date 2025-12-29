@@ -48,7 +48,7 @@ def main() -> int:
     branch = env("CI_COMMIT_REF_NAME")
 
     lines = []
-    lines.append("# ORSA CI/MR Report")
+    lines.append("# CLARISSA CI/MR Report")
     lines.append("")
     if project or sha or branch:
         lines.append("## Context")

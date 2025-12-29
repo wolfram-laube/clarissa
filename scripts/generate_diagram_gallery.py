@@ -35,13 +35,13 @@ def main() -> int:
         "<!doctype html>",
         "<html><head><meta charset='utf-8'>",
         "<meta name='viewport' content='width=device-width, initial-scale=1'>",
-        "<title>ORSA Architecture Diagrams</title>",
+        "<title>CLARISSA Architecture Diagrams</title>",
         "<style>body{font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:1100px;margin:24px auto;padding:0 16px;line-height:1.35}"
         "h1{margin:0 0 12px} .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}"
         ".card{border:1px solid #ddd;border-radius:14px;padding:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}"
         ".card img{width:100%;height:auto;border-radius:10px} .meta{font-size:14px;color:#444;margin-top:8px}</style>",
         "</head><body>",
-        "<h1>ORSA Architecture Diagrams</h1>",
+        "<h1>CLARISSA Architecture Diagrams</h1>",
         "<p>Rendered artifacts (SVG/PNG). Canonical sources live in <code>docs/architecture/diagrams/*.mmd</code>.</p>",
     ]
 

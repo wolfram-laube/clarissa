@@ -80,7 +80,7 @@ def api_post_note(
 
     headers = {
         "Content-Type": "application/json",
-        "User-Agent": "orsa-ci-mr-bot/1.0",
+        "User-Agent": "clarissa-ci-mr-bot/1.0",
     }
 
     # Deterministic auth selection:
@@ -121,7 +121,7 @@ def build_comment() -> str:
     classify = parse_dotenv(classify_env_path)
 
     lines: list[str] = []
-    lines.append("## 🤖 CI report (ORSA)")
+    lines.append("## 🤖 CI report (CLARISSA)")
     lines.append("")
 
     lines.append("### Classification")

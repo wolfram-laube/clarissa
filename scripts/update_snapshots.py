@@ -13,12 +13,12 @@ def run(args, env=None) -> str:
         raise SystemExit(f"Command failed: {args}\n{p.stdout}\n{p.stderr}")
     return (p.stdout or "") + "\n" + (p.stderr or "")
 
-out = run([sys.executable, "-m", "orsa", "--help"])
+out = run([sys.executable, "-m", "clarissa", "--help"])
 write_expected("cli_help.snap", normalize(out))
 
 env = os.environ.copy()
-env["ORSA_AUTO_APPROVE"] = "1"
-out = run([sys.executable, "-m", "orsa", "demo"], env=env)
+env["AUTO_APPROVE"] = "1"
+out = run([sys.executable, "-m", "clarissa", "demo"], env=env)
 write_expected("cli_demo.snap", normalize(out))
 
 print("Updated snapshots.")

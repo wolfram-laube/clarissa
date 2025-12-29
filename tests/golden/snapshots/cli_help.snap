@@ -1,6 +1,6 @@
-usage: orsa [-h] {demo} ...
+usage: clarissa [-h] {demo} ...
 
-orsa prototype cli
+clarissa prototype cli
 
 positional arguments:
   {demo}

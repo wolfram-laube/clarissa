@@ -18,10 +18,10 @@ class GovernancePolicy:
     def request_approval(self, proposal: str) -> bool:
         """Request human approval.
 
-        If ORSA_AUTO_APPROVE=1 is set, approvals are auto-granted (CI-friendly).
+        If AUTO_APPROVE=1 is set, approvals are auto-granted (CI-friendly).
         """
-        if os.getenv("ORSA_AUTO_APPROVE", "0").strip() == "1":
-            print("[GOV] Auto-approve enabled (ORSA_AUTO_APPROVE=1).")
+        if os.getenv("AUTO_APPROVE", "0").strip() == "1":
+            print("[GOV] Auto-approve enabled (AUTO_APPROVE=1).")
             return True
         print("[GOV] Approval required for:")
         print("      ", proposal)

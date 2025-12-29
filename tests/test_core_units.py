@@ -1,7 +1,7 @@
 import os
-from orsa.governance.policy import GovernancePolicy
-from orsa.simulators.mock import MockSimulator
-from orsa_kernel.core import NativeKernel
+from clarissa.governance.policy import GovernancePolicy
+from clarissa.simulators.mock import MockSimulator
+from clarissa_kernel.core import NativeKernel
 
 def test_governance_requires_approval_rate_change():
     g = GovernancePolicy()
