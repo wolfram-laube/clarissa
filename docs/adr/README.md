@@ -15,6 +15,7 @@ ADRs document significant architectural decisions, their rationale, and conseque
 - ADR-003 — ORSA-Native Simulation Kernel (Accepted)
 - ADR-004 — Dual-Simulator Strategy (Superseded)
 - ADR-005 — Single-Repo Until Architecture Stabilizes (Accepted)
+- ADR-006 — Noise-Free CI Artifacts and Best-Effort Jobs (Accepted)
 
 ## Cross-References
 ### Architecture Diagrams
@@ -31,3 +32,4 @@ ADRs document significant architectural decisions, their rationale, and conseque
 | Separation of roles | ADR-002 |
 | Native simulation kernel | ADR-003 |
 | Repo strategy | ADR-005 |
+| CI hygiene & developer experience | ADR-006 |
