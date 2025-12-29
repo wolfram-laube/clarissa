@@ -7,9 +7,11 @@ workflow:
     - when: never
 
 stages:
+  - deploy
   - test
   - classify
   - automation
+  - deploy
 
 # ----------------------------
 # Anchors (infrastructure hygiene)
@@ -285,3 +287,24 @@ mr_comment_on_failure:
       optional: true
   script:
     - python scripts/gitlab_mr_bot.py
+
+# ----------------------------
+# Documentation Site (GitLab Pages)
+# ----------------------------
+pages:
+  stage: deploy
+  image: python:3.11
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - when: never
+  before_script:
+    - pip install mkdocs mkdocs-material mkdocs-mermaid2-plugin pymdown-extensions
+    - apt-get update && apt-get install -y pandoc || true
+  script:
+    - python scripts/build_docs.py
+    - mkdocs build --site-dir public
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 week
