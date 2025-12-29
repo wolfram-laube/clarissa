@@ -1,9 +1,9 @@
-[orsa] starting demo with deck:
+[clarissa] starting demo with deck:
  -- minimal deck (mock)
 well a rate 100
 
-[orsa<path> proposal: reduce well a rate from 100 to 90 to improve stability
+[clarissa<path> proposal: reduce well a rate from 100 to 90 to improve stability
 [gov] auto-approve enabled (auto_approve=1).
-[orsa] applying change and running simulator...
+[clarissa] applying change and running simulator...
 [sim] outcome: {'ran': true, 'converged': true, 'timestep_collapses': 0, 'errors': []}
-[orsa<path> explanation: simulation stabilized after rate reduction; no divergence flags were observed.
+[clarissa<path> explanation: simulation stabilized after rate reduction; no divergence flags were observed.
