@@ -8,7 +8,7 @@
 
 ## Context
 
-ORSA's core value proposition is translating natural language (voice or text) into valid, physics-consistent reservoir simulation syntax. This translation is non-trivial:
+CLARISSA's core value proposition is translating natural language (voice or text) into valid, physics-consistent reservoir simulation syntax. This translation is non-trivial:
 
 - Reservoir simulation languages (ECLIPSE, OPM) have complex, interdependent keyword structures.
 - Ambiguous or incomplete user input must be resolved against asset-specific context.
@@ -19,7 +19,7 @@ A monolithic end-to-end model (speech → ECLIPSE) would be opaque, difficult to
 
 ## Decision
 
-ORSA implements a **multi-stage translation pipeline** with explicit validation checkpoints between stages:
+CLARISSA implements a **multi-stage translation pipeline** with explicit validation checkpoints between stages:
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
@@ -142,6 +142,6 @@ Template-based generation without ML.
 
 - ADR-001 — Physics-Centric, Simulator-in-the-Loop Architecture
 - ADR-002 — Separation of Reasoning, Learning, and Governance
-- ADR-003 — ORSA-Native Simulation Kernel
+- ADR-003 — CLARISSA-Native Simulation Kernel
 - ADR-007 — CI as an Observability Layer
 - IJACSA Paper — Section III.C (NLP Translation Layer)

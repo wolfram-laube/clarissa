@@ -1,8 +1,8 @@
-# ORSA – Oxy Reservoir Simulation Agent
+# CLARISSA – Conversational Language Agent for Reservoir Integrated Simulation System Analysis
 
 **A physics-centric AI agent architecture for reservoir simulation.**
 
-ORSA bridges natural language interaction and domain-specific simulation syntax through governed, simulator-in-the-loop learning.
+CLARISSA bridges natural language interaction and domain-specific simulation syntax through governed, simulator-in-the-loop learning.
 
 ## Quick Start
 
@@ -11,10 +11,10 @@ ORSA bridges natural language interaction and domain-specific simulation syntax 
 pip install -e ".[dev]"
 
 # Run demo (interactive approval)
-python -m orsa demo
+python -m clarissa demo
 
 # Run demo (CI mode, auto-approve)
-ORSA_AUTO_APPROVE=1 python -m orsa demo
+AUTO_APPROVE=1 python -m clarissa demo
 
 # Run tests
 pytest -q
@@ -23,13 +23,13 @@ pytest -q
 ## Repository Structure
 
 ```
-src/orsa/           # Importable ORSA package
+src/clarissa/           # Importable CLARISSA package
   ├── agent/        # Agent core (reasoning, planning)
   ├── governance/   # Policy enforcement, approval gates
   ├── learning/     # RL components (planned)
   └── simulators/   # Simulator adapters
 
-src/orsa_kernel/    # Native simulation kernel (laboratory)
+src/clarissa_kernel/    # Native simulation kernel (laboratory)
 
 docs/
   ├── adr/          # Architecture Decision Records
@@ -37,7 +37,7 @@ docs/
   └── simulators/   # Adapter specifications
 
 conference/         # Academic artifacts (abstracts, papers)
-experiments/        # Exploratory work (may import orsa)
+experiments/        # Exploratory work (may import clarissa)
 scripts/            # CI/CD tooling, bots
 tests/              # Contract tests, golden tests, snapshots
 ```
@@ -59,7 +59,7 @@ tests/              # Contract tests, golden tests, snapshots
 |-----|-------|--------|
 | [001](docs/adr/ADR-001-physics-centric.md) | Physics-Centric, Simulator-in-the-Loop | Accepted |
 | [002](docs/adr/ADR-002-separation-of-roles.md) | Separation of Reasoning, Learning, Governance | Accepted |
-| [003](docs/adr/ADR-003-native-kernel.md) | ORSA-Native Simulation Kernel | Accepted |
+| [003](docs/adr/ADR-003-native-kernel.md) | CLARISSA-Native Simulation Kernel | Accepted |
 | [005](docs/adr/ADR-005-repo-decomposition.md) | Single Repo Until Stabilization | Accepted |
 | [006](docs/adr/ADR-006-noise-free-ci-artifacts.md) | Noise-free CI Artifacts | Accepted |
 | [007](docs/adr/ADR-007-ci-as-observability-layer.md) | CI as Observability Layer | Accepted |

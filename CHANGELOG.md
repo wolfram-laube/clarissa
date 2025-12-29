@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the ORSA project will be documented in this file.
+All notable changes to the CLARISSA project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -91,20 +91,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Core Agent Architecture**
-  - `src/orsa/agent/core.py` - ORSAAgent with governance gate
-  - `src/orsa/governance/policy.py` - GovernancePolicy with approval logic
-  - `src/orsa/simulators/mock.py` - MockSimulator for testing
-  - `src/orsa_kernel/core.py` - NativeKernel for explainability
+  - `src/clarissa/agent/core.py` - CLARISSAAgent with governance gate
+  - `src/clarissa/governance/policy.py` - GovernancePolicy with approval logic
+  - `src/clarissa/simulators/mock.py` - MockSimulator for testing
+  - `src/clarissa_kernel/core.py` - NativeKernel for explainability
 
 - **CLI**
-  - `python -m orsa demo` - Interactive governed demo
-  - `python -m orsa --help` - Help output
-  - `ORSA_AUTO_APPROVE=1` for CI-friendly execution
+  - `python -m clarissa demo` - Interactive governed demo
+  - `python -m clarissa --help` - Help output
+  - `AUTO_APPROVE=1` for CI-friendly execution
 
 - **Foundational ADRs**
   - ADR-001: Physics-Centric, Simulator-in-the-Loop Architecture
   - ADR-002: Separation of Reasoning, Learning, and Governance
-  - ADR-003: ORSA-Native Simulation Kernel
+  - ADR-003: CLARISSA-Native Simulation Kernel
   - ADR-004: Dual-Simulator Strategy (Superseded)
 
 - **Project Infrastructure**
@@ -114,7 +114,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `CONTRIBUTING.md` with ADR discipline guidelines
 
 - **Conference Artifacts**
-  - `conference/abstract.md` - ORSA abstract
+  - `conference/abstract.md` - CLARISSA abstract
 
 ---
 

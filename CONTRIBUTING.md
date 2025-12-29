@@ -1,4 +1,4 @@
-# Contributing to ORSA
+# Contributing to CLARISSA
 
 ## ADR Discipline
 If a change alters behavior, responsibilities, authority, or safety boundaries, it should:
@@ -6,12 +6,12 @@ If a change alters behavior, responsibilities, authority, or safety boundaries, 
 - introduce a new ADR in `docs/adr/`.
 
 ## Boundaries
-- `src/orsa/` must not import from `experiments/`.
-- Experiments may import `orsa`.
+- `src/clarissa/` must not import from `experiments/`.
+- Experiments may import `clarissa`.
 
 ## Running
 ```bash
-python -m orsa demo
+python -m clarissa demo
 pytest -q
 ```
 

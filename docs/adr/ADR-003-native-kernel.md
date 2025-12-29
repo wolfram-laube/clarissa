@@ -1,13 +1,13 @@
-# ADR-003: ORSA-Native Simulation Kernel
+# ADR-003: CLARISSA-Native Simulation Kernel
 
 **Status:** Accepted  
 **Date:** 2025-12-27
 
 ## Context
-Production simulators provide operational fidelity but limited introspection and controlled experimentation. ORSA needs a fully observable environment for explanation, sensitivity analysis, and learning-signal generation.
+Production simulators provide operational fidelity but limited introspection and controlled experimentation. CLARISSA needs a fully observable environment for explanation, sensitivity analysis, and learning-signal generation.
 
 ## Decision
-Introduce a lightweight ORSA-native simulation kernel (laboratory environment) that complements production simulators. It is not a replacement for production simulators.
+Introduce a lightweight CLARISSA-native simulation kernel (laboratory environment) that complements production simulators. It is not a replacement for production simulators.
 
 ## Consequences
 ### Positive

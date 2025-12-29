@@ -4,12 +4,12 @@
 **Date:** 2025-12-27
 
 ## Context
-ORSA is currently co-evolving across architecture (ADRs/diagrams), prototype code, and conference artifacts. Splitting repositories too early increases drift, reduces traceability, and weakens governance discipline.
+CLARISSA is currently co-evolving across architecture (ADRs/diagrams), prototype code, and conference artifacts. Splitting repositories too early increases drift, reduces traceability, and weakens governance discipline.
 
 ## Decision
 Maintain a single repository that contains:
-- the importable ORSA package (`src/orsa/`),
-- the ORSA-native kernel package (`src/orsa_kernel/`),
+- the importable CLARISSA package (`src/clarissa/`),
+- the CLARISSA-native kernel package (`src/clarissa_kernel/`),
 - governing documentation (`docs/adr/`, `architecture/`),
 - conference artifacts (`conference/`),
 - experiments (`experiments/`) and tooling (`scripts/`).
@@ -21,6 +21,6 @@ Repository decomposition will be revisited only when the architecture stabilizes
 - Strong traceability between ADRs and code.
 - Simplifies onboarding and review.
 ### Negative
-- Requires clear internal boundaries (no `orsa` importing `experiments`).
+- Requires clear internal boundaries (no `clarissa` importing `experiments`).
 ### Neutral / Open
-- Future split may create `orsa-architecture`, `orsa-core`, and `orsa-experiments` repositories.
+- Future split may create `clarissa-architecture`, `clarissa-core`, and `clarissa-experiments` repositories.

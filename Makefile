@@ -1,4 +1,4 @@
-# ORSA Makefile
+# CLARISSA Makefile
 # Usage: make <target>
 
 PY ?= python
@@ -8,8 +8,8 @@ PIP ?= pip
 
 help:
 	@echo "Targets:"
-	@echo "  install   Install ORSA in editable mode"
-	@echo "  dev       Install ORSA + dev dependencies (pytest, ruff)"
+	@echo "  install   Install CLARISSA in editable mode"
+	@echo "  dev       Install CLARISSA + dev dependencies (pytest, ruff)"
 	@echo "  test      Run tests"
 	@echo "  demo      Run minimal governed demo (interactive approval)"
 	@echo "  clean     Remove caches"
@@ -24,7 +24,7 @@ test:
 	$(PY) -m pytest -q
 
 demo:
-	$(PY) -m orsa demo
+	$(PY) -m clarissa demo
 
 clean:
 	@rm -rf .pytest_cache .ruff_cache __pycache__ */__pycache__ */*/__pycache__ */*/*/__pycache__
@@ -51,13 +51,13 @@ ci-flaky-ledger:
 .PHONY: demo-ci
 
 demo-ci:
-	ORSA_AUTO_APPROVE=1 $(PY) -m orsa demo
+	AUTO_APPROVE=1 $(PY) -m clarissa demo
 
 .PHONY: update-golden
 
 update-golden:
 	@echo 'usage:' > tests/golden/cli_help.txt
-	@printf '[GOV]\n[SIM]\n[ORSA/LLM]\n' > tests/golden/cli_demo.txt
+	@printf '[GOV]\n[SIM]\n[CLARISSA/LLM]\n' > tests/golden/cli_demo.txt
 
 .PHONY: update-snapshots
 

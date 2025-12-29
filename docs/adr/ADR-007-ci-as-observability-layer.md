@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-ORSA development relies on iterative changes across code, docs, and governance-related logic.
+CLARISSA development relies on iterative changes across code, docs, and governance-related logic.
 Traditional CI setups tend to act as a hard gate: either "green" or "red".
 This becomes counterproductive when:
 - failures can be flaky or environment-dependent,

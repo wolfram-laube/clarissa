@@ -7,7 +7,7 @@
 Reservoir simulation failures commonly manifest as numerical effects (non-convergence, timestep collapse, unstable solver behavior) rather than as clean logical violations. Purely text-driven or static rule-based AI assistance risks producing plausible but unsafe recommendations.
 
 ## Decision
-ORSA treats simulators as first-class learning substrates. Simulator execution, solver diagnostics, and numerical outcomes provide primary feedback signals for learning and validation.
+CLARISSA treats simulators as first-class learning substrates. Simulator execution, solver diagnostics, and numerical outcomes provide primary feedback signals for learning and validation.
 
 ## Consequences
 ### Positive

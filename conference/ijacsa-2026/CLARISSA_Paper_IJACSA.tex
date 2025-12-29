@@ -28,7 +28,7 @@
 \maketitle
 
 \begin{abstract}
-Reservoir simulation remains one of the most technically demanding disciplines in the energy sector. Despite decades of software evolution, the fundamental barrier persists: translating engineering intent into executable simulation input requires specialized expertise that takes years to develop. This paper presents the architecture of the Oxy Reservoir Simulation Agent (ORSA), a system designed to bridge the gap between natural language interaction and domain-specific simulation syntax. We propose a multi-stage pipeline that decomposes translation into discrete, validated steps: speech recognition, intent classification, entity extraction, asset validation, syntax generation, and physics-based verification. The architecture addresses deployment heterogeneity through configuration-driven design, enabling air-gapped installations alongside cloud-native deployments. We present a domain mesh data architecture with purpose-built storage for different data types, and a hybrid synchronous-asynchronous communication pattern for long-running simulation workflows. This paper contributes reference architecture patterns applicable beyond reservoir simulation to any domain requiring natural language interfaces to complex technical systems.
+Reservoir simulation remains one of the most technically demanding disciplines in the energy sector. Despite decades of software evolution, the fundamental barrier persists: translating engineering intent into executable simulation input requires specialized expertise that takes years to develop. This paper presents the architecture of the Conversational Language Agent for Reservoir Integrated Simulation System Analysis (CLARISSA), a system designed to bridge the gap between natural language interaction and domain-specific simulation syntax. We propose a multi-stage pipeline that decomposes translation into discrete, validated steps: speech recognition, intent classification, entity extraction, asset validation, syntax generation, and physics-based verification. The architecture addresses deployment heterogeneity through configuration-driven design, enabling air-gapped installations alongside cloud-native deployments. We present a domain mesh data architecture with purpose-built storage for different data types, and a hybrid synchronous-asynchronous communication pattern for long-running simulation workflows. This paper contributes reference architecture patterns applicable beyond reservoir simulation to any domain requiring natural language interfaces to complex technical systems.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -43,7 +43,7 @@ This expertise bottleneck creates organizational challenges. Simulation speciali
 
 Previous attempts to address this challenge through graphical user interfaces have met limited success. The complexity of reservoir simulation resists reduction to form-based interaction; the combinatorial space of valid configurations exceeds what traditional GUI paradigms can meaningfully represent. Users inevitably encounter edge cases where the interface cannot express their intent, forcing fallback to manual deck editing.
 
-Recent advances in natural language processing suggest an alternative approach. Rather than constraining users to predefined interface elements, systems can interpret natural language descriptions and generate appropriate technical syntax. This paper presents the Oxy Reservoir Simulation Agent (ORSA), a system architecture that translates conversational input directly into executable simulation configurations.
+Recent advances in natural language processing suggest an alternative approach. Rather than constraining users to predefined interface elements, systems can interpret natural language descriptions and generate appropriate technical syntax. This paper presents the Conversational Language Agent for Reservoir Integrated Simulation System Analysis (CLARISSA), a system architecture that translates conversational input directly into executable simulation configurations.
 
 The technical challenges extend beyond language understanding. Global energy operations impose heterogeneous deployment requirements: some installations operate air-gapped with strict data sovereignty constraints, while others benefit from cloud-native infrastructure. The architecture must accommodate both extremes without fundamental redesign. Additionally, simulation runs range from seconds to hours, requiring careful separation of synchronous user interaction from asynchronous backend processing.
 
@@ -71,12 +71,12 @@ Microservices architecture has emerged as a dominant pattern for complex distrib
 
 \section{System Architecture}
 
-The ORSA architecture comprises six primary layers, each addressing distinct concerns while maintaining loose coupling through well-defined interfaces. Fig.~\ref{fig:architecture} illustrates the overall system structure.
+The CLARISSA architecture comprises six primary layers, each addressing distinct concerns while maintaining loose coupling through well-defined interfaces. Fig.~\ref{fig:architecture} illustrates the overall system structure.
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.85\textwidth]{ORSA_Figure1_Architecture.png}
-    \caption{ORSA System Architecture. The layered design separates concerns across User Interface, NLP Translation, API Gateway, Orchestration, AI Inference, and Data Mesh layers. Each layer is independently configurable for different deployment scenarios.}
+    \includegraphics[width=0.85\textwidth]{CLARISSA_Figure1_Architecture.png}
+    \caption{CLARISSA System Architecture. The layered design separates concerns across User Interface, NLP Translation, API Gateway, Orchestration, AI Inference, and Data Mesh layers. Each layer is independently configurable for different deployment scenarios.}
     \label{fig:architecture}
 \end{figure*}
 
@@ -111,7 +111,7 @@ Failed validation at any stage triggers rollback to the previous valid state. Lo
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.9\textwidth]{ORSA_Figure2_NLP_Pipeline.png}
+    \includegraphics[width=0.9\textwidth]{CLARISSA_Figure2_NLP_Pipeline.png}
     \caption{NLP Translation Pipeline. The six-stage pipeline converts voice input to validated ECLIPSE deck syntax. Each stage includes validation checkpoints with rollback capability on failure.}
     \label{fig:nlp_pipeline}
 \end{figure*}
@@ -136,7 +136,7 @@ Five storage domains address distinct data characteristics:
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.8\textwidth]{ORSA_Figure3_DataMesh.png}
+    \includegraphics[width=0.8\textwidth]{CLARISSA_Figure3_DataMesh.png}
     \caption{Data Mesh Architecture. Five specialized storage domains communicate through a central event bus, maintaining eventual consistency through event-driven synchronization.}
     \label{fig:datamesh}
 \end{figure*}
@@ -151,7 +151,7 @@ The communication layer bridges synchronous frontend expectations with asynchron
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.85\textwidth]{ORSA_Figure4_Communication.png}
+    \includegraphics[width=0.85\textwidth]{CLARISSA_Figure4_Communication.png}
     \caption{Communication Architecture. The hybrid synchronous-asynchronous pattern provides immediate response to users while processing long-running jobs in the background with real-time status updates via WebSocket.}
     \label{fig:communication}
 \end{figure*}
@@ -210,7 +210,7 @@ Security requirements span authentication (pluggable identity providers), author
 
 \section{Conclusions}
 
-This paper presented the architecture of ORSA, a system that bridges natural language interaction and reservoir simulation through configurable, event-driven microservices. The multi-stage NLP pipeline decomposes the translation challenge into validated steps, enabling graceful degradation when confidence is insufficient. The domain mesh data architecture optimizes storage for different data types while maintaining eventual consistency through event sourcing.
+This paper presented the architecture of CLARISSA, a system that bridges natural language interaction and reservoir simulation through configurable, event-driven microservices. The multi-stage NLP pipeline decomposes the translation challenge into validated steps, enabling graceful degradation when confidence is insufficient. The domain mesh data architecture optimizes storage for different data types while maintaining eventual consistency through event sourcing.
 
 The configuration-driven approach addresses deployment heterogeneity inherent in global energy operations, supporting both air-gapped installations and cloud-native deployments from a common codebase. This flexibility positions the architecture for long-term evolution as AI capabilities advance---new models can be integrated through configuration rather than architectural revision.
 

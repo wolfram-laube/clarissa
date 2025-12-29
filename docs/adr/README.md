@@ -1,7 +1,7 @@
-# ORSA – Architecture Decision Records (ADR Index)
+# CLARISSA – Architecture Decision Records (ADR Index)
 
 ## Purpose of ADRs
-This directory contains Architecture Decision Records (ADRs) for ORSA.
+This directory contains Architecture Decision Records (ADRs) for CLARISSA.
 ADRs document significant architectural decisions, their rationale, and consequences over time.
 
 ## How to Read These ADRs
@@ -16,7 +16,7 @@ ADRs document significant architectural decisions, their rationale, and conseque
 |-----|-------|--------|
 | [001](ADR-001-physics-centric.md) | Physics-Centric, Simulator-in-the-Loop Architecture | Accepted |
 | [002](ADR-002-separation-of-roles.md) | Separation of Reasoning, Learning, and Governance | Accepted |
-| [003](ADR-003-native-kernel.md) | ORSA-Native Simulation Kernel | Accepted |
+| [003](ADR-003-native-kernel.md) | CLARISSA-Native Simulation Kernel | Accepted |
 | [009](ADR-009-nlp-translation-pipeline.md) | Multi-Stage NLP Translation Pipeline | Proposed |
 
 ### Repository & Process
@@ -53,13 +53,13 @@ ADRs document significant architectural decisions, their rationale, and conseque
 - `architecture/learning-dialectic.puml` — Learning flow
 
 ### Conference Artifacts
-- `conference/abstract.md` — ORSA abstract
+- `conference/abstract.md` — CLARISSA abstract
 - `conference/ijacsa-2026/` — IJACSA 2026 paper submission
 
 ### Implementation
-- `src/orsa/agent/` — Agent core (ADR-002)
-- `src/orsa/governance/` — Governance policy (ADR-002, ADR-008)
-- `src/orsa_kernel/` — Native kernel (ADR-003)
+- `src/clarissa/agent/` — Agent core (ADR-002)
+- `src/clarissa/governance/` — Governance policy (ADR-002, ADR-008)
+- `src/clarissa_kernel/` — Native kernel (ADR-003)
 - `docs/simulators/adapter_matrix.md` — Simulator backends (ADR-001)
 
 ## Creating New ADRs

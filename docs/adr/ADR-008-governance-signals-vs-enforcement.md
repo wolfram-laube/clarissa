@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-ORSA operates in a domain where changes may have:
+CLARISSA operates in a domain where changes may have:
 - physical implications (simulation parameters, rates, constraints),
 - governance implications (compliance, approvals, auditability),
 - research implications (exploration, experimentation, iteration).
@@ -15,7 +15,7 @@ hard enforcement rules inside CI/CD pipelines, e.g.:
 - mandatory approvals triggered automatically,
 - policy-as-code gates with binary outcomes.
 
-This approach creates several problems for ORSA:
+This approach creates several problems for CLARISSA:
 - governance logic becomes opaque and brittle,
 - false positives lead to unnecessary friction,
 - experimentation is discouraged,
@@ -25,7 +25,7 @@ At the same time, *ignoring governance signals entirely* is not acceptable,
 as traceability, visibility, and accountability are required.
 
 ## Decision
-ORSA explicitly distinguishes between **governance signals** and **governance enforcement**.
+CLARISSA explicitly distinguishes between **governance signals** and **governance enforcement**.
 
 ### Governance Signals
 Governance signals are:
@@ -86,7 +86,7 @@ Automated systems can detect patterns, but they cannot:
 - understand situational risk,
 - balance competing objectives.
 
-ORSA therefore treats governance automation as:
+CLARISSA therefore treats governance automation as:
 - **sensing**, not judging,
 - **highlighting**, not enforcing,
 - **supporting**, not replacing human oversight.

@@ -5,7 +5,7 @@
 **Superseded by:** ADR-001
 
 ## Context
-Early discussions framed ORSA as a dual-simulator strategy (one production simulator + one open simulator). This simplified communication but became restrictive as the architecture expanded.
+Early discussions framed CLARISSA as a dual-simulator strategy (one production simulator + one open simulator). This simplified communication but became restrictive as the architecture expanded.
 
 ## Decision
 Supersede the dual-simulator framing in favor of a physics-centric multi-simulator substrate (ADR-001).

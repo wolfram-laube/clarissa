@@ -1,6 +1,6 @@
-# How to Read CI Results (ORSA)
+# How to Read CI Results (CLARISSA)
 
-ORSA uses CI primarily as an **observability and reporting system**, not as a
+CLARISSA uses CI primarily as an **observability and reporting system**, not as a
 binary pass/fail gate.
 
 CI produces *signals*. Humans make *decisions*.
@@ -9,7 +9,7 @@ CI produces *signals*. Humans make *decisions*.
 
 ## 1. CI Stages at a Glance
 
-The ORSA pipeline is structured into four conceptual layers:
+The CLARISSA pipeline is structured into four conceptual layers:
 
 ### 1. Test & Signal Collection
 - Unit and integration tests
@@ -66,7 +66,7 @@ In such cases:
 
 ## 4. Governance Signals
 
-ORSA explicitly separates **governance signals** from **enforcement**.
+CLARISSA explicitly separates **governance signals** from **enforcement**.
 
 - Governance detection is heuristic and informational
 - Signals are surfaced in the MR report
@@ -106,7 +106,7 @@ Some jobs (e.g. architecture diagrams) are best-effort:
 
 ## 7. Review Checklist
 
-When reviewing an ORSA MR:
+When reviewing an CLARISSA MR:
 
 1. Read the MR report
 2. Check the classification

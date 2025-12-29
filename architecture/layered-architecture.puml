@@ -1,5 +1,5 @@
 @startuml
-title ORSA Layered Responsibility Architecture
+title CLARISSA Layered Responsibility Architecture
 
 skinparam Shadowing false
 skinparam componentStyle rectangle
@@ -8,7 +8,7 @@ skinparam defaultTextAlignment center
 rectangle "Neuro-Symbolic Governance\nRules · Constraints · Escalation" as GOV
 rectangle "LLM Reasoning & Interaction\nPlanning · Explanation · Dialogue" as LLM
 rectangle "Reinforcement Learning\nAction Sequences · Skill" as RL
-rectangle "Simulation Substrate\nProduction Simulators · Open/Research Simulators · ORSA Native Kernel" as SIM
+rectangle "Simulation Substrate\nProduction Simulators · Open/Research Simulators · CLARISSA Native Kernel" as SIM
 
 GOV -down-> LLM : constrains
 LLM -down-> RL : orchestrates

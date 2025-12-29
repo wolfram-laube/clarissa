@@ -7,7 +7,7 @@
 In safety-critical engineering domains, a single AI paradigm should not combine reasoning, learning, and decision authority. Mixing these responsibilities reduces auditability and increases risk.
 
 ## Decision
-ORSA separates:
+CLARISSA separates:
 - LLM reasoning & interaction (planning, explanation, translation),
 - Reinforcement learning (skill acquisition for action sequences),
 - Neuro-symbolic governance (rules, constraints, escalation, approvals).

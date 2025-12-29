@@ -1,6 +1,6 @@
 # Simulator adapter matrix
 
-This document tracks simulator backends ORSA can target and the integration surface that must remain stable.
+This document tracks simulator backends CLARISSA can target and the integration surface that must remain stable.
 
 ## Adapter contract (minimum)
 All simulator adapters MUST implement:
@@ -20,26 +20,26 @@ See tests:
 
 ## Backends
 
-| Backend | Type | Primary language | Strengths | Risks/limits | ORSA status |
+| Backend | Type | Primary language | Strengths | Risks/limits | CLARISSA status |
 |---|---|---|---|---|---|
 | MockSimulator | in-repo mock | Python | deterministic, fast, CI-friendly | not physically meaningful | ✅ implemented |
 | MRST (Matlab Reservoir Simulation Toolbox) | external simulator | MATLAB | huge ecosystem, research-friendly workflows | MATLAB runtime/licensing, IO glue | 🟡 planned |
 | OPM Flow (Open Porous Media) | external simulator | C++ | open-source, industry-grade black-oil/compositional | integration complexity, deck management | 🟡 planned |
 
 ## Integration approach (recommended)
-ORSA treats simulators as *pluggable backends* behind a strict contract.
+CLARISSA treats simulators as *pluggable backends* behind a strict contract.
 
 ### MRST adapter sketch
-- ORSA writes a case/deck representation (or MATLAB script) into a temp workdir
+- CLARISSA writes a case/deck representation (or MATLAB script) into a temp workdir
 - invokes MATLAB/Octave (depending on feasibility)
 - parses convergence / error markers and returns a contract-compliant dict
 
 ### OPM adapter sketch
-- ORSA writes an Eclipse-style deck (or references existing decks)
+- CLARISSA writes an Eclipse-style deck (or references existing decks)
 - invokes `flow` (or dockerized OPM)
 - parses log convergence + reports and returns a contract-compliant dict
 
 ## Decision points
 - Prefer *file-based interfaces* first (robust, auditable), then optimize into in-memory APIs.
 - Keep adapter responsibilities narrow: IO + invocation + parsing + contract mapping.
-- Put physical correctness into the simulator, not into ORSA.
+- Put physical correctness into the simulator, not into CLARISSA.

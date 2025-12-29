@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "orsa"
+name = "clarissa"
 version = "0.1.0"
-description = "ORSA unified prototype (code + ADR-governed architecture)"
+description = "CLARISSA unified prototype (code + ADR-governed architecture)"
 requires-python = ">=3.10"
 
 [tool.setuptools]
