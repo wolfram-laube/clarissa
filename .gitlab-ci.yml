@@ -82,10 +82,19 @@ snapshot_tests:
   script:
     - |
       set -e
+      mkdir -p tests/golden tests/golden/snapshots tests/golden/diffs
+
+      # Create a default summary to avoid artifact warnings
+      echo '# Snapshot diffs' > tests/golden/summary.md
+      echo '' >> tests/golden/summary.md
+      echo '_No snapshot diffs produced._' >> tests/golden/summary.md
+      echo '' >> tests/golden/summary.md
+
       python -m pytest -q \
         tests/golden/test_cli_help_snapshot.py \
         tests/golden/test_cli_demo_snapshot.py || EXIT=$?
-      mkdir -p tests/golden
+
+      # If diffs exist, overwrite summary with real content
       if [ -d tests/golden/diffs ] && ls -1 tests/golden/diffs/*.diff >/dev/null 2>&1; then
         echo '# Snapshot diffs' > tests/golden/summary.md
         echo '' >> tests/golden/summary.md
@@ -97,6 +106,7 @@ snapshot_tests:
           echo '' >> tests/golden/summary.md
         done
       fi
+
       if [ -n "${EXIT:-}" ]; then exit "$EXIT"; fi
   artifacts:
     when: on_failure
@@ -111,6 +121,7 @@ contract_tests:
   script:
     - |
       set -e
+      mkdir -p tests/contracts
       python -m pytest -q tests/contracts 2>&1 | tee pytest_contracts.log || EXIT=$?
       python scripts/generate_contract_summary.py || true
       if [ -n "${EXIT:-}" ]; then exit "$EXIT"; fi
@@ -128,6 +139,7 @@ governance_impact:
       when: on_success
     - when: never
   script:
+    - mkdir -p tests/governance
     - python scripts/detect_governance_impact.py
   artifacts:
     when: always
@@ -136,7 +148,9 @@ governance_impact:
 
 architecture_graphs:
   stage: test
-  image: ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:latest
+  image:
+    name: ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:latest
+    entrypoint: [""]
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
@@ -144,6 +158,7 @@ architecture_graphs:
       when: on_success
     - when: never
   script:
+    - mkdir -p docs/architecture/diagrams docs/architecture/rendered
     - mmdc --version || true
     - bash scripts/render_mermaid.sh || echo "Mermaid render failed; keeping sources."
   artifacts:
@@ -218,6 +233,7 @@ mr_report:
       artifacts: true
       optional: true
   script:
+    - mkdir -p reports
     - python scripts/generate_mr_report.py
     - python scripts/render_report_html.py || true
   artifacts:
