@@ -27,6 +27,21 @@ Authority flows from human approval.
 ## CI-friendly demo
 Set `ORSA_AUTO_APPROVE=1` to run the demo without interactive approval.
 
+## CI philosophy (important)
+ORSA CI is designed as an observability and reporting system, not a strict
+pass/fail gate.
+
+A green pipeline indicates a healthy system state.
+A red pipeline indicates a signal that requires inspection, not automatic rejection.
+
+Always consult the MR report for context, including:
+- snapshot (golden) diffs
+- contract test outcomes
+- governance-impact heuristics
+
+Details: docs/ci/README.md
+
+
 ## Tests
 - Contract tests: `tests/contracts/` enforce simulator adapter invariants.
 - Golden CLI tests: `tests/golden/` ensure stable CLI UX.
