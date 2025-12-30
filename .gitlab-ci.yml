@@ -7,7 +7,6 @@ workflow:
     - when: never
 
 stages:
-  - deploy
   - test
   - classify
   - automation
