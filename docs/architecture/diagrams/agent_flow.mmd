@@ -1,0 +1,9 @@
+flowchart TD
+  U[User / Engineer] -->|proposal| A[CLARISSA Agent]
+  A --> G{Governance Policy}
+  G -->|approval required| H[Human Approval]
+  H -->|approve| S[Simulator Adapter]
+  G -->|no approval| S
+  S --> K[Kernel/Explainer]
+  K --> R[Recommendation / Rationale]
+  R --> U

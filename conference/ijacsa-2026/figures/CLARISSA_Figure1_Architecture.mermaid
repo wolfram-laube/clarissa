@@ -1,0 +1,55 @@
+%%{init: {'theme': 'base', 'themeVariables': { 
+  'primaryColor': '#5B7553', 
+  'primaryTextColor': '#F5F2ED', 
+  'primaryBorderColor': '#F5F2ED',
+  'lineColor': '#6B7B6E', 
+  'secondaryColor': '#7D6B5D', 
+  'tertiaryColor': '#A67C52',
+  'background': '#FDFBF7',
+  'mainBkg': '#FDFBF7',
+  'fontSize': '14px'
+}}}%%
+
+flowchart TB
+    subgraph UI["<b>User Interface Layer</b><br/>Voice Input │ Text Chat │ Web Interface │ REST API"]
+    end
+    
+    subgraph NLP["<b>NLP Translation Layer</b><br/>Speech-to-Text │ Intent Recognition │ Entity Extraction │ ECLIPSE Generation"]
+    end
+    
+    subgraph API["<b>API Gateway Layer</b><br/>Authentication │ Rate Limiting │ Load Balancing │ Request Routing"]
+    end
+    
+    subgraph ORCH["<b>Orchestration Layer</b><br/>Job Management │ Workflow Engine │ Event Routing │ Status Updates"]
+    end
+    
+    subgraph AI["<b>AI Inference Layer</b><br/>Model Registry │ Configurable Serving │ Model Router │ Health Monitoring"]
+    end
+    
+    subgraph DATA["<b>Data Mesh Layer</b>"]
+        direction LR
+        DB1[("Cassandra<br/><i>Time-series</i>")]
+        DB2[("MongoDB<br/><i>Documents</i>")]
+        DB3[("PostgreSQL<br/><i>Relational</i>")]
+        DB4[("Neo4j<br/><i>Graph</i>")]
+        DB5[("Redis<br/><i>Cache</i>")]
+    end
+    
+    UI --> NLP
+    NLP --> API
+    API --> ORCH
+    ORCH --> AI
+    AI --> DATA
+    
+    style UI fill:#5B7553,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style NLP fill:#7D6B5D,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style API fill:#A67C52,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style ORCH fill:#BF8B4E,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style AI fill:#8B5A3C,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style DATA fill:#4A5D4F,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    
+    style DB1 fill:#3D5A45,stroke:#F5F2ED,color:#F5F2ED
+    style DB2 fill:#4A6B52,stroke:#F5F2ED,color:#F5F2ED
+    style DB3 fill:#567D5E,stroke:#F5F2ED,color:#F5F2ED
+    style DB4 fill:#638F6A,stroke:#F5F2ED,color:#F5F2ED
+    style DB5 fill:#70A176,stroke:#F5F2ED,color:#F5F2ED

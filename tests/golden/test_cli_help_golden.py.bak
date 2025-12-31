@@ -1,0 +1,9 @@
+import subprocess
+import sys
+from .util import assert_contains_markers
+
+def test_cli_help_golden():
+    p = subprocess.run([sys.executable, "-m", "clarissa", "--help"], capture_output=True, text=True)
+    assert p.returncode == 0
+    out = p.stdout + "\n" + p.stderr
+    assert_contains_markers(out, ["usage"])

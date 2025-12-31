@@ -1,0 +1,14 @@
+repos:
+  - repo: local
+    hooks:
+      - id: clarissa-snapshot-tests
+        name: CLARISSA CLI snapshot tests
+        entry: bash -lc "pytest -q tests/golden/test_cli_help_snapshot.py tests/golden/test_cli_demo_snapshot.py"
+        language: system
+        pass_filenames: false
+
+      - id: clarissa-unit-tests-smoke
+        name: CLARISSA unit smoke (fast)
+        entry: bash -lc "pytest -q tests/test_core_units.py"
+        language: system
+        pass_filenames: false

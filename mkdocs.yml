@@ -1,0 +1,98 @@
+site_name: CLARISSA Documentation
+site_description: Conversational Language Agent for Reservoir Integrated Simulation System Analysis
+site_author: BlauWeiss LLC
+site_url: https://wolfram_laube.gitlab.io/blauweiss_llc/irena/
+
+repo_name: irena
+repo_url: https://gitlab.com/wolfram_laube/blauweiss_llc/irena
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/gitlab
+
+plugins:
+  - search
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - admonition
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+extra_javascript:
+  - https://unpkg.com/mermaid@10/dist/mermaid.esm.min.mjs
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Quick Start: getting-started/quickstart.md
+    - Installation: getting-started/installation.md
+  - Architecture:
+    - Overview: architecture/overview.md
+    - ADR Index: architecture/adr/index.md
+    - ADR-001 Physics-Centric: architecture/adr/ADR-001-physics-centric.md
+    - ADR-002 Separation of Roles: architecture/adr/ADR-002-separation-of-roles.md
+    - ADR-003 Native Kernel: architecture/adr/ADR-003-native-kernel.md
+    - ADR-005 Single Repo: architecture/adr/ADR-005-repo-decomposition.md
+    - ADR-006 CI Artifacts: architecture/adr/ADR-006-noise-free-ci-artifacts.md
+    - ADR-007 CI Observability: architecture/adr/ADR-007-ci-as-observability-layer.md
+    - ADR-008 Governance Signals: architecture/adr/ADR-008-governance-signals-vs-enforcement.md
+    - ADR-009 NLP Pipeline: architecture/adr/ADR-009-nlp-translation-pipeline.md
+    - Diagrams: architecture/diagrams.md
+  - Development:
+    - Contributing: development/contributing.md
+    - CI/CD: development/ci-cd.md
+    - Scripts: development/scripts.md
+  - Conference:
+    - IJACSA 2026: conference/ijacsa-2026.md
+    - Abstract: conference/abstract.md
+  - Changelog: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/gitlab
+      link: https://gitlab.com/wolfram_laube/blauweiss_llc/irena
+  generator: false
+
+copyright: Copyright &copy; 2025 BlauWeiss LLC

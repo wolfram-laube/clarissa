@@ -1,0 +1,27 @@
+@startuml
+title CLARISSA Layered Responsibility Architecture
+
+skinparam Shadowing false
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+
+rectangle "Neuro-Symbolic Governance\nRules · Constraints · Escalation" as GOV
+rectangle "LLM Reasoning & Interaction\nPlanning · Explanation · Dialogue" as LLM
+rectangle "Reinforcement Learning\nAction Sequences · Skill" as RL
+rectangle "Simulation Substrate\nProduction Simulators · Open/Research Simulators · CLARISSA Native Kernel" as SIM
+
+GOV -down-> LLM : constrains
+LLM -down-> RL : orchestrates
+RL  -down-> SIM : acts through
+
+note right of GOV
+Sets permissions, thresholds,
+approval gates, audit rules.
+end note
+
+note right of RL
+Learns skill from consequences,
+not authority or physics laws.
+end note
+
+@enduml

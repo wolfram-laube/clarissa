@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+"""Post snapshot diff summary to the Merge Request as a note (deduped).
+
+Trigger: snapshot_tests job on MR pipelines when snapshots mismatch.
+
+Requires env:
+- GITLAB_TOKEN
+- CI_API_V4_URL
+- CI_PROJECT_ID
+- CI_MERGE_REQUEST_IID (available in MR pipelines)
+
+Optional:
+- CI_BOT_SNAPSHOT_MARKER (default: "clarissa-ci-snapshot-summary")
+- CI_BOT_SNAPSHOT_SUMMARY_PATH (default: "tests/golden/summary.md")
+"""
+
+from __future__ import annotations
+import json, os, sys, urllib.parse, urllib.request
+from typing import Any, Dict, List, Optional
+
+def env(name: str, default: Optional[str] = None) -> str:
+    v = os.getenv(name, default)
+    if v is None or v == "":
+        return default or ""
+    return v
+
+def api_request(method: str, url: str, token: str, data: Optional[dict] = None) -> Any:
+    headers = {
+        "PRIVATE-TOKEN": token,
+        "Content-Type": "application/json",
+        "User-Agent": "clarissa-ci-mr-snapshot-bot/1.0",
+    }
+    body = None
+    if data is not None:
+        body = json.dumps(data).encode("utf-8")
+    req = urllib.request.Request(url=url, method=method, headers=headers, data=body)
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        raw = resp.read().decode("utf-8")
+        return json.loads(raw) if raw else None
+
+def project_url(api: str, project_id: str, path: str) -> str:
+    return f"{api}/projects/{urllib.parse.quote(project_id, safe='')}{path}"
+
+def marker(tag: str) -> str:
+    return f"<!-- {tag} -->"
+
+def list_notes(api: str, project_id: str, token: str, mr_iid: str) -> List[Dict[str, Any]]:
+    q = urllib.parse.urlencode({"per_page": 50, "sort": "desc", "order_by": "created_at"})
+    url = project_url(api, project_id, f"/merge_requests/{mr_iid}/notes?{q}")
+    notes = api_request("GET", url, token) or []
+    return notes if isinstance(notes, list) else []
+
+def create_note(api: str, project_id: str, token: str, mr_iid: str, body: str) -> Any:
+    url = project_url(api, project_id, f"/merge_requests/{mr_iid}/notes")
+    return api_request("POST", url, token, {"body": body})
+
+def update_note(api: str, project_id: str, token: str, mr_iid: str, note_id: int, body: str) -> Any:
+    url = project_url(api, project_id, f"/merge_requests/{mr_iid}/notes/{note_id}")
+    return api_request("PUT", url, token, {"body": body})
+
+def main() -> int:
+    token = env("GITLAB_TOKEN")
+    api = env("CI_API_V4_URL", "https://gitlab.com/api/v4")
+    project_id = env("CI_PROJECT_ID")
+    mr_iid = env("CI_MERGE_REQUEST_IID")
+    summary_path = env("CI_BOT_SNAPSHOT_SUMMARY_PATH", "tests/golden/summary.md")
+    tag = env("CI_BOT_SNAPSHOT_MARKER", "clarissa-ci-snapshot-summary")
+
+    if not token or not project_id or not mr_iid:
+        print("Missing token/project/mr iid; skipping.")
+        return 0
+
+    if not os.path.exists(summary_path):
+        print(f"No summary at {summary_path}; skipping.")
+        return 0
+
+    summary = Path(summary_path).read_text(encoding="utf-8").strip()
+    if not summary:
+        print("Empty summary; skipping.")
+        return 0
+
+    m = marker(tag)
+    body = f"{m}\n## 🧾 CLI snapshot diff summary\n\n{summary}\n"
+
+    notes = list_notes(api, project_id, token, mr_iid)
+    existing = None
+    for n in notes:
+        if m in (n.get("body") or ""):
+            existing = n
+            break
+
+    if existing:
+        update_note(api, project_id, token, mr_iid, int(existing["id"]), body)
+        print("Updated existing MR snapshot summary note.")
+    else:
+        create_note(api, project_id, token, mr_iid, body)
+        print("Created MR snapshot summary note.")
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())

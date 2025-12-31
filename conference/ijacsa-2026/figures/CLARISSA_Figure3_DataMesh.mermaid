@@ -1,0 +1,46 @@
+%%{init: {'theme': 'base', 'themeVariables': { 
+  'primaryColor': '#5B7553', 
+  'primaryTextColor': '#F5F2ED', 
+  'primaryBorderColor': '#F5F2ED',
+  'lineColor': '#6B7B6E',
+  'background': '#FDFBF7',
+  'fontSize': '13px'
+}}}%%
+
+flowchart TB
+    subgraph TOP["Domain Layer — Upper"]
+        direction LR
+        SIM["<b>Simulation Domain</b><br/>───────────<br/>Cassandra<br/><i>Time-series</i><br/><i>ECLIPSE Results</i>"]
+        TRAIN["<b>Training Domain</b><br/>───────────<br/>MongoDB<br/><i>ML Datasets</i><br/><i>Model Artifacts</i>"]
+        USER["<b>User Domain</b><br/>───────────<br/>PostgreSQL<br/><i>Auth & Audit</i><br/><i>Permissions</i>"]
+    end
+    
+    BUS[["<b>Event Bus</b><br/>Kafka │ RabbitMQ │ Redis Streams"]]
+    
+    subgraph BOTTOM["Domain Layer — Lower"]
+        direction LR
+        CONN["<b>Connectivity Domain</b><br/>───────────<br/>Neo4j<br/><i>Well Relations</i><br/><i>Flow Patterns</i>"]
+        CACHE["<b>Cache Layer</b><br/>───────────<br/>Redis<br/><i>Sessions</i><br/><i>Frequent Queries</i>"]
+    end
+    
+    PRINCIPLES["<i>Domain Ownership │ Schema Independence │ Event-Driven Sync │ Configurable Backends</i>"]
+    
+    SIM <--> BUS
+    TRAIN <--> BUS
+    USER <--> BUS
+    BUS <--> CONN
+    BUS <--> CACHE
+    
+    BOTTOM ~~~ PRINCIPLES
+    
+    style SIM fill:#5B7553,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style TRAIN fill:#7D6B5D,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style USER fill:#6B8E6B,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style CONN fill:#A67C52,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    style CACHE fill:#8B5A3C,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    
+    style BUS fill:#3D3D3D,stroke:#F5F2ED,stroke-width:2px,color:#F5F2ED
+    
+    style TOP fill:transparent,stroke:none
+    style BOTTOM fill:transparent,stroke:none
+    style PRINCIPLES fill:#F0EDE6,stroke:#C4B9A8,stroke-width:1px,color:#5A5A5A

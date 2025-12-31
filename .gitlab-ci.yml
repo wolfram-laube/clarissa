@@ -1,0 +1,309 @@
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: always
+    - when: never
+
+stages:
+  - test
+  - classify
+  - automation
+  - deploy
+
+# ----------------------------
+# Anchors (infrastructure hygiene)
+# ----------------------------
+.python_base: &python_base
+  image: python:3.11
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    key: pip-cache
+    paths:
+      - .cache/pip
+
+.install_dev_deps: &install_dev_deps
+  before_script:
+    - python -V
+    - python -m pip install --upgrade pip
+    - python -m pip install -e ".[dev]"
+
+.pytest_run: &pytest_run
+  script:
+    - python -m pytest -q --junitxml=junit.xml
+  artifacts:
+    when: always
+    reports:
+      junit: junit.xml
+    paths:
+      - junit.xml
+      - .pytest_cache/
+
+.rerun_rules: &rerun_rules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_failure
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_failure
+    - when: never
+
+.issue_bot_rules: &issue_bot_rules
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - when: never
+
+.recovery_bot_rules: &recovery_bot_rules
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - when: never
+
+.mr_bot_rules: &mr_bot_rules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - when: never
+
+# ----------------------------
+# Jobs
+# ----------------------------
+tests:
+  stage: test
+  <<: *python_base
+  <<: *install_dev_deps
+  <<: *pytest_run
+
+snapshot_tests:
+  stage: test
+  <<: *python_base
+  <<: *install_dev_deps
+  script:
+    - |
+      set -e
+      mkdir -p tests/golden tests/golden/snapshots tests/golden/diffs
+
+      # Create a default summary to avoid artifact warnings
+      echo '# Snapshot diffs' > tests/golden/summary.md
+      echo '' >> tests/golden/summary.md
+      echo '_No snapshot diffs produced._' >> tests/golden/summary.md
+      echo '' >> tests/golden/summary.md
+
+      python -m pytest -q \
+        tests/golden/test_cli_help_snapshot.py \
+        tests/golden/test_cli_demo_snapshot.py || EXIT=$?
+
+      # If diffs exist, overwrite summary with real content
+      if [ -d tests/golden/diffs ] && ls -1 tests/golden/diffs/*.diff >/dev/null 2>&1; then
+        echo '# Snapshot diffs' > tests/golden/summary.md
+        echo '' >> tests/golden/summary.md
+        for f in tests/golden/diffs/*.diff; do
+          echo "## $(basename "$f")" >> tests/golden/summary.md
+          echo '```diff' >> tests/golden/summary.md
+          cat "$f" >> tests/golden/summary.md
+          echo '```' >> tests/golden/summary.md
+          echo '' >> tests/golden/summary.md
+        done
+      fi
+
+      if [ -n "${EXIT:-}" ]; then exit "$EXIT"; fi
+  artifacts:
+    when: on_failure
+    paths:
+      - tests/golden/snapshots/
+      - tests/golden/summary.md
+
+contract_tests:
+  stage: test
+  <<: *python_base
+  <<: *install_dev_deps
+  script:
+    - |
+      set -e
+      mkdir -p tests/contracts
+      python -m pytest -q tests/contracts 2>&1 | tee pytest_contracts.log || EXIT=$?
+      python scripts/generate_contract_summary.py || true
+      if [ -n "${EXIT:-}" ]; then exit "$EXIT"; fi
+  artifacts:
+    when: on_failure
+    paths:
+      - tests/contracts/summary.md
+      - pytest_contracts.log
+
+governance_impact:
+  stage: test
+  <<: *python_base
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - when: never
+  script:
+    - mkdir -p tests/governance
+    - python scripts/detect_governance_impact.py
+  artifacts:
+    when: always
+    paths:
+      - tests/governance/impact.md
+
+architecture_graphs:
+  stage: test
+  image:
+    name: ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:latest
+    entrypoint: [""]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - when: never
+  script:
+    - mkdir -p docs/architecture/diagrams docs/architecture/rendered
+    - mmdc --version || true
+    - bash scripts/render_mermaid.sh || echo "Mermaid render failed; keeping sources."
+  artifacts:
+    when: always
+    paths:
+      - docs/architecture/diagrams/
+      - docs/architecture/rendered/
+  allow_failure: true
+
+tests_rerun:
+  stage: test
+  <<: *python_base
+  <<: *install_dev_deps
+  <<: *rerun_rules
+  needs:
+    - job: tests
+      artifacts: true
+      optional: true
+  script:
+    - |
+      set +e
+      python -m pytest -q \
+        --last-failed \
+        --last-failed-no-failures=none \
+        --maxfail=${CI_BOT_RERUN_MAXFAIL:-1} \
+        -x \
+        --junitxml=junit_rerun.xml
+      echo $? > rerun_exit_code.txt
+      exit 0
+  artifacts:
+    when: always
+    paths:
+      - junit_rerun.xml
+      - rerun_exit_code.txt
+
+ci_classify:
+  stage: classify
+  <<: *python_base
+  needs:
+    - job: tests
+      artifacts: true
+      optional: true
+    - job: tests_rerun
+      artifacts: true
+      optional: true
+  script:
+    - python scripts/ci_classify.py
+  artifacts:
+    reports:
+      dotenv: ci_classify.env
+    paths:
+      - ci_classify.env
+
+mr_report:
+  stage: automation
+  <<: *python_base
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - when: never
+  needs:
+    - job: snapshot_tests
+      artifacts: true
+      optional: true
+    - job: contract_tests
+      artifacts: true
+      optional: true
+    - job: governance_impact
+      artifacts: true
+      optional: true
+    - job: architecture_graphs
+      artifacts: true
+      optional: true
+  script:
+    - mkdir -p reports
+    - python scripts/generate_mr_report.py
+    - python scripts/render_report_html.py || true
+  artifacts:
+    when: always
+    paths:
+      - reports/mr_report.md
+      - reports/mr_report.html
+
+ci_flaky_ledger:
+  stage: automation
+  <<: *python_base
+  <<: *issue_bot_rules
+  needs:
+    - job: ci_classify
+      artifacts: true
+      optional: true
+  script:
+    - python scripts/gitlab_flaky_ledger_bot.py
+
+ci_issue_on_failure:
+  stage: automation
+  <<: *python_base
+  <<: *issue_bot_rules
+  needs:
+    - job: ci_classify
+      artifacts: true
+      optional: true
+  script:
+    - python scripts/gitlab_issue_bot.py
+
+ci_issue_on_recovery:
+  stage: automation
+  <<: *python_base
+  <<: *recovery_bot_rules
+  needs:
+    - job: ci_classify
+      artifacts: true
+      optional: true
+  script:
+    - python scripts/gitlab_recovery_bot.py
+
+mr_comment_on_failure:
+  stage: automation
+  <<: *python_base
+  <<: *mr_bot_rules
+  needs:
+    - job: ci_classify
+      artifacts: true
+      optional: true
+  script:
+    - python scripts/gitlab_mr_bot.py
+
+# ----------------------------
+# Documentation Site (GitLab Pages)
+# ----------------------------
+pages:
+  stage: deploy
+  image: python:3.11
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - when: never
+  before_script:
+    - pip install mkdocs mkdocs-material pymdown-extensions
+    - apt-get update && apt-get install -y pandoc || true
+  script:
+    - python scripts/build_docs.py
+    - mkdocs build --site-dir public
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 week
