@@ -35,9 +35,36 @@ registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/opm-flow:<tag>
 ```
 
 **Tagging strategy:**
-- `latest` — most recent build from `main` (mutable, convenience only)
-- `<commit-sha>` — immutable, traceable to exact code version
-- `v<semver>` — release tags (when applicable)
+
+| Tag | Example | When Created | Use Case |
+|-----|---------|--------------|----------|
+| `<commit-sha>` | `e83bbe2a` | Every CI build | Traceability, debugging, rollback to exact commit |
+| `latest` | `latest` | Every `main` build | Development, local testing (mutable, not for prod) |
+| `v<major>.<minor>.<patch>` | `v1.0.0` | Manual release | Production, K8s Jobs, stable references |
+
+**Semantic Versioning guidelines for OPM Flow image:**
+
+- **Patch** (`v1.0.0` → `v1.0.1`):
+  - Bugfix in Dockerfile or entrypoint script
+  - Security update of base image (Ubuntu)
+  - OPM package patch update (same minor version)
+
+- **Minor** (`v1.0.x` → `v1.1.0`):
+  - New OPM Flow version with new features
+  - New entrypoint options or capabilities
+  - Additional output formats supported
+  - Backward-compatible changes
+
+- **Major** (`v1.x.x` → `v2.0.0`):
+  - Breaking changes to volume mount paths
+  - Different base image (e.g., Ubuntu 22.04 → 24.04)
+  - Changed default behavior requiring adapter updates
+  - Incompatible OPM Flow major version upgrade
+
+**Release process:**
+1. Update `VERSION` file in `src/clarissa/simulators/opm/` (create if not exists)
+2. Tag commit with `opm-flow-v<semver>` (e.g., `opm-flow-v1.0.0`)
+3. CI detects tag and pushes image with semver tag
 
 ### 2. CI Pipeline: Automated Image Build
 
@@ -67,6 +94,8 @@ build_opm_image:
       changes:
         - src/clarissa/simulators/opm/**/*
       when: on_success
+    - if: '$CI_COMMIT_TAG =~ /^opm-flow-v[0-9]+\.[0-9]+\.[0-9]+$/'
+      when: on_success
     - when: never
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -76,6 +105,12 @@ build_opm_image:
       if [ "$CI_COMMIT_BRANCH" == "main" ]; then
         docker tag $CI_REGISTRY_IMAGE/opm-flow:$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE/opm-flow:latest
         docker push $CI_REGISTRY_IMAGE/opm-flow:latest
+      fi
+    - |
+      if [[ "$CI_COMMIT_TAG" =~ ^opm-flow-v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        SEMVER="${CI_COMMIT_TAG#opm-flow-}"
+        docker tag $CI_REGISTRY_IMAGE/opm-flow:$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE/opm-flow:$SEMVER
+        docker push $CI_REGISTRY_IMAGE/opm-flow:$SEMVER
       fi
 ```
 
@@ -115,7 +150,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: opm-flow
-          image: registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/opm-flow:latest
+          image: registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/opm-flow:v1.0.0
           command: ["flow"]
           args: ["data/CASE.DATA", "--output-dir=output/"]
           volumeMounts:
@@ -138,6 +173,8 @@ spec:
           emptyDir: {}
 ```
 
+**Note:** Production K8s Jobs should reference semver tags (`v1.0.0`), not `latest`.
+
 ### 4. OPMFlowAdapter Update
 
 Update `OPMFlowAdapter` to use the registry image by default:
@@ -146,15 +183,17 @@ Update `OPMFlowAdapter` to use the registry image by default:
 DEFAULT_IMAGE = "registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/opm-flow:latest"
 ```
 
-Allow override via environment variable `CLARISSA_OPM_IMAGE` for flexibility.
+Allow override via environment variable `CLARISSA_OPM_IMAGE` for flexibility:
+- Development: `latest` or `<sha>` for testing changes
+- Production: `v1.0.0` or specific semver for stability
 
 ## Rationale
 
 1. **GitLab Registry**: Zero additional infrastructure; integrated with existing CI/CD;
    authentication handled via CI variables.
 
-2. **Minimal CI job**: Only builds when OPM files change; tagged images enable rollback
-   and traceability.
+2. **Three-tier tagging**: Commit SHA for traceability, latest for development,
+   semver for production stability. Clear separation of concerns.
 
 3. **Kustomize over Helm**: Simpler for current needs; no templating complexity;
    overlays provide environment differentiation when needed.
@@ -167,6 +206,7 @@ Allow override via environment variable `CLARISSA_OPM_IMAGE` for flexibility.
 ### Positive
 - Reproducible builds on every commit to `main`
 - Immutable, versioned images in registry
+- Semantic versioning enables controlled rollouts and rollbacks
 - Clear path from development to K8s execution
 - Foundation for future scaling (parallel simulations, GPU nodes)
 
@@ -174,11 +214,13 @@ Allow override via environment variable `CLARISSA_OPM_IMAGE` for flexibility.
 - CI pipeline becomes longer (Docker build adds ~2-5 min)
 - Requires Docker-in-Docker or Kaniko (slight complexity)
 - K8s manifests add maintenance surface
+- Semver requires discipline to bump versions appropriately
 
 ### Neutral / Open
 - Helm adoption deferred until multi-environment or complex parametrization needed
 - GPU support for accelerated solvers not yet addressed
 - Result collection from K8s jobs (S3, PVC, etc.) to be decided per use case
+- Automated semver bumping (e.g., via commit message conventions) not yet implemented
 
 ## Alternatives Considered
 
@@ -196,6 +238,11 @@ chart distribution becomes necessary.
 adds complexity. DinD is acceptable for now; can migrate to Kaniko if security
 requirements tighten.
 
+### CalVer instead of SemVer
+**Rejected**: Calendar versioning (e.g., `2026.01`) is useful for time-based releases
+but doesn't communicate compatibility. SemVer's major/minor/patch semantics are
+more appropriate for infrastructure components.
+
 ## Implementation Notes
 
 - CI variables `CI_REGISTRY`, `CI_REGISTRY_USER`, `CI_REGISTRY_PASSWORD` are
@@ -203,6 +250,7 @@ requirements tighten.
 - Test image build in MR pipeline before merge
 - Update `OPMFlowAdapter` default image after first successful push
 - Document K8s job execution in `docs/simulators/`
+- First release should be tagged `opm-flow-v1.0.0`
 
 ## Related ADRs
 - ADR-001 — Physics-Centric, Simulator-in-the-Loop Architecture
