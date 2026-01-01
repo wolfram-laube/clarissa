@@ -224,12 +224,14 @@ def generate_sync_package(
     since_commit: Optional[str] = None,
     include_diff_content: bool = True,
     lite_mode: bool = False,
+    medium_mode: bool = False,
     verbose: bool = True
 ) -> str:
     """Generate the sync package
     
     Args:
-        lite_mode: If True, skip full directory dumps (smaller output)
+        lite_mode: If True, skip full directory dumps (smallest output)
+        medium_mode: If True, include ADRs and arch docs but not opmflow binaries
     """
     
     tree = get_tree(branch)
@@ -343,10 +345,18 @@ def generate_sync_package(
             output.append("```")
     
     # ==========================================================================
-    # FULL INCLUDE DIRECTORIES (skip in lite mode)
+    # FULL INCLUDE DIRECTORIES (skip in lite mode, selective in medium mode)
     # ==========================================================================
-    if not lite_mode:
-        for include_dir in FULL_INCLUDE_DIRS:
+    if lite_mode:
+        include_dirs = []
+    elif medium_mode:
+        # Medium: ADRs and architecture docs, but not opmflow (too large)
+        include_dirs = ["docs/adr", "docs/architecture"]
+    else:
+        # Full: everything
+        include_dirs = FULL_INCLUDE_DIRS
+    
+    for include_dir in include_dirs:
             dir_files = [
                 item for item in tree
                 if item['path'].startswith(include_dir) and item['type'] == 'blob'
@@ -455,6 +465,11 @@ Examples:
         action="store_true",
         help="Lite mode: only core files, no full directory dumps"
     )
+    parser.add_argument(
+        "--medium", "-m",
+        action="store_true",
+        help="Medium mode: core files + ADRs + architecture docs (fits in Claude)"
+    )
     
     args = parser.parse_args()
     
@@ -464,6 +479,7 @@ Examples:
         since_commit=args.since,
         include_diff_content=not args.no_diff_content,
         lite_mode=args.lite,
+        medium_mode=args.medium,
         verbose=not args.quiet
     )
 

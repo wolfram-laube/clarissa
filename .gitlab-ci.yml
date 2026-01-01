@@ -326,9 +326,11 @@ llm_sync_package:
       echo "Generating sync package for branch: $BRANCH"
       cd scripts
       python llm_sync_generator.py --branch "$BRANCH" --lite -o ../clarissa_sync_lite.md
+      python llm_sync_generator.py --branch "$BRANCH" --medium -o ../clarissa_sync_medium.md
       python llm_sync_generator.py --branch "$BRANCH" --lite --since ${CI_COMMIT_BEFORE_SHA:-HEAD~5} -o ../clarissa_sync_diff.md || true
   artifacts:
     paths:
       - clarissa_sync_lite.md
+      - clarissa_sync_medium.md
       - clarissa_sync_diff.md
     expire_in: 4 weeks
