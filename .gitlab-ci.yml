@@ -307,3 +307,22 @@ pages:
     paths:
       - public
     expire_in: 1 week
+
+# ----------------------------
+# LLM Sync Package (private artifact)
+# ----------------------------
+llm_sync_package:
+  stage: deploy
+  image: python:3.11
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - when: never
+  script:
+    - cd scripts && python llm_sync_generator.py --lite -o ../clarissa_sync_lite.md
+    - cd scripts && python llm_sync_generator.py --lite --since ${CI_COMMIT_BEFORE_SHA:-HEAD~5} -o ../clarissa_sync_diff.md || true
+  artifacts:
+    paths:
+      - clarissa_sync_lite.md
+      - clarissa_sync_diff.md
+    expire_in: 4 weeks
