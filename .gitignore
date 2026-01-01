@@ -17,3 +17,14 @@ site/
 
 # legacy docs staging (removed)
 site_docs/
+
+# OPM Flow / ECLIPSE output artifacts
+*.PRT
+*.DBG
+*.EGRID
+*.INIT
+*.UNRST
+*.SMSPEC
+*.UNSMRY
+*.RSM
+*.RFT
