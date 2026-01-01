@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  opm-flow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: opm-flow:latest
+    container_name: opm-flow-simulator
+    environment:
+      # Pass host user's UID/GID to fix permission issues
+      - LOCAL_UID=${LOCAL_UID:-1000}
+      - LOCAL_GID=${LOCAL_GID:-1000}
+    volumes:
+      # Mount your local simulation data directory
+      - ./data:/simulation/data
+      # Mount output directory for results
+      - ./output:/simulation/output
+    working_dir: /simulation
+    # Override default command to keep container running for interactive use
+    # command: tail -f /dev/null
+    
+    # Example: Run a specific deck file
+    # command: flow data/YOUR_DECK.DATA --output-dir=output/
+
+  # Optional: Service for parallel MPI runs
+  opm-flow-mpi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: opm-flow:latest
+    container_name: opm-flow-mpi
+    environment:
+      - LOCAL_UID=${LOCAL_UID:-1000}
+      - LOCAL_GID=${LOCAL_GID:-1000}
+    volumes:
+      - ./data:/simulation/data
+      - ./output:/simulation/output
+    working_dir: /simulation
+    # Example MPI run with 4 processes
+    # command: mpirun -np 4 flow data/YOUR_DECK.DATA --output-dir=output/
