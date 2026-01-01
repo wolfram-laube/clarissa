@@ -8,10 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- ADR-009: Multi-Stage NLP Translation Pipeline (Proposed)
-- IJACSA 2026 paper draft with architecture diagrams (`conference/ijacsa-2026/`)
+- ADR-011: OPM Flow Simulator Integration
+- `SimulatorAdapter` abstract base class in `src/clarissa/simulators/base.py`
+- `OPMFlowAdapter` for OPM Flow integration via Docker
+- OPM Flow Docker infrastructure in `src/clarissa/simulators/opm/`
+- Integration test suite for OPM Flow (`tests/integration/test_opm_flow.py`)
 
 ### Changed
+- `MockSimulator` now inherits from `SimulatorAdapter` ABC
+- Extended contract tests to verify inheritance and optional fields
+- `.gitignore` extended for OPM/ECLIPSE output artifacts
+
+### Removed
+- Standalone `opmflow/` directory (migrated to `src/clarissa/simulators/opm/`)
+
+---
+
+### Previously in Unreleased
+- ADR-009: Multi-Stage NLP Translation Pipeline (Proposed)
+- IJACSA 2026 paper draft with architecture diagrams (`conference/ijacsa-2026/`)
 - Extracted version history from README into CHANGELOG.md
 
 ---

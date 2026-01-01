@@ -1,19 +1,38 @@
 """Mock simulator adapter.
 
-Represents simulator-in-the-loop feedback. Replace with real adapters later.
+Provides a lightweight, deterministic simulator for testing and CI.
+Does not perform physically meaningful calculations.
 """
 
 from __future__ import annotations
-from typing import Any
+
+from .base import SimulatorAdapter, SimulatorResult
 
 
-class MockSimulator:
-    def run(self, deck_text: str) -> dict[str, Any]:
-        # Minimal "numerical" outcome
-        stable = "RATE 90" in deck_text
-        return {
-            "ran": True,
-            "converged": stable,
-            "timestep_collapses": 0 if stable else 3,
-            "errors": [] if stable else ["NONLINEAR_DIVERGENCE"],
-        }
+class MockSimulator(SimulatorAdapter):
+    """Mock simulator for testing CLARISSA's learning loop.
+    
+    Behavior:
+        - Returns converged=True if input contains "RATE 90"
+        - Returns converged=False with errors otherwise
+    
+    This allows deterministic testing of the feedback cycle without
+    requiring actual reservoir simulation infrastructure.
+    """
+    
+    def run(self, case: str) -> SimulatorResult:
+        """Execute mock simulation based on simple pattern matching."""
+        stable = "RATE 90" in case
+        
+        if stable:
+            return SimulatorResult(
+                converged=True,
+                errors=[],
+                metrics={"timestep_collapses": 0},
+            )
+        else:
+            return SimulatorResult(
+                converged=False,
+                errors=["NONLINEAR_DIVERGENCE"],
+                metrics={"timestep_collapses": 3},
+            )
