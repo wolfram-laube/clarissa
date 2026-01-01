@@ -9,3 +9,11 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+
+# MkDocs build output
+public/
+site/
+.site/
+
+# legacy docs staging (removed)
+site_docs/
