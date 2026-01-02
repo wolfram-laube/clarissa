@@ -1,7 +1,7 @@
 # ADR-012 — Container Registry and Kubernetes Deployment Strategy
 
 ## Status
-Proposed
+Implemented
 
 ## Context
 
