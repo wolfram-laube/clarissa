@@ -27,14 +27,14 @@ slides:
     title: "Tại sao cần workflow này?"
     without:
       title: "Không có workflow"
-      items:
+      list_items:
         - "Commit trực tiếp vào main"
         - "Không ai biết ai làm gì"
         - "Không thể truy vết lỗi"
         - "Hỗn loạn trong repository"
     with:
       title: "Có workflow"
-      items:
+      list_items:
         - "Mọi thay đổi liên kết với issue"
         - "Board hiển thị ai đang làm gì"
         - "Review code trước khi merge"
@@ -147,7 +147,7 @@ slides:
   
   donts:
     title: "Những điều cấm kỵ"
-    items:
+    list_items:
       - title: "Push trực tiếp lên main"
         tip: "Luôn dùng branch + MR!"
       - title: "Commit không có tham chiếu issue"
@@ -161,7 +161,7 @@ slides:
   
   checklist:
     title: "Checklist trước khi Merge"
-    items:
+    list_items:
       - "Branch tạo từ main"
       - "Tên branch có số issue"
       - "Commit theo Conventional Commits"
@@ -209,7 +209,7 @@ cheatsheet:
   
   donts:
     title: "Những điều cấm kỵ"
-    items:
+    list_items:
       - "Push trực tiếp lên main"
       - "Commit không có tham chiếu issue (#42)"
       - "Commit mật khẩu/secrets"

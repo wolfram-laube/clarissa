@@ -37,14 +37,14 @@ slides:
     title: "Why this workflow?"
     without:
       title: "Without workflow"
-      items:
+      list_items:
         - "Commit directly to main"
         - "Nobody knows who does what"
         - "Can't trace bugs"
         - "Repository chaos"
     with:
       title: "With workflow"
-      items:
+      list_items:
         - "All changes linked to issue"
         - "Board shows who works on what"
         - "Code review before merge"
@@ -210,7 +210,7 @@ slides:
   # Section: Don'ts
   donts:
     title: "Don'ts"
-    items:
+    list_items:
       - title: "Push directly to main"
         tip: "Always use branch + MR!"
       - title: "Commit without issue reference"
@@ -225,7 +225,7 @@ slides:
   # Section: Checklist
   checklist:
     title: "Pre-Merge Checklist"
-    items:
+    list_items:
       - "Branch created from main"
       - "Branch name contains issue number"
       - "Commits follow Conventional Commits"
@@ -302,7 +302,7 @@ cheatsheet:
   
   donts:
     title: "Don'ts"
-    items:
+    list_items:
       - "Push directly to main"
       - "Commit without issue reference (#42)"
       - "Commit passwords/secrets"
@@ -311,7 +311,7 @@ cheatsheet:
   
   pre_merge_checklist:
     title: "Pre-Merge Checklist"
-    items:
+    list_items:
       - "Branch name contains issue number"
       - "Commits follow Conventional Commits"
       - "Commits reference issue (#42)"
@@ -321,7 +321,7 @@ cheatsheet:
   
   quick_links:
     title: "Quick Links"
-    items:
+    list_items:
       - name: "Issue Board"
         path: "/-/boards"
       - name: "All Issues"

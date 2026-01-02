@@ -27,14 +27,14 @@ slides:
     title: "Af hverju þetta verkflæði?"
     without:
       title: "Án verkflæðis"
-      items:
+      list_items:
         - "Commit beint á main"
         - "Enginn veit hver gerir hvað"
         - "Ekki hægt að rekja villur"
         - "Ringulreið í gagnageymslunni"
     with:
       title: "Með verkflæði"
-      items:
+      list_items:
         - "Allar breytingar tengdar við issue"
         - "Borðið sýnir hver vinnur að hverju"
         - "Kóðarýni fyrir sameiningu"
@@ -147,7 +147,7 @@ slides:
   
   donts:
     title: "Bannað"
-    items:
+    list_items:
       - title: "Push beint á main"
         tip: "Notaðu alltaf grein + MR!"
       - title: "Commit án issue-tilvísunar"
@@ -161,7 +161,7 @@ slides:
   
   checklist:
     title: "Gátlisti fyrir sameiningu"
-    items:
+    list_items:
       - "Grein búin til úr main"
       - "Greinarheiti inniheldur issue-númer"
       - "Commit fylgja Conventional Commits"
@@ -209,7 +209,7 @@ cheatsheet:
   
   donts:
     title: "Bannað"
-    items:
+    list_items:
       - "Push beint á main"
       - "Commit án issue-tilvísunar (#42)"
       - "Commit leyniorð/secrets"

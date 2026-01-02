@@ -27,14 +27,14 @@ slides:
     title: "Warum dieses Workflow?"
     without:
       title: "Ohne Workflow"
-      items:
+      list_items:
         - "Commit direkt auf main"
         - "Niemand weiß, wer was macht"
         - "Fehler nicht nachvollziehbar"
         - "Chaos im Repository"
     with:
       title: "Mit Workflow"
-      items:
+      list_items:
         - "Alle Änderungen mit Issue verknüpft"
         - "Board zeigt wer woran arbeitet"
         - "Code-Review vor Merge"
@@ -147,7 +147,7 @@ slides:
   
   donts:
     title: "Verboten"
-    items:
+    list_items:
       - title: "Push direkt auf main"
         tip: "Immer Branch + MR verwenden!"
       - title: "Commit ohne Issue-Referenz"
@@ -161,7 +161,7 @@ slides:
   
   checklist:
     title: "Checkliste vor dem Merge"
-    items:
+    list_items:
       - "Branch von main erstellt"
       - "Branch-Name enthält Issue-Nummer"
       - "Commits folgen Conventional Commits"
@@ -219,7 +219,7 @@ cheatsheet:
   
   donts:
     title: "Verboten"
-    items:
+    list_items:
       - "Push direkt auf main"
       - "Commit ohne Issue-Referenz (#42)"
       - "Passwörter/Secrets committen"
@@ -228,7 +228,7 @@ cheatsheet:
   
   pre_merge_checklist:
     title: "Checkliste vor dem Merge"
-    items:
+    list_items:
       - "Branch-Name enthält Issue-Nummer"
       - "Commits folgen Conventional Commits"
       - "Commits referenzieren Issue (#42)"

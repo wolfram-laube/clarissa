@@ -93,7 +93,7 @@ git push -u origin 42-short-description
 
 ## 🚫 {{ t.cheatsheet.donts.title }}
 
-{% for item in t.cheatsheet.donts.items %}
+{% for item in t.cheatsheet.donts.list_items %}
 {{ loop.index }}. ❌ {{ item }}
 {% endfor %}
 

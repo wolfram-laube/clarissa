@@ -27,14 +27,14 @@ slides:
     title: "لماذا نحتاج هذا النظام؟"
     without:
       title: "بدون نظام"
-      items:
+      list_items:
         - "Commit مباشر على main"
         - "لا أحد يعرف من يفعل ماذا"
         - "لا يمكن تتبع الأخطاء"
         - "فوضى في المستودع"
     with:
       title: "مع النظام"
-      items:
+      list_items:
         - "كل تغيير مرتبط بـ issue"
         - "اللوحة تُظهر من يعمل على ماذا"
         - "مراجعة الكود قبل الدمج"
@@ -147,7 +147,7 @@ slides:
   
   donts:
     title: "الممنوعات"
-    items:
+    list_items:
       - title: "Push مباشر على main"
         tip: "استخدم دائماً branch + MR!"
       - title: "Commit بدون إشارة للـ issue"
@@ -161,7 +161,7 @@ slides:
   
   checklist:
     title: "قائمة التحقق قبل الدمج"
-    items:
+    list_items:
       - "الـ Branch منشأ من main"
       - "اسم الـ branch يحتوي رقم الـ issue"
       - "الـ Commits تتبع Conventional Commits"
@@ -209,7 +209,7 @@ cheatsheet:
   
   donts:
     title: "الممنوعات"
-    items:
+    list_items:
       - "Push مباشر على main"
       - "Commit بدون إشارة للـ issue (#42)"
       - "Commit كلمات سر أو أسرار"

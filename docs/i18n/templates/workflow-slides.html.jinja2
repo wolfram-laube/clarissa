@@ -73,11 +73,11 @@
             <div class="two-column" style="margin-top: 1em;">
                 <div class="warning-box">
                     <h3 style="color: var(--danger-red); margin-top: 0;">❌ {{ t.slides.why_workflow.without.title }}</h3>
-                    <ul style="font-size: 0.7em;">{% for item in t.slides.why_workflow.without.items %}<li>{{ item }}</li>{% endfor %}</ul>
+                    <ul style="font-size: 0.7em;">{% for item in t.slides.why_workflow.without.list_items %}<li>{{ item }}</li>{% endfor %}</ul>
                 </div>
                 <div class="success-box">
                     <h3 style="color: var(--success-green); margin-top: 0;">✅ {{ t.slides.why_workflow.with.title }}</h3>
-                    <ul style="font-size: 0.7em;">{% for item in t.slides.why_workflow.with.items %}<li>{{ item }}</li>{% endfor %}</ul>
+                    <ul style="font-size: 0.7em;">{% for item in t.slides.why_workflow.with.list_items %}<li>{{ item }}</li>{% endfor %}</ul>
                 </div>
             </div>
         </section>
@@ -130,11 +130,11 @@ git checkout -b 12-extend-gitignore</code></pre>
         </section>
         <section>
             <h2>🚫 {{ t.slides.donts.title }}</h2>
-            <div class="warning-box"><ol style="font-size: 0.8em;">{% for item in t.slides.donts.items %}<li><strong>{{ item.title }}</strong><br><span style="color: #8b949e;">{% if meta.direction == 'rtl' %}←{% else %}→{% endif %} {{ item.tip }}</span></li>{% endfor %}</ol></div>
+            <div class="warning-box"><ol style="font-size: 0.8em;">{% for item in t.slides.donts.list_items %}<li><strong>{{ item.title }}</strong><br><span style="color: #8b949e;">{% if meta.direction == 'rtl' %}←{% else %}→{% endif %} {{ item.tip }}</span></li>{% endfor %}</ol></div>
         </section>
         <section>
             <h2>✅ {{ t.slides.checklist.title }}</h2>
-            <ul class="checklist" style="font-size: 0.8em;">{% for item in t.slides.checklist.items %}<li>{{ item }}</li>{% endfor %}</ul>
+            <ul class="checklist" style="font-size: 0.8em;">{% for item in t.slides.checklist.list_items %}<li>{{ item }}</li>{% endfor %}</ul>
         </section>
         <section>
             <span class="big-emoji">🦊</span>
