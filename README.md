@@ -10,6 +10,20 @@ It is **explicitly documented and versioned**.
 
 ---
 
+## 📚 Documentation
+
+**[→ Full Documentation (GitLab Pages)](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/)**
+
+| Quick Links | |
+|-------------|---|
+| [Contributing Guide](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/contributing/) | How to contribute |
+| [Workflow Slides](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/guides/contributing/) | Interactive 5-min intro |
+| [Project Management](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/guides/project-management/) | Issues, Labels, Boards |
+| [CI Guide](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/ci/) | How to read CI results |
+| [ADRs](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/architecture/adr/) | Architecture decisions |
+
+---
+
 ## What This Repository Is
 
 This repository is the **single source of truth** for:
