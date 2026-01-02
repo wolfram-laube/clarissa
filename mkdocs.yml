@@ -75,7 +75,12 @@ nav:
     - Overview: publications/index.md
     - "IJACSA 2026":
       - Abstract: publications/ijacsa-2026/abstract.md
-    - "Paper bearbeiten (einfach)": publications/paper-editing-simple.md
+    - "Paper Editing":
+      - English: publications/paper-editing-en.md
+      - Deutsch: publications/paper-editing-de.md
+      - Tiếng Việt: publications/paper-editing-vi.md
+      - العربية: publications/paper-editing-ar.md
+      - Íslenska: publications/paper-editing-is.md
     - "Paper Workflow (technisch)": publications/paper-workflow.md
 
 extra:

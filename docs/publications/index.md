@@ -47,21 +47,20 @@ conference/
 
 ## ✏️ Paper bearbeiten
 
-| Guide | Für wen |
-|-------|---------|
-| **[Paper bearbeiten (einfach)](paper-editing-simple.md)** | Co-Authors, Non-Techies - nur Web-UI, kein Terminal |
-| **[Paper Workflow (technisch)](paper-workflow.md)** | Entwickler - LaTeX, Git, CI |
+| Guide | Language |
+|-------|----------|
+| **[Edit Paper (English)](paper-editing-en.md)** | 🇬🇧 English |
+| **[Paper bearbeiten (Deutsch)](paper-editing-de.md)** | 🇩🇪 Deutsch |
+| **[Chỉnh sửa bài báo (Tiếng Việt)](paper-editing-vi.md)** | 🇻🇳 Tiếng Việt |
+| **[تحرير الورقة (العربية)](paper-editing-ar.md)** | 🇸🇦 العربية |
+| **[Breyta grein (Íslenska)](paper-editing-is.md)** | 🇮🇸 Íslenska |
 
-### Kurzversion
+**[Paper Workflow (technical)](paper-workflow.md)** - For developers (LaTeX, Git, CI)
 
-**Ohne technische Kenntnisse:**
-1. [LaTeX-Datei öffnen](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/conference/ijacsa-2026/CLARISSA_Paper_IJACSA.tex)
-2. "Edit" klicken
-3. Text ändern, "Commit"
-4. CI baut das PDF automatisch!
+### Kurzversion / Quick Start
 
-**Mit technischen Kenntnissen:**
-1. Branch erstellen
-2. `.tex` editieren
-3. `pdflatex` lokal oder CI nutzen
-4. MR erstellen
+**Ohne technische Kenntnisse / Without technical knowledge:**
+1. [LaTeX-Datei öffnen / Open LaTeX file](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/conference/ijacsa-2026/CLARISSA_Paper_IJACSA.tex)
+2. "Edit" klicken / Click "Edit"
+3. Text ändern, "Commit" / Change text, "Commit"
+4. CI baut das PDF automatisch! / CI builds PDF automatically!

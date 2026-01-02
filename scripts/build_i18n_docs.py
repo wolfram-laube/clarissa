@@ -147,6 +147,29 @@ def build_cheatsheets(env: Environment, translations: dict, fallback: dict) -> N
         print(f"  Generated: cheatsheet-{lang_code}.md")
 
 
+def build_paper_editing(env: Environment, translations: dict, fallback: dict) -> None:
+    """Build paper editing guide markdown files for all languages."""
+    template = env.get_template("paper-editing.md.jinja2")
+    
+    # Paper editing goes to publications/, not guides/contributing/
+    publications_dir = Path(__file__).parent.parent / "docs" / "publications"
+    publications_dir.mkdir(parents=True, exist_ok=True)
+    
+    for lang_code, trans in translations.items():
+        # Merge with English fallback
+        merged = merge_with_fallback(trans, fallback)
+        paper_editing = merged.get("paper_editing", {})
+        
+        output = template.render(
+            paper_editing=paper_editing,
+            lang_code=lang_code,
+        )
+        
+        output_path = publications_dir / f"paper-editing-{lang_code}.md"
+        output_path.write_text(output, encoding="utf-8")
+        print(f"  Generated: paper-editing-{lang_code}.md")
+
+
 def main():
     print("=" * 60)
     print("CLARISSA i18n Documentation Builder")
@@ -191,6 +214,9 @@ def main():
     
     print("\nBuilding cheatsheets...")
     build_cheatsheets(env, translations, fallback)
+    
+    print("\nBuilding paper editing guides...")
+    build_paper_editing(env, translations, fallback)
     
     # Summary
     print("\n" + "=" * 60)
