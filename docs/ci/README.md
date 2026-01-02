@@ -116,3 +116,62 @@ When reviewing an CLARISSA MR:
 
 CI provides context.
 Decisions remain human.
+
+---
+
+## 8. Manual Job Triggers
+
+Some jobs can be triggered manually without a code change.
+
+### How to Trigger
+
+1. Go to **CI/CD → Pipelines**
+2. Click **Run Pipeline**
+3. Select branch (usually `main`)
+4. Click **Run Pipeline**
+5. In the pipeline view, click the ▶️ play button on the manual job
+
+### Available Manual Jobs
+
+| Job | Stage | Use Case |
+|-----|-------|----------|
+| `rebuild_docs` | deploy | Rebuild documentation without code change |
+| `rebuild_opm_image` | build | Force rebuild Docker image (e.g., after base image update) |
+| `rerun_all_tests` | test | Run full test suite for debugging |
+| `llm_sync_package` | deploy | Generate LLM sync package on demand |
+
+### When to Use
+
+**rebuild_docs**
+- After updating MkDocs theme
+- To verify documentation changes
+- Troubleshooting Pages deployment
+
+**rebuild_opm_image**  
+- After OPM base image update
+- Security patches
+- When `--no-cache` build is needed
+
+**rerun_all_tests**
+- Debugging flaky tests
+- Verifying fix without new commit
+- Checking environment issues
+
+### API Trigger
+
+You can also trigger via API:
+
+```bash
+curl --request POST \
+  --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  "https://gitlab.com/api/v4/projects/77260390/pipeline" \
+  --form "ref=main"
+```
+
+Then use the pipeline ID to trigger a specific job:
+
+```bash
+curl --request POST \
+  --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  "https://gitlab.com/api/v4/projects/77260390/jobs/$JOB_ID/play"
+```
