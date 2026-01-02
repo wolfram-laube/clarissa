@@ -20,6 +20,7 @@ Documentation is available in multiple languages:
 - **Deutsch**: [Workflow Slides (DE)](contributing/workflow-slides-de.html) • [Cheatsheet (DE)](contributing/cheatsheet-de.md)
 - **Tiếng Việt**: [Workflow Slides (VI)](contributing/workflow-slides-vi.html) • [Cheatsheet (VI)](contributing/cheatsheet-vi.md)
 - **العربية**: [Workflow Slides (AR)](contributing/workflow-slides-ar.html) • [Cheatsheet (AR)](contributing/cheatsheet-ar.md)
+- **Íslenska**: [Workflow Slides (IS)](contributing/workflow-slides-is.html) • [Cheatsheet (IS)](contributing/cheatsheet-is.md)
 
 ## 📋 Guide Index
 

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="is">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CLARISSA GitLab Workflow Guide</title>
+    <title>GitLab verkflæðisleiðbeiningar - CLARISSA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
     <style>
@@ -29,15 +29,8 @@
             --code-bg: #161b22;
         }
         
-        .reveal {
-            font-family: var(--r-main-font);
-        }
-        
-        .reveal h1, .reveal h2, .reveal h3 {
-            font-weight: 700;
-            text-transform: none;
-        }
-        
+        .reveal { font-family: var(--r-main-font); }
+        .reveal h1, .reveal h2, .reveal h3 { font-weight: 700; text-transform: none; }
         .reveal h1 {
             font-size: 2.5em;
             background: linear-gradient(135deg, var(--gitlab-orange), var(--gitlab-purple));
@@ -45,14 +38,12 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
         .reveal h2 {
             color: var(--r-heading-color);
             border-bottom: 3px solid var(--gitlab-orange);
             padding-bottom: 0.3em;
             display: inline-block;
         }
-        
         .reveal code {
             font-family: var(--r-code-font);
             background: var(--code-bg);
@@ -61,7 +52,6 @@
             font-size: 0.85em;
             color: #79c0ff;
         }
-        
         .reveal pre {
             background: var(--code-bg);
             border-radius: 12px;
@@ -69,14 +59,12 @@
             box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             width: 100%;
         }
-        
         .reveal pre code {
             background: transparent;
             padding: 1em;
             font-size: 0.7em;
             line-height: 1.5;
         }
-        
         .workflow-box {
             background: linear-gradient(135deg, #161b22, #1c2128);
             border: 2px solid #30363d;
@@ -85,12 +73,6 @@
             margin: 0.5em 0;
             text-align: left;
         }
-        
-        .workflow-box.active {
-            border-color: var(--gitlab-orange);
-            box-shadow: 0 0 30px rgba(252, 109, 38, 0.3);
-        }
-        
         .step-number {
             display: inline-flex;
             align-items: center;
@@ -104,12 +86,6 @@
             margin-right: 0.5em;
             color: white;
         }
-        
-        .emoji-icon {
-            font-size: 1.5em;
-            margin-right: 0.3em;
-        }
-        
         .keyword {
             display: inline-block;
             background: var(--code-bg);
@@ -120,39 +96,32 @@
             font-family: var(--r-code-font);
             font-size: 0.8em;
         }
-        
         .keyword.closes { border-color: var(--success-green); color: var(--success-green); }
-        .keyword.fixes { border-color: var(--warning-yellow); color: var(--warning-yellow); }
         .keyword.ref { border-color: var(--r-heading-color); color: var(--r-heading-color); }
-        
         .board-visual {
             display: flex;
             gap: 10px;
             justify-content: center;
             margin: 1em 0;
         }
-        
         .board-column {
             background: var(--code-bg);
             border: 1px solid #30363d;
             border-radius: 8px;
             padding: 0.5em;
-            min-width: 120px;
+            min-width: 110px;
             text-align: center;
         }
-        
         .board-column.highlight {
             border-color: var(--gitlab-orange);
             background: rgba(252, 109, 38, 0.1);
         }
-        
         .board-column h4 {
-            font-size: 0.6em;
+            font-size: 0.55em;
             margin: 0 0 0.5em 0;
             color: #8b949e;
             text-transform: uppercase;
         }
-        
         .issue-card {
             background: #21262d;
             border-radius: 6px;
@@ -161,17 +130,14 @@
             font-size: 0.5em;
             border-left: 3px solid var(--gitlab-purple);
         }
-        
         .issue-card.moving {
             border-left-color: var(--gitlab-orange);
             animation: pulse 1s infinite;
         }
-        
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
         }
-        
         .warning-box {
             background: rgba(248, 81, 73, 0.1);
             border: 2px solid var(--danger-red);
@@ -179,7 +145,6 @@
             padding: 1em;
             margin: 1em 0;
         }
-        
         .success-box {
             background: rgba(63, 185, 80, 0.1);
             border: 2px solid var(--success-green);
@@ -187,20 +152,17 @@
             padding: 1em;
             margin: 1em 0;
         }
-        
         .flow-arrow {
             font-size: 2em;
             color: var(--gitlab-orange);
             margin: 0 0.3em;
         }
-        
         .two-column {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2em;
             text-align: left;
         }
-        
         .label-demo {
             display: inline-block;
             padding: 0.2em 0.6em;
@@ -209,25 +171,19 @@
             font-weight: 600;
             margin: 0.1em;
         }
-        
         .label-type { background: #238636; }
         .label-priority-high { background: #ff6600; }
-        .label-priority-med { background: #d29922; }
         .label-workflow { background: #6e49cb; }
-        .label-component { background: #1f6feb; }
-        
         .checklist {
             text-align: left;
             list-style: none;
             padding: 0;
         }
-        
         .checklist li {
             padding: 0.5em 0;
             padding-left: 2em;
             position: relative;
         }
-        
         .checklist li::before {
             content: "☐";
             position: absolute;
@@ -235,57 +191,29 @@
             color: var(--gitlab-orange);
             font-size: 1.2em;
         }
-        
         .checklist li.done::before {
             content: "☑";
             color: var(--success-green);
         }
-        
-        footer.slide-footer {
-            position: absolute;
-            bottom: 1em;
-            left: 1em;
-            font-size: 0.5em;
-            color: #8b949e;
-        }
-        
         .big-emoji {
             font-size: 4em;
             display: block;
             margin: 0.5em 0;
         }
-        
         .command-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.7em;
         }
-        
         .command-table th, .command-table td {
             padding: 0.8em;
             border: 1px solid #30363d;
             text-align: left;
         }
-        
         .command-table th {
             background: var(--code-bg);
             color: var(--gitlab-orange);
         }
-        
-        .progress-bar {
-            height: 6px;
-            background: #30363d;
-            border-radius: 3px;
-            overflow: hidden;
-            margin: 1em 0;
-        }
-        
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--gitlab-orange), var(--success-green));
-            border-radius: 3px;
-        }
-    
         .lang-switch {
             position: fixed;
             top: 1em;
@@ -305,81 +233,77 @@
             color: var(--gitlab-orange);
             border-color: var(--gitlab-orange);
         }
-
     </style>
 </head>
 <body>
     <div class="lang-switch">
         <a href="workflow-slides-en.html">EN</a>
-        <a href="workflow-slides-de.html" class="active">DE</a>
+        <a href="workflow-slides-de.html">DE</a>
         <a href="workflow-slides-vi.html">VI</a>
         <a href="workflow-slides-ar.html">AR</a>
-        <a href="workflow-slides-is.html">IS</a>
+        <a href="workflow-slides-is.html" class="active">IS</a>
     </div>
-
+    
     <div class="reveal">
         <div class="slides">
             
             <!-- TITLE SLIDE -->
             <section>
-                <h1>🦊 CLARISSA<br>GitLab Workflow</h1>
-                <p style="font-size: 1.2em; color: #8b949e;">Deppensichere Anleitung für Contributors</p>
+                <h1>🦊 CLARISSA<br>GitLab Verkflæði</h1>
+                <p style="font-size: 1.2em; color: #8b949e;">Leiðbeiningar fyrir þátttakendur</p>
                 <div style="margin-top: 2em;">
                     <span class="label-demo label-type">type::feature</span>
                     <span class="label-demo label-priority-high">priority::high</span>
                     <span class="label-demo label-workflow">workflow::ready</span>
                 </div>
                 <p style="font-size: 0.6em; margin-top: 3em; color: #6e7681;">
-                    Drücke <code>→</code> oder <code>Space</code> zum Weiterblättern<br>
-                    <code>Esc</code> für Übersicht • <code>S</code> für Speaker Notes
+                    Ýttu á <code>→</code> eða <code>Space</code> til að halda áfram<br>
+                    <code>Esc</code> fyrir yfirlit
                 </p>
             </section>
             
             <!-- OVERVIEW -->
             <section>
-                <h2>📋 Warum dieser Workflow?</h2>
+                <h2>📋 Af hverju þetta verkflæði?</h2>
                 <div class="two-column" style="margin-top: 1em;">
                     <div class="warning-box">
-                        <h3 style="color: var(--danger-red); margin-top: 0;">❌ Ohne Workflow</h3>
+                        <h3 style="color: var(--danger-red); margin-top: 0;">❌ Án verkflæðis</h3>
                         <ul style="font-size: 0.7em;">
-                            <li>Commits direkt auf <code>main</code></li>
-                            <li>Niemand weiß, wer woran arbeitet</li>
-                            <li>Bugs lassen sich nicht zurückverfolgen</li>
-                            <li>Chaos im Repository</li>
+                            <li>Commit beint á <code>main</code></li>
+                            <li>Enginn veit hver gerir hvað</li>
+                            <li>Ekki hægt að rekja villur</li>
+                            <li>Ringulreið í gagnageymslunni</li>
                         </ul>
                     </div>
                     <div class="success-box">
-                        <h3 style="color: var(--success-green); margin-top: 0;">✅ Mit Workflow</h3>
+                        <h3 style="color: var(--success-green); margin-top: 0;">✅ Með verkflæði</h3>
                         <ul style="font-size: 0.7em;">
-                            <li>Jede Änderung ist einem Issue zugeordnet</li>
-                            <li>Board zeigt, wer woran arbeitet</li>
-                            <li>Code-Reviews vor dem Merge</li>
-                            <li>Automatische Issue-Schließung</li>
+                            <li>Allar breytingar tengdar við issue</li>
+                            <li>Borðið sýnir hver vinnur að hverju</li>
+                            <li>Kóðarýni fyrir sameiningu</li>
+                            <li>Sjálfvirk lokun issue</li>
                         </ul>
                     </div>
                 </div>
-                <aside class="notes">
-                    Der Workflow schützt das Repository vor versehentlichen Fehlern und macht die Zusammenarbeit transparent.
-                </aside>
             </section>
             
             <!-- THE BIG PICTURE -->
             <section>
-                <h2>🔄 Der Workflow im Überblick</h2>
-                <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.5em; font-size: 0.8em;">
+                <h2>🔄 Yfirlit verkflæðis</h2>
+                <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.5em; font-size: 0.75em;">
                     <div class="workflow-box" style="padding: 0.8em; text-align: center;">
                         <span class="step-number">1</span><br>
-                        Issue wählen
+                        Veldu Issue
                     </div>
                     <span class="flow-arrow">→</span>
                     <div class="workflow-box" style="padding: 0.8em; text-align: center;">
                         <span class="step-number">2</span><br>
-                        Branch erstellen
+                        Búðu til grein
                     </div>
                     <span class="flow-arrow">→</span>
                     <div class="workflow-box" style="padding: 0.8em; text-align: center;">
                         <span class="step-number">3</span><br>
-                        Coden & Committen
+                        Commit
                     </div>
                     <span class="flow-arrow">→</span>
                     <div class="workflow-box" style="padding: 0.8em; text-align: center;">
@@ -389,57 +313,51 @@
                     <span class="flow-arrow">→</span>
                     <div class="workflow-box" style="padding: 0.8em; text-align: center;">
                         <span class="step-number">5</span><br>
-                        Review & Merge
+                        Rýni & sameining
                     </div>
-                </div>
-                <div class="progress-bar" style="margin-top: 2em;">
-                    <div class="progress-bar-fill" style="width: 0%;"></div>
                 </div>
             </section>
             
             <!-- STEP 1: ISSUE BOARD -->
             <section>
                 <section>
-                    <h2><span class="step-number">1</span> Issue Board</h2>
-                    <p>Das Board zeigt alle Aufgaben und ihren Status</p>
+                    <h2><span class="step-number">1</span> Verkefnaborðið</h2>
+                    <p>Borðið sýnir öll verkefni og stöðu þeirra</p>
                     <div class="board-visual">
                         <div class="board-column">
                             <h4>Backlog</h4>
-                            <div class="issue-card">#4 NLP Design</div>
+                            <div class="issue-card">#4 NLP</div>
                             <div class="issue-card">#5 ECLIPSE</div>
                         </div>
                         <div class="board-column highlight">
-                            <h4>Ready</h4>
+                            <h4>Tilbúið</h4>
                             <div class="issue-card moving">#12 gitignore</div>
-                            <div class="issue-card">#8 Docker CI</div>
+                            <div class="issue-card">#8 Docker</div>
                         </div>
                         <div class="board-column">
-                            <h4>In Progress</h4>
+                            <h4>Í vinnslu</h4>
                         </div>
                         <div class="board-column">
-                            <h4>Review</h4>
+                            <h4>Rýni</h4>
                         </div>
                         <div class="board-column">
-                            <h4>Done</h4>
+                            <h4>Lokið</h4>
                         </div>
                     </div>
-                    <p style="font-size: 0.7em; color: #8b949e;">
-                        🔗 <code>gitlab.com/wolfram_laube/blauweiss_llc/irena/-/boards</code>
-                    </p>
                 </section>
                 
                 <section>
-                    <h2>📌 Issue auswählen</h2>
+                    <h2>📌 Velja Issue</h2>
                     <div class="workflow-box">
-                        <p><strong>Regel #1:</strong> Nimm dir ein Issue aus der <code>Ready</code>-Spalte</p>
-                        <p><strong>Regel #2:</strong> Arbeite nur an <em>einem</em> Issue gleichzeitig</p>
-                        <p><strong>Regel #3:</strong> Ziehe das Issue nach <code>In Progress</code></p>
+                        <p><strong>Regla #1:</strong> Veldu issue úr <code>Ready</code> dálkinum</p>
+                        <p><strong>Regla #2:</strong> Vinndu bara að <em>einu</em> issue í einu</p>
+                        <p><strong>Regla #3:</strong> Færðu issue í <code>In Progress</code></p>
                     </div>
                     <div class="success-box" style="font-size: 0.8em;">
-                        <strong>💡 Tipp:</strong> Die Labels zeigen Priorität und Typ:
+                        <strong>💡 Ábending:</strong> Merki sýna forgang og tegund:
                         <div style="margin-top: 0.5em;">
-                            <span class="label-demo label-priority-high">priority::high</span> = Wichtig, bald machen<br>
-                            <span class="label-demo label-type">type::bug</span> = Fehler beheben
+                            <span class="label-demo label-priority-high">priority::high</span> = Mikilvægt<br>
+                            <span class="label-demo label-type">type::bug</span> = Villuleiðrétting
                         </div>
                     </div>
                 </section>
@@ -448,40 +366,38 @@
             <!-- STEP 2: BRANCH -->
             <section>
                 <section>
-                    <h2><span class="step-number">2</span> Branch erstellen</h2>
-                    <p>Niemals direkt auf <code>main</code> arbeiten!</p>
-                    <pre><code class="language-bash"># Branch-Name beginnt IMMER mit der Issue-Nummer!
+                    <h2><span class="step-number">2</span> Búa til grein</h2>
+                    <p>Aldrei vinna beint á <code>main</code>!</p>
+                    <pre><code class="language-bash"># Nafn greinar byrjar ALLTAF á issue-númer!
 git checkout -b 12-extend-gitignore
 
-# Alternativ in GitLab: 
-# Issue öffnen → "Create merge request" Button</code></pre>
+# Eða í GitLab viðmótinu:
+# Opnaðu issue → "Create merge request" hnappur</code></pre>
                     <div class="warning-box" style="font-size: 0.8em;">
-                        <strong>⚠️ Wichtig:</strong> Die Issue-Nummer am Anfang des Branch-Namens 
-                        verknüpft Branch automatisch mit dem Issue!
+                        <strong>⚠️ Mikilvægt:</strong> Issue-númerið í upphafi greinarheitis 
+                        tengir sjálfkrafa greinina við issue!
                     </div>
                 </section>
                 
                 <section>
-                    <h2>🏷️ Branch-Naming Convention</h2>
+                    <h2>🏷️ Nafnavenjur fyrir greinar</h2>
                     <table class="command-table">
                         <tr>
-                            <th>Format</th>
-                            <td><code>&lt;issue-nr&gt;-&lt;kurze-beschreibung&gt;</code></td>
+                            <th>Snið</th>
+                            <td><code>&lt;issue-númer&gt;-&lt;stutt-lýsing&gt;</code></td>
                         </tr>
                         <tr>
-                            <th>✅ Gut</th>
+                            <th>✅ Gott</th>
                             <td>
                                 <code>12-extend-gitignore</code><br>
-                                <code>42-fix-login-bug</code><br>
-                                <code>7-add-docker-ci</code>
+                                <code>42-fix-login-bug</code>
                             </td>
                         </tr>
                         <tr>
-                            <th>❌ Schlecht</th>
+                            <th>❌ Slæmt</th>
                             <td>
-                                <code>fix-stuff</code> (keine Issue-Nr)<br>
-                                <code>mein-branch</code> (nichtssagend)<br>
-                                <code>test123</code> (????)
+                                <code>fix-stuff</code> (ekkert issue-númer)<br>
+                                <code>my-branch</code> (merkingarlaust)
                             </td>
                         </tr>
                     </table>
@@ -491,67 +407,67 @@ git checkout -b 12-extend-gitignore
             <!-- STEP 3: COMMITS -->
             <section>
                 <section>
-                    <h2><span class="step-number">3</span> Commits mit Issue-Referenz</h2>
-                    <p>Jeder Commit sollte das Issue referenzieren</p>
-                    <pre><code class="language-bash"># Die magische Formel:
-git commit -m "typ: beschreibung #12"
+                    <h2><span class="step-number">3</span> Commit með issue-tilvísun</h2>
+                    <p>Hver commit ætti að vísa í issue</p>
+                    <pre><code class="language-bash"># Töfraformúlan:
+git commit -m "type: lýsing #12"
 
-# Beispiele:
-git commit -m "fix: resolve null pointer #42"
-git commit -m "feat: add user authentication #7"
-git commit -m "docs: update README #15"</code></pre>
+# Dæmi:
+git commit -m "fix: laga null pointer villu #42"
+git commit -m "feat: bæta við notandavottun #7"
+git commit -m "docs: uppfæra README #15"</code></pre>
                 </section>
                 
                 <section>
                     <h2>📝 Conventional Commits</h2>
                     <table class="command-table">
                         <tr>
-                            <th>Prefix</th>
-                            <th>Verwendung</th>
+                            <th>Forskeyti</th>
+                            <th>Notkun</th>
                         </tr>
                         <tr>
                             <td><code>feat:</code></td>
-                            <td>Neue Funktion</td>
+                            <td>Nýr eiginleiki</td>
                         </tr>
                         <tr>
                             <td><code>fix:</code></td>
-                            <td>Bugfix</td>
+                            <td>Villuleiðrétting</td>
                         </tr>
                         <tr>
                             <td><code>docs:</code></td>
-                            <td>Dokumentation</td>
+                            <td>Skjölun</td>
                         </tr>
                         <tr>
                             <td><code>chore:</code></td>
-                            <td>Maintenance, Aufräumen</td>
+                            <td>Viðhald</td>
                         </tr>
                         <tr>
                             <td><code>refactor:</code></td>
-                            <td>Code-Umbau ohne Funktionsänderung</td>
+                            <td>Endurskipulagning kóða</td>
                         </tr>
                         <tr>
                             <td><code>test:</code></td>
-                            <td>Tests hinzufügen/ändern</td>
+                            <td>Prófanir</td>
                         </tr>
                     </table>
                 </section>
                 
                 <section>
-                    <h2>🔗 Die magischen Keywords</h2>
-                    <p>Diese Wörter im Commit/MR schließen Issues automatisch:</p>
+                    <h2>🔗 Töfraorðin</h2>
+                    <p>Þessi orð í commit/MR loka issue sjálfkrafa:</p>
                     <div style="margin: 1em 0;">
                         <span class="keyword closes">Closes #12</span>
                         <span class="keyword closes">Fixes #12</span>
                         <span class="keyword closes">Resolves #12</span>
                     </div>
-                    <p style="font-size: 0.8em;">Nur verlinken (ohne zu schließen):</p>
+                    <p style="font-size: 0.8em;">Bara tengja (ekki loka):</p>
                     <div>
                         <span class="keyword ref">#12</span>
                         <span class="keyword ref">Related to #12</span>
                     </div>
                     <div class="success-box" style="margin-top: 1em; font-size: 0.8em;">
-                        <strong>🎯 Best Practice:</strong> <code>Closes #12</code> im letzten Commit 
-                        oder in der MR-Beschreibung verwenden!
+                        <strong>🎯 Besta aðferðin:</strong> Notaðu <code>Closes #12</code> í síðasta commit 
+                        eða í MR-lýsingunni!
                     </div>
                 </section>
             </section>
@@ -559,202 +475,126 @@ git commit -m "docs: update README #15"</code></pre>
             <!-- STEP 4: MERGE REQUEST -->
             <section>
                 <section>
-                    <h2><span class="step-number">4</span> Merge Request erstellen</h2>
-                    <pre><code class="language-bash"># Branch pushen
+                    <h2><span class="step-number">4</span> Búa til Merge Request</h2>
+                    <pre><code class="language-bash"># Senda grein
 git push -u origin 12-extend-gitignore
 
-# GitLab zeigt dann einen Link zum MR-Erstellen!</code></pre>
+# GitLab sýnir tengil til að búa til MR!</code></pre>
                     <div class="workflow-box">
-                        <p><strong>MR Title:</strong> <code>chore: extend .gitignore for OPM artifacts</code></p>
-                        <p><strong>MR Description muss enthalten:</strong></p>
+                        <p><strong>MR-titill:</strong> <code>chore: stækka .gitignore fyrir OPM</code></p>
+                        <p><strong>MR-lýsing verður að innihalda:</strong></p>
                         <ul style="font-size: 0.8em;">
-                            <li>Was wurde geändert?</li>
-                            <li><code>Closes #12</code> (für Auto-Close)</li>
-                            <li>Checklist für Review</li>
+                            <li>Hvað breyttist?</li>
+                            <li><code>Closes #12</code> (fyrir sjálfvirka lokun)</li>
+                            <li>Gátlisti fyrir rýni</li>
                         </ul>
                     </div>
                 </section>
                 
                 <section>
-                    <h2>📋 MR Template</h2>
-                    <pre><code class="language-markdown">## Summary
-Kurze Beschreibung der Änderungen.
+                    <h2>📋 MR-sniðmát</h2>
+                    <pre><code class="language-markdown">## Samantekt
+Stutt lýsing á breytingum.
 
-## Changes
-- Punkt 1
-- Punkt 2
+## Breytingar
+- Atriði 1
+- Atriði 2
 
-## Related
+## Tengt
 Closes #12
 
-## Checklist
-- [ ] Code getestet
-- [ ] Dokumentation aktualisiert
-- [ ] Keine Secrets committed</code></pre>
-                </section>
-                
-                <section>
-                    <h2>🏷️ Issue-Status aktualisieren</h2>
-                    <p>Nach MR-Erstellung: Issue auf <code>Review</code> setzen</p>
-                    <div class="board-visual">
-                        <div class="board-column">
-                            <h4>Backlog</h4>
-                            <div class="issue-card">#4 NLP</div>
-                        </div>
-                        <div class="board-column">
-                            <h4>Ready</h4>
-                            <div class="issue-card">#8 Docker</div>
-                        </div>
-                        <div class="board-column">
-                            <h4>In Progress</h4>
-                        </div>
-                        <div class="board-column highlight">
-                            <h4>Review</h4>
-                            <div class="issue-card moving">#12 gitignore</div>
-                        </div>
-                        <div class="board-column">
-                            <h4>Done</h4>
-                        </div>
-                    </div>
+## Gátlisti
+- [ ] Kóði prófaður
+- [ ] Skjölun uppfærð</code></pre>
                 </section>
             </section>
             
             <!-- STEP 5: MERGE -->
             <section>
                 <section>
-                    <h2><span class="step-number">5</span> Review & Merge</h2>
+                    <h2><span class="step-number">5</span> Rýni & sameining</h2>
                     <div class="two-column">
                         <div>
-                            <h3 style="color: var(--warning-yellow);">👀 Review</h3>
+                            <h3 style="color: var(--warning-yellow);">👀 Rýni</h3>
                             <ul style="font-size: 0.7em;">
-                                <li>Reviewer schaut Code an</li>
-                                <li>Kommentare & Änderungswünsche</li>
-                                <li>Bei Bedarf: Commits nachschieben</li>
-                                <li>Approval erteilen</li>
+                                <li>Rýnir skoðar kóða</li>
+                                <li>Athugasemdir & beiðnir um breytingar</li>
+                                <li>Bæta við commit ef þarf</li>
+                                <li>Samþykki</li>
                             </ul>
                         </div>
                         <div>
-                            <h3 style="color: var(--success-green);">✅ Merge</h3>
+                            <h3 style="color: var(--success-green);">✅ Sameining</h3>
                             <ul style="font-size: 0.7em;">
-                                <li>"Merge" Button klicken</li>
-                                <li>Branch wird gelöscht</li>
-                                <li>Code landet auf <code>main</code></li>
-                                <li><strong>Issue wird automatisch geschlossen!</strong></li>
+                                <li>Smelltu á "Merge" hnapp</li>
+                                <li>Greinin eyðist</li>
+                                <li>Kóði fer í <code>main</code></li>
+                                <li><strong>Issue lokast sjálfkrafa!</strong></li>
                             </ul>
                         </div>
                     </div>
                 </section>
                 
                 <section>
-                    <h2>🎉 Automatische Magie</h2>
-                    <p>Durch <code>Closes #12</code> passiert beim Merge:</p>
+                    <h2>🎉 Sjálfvirka töfran</h2>
+                    <p>Þökk sé <code>Closes #12</code>, þegar sameinað:</p>
                     <div style="font-size: 1.5em; margin: 1em 0;">
-                        MR merged <span class="flow-arrow">→</span> Issue #12 closed
+                        MR sameinað <span class="flow-arrow">→</span> Issue #12 lokast
                     </div>
                     <div class="board-visual">
                         <div class="board-column">
-                            <h4>Review</h4>
+                            <h4>Rýni</h4>
                         </div>
                         <div class="board-column highlight" style="border-color: var(--success-green);">
-                            <h4>Closed ✅</h4>
+                            <h4>Lokað ✅</h4>
                             <div class="issue-card" style="border-left-color: var(--success-green);">#12 gitignore</div>
                         </div>
                     </div>
                 </section>
             </section>
             
-            <!-- QUICK REFERENCE -->
-            <section>
-                <h2>📖 Quick Reference</h2>
-                <table class="command-table" style="font-size: 0.6em;">
-                    <tr>
-                        <th>Aktion</th>
-                        <th>Befehl / Ort</th>
-                    </tr>
-                    <tr>
-                        <td>Issue Board</td>
-                        <td><code>Project → Plan → Issue Boards</code></td>
-                    </tr>
-                    <tr>
-                        <td>Branch erstellen</td>
-                        <td><code>git checkout -b 42-beschreibung</code></td>
-                    </tr>
-                    <tr>
-                        <td>Commit mit Referenz</td>
-                        <td><code>git commit -m "feat: add thing #42"</code></td>
-                    </tr>
-                    <tr>
-                        <td>Issue auto-schließen</td>
-                        <td><code>Closes #42</code> in MR-Description</td>
-                    </tr>
-                    <tr>
-                        <td>Push & MR</td>
-                        <td><code>git push -u origin branch-name</code></td>
-                    </tr>
-                </table>
-            </section>
-            
             <!-- DON'TS -->
             <section>
-                <h2>🚫 Die Todsünden</h2>
+                <h2>🚫 Bannað</h2>
                 <div class="warning-box">
                     <ol style="font-size: 0.8em; text-align: left;">
-                        <li><strong>Direkt auf <code>main</code> pushen</strong><br>
-                            <span style="color: #8b949e;">→ Immer Branch + MR!</span></li>
-                        <li><strong>Commits ohne Issue-Referenz</strong><br>
-                            <span style="color: #8b949e;">→ Immer <code>#42</code> im Commit!</span></li>
-                        <li><strong>Secrets/Passwörter committen</strong><br>
-                            <span style="color: #8b949e;">→ <code>.gitignore</code> nutzen!</span></li>
-                        <li><strong>Riesige MRs mit 50 Dateien</strong><br>
-                            <span style="color: #8b949e;">→ Kleine, fokussierte Änderungen!</span></li>
-                        <li><strong>MR ohne Beschreibung</strong><br>
-                            <span style="color: #8b949e;">→ Immer "Closes #X" + Summary!</span></li>
+                        <li><strong>Push beint á <code>main</code></strong><br>
+                            <span style="color: #8b949e;">→ Notaðu alltaf grein + MR!</span></li>
+                        <li><strong>Commit án issue-tilvísunar</strong><br>
+                            <span style="color: #8b949e;">→ Settu alltaf <code>#42</code> í commit!</span></li>
+                        <li><strong>Commit leyniorð/secrets</strong><br>
+                            <span style="color: #8b949e;">→ Notaðu <code>.gitignore</code>!</span></li>
+                        <li><strong>Risastórt MR með 50 skrám</strong><br>
+                            <span style="color: #8b949e;">→ Litlar, einbeittar breytingar!</span></li>
+                        <li><strong>MR án lýsingar</strong><br>
+                            <span style="color: #8b949e;">→ Alltaf hafa "Closes #X"!</span></li>
                     </ol>
                 </div>
             </section>
             
             <!-- CHECKLIST -->
             <section>
-                <h2>✅ Vor jedem Merge prüfen</h2>
+                <h2>✅ Gátlisti fyrir sameiningu</h2>
                 <ul class="checklist" style="font-size: 0.8em;">
-                    <li class="done">Branch von <code>main</code> erstellt</li>
-                    <li class="done">Branch-Name enthält Issue-Nummer</li>
-                    <li class="done">Commits folgen Conventional Commits</li>
-                    <li class="done">Commits referenzieren Issue (<code>#42</code>)</li>
-                    <li class="done">MR-Description enthält <code>Closes #42</code></li>
-                    <li class="done">Keine Secrets im Code</li>
-                    <li class="done">Tests laufen durch (CI grün)</li>
-                    <li class="done">Issue-Label auf <code>workflow::review</code></li>
+                    <li class="done">Grein búin til úr <code>main</code></li>
+                    <li class="done">Greinarheiti inniheldur issue-númer</li>
+                    <li class="done">Commit fylgja Conventional Commits</li>
+                    <li class="done">Commit vísa í issue (<code>#42</code>)</li>
+                    <li class="done">MR-lýsing hefur <code>Closes #42</code></li>
+                    <li class="done">Engin leyniorð í kóða</li>
+                    <li class="done">CI pipeline grænt</li>
                 </ul>
-            </section>
-            
-            <!-- HELP -->
-            <section>
-                <h2>🆘 Hilfe & Links</h2>
-                <div class="workflow-box" style="font-size: 0.8em;">
-                    <p><strong>📋 Issue Board:</strong><br>
-                    <code>gitlab.com/.../irena/-/boards</code></p>
-                    
-                    <p><strong>📝 Alle Issues:</strong><br>
-                    <code>gitlab.com/.../irena/-/issues</code></p>
-                    
-                    <p><strong>📖 PM Guide:</strong><br>
-                    <code>docs/guides/project-management.md</code></p>
-                    
-                    <p><strong>❓ Fragen?</strong><br>
-                    Issue erstellen mit Label <code>help-wanted</code></p>
-                </div>
             </section>
             
             <!-- END -->
             <section>
                 <span class="big-emoji">🦊</span>
-                <h2>Happy Contributing!</h2>
-                <p style="color: #8b949e;">Jetzt weißt du, wie's geht.</p>
+                <h2>Gleðilega þátttöku!</h2>
+                <p style="color: #8b949e;">Nú veistu hvernig þetta virkar.</p>
                 <p style="font-size: 0.7em; margin-top: 2em;">
                     <span class="keyword ref">#issue</span>
                     <span class="flow-arrow">→</span>
-                    <span class="keyword ref">branch</span>
+                    <span class="keyword ref">grein</span>
                     <span class="flow-arrow">→</span>
                     <span class="keyword ref">commit</span>
                     <span class="flow-arrow">→</span>
@@ -768,20 +608,13 @@ Closes #12
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/notes/notes.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
     <script>
         Reveal.initialize({
             hash: true,
             slideNumber: 'c/t',
-            showSlideNumber: 'all',
             transition: 'slide',
-            backgroundTransition: 'fade',
-            plugins: [ RevealNotes, RevealHighlight ],
-            // Keyboard shortcuts
-            keyboard: {
-                27: function() { Reveal.toggleOverview(); }, // ESC
-            }
+            plugins: [ RevealHighlight ]
         });
     </script>
 </body>
