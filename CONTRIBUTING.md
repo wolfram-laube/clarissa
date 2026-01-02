@@ -1,44 +1,111 @@
 # Contributing to CLARISSA
 
-## ADR Discipline
-If a change alters behavior, responsibilities, authority, or safety boundaries, it should:
-- reference an existing ADR, or
-- introduce a new ADR in `docs/adr/`.
+## Quick Start
 
-## Boundaries
-- `src/clarissa/` must not import from `experiments/`.
-- Experiments may import `clarissa`.
+**New here? Start with these:**
 
-## Running
+1. **[Workflow Slides](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/guides/contributing/)** - Interactive 5-minute intro
+2. **[Issue Board](/-/boards)** - Pick a task from the "Ready" column
+3. **[Project Management Guide](docs/guides/project-management.md)** - Full reference
+
+## Your First Contribution
+
 ```bash
-python -m clarissa demo
-pytest -q
+# 1. Pick an issue from the board, e.g. #42
+#    Move it to "In Progress"
+
+# 2. Create a branch (issue number first!)
+git checkout -b 42-short-description
+
+# 3. Make changes, commit with issue reference
+git commit -m "feat: add feature X #42"
+
+# 4. Push and create MR
+git push -u origin 42-short-description
+# → Click the MR link GitLab shows you
+# → Add "Closes #42" in MR description
+
+# 5. Wait for review, then merge
+#    Issue closes automatically!
 ```
 
+## Workflow Cheatsheet
 
-## Workflow Automation (CI Issue Bot)
-CI can create or update a GitLab issue on failures. The job uses `scripts/gitlab_issue_bot.py`.
-Configure via CI variables:
-- `GITLAB_TOKEN` (required)
-- `CI_BOT_LABELS`, `CI_BOT_ASSIGNEE_IDS` (optional)
-- `CI_BOT_SILENT_MODE` (optional; "1" means comment-only)
+| Step | Command/Action |
+|------|----------------|
+| Find work | [Issue Board](/-/boards) → "Ready" column |
+| Start work | `git checkout -b 42-description` |
+| Commit | `git commit -m "type: message #42"` |
+| Push | `git push -u origin 42-description` |
+| Close issue | Add `Closes #42` in MR description |
 
+**Commit types:** `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`
 
-## Merge Request Comment Bot
-In MR pipelines, CI can add/update a note on the MR when tests fail via `scripts/gitlab_mr_bot.py`.
+## Labels We Use
 
+| Label | Meaning |
+|-------|---------|
+| `type::feature` | New functionality |
+| `type::bug` | Something broken |
+| `type::docs` | Documentation |
+| `type::task` | General work |
+| `priority::high` | Do this first |
+| `workflow::ready` | Ready to pick up |
+| `workflow::in-progress` | Someone's working on it |
 
-## Recovery Bot
-On successful `main` push pipelines, CI can update the deduped failure issue (add a recovery note, labels, optional close)
-via `scripts/gitlab_recovery_bot.py`.
+Full label reference: [Project Management Guide](docs/guides/project-management.md#label-system)
 
-## Pre-commit hooks
-Install and run:
-- `pip install pre-commit`
-- `pre-commit install`
+---
 
-Hooks included:
-- CLI snapshot tests
-- fast unit smoke tests
+## Development Setup
+
+```bash
+# Clone and install
+git clone git@gitlab.com:wolfram_laube/blauweiss_llc/irena.git
+cd irena
+pip install -e ".[dev]"
+
+# Run tests
+pytest -q
+
+# Run CLI
+python -m clarissa demo
+```
+
+## Pre-commit Hooks
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+Hooks run CLI snapshot tests and fast unit tests before each commit.
 
 To refresh snapshots: `make update-snapshots`
+
+---
+
+## Code Guidelines
+
+### ADR Discipline
+
+If a change alters behavior, responsibilities, authority, or safety boundaries:
+- Reference an existing ADR, or
+- Introduce a new ADR in `docs/architecture/adr/`
+
+### Boundaries
+
+- `src/clarissa/` must not import from `experiments/`
+- Experiments may import `clarissa`
+
+---
+
+## CI Bots (for maintainers)
+
+| Bot | What it does |
+|-----|--------------|
+| `gitlab_issue_bot.py` | Creates issue on CI failure |
+| `gitlab_mr_bot.py` | Comments on MR when tests fail |
+| `gitlab_recovery_bot.py` | Updates issue when build recovers |
+
+Configure via CI variables: `GITLAB_TOKEN`, `CI_BOT_LABELS`, `CI_BOT_ASSIGNEE_IDS`
