@@ -101,7 +101,7 @@ git push -u origin 42-short-description
 
 ## ✅ {{ t.cheatsheet.pre_merge_checklist.title }}
 
-{% for item in t.cheatsheet.pre_merge_checklist.items | default(t.slides.checklist.items) %}
+{% for item in t.cheatsheet.pre_merge_checklist.list_items | default(t.slides.checklist.list_items) %}
 - [ ] {{ item }}
 {% endfor %}
 
@@ -111,7 +111,7 @@ git push -u origin 42-short-description
 
 | {{ 'Resource' if meta.direction != 'rtl' else 'المورد' }} | {{ 'Path' if meta.direction != 'rtl' else 'المسار' }} |
 |---------|------|
-{% for item in t.cheatsheet.quick_links.items | default([{'name': 'Issue Board', 'path': '/-/boards'}, {'name': 'All Issues', 'path': '/-/issues'}, {'name': 'Merge Requests', 'path': '/-/merge_requests'}]) %}| {{ item.name }} | `{{ item.path }}` |
+{% for item in t.cheatsheet.quick_links.list_items | default([{'name': 'Issue Board', 'path': '/-/boards'}, {'name': 'All Issues', 'path': '/-/issues'}, {'name': 'Merge Requests', 'path': '/-/merge_requests'}]) %}| {{ item.name }} | `{{ item.path }}` |
 {% endfor %}
 | {{ 'Interactive Slides' if meta.direction != 'rtl' else 'العرض التفاعلي' }} | `workflow-slides-{{ lang_code }}.html` |
 
