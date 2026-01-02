@@ -24,13 +24,13 @@ class OPMFlowAdapter(SimulatorAdapter):
     to determine convergence status and extract metrics.
     
     Args:
-        image: Docker image name for OPM Flow (default: "opm-flow:latest")
+        image: Docker image name for OPM Flow (default: registry image)
         timeout: Maximum seconds to wait for simulation (default: 3600)
     """
     
     def __init__(
         self, 
-        image: str = "opm-flow:latest",
+        image: str = "registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/opm-flow:latest",
         timeout: int = 3600,
     ) -> None:
         self._image = image
