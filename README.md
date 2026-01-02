@@ -21,6 +21,7 @@ It is **explicitly documented and versioned**.
 | [Project Management](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/guides/project-management/) | Issues, Labels, Boards |
 | [CI Guide](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/ci/) | How to read CI results |
 | [ADRs](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/architecture/adr/) | Architecture decisions |
+| [Publications](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/publications/) | Research papers (IJACSA 2026) |
 
 ---
 
