@@ -75,6 +75,7 @@ nav:
     - Overview: publications/index.md
     - "IJACSA 2026":
       - Abstract: publications/ijacsa-2026/abstract.md
+    - Paper Workflow: publications/paper-workflow.md
 
 extra:
   social:
