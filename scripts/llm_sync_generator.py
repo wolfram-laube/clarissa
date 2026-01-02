@@ -252,7 +252,10 @@ def generate_sync_package(
     output.append("|----------|-------|")
     output.append(f"| Generated | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} |")
     output.append(f"| Branch | `{branch}` |")
-    output.append(f"| Latest Commit | `{commits[0]['short_id']}` - {commits[0]['title']} |")
+    if commits:
+        output.append(f"| Latest Commit | `{commits[0]['short_id']}` - {commits[0]['title']} |")
+    else:
+        output.append("| Latest Commit | (no commits found) |")
     output.append(f"| Total Files | {len([i for i in tree if i['type'] == 'blob'])} |")
     if since_commit:
         output.append(f"| Diff Since | `{since_commit[:8]}` |")
