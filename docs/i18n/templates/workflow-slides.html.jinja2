@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="{{ lang_code }}" {% if meta.direction == 'rtl' %}dir="rtl"{% endif %}>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t.slides.title }} - CLARISSA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+    <style>
+        @import url('{{ meta.font_import }}');
+        :root {
+            --r-background-color: #0d1117;
+            --r-main-font: '{{ meta.font_family }}', sans-serif;
+            --r-main-font-size: 38px;
+            --r-main-color: #e6edf3;
+            --r-heading-font: '{{ meta.font_family }}', sans-serif;
+            --r-heading-color: #58a6ff;
+            --r-code-font: 'JetBrains Mono', monospace;
+            --gitlab-orange: #fc6d26;
+            --gitlab-purple: #6e49cb;
+            --success-green: #3fb950;
+            --danger-red: #f85149;
+            --code-bg: #161b22;
+        }
+        .reveal { font-family: var(--r-main-font); {% if meta.direction == 'rtl' %}direction: rtl;{% endif %} }
+        .reveal h1, .reveal h2 { font-weight: 700; text-transform: none; }
+        .reveal h1 { font-size: 2.5em; background: linear-gradient(135deg, var(--gitlab-orange), var(--gitlab-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .reveal h2 { color: var(--r-heading-color); border-bottom: 3px solid var(--gitlab-orange); padding-bottom: 0.3em; display: inline-block; }
+        .reveal code { font-family: var(--r-code-font); background: var(--code-bg); padding: 0.2em 0.5em; border-radius: 6px; color: #79c0ff; direction: ltr; }
+        .reveal pre { background: var(--code-bg); border-radius: 12px; border: 1px solid #30363d; direction: ltr; text-align: left; }
+        .reveal pre code { background: transparent; padding: 1em; font-size: 0.7em; }
+        .workflow-box { background: linear-gradient(135deg, #161b22, #1c2128); border: 2px solid #30363d; border-radius: 16px; padding: 1.5em; margin: 0.5em 0; }
+        .step-number { display: inline-flex; align-items: center; justify-content: center; width: 50px; height: 50px; background: linear-gradient(135deg, var(--gitlab-orange), var(--gitlab-purple)); border-radius: 50%; font-weight: 700; font-size: 1.3em; margin-{% if meta.direction == 'rtl' %}left{% else %}right{% endif %}: 0.5em; color: white; }
+        .keyword { display: inline-block; background: var(--code-bg); border: 1px solid #30363d; padding: 0.3em 0.8em; border-radius: 20px; margin: 0.2em; font-family: var(--r-code-font); font-size: 0.8em; direction: ltr; }
+        .keyword.closes { border-color: var(--success-green); color: var(--success-green); }
+        .keyword.ref { border-color: var(--r-heading-color); color: var(--r-heading-color); }
+        .warning-box { background: rgba(248, 81, 73, 0.1); border: 2px solid var(--danger-red); border-radius: 12px; padding: 1em; margin: 1em 0; }
+        .success-box { background: rgba(63, 185, 80, 0.1); border: 2px solid var(--success-green); border-radius: 12px; padding: 1em; margin: 1em 0; }
+        .flow-arrow { font-size: 2em; color: var(--gitlab-orange); margin: 0 0.3em; }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 2em; }
+        .label-demo { display: inline-block; padding: 0.2em 0.6em; border-radius: 12px; font-size: 0.7em; font-weight: 600; margin: 0.1em; }
+        .label-type { background: #238636; }
+        .label-priority-high { background: #ff6600; }
+        .label-workflow { background: #6e49cb; }
+        .checklist { list-style: none; padding: 0; }
+        .checklist li { padding: 0.5em 0; padding-{% if meta.direction == 'rtl' %}right{% else %}left{% endif %}: 2em; position: relative; }
+        .checklist li::before { content: "☑"; position: absolute; {% if meta.direction == 'rtl' %}right{% else %}left{% endif %}: 0; color: var(--success-green); font-size: 1.2em; }
+        .big-emoji { font-size: 4em; display: block; margin: 0.5em 0; }
+        .lang-switch { position: fixed; top: 1em; {% if meta.direction == 'rtl' %}left{% else %}right{% endif %}: 1em; z-index: 100; font-size: 0.5em; }
+        .lang-switch a { color: #8b949e; text-decoration: none; padding: 0.5em 1em; border: 1px solid #30363d; border-radius: 6px; margin-{% if meta.direction == 'rtl' %}right{% else %}left{% endif %}: 0.5em; }
+        .lang-switch a:hover, .lang-switch a.active { color: var(--gitlab-orange); border-color: var(--gitlab-orange); }
+        .command-table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
+        .command-table th, .command-table td { padding: 0.8em; border: 1px solid #30363d; }
+        .command-table th { background: var(--code-bg); color: var(--gitlab-orange); }
+    </style>
+</head>
+<body>
+    <div class="lang-switch">
+        {% for lang in all_langs %}<a href="workflow-slides-{{ lang.code }}.html"{% if lang.code == lang_code %} class="active"{% endif %}>{{ lang.name }}</a>{% endfor %}
+    </div>
+    <div class="reveal"><div class="slides">
+        <section>
+            <h1>🦊 CLARISSA<br>{{ t.slides.title }}</h1>
+            <p style="font-size: 1.2em; color: #8b949e;">{{ t.slides.subtitle }}</p>
+            <div style="margin-top: 2em;">
+                <span class="label-demo label-type">{{ t.slides.labels.type_feature }}</span>
+                <span class="label-demo label-priority-high">{{ t.slides.labels.priority_high }}</span>
+                <span class="label-demo label-workflow">{{ t.slides.labels.workflow_ready }}</span>
+            </div>
+        </section>
+        <section>
+            <h2>📋 {{ t.slides.why_workflow.title }}</h2>
+            <div class="two-column" style="margin-top: 1em;">
+                <div class="warning-box">
+                    <h3 style="color: var(--danger-red); margin-top: 0;">❌ {{ t.slides.why_workflow.without.title }}</h3>
+                    <ul style="font-size: 0.7em;">{% for item in t.slides.why_workflow.without.items %}<li>{{ item }}</li>{% endfor %}</ul>
+                </div>
+                <div class="success-box">
+                    <h3 style="color: var(--success-green); margin-top: 0;">✅ {{ t.slides.why_workflow.with.title }}</h3>
+                    <ul style="font-size: 0.7em;">{% for item in t.slides.why_workflow.with.items %}<li>{{ item }}</li>{% endfor %}</ul>
+                </div>
+            </div>
+        </section>
+        <section>
+            <h2>🔄 {{ t.slides.overview.title }}</h2>
+            <div style="display: flex; {% if meta.direction == 'rtl' %}flex-direction: row-reverse;{% endif %} align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.5em; font-size: 0.75em;">
+                {% for step in t.slides.overview.steps %}
+                <div class="workflow-box" style="padding: 0.8em; text-align: center;"><span class="step-number">{{ step.number }}</span><br>{{ step.label }}</div>
+                {% if not loop.last %}<span class="flow-arrow">{% if meta.direction == 'rtl' %}←{% else %}→{% endif %}</span>{% endif %}
+                {% endfor %}
+            </div>
+        </section>
+        <section>
+            <h2><span class="step-number">{{ t.slides.overview.steps[1].number }}</span> {{ t.slides.branch.title }}</h2>
+            <p>{{ t.slides.branch.warning }}</p>
+            <pre><code># ALWAYS start with issue number!
+git checkout -b 12-extend-gitignore</code></pre>
+            <div class="warning-box" style="font-size: 0.8em;"><strong>⚠️</strong> {{ t.slides.branch.important }}</div>
+        </section>
+        <section>
+            <section>
+                <h2><span class="step-number">{{ t.slides.overview.steps[2].number }}</span> {{ t.slides.commits.title }}</h2>
+                <p>{{ t.slides.commits.description }}</p>
+                <pre><code>git commit -m "type: description #12"</code></pre>
+            </section>
+            <section>
+                <h2>📝 {{ t.slides.commits.conventional.title }}</h2>
+                <table class="command-table">{% for type in t.slides.commits.conventional.types %}<tr><td><code>{{ type.prefix }}</code></td><td>{{ type.description }}</td></tr>{% endfor %}</table>
+            </section>
+            <section>
+                <h2>🔗 {{ t.slides.commits.magic_words.title }}</h2>
+                <p>{{ t.slides.commits.magic_words.description }}</p>
+                <div style="margin: 1em 0;">{% for word in t.slides.commits.magic_words.closing %}<span class="keyword closes">{{ word }}</span>{% endfor %}</div>
+            </section>
+        </section>
+        <section>
+            <h2><span class="step-number">{{ t.slides.overview.steps[3].number }}</span> {{ t.slides.merge_request.title }}</h2>
+            <pre><code>git push -u origin 12-extend-gitignore</code></pre>
+            <div class="workflow-box">
+                <p><strong>{{ t.slides.merge_request.description_must_contain }}</strong></p>
+                <ul style="font-size: 0.8em;">{% for item in t.slides.merge_request.description_items %}<li>{{ item }}</li>{% endfor %}</ul>
+            </div>
+        </section>
+        <section>
+            <h2><span class="step-number">{{ t.slides.overview.steps[4].number }}</span> {{ t.slides.review_merge.title }}</h2>
+            <div class="two-column">
+                <div><h3 style="color: #d29922;">👀 {{ t.slides.review_merge.review.title }}</h3><ul style="font-size: 0.7em;">{% for step in t.slides.review_merge.review.steps %}<li>{{ step }}</li>{% endfor %}</ul></div>
+                <div><h3 style="color: var(--success-green);">✅ {{ t.slides.review_merge.merge.title }}</h3><ul style="font-size: 0.7em;">{% for step in t.slides.review_merge.merge.steps %}<li>{{ step }}</li>{% endfor %}</ul></div>
+            </div>
+        </section>
+        <section>
+            <h2>🚫 {{ t.slides.donts.title }}</h2>
+            <div class="warning-box"><ol style="font-size: 0.8em;">{% for item in t.slides.donts.items %}<li><strong>{{ item.title }}</strong><br><span style="color: #8b949e;">{% if meta.direction == 'rtl' %}←{% else %}→{% endif %} {{ item.tip }}</span></li>{% endfor %}</ol></div>
+        </section>
+        <section>
+            <h2>✅ {{ t.slides.checklist.title }}</h2>
+            <ul class="checklist" style="font-size: 0.8em;">{% for item in t.slides.checklist.items %}<li>{{ item }}</li>{% endfor %}</ul>
+        </section>
+        <section>
+            <span class="big-emoji">🦊</span>
+            <h2>{{ t.slides.end.title }}</h2>
+            <p style="color: #8b949e;">{{ t.slides.end.subtitle }}</p>
+            <p style="font-size: 0.7em; margin-top: 2em;">
+                <span class="keyword ref">#issue</span><span class="flow-arrow">{% if meta.direction == 'rtl' %}←{% else %}→{% endif %}</span>
+                <span class="keyword ref">branch</span><span class="flow-arrow">{% if meta.direction == 'rtl' %}←{% else %}→{% endif %}</span>
+                <span class="keyword ref">commit</span><span class="flow-arrow">{% if meta.direction == 'rtl' %}←{% else %}→{% endif %}</span>
+                <span class="keyword ref">MR</span><span class="flow-arrow">{% if meta.direction == 'rtl' %}←{% else %}→{% endif %}</span>
+                <span class="keyword closes">Closes #X</span>
+            </p>
+        </section>
+    </div></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+    <script>Reveal.initialize({ hash: true, slideNumber: 'c/t', transition: 'slide'{% if meta.direction == 'rtl' %}, rtl: true{% endif %} });</script>
+</body>
+</html>

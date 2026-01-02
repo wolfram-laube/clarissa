@@ -1,0 +1,332 @@
+# CLARISSA Documentation - English (Master)
+# This is the source of truth. All other translations derive from this.
+
+meta:
+  language_code: en
+  language_name: English
+  language_native: English
+  flag_emoji: "🇬🇧"
+  direction: ltr
+  font_family: "Space Grotesk"
+  font_import: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;600;700&display=swap"
+
+# Language selector page
+selector:
+  title: "CLARISSA GitLab Workflow"
+  subtitle: "Select your language"
+  slides_label: "Interactive Slides"
+  cheatsheet_label: "Quick Reference"
+  add_language_note: "Want to add a language? See the contribution guide."
+
+# Workflow slides content
+slides:
+  title: "CLARISSA GitLab Workflow"
+  subtitle: "Guide for Contributors"
+  
+  navigation:
+    press_to_continue: "Press → or Space to continue"
+    press_for_overview: "Esc for overview"
+  
+  labels:
+    type_feature: "type::feature"
+    priority_high: "priority::high"
+    workflow_ready: "workflow::ready"
+  
+  # Section: Why this workflow?
+  why_workflow:
+    title: "Why this workflow?"
+    without:
+      title: "Without workflow"
+      items:
+        - "Commit directly to main"
+        - "Nobody knows who does what"
+        - "Can't trace bugs"
+        - "Repository chaos"
+    with:
+      title: "With workflow"
+      items:
+        - "All changes linked to issue"
+        - "Board shows who works on what"
+        - "Code review before merge"
+        - "Automatic issue closing"
+  
+  # Section: Overview
+  overview:
+    title: "Workflow Overview"
+    steps:
+      - label: "Pick Issue"
+        number: "1"
+      - label: "Create Branch"
+        number: "2"
+      - label: "Commit"
+        number: "3"
+      - label: "Merge Request"
+        number: "4"
+      - label: "Review & Merge"
+        number: "5"
+  
+  # Section: Issue Board
+  issue_board:
+    title: "The Issue Board"
+    description: "The board shows all tasks and their status"
+    columns:
+      backlog: "Backlog"
+      ready: "Ready"
+      in_progress: "In Progress"
+      review: "Review"
+      done: "Done"
+    pick_issue:
+      title: "Pick an Issue"
+      rules:
+        - number: "1"
+          text: "Pick issue from Ready column"
+        - number: "2"
+          text: "Work on only ONE issue at a time"
+        - number: "3"
+          text: "Move issue to In Progress"
+    tip: "Labels show priority and type:"
+    priority_high_label: "= Important"
+    type_bug_label: "= Bug fix"
+  
+  # Section: Branch
+  branch:
+    title: "Create a Branch"
+    warning: "Never work directly on main!"
+    code_example: |
+      # Branch name ALWAYS starts with issue number!
+      git checkout -b 12-extend-gitignore
+      
+      # Or in GitLab UI:
+      # Open issue → "Create merge request" button
+    important: "Issue number at start of branch name automatically links branch to issue!"
+    naming:
+      title: "Branch Naming Convention"
+      format: "<issue-number>-<short-description>"
+      good:
+        title: "Good"
+        examples:
+          - "12-extend-gitignore"
+          - "42-fix-login-bug"
+      bad:
+        title: "Bad"
+        examples:
+          - text: "fix-stuff"
+            reason: "no issue number"
+          - text: "my-branch"
+            reason: "meaningless"
+  
+  # Section: Commits
+  commits:
+    title: "Commit with Issue Reference"
+    description: "Every commit should reference the issue"
+    formula: "The magic formula:"
+    formula_code: 'git commit -m "type: description #12"'
+    examples:
+      - 'git commit -m "fix: resolve null pointer #42"'
+      - 'git commit -m "feat: add user authentication #7"'
+      - 'git commit -m "docs: update README #15"'
+    conventional:
+      title: "Conventional Commits"
+      types:
+        - prefix: "feat:"
+          description: "New feature"
+        - prefix: "fix:"
+          description: "Bug fix"
+        - prefix: "docs:"
+          description: "Documentation"
+        - prefix: "chore:"
+          description: "Maintenance"
+        - prefix: "refactor:"
+          description: "Code refactoring"
+        - prefix: "test:"
+          description: "Tests"
+    magic_words:
+      title: "Magic Words"
+      description: "These words in commit/MR close the issue automatically:"
+      closing:
+        - "Closes #12"
+        - "Fixes #12"
+        - "Resolves #12"
+      linking_description: "For linking only (no close):"
+      linking:
+        - "#12"
+        - "Related to #12"
+      tip: "Use Closes #12 in last commit or MR description!"
+  
+  # Section: Merge Request
+  merge_request:
+    title: "Create Merge Request"
+    push_code: |
+      # Push branch
+      git push -u origin 12-extend-gitignore
+      
+      # GitLab shows link to create MR!
+    mr_title: "MR Title:"
+    mr_title_example: "chore: extend .gitignore for OPM"
+    description_must_contain: "MR description must contain:"
+    description_items:
+      - "What changed?"
+      - "Closes #12 (for auto-close)"
+      - "Review checklist"
+    template:
+      title: "MR Template"
+      content: |
+        ## Summary
+        Short description of changes.
+        
+        ## Changes
+        - Item 1
+        - Item 2
+        
+        ## Related
+        Closes #12
+        
+        ## Checklist
+        - [ ] Code tested
+        - [ ] Documentation updated
+  
+  # Section: Review & Merge
+  review_merge:
+    title: "Review & Merge"
+    review:
+      title: "Review"
+      steps:
+        - "Reviewer checks code"
+        - "Comments & change requests"
+        - "Add commits if needed"
+        - "Approval"
+    merge:
+      title: "Merge"
+      steps:
+        - 'Click "Merge" button'
+        - "Branch gets deleted"
+        - "Code goes to main"
+        - "Issue closes automatically!"
+    magic:
+      title: "The Auto-Magic"
+      description: "Thanks to Closes #12, when merged:"
+      flow: "MR merged → Issue #12 closes"
+  
+  # Section: Don'ts
+  donts:
+    title: "Don'ts"
+    items:
+      - title: "Push directly to main"
+        tip: "Always use branch + MR!"
+      - title: "Commit without issue reference"
+        tip: "Always put #42 in commit!"
+      - title: "Commit passwords/secrets"
+        tip: "Use .gitignore!"
+      - title: "Huge MR with 50 files"
+        tip: "Small, focused changes!"
+      - title: "MR without description"
+        tip: "Always have Closes #X!"
+  
+  # Section: Checklist
+  checklist:
+    title: "Pre-Merge Checklist"
+    items:
+      - "Branch created from main"
+      - "Branch name contains issue number"
+      - "Commits follow Conventional Commits"
+      - "Commits reference issue (#42)"
+      - "MR description has Closes #42"
+      - "No secrets in code"
+      - "CI pipeline green"
+  
+  # Final slide
+  end:
+    title: "Happy Contributing!"
+    subtitle: "Now you know how it works."
+    flow: "#issue → branch → commit → MR → Closes #X"
+
+# Cheatsheet content
+cheatsheet:
+  title: "CLARISSA GitLab Workflow - Quick Reference"
+  tldr: "Issue → Branch → Commit → MR → Merge → Issue auto-closes"
+  
+  workflow_title: "The Workflow in 5 Steps"
+  
+  step1:
+    title: "Pick Issue from Board"
+    path: "Project → Plan → Issue Boards"
+    instructions:
+      - "Take issue from **Ready** column"
+      - "Move to **In Progress**"
+  
+  step2:
+    title: "Create Branch"
+    instruction: "ALWAYS start with issue number!"
+    code: "git checkout -b 42-short-description"
+    good_examples:
+      - "42-add-login"
+      - "12-fix-bug"
+      - "7-update-docs"
+    bad_examples:
+      - "my-branch"
+      - "test123"
+      - "changes"
+  
+  step3:
+    title: "Commit with Issue Reference"
+    code: 'git commit -m "type: description #42"'
+    examples:
+      - 'git commit -m "feat: add user auth #42"'
+      - 'git commit -m "fix: resolve null pointer #15"'
+      - 'git commit -m "docs: update guide #7"'
+  
+  step4:
+    title: "Create Merge Request"
+    code: "git push -u origin 42-short-description"
+    important: "Closes #42 auto-closes issue on merge!"
+  
+  step5:
+    title: "Review & Merge"
+    steps:
+      - "Reviewer checks code"
+      - "When approved: Click **Merge**"
+      - "Issue closes automatically!"
+  
+  magic_words:
+    title: "Magic Words"
+    description: "These words in commit/MR auto-close issues:"
+    closing:
+      - word: "Closes #42"
+        effect: "Closes issue on merge"
+      - word: "Fixes #42"
+        effect: "Closes issue on merge"
+      - word: "Resolves #42"
+        effect: "Closes issue on merge"
+      - word: "#42"
+        effect: "Links only"
+  
+  donts:
+    title: "Don'ts"
+    items:
+      - "Push directly to main"
+      - "Commit without issue reference (#42)"
+      - "Commit passwords/secrets"
+      - "Huge MR with 50 files"
+      - "MR without Closes #X"
+  
+  pre_merge_checklist:
+    title: "Pre-Merge Checklist"
+    items:
+      - "Branch name contains issue number"
+      - "Commits follow Conventional Commits"
+      - "Commits reference issue (#42)"
+      - "MR has Closes #42"
+      - "CI pipeline green"
+      - "Issue label set to workflow::review"
+  
+  quick_links:
+    title: "Quick Links"
+    items:
+      - name: "Issue Board"
+        path: "/-/boards"
+      - name: "All Issues"
+        path: "/-/issues"
+      - name: "Merge Requests"
+        path: "/-/merge_requests"
+  
+  footer: "Have a question? Create an issue with the help-wanted label"

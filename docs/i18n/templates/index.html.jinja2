@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ selector.title | default('CLARISSA GitLab Workflow') }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Cairo:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&display=swap');
+        
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --accent-orange: #fc6d26;
+            --accent-purple: #6e49cb;
+            --border-color: #30363d;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .lang-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .language-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        
+        .language-card:hover {
+            border-color: var(--accent-orange);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(252, 109, 38, 0.2);
+        }
+        
+        .flag {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .lang-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .lang-native {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* RTL font support */
+        .lang-ar { font-family: 'Cairo', sans-serif; }
+        .lang-vi { font-family: 'Be Vietnam Pro', sans-serif; }
+        
+        .cheatsheets {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .cheatsheets h3 {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .cheatsheet-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        
+        .format-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .format-link:hover {
+            color: var(--accent-orange);
+            border-color: var(--accent-orange);
+        }
+        
+        .note {
+            margin-top: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        
+        .note a {
+            color: var(--accent-orange);
+            text-decoration: none;
+        }
+        
+        .note a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🦊 {{ selector.title | default('CLARISSA GitLab Workflow') }}</h1>
+        <p class="subtitle">
+            {% for lang in languages %}
+                {% if lang.code == 'ar' %}<span class="lang-ar">{% elif lang.code == 'vi' %}<span class="lang-vi">{% else %}<span>{% endif %}
+                {{ all_translations[lang.code].selector.subtitle | default(selector.subtitle) }}
+                </span>{% if not loop.last %} / {% endif %}
+            {% endfor %}
+        </p>
+        
+        <div class="lang-grid">
+            {% for lang in languages %}
+            <a href="workflow-slides-{{ lang.code }}.html" class="language-card">
+                <div class="flag">{{ lang.flag }}</div>
+                <div class="lang-name {% if lang.code == 'ar' %}lang-ar{% elif lang.code == 'vi' %}lang-vi{% endif %}">{{ lang.native }}</div>
+                <div class="lang-native {% if lang.code == 'ar' %}lang-ar{% elif lang.code == 'vi' %}lang-vi{% endif %}">
+                    {{ all_translations[lang.code].selector.slides_label | default(selector.slides_label) }}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        
+        <div class="cheatsheets">
+            <h3>📋 {{ selector.cheatsheet_label | default('Quick Reference') }}</h3>
+            <div class="cheatsheet-links">
+                {% for lang in languages %}
+                <a href="cheatsheet-{{ lang.code }}.md" class="format-link">
+                    {% if lang.code == 'ar' %}<span class="lang-ar">{% elif lang.code == 'vi' %}<span class="lang-vi">{% else %}<span>{% endif %}
+                    {{ lang.flag }} {{ all_translations[lang.code].cheatsheet.title | default(lang.native) | truncate(30) }}
+                    </span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <p class="note">
+            {{ selector.add_language_note | default('Want to add a language? See the contribution guide.') }}
+        </p>
+    </div>
+</body>
+</html>

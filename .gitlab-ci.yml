@@ -448,8 +448,10 @@ pages:
       when: on_success
     - when: never
   before_script:
-    - pip install mkdocs mkdocs-material pymdown-extensions
+    - pip install mkdocs mkdocs-material pymdown-extensions jinja2 pyyaml
   script:
+    # Build i18n docs from templates
+    - python scripts/build_i18n_docs.py
     # Build MkDocs site from docs/ directory
     - mkdocs build --site-dir public
     # Copy static HTML files that MkDocs doesn't process (reveal.js slides, etc.)
