@@ -330,3 +330,63 @@ cheatsheet:
         path: "/-/merge_requests"
   
   footer: "Have a question? Create an issue with the help-wanted label"
+
+# Paper editing guide (simple)
+paper_editing:
+  title: "✏️ Edit the Paper - Quick Guide"
+  subtitle: "For everyone who just wants to change text - no terminal, no installation."
+  how_it_works: "How it works"
+  steps: "steps"
+  example: "Example"
+  example_short: "e.g."
+  before: "BEFORE"
+  after: "AFTER"
+  done: "Done"
+  done_explanation: "A Merge Request will be created. The team reviews the change and builds a new PDF."
+  
+  step1:
+    title: "Step 1: Open the file"
+    line1: "Go to"
+    link_text: "Paper LaTeX file"
+    line2: "Click"
+  
+  step2:
+    title: "Step 2: Make changes"
+    line1: "Edit the text directly in the editor"
+    line2: "Try not to touch LaTeX commands (with \\)"
+    line3: "If unsure: only change the text between {}"
+  
+  step3:
+    title: "Step 3: Save"
+    line1: "Scroll down"
+    line2: "Select 'Create new branch'"
+    line3: "Enter a name"
+    line4: "Enable"
+    line5: "Click"
+  
+  build_pdf:
+    title: "Build PDF automatically"
+    intro: "After merge, the PDF is built automatically. You can also trigger it manually:"
+    step1: "Go to"
+    step2: "Click"
+    step3: "Select your branch"
+    step4: "Click"
+    step5: "Wait until"
+    step5b: "appears, click"
+    result: "You'll find the new PDF under **Job artifacts**."
+  
+  faq:
+    title: "Frequently Asked Questions"
+    q1: "Can I edit the PDF directly?"
+    a1: "No - the PDF is generated from the .tex file. Changes to the PDF are lost on the next build."
+    q2: "What if I make a mistake?"
+    a2: "No problem! Your change goes into a 'Merge Request' first - the team reviews it before it goes live."
+    q3: "How do I change a figure?"
+    a3: "The figures are PNG files in `conference/ijacsa-2026/figures/`. You can download, edit, and upload them as new files."
+    q4: "Where can I see the finished PDF?"
+    a4: "Download current PDF"
+  
+  help:
+    title: "Help"
+    text: "Problems? Create an"
+    with_label: "with label"

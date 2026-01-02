@@ -65,6 +65,12 @@ def main():
         "guides/contributing/workflow-slides-vi.html",
         "guides/contributing/workflow-slides-ar.html",
         "guides/contributing/workflow-slides-is.html",
+        # Paper editing guides
+        "publications/paper-editing-en.md",
+        "publications/paper-editing-de.md",
+        "publications/paper-editing-vi.md",
+        "publications/paper-editing-ar.md",
+        "publications/paper-editing-is.md",
     }
 
     # Check for missing files (in nav but not in docs/)
