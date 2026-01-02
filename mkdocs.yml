@@ -33,6 +33,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Contributing: contributing.md
 
   - Architecture:
     - Overview: architecture/README.md
@@ -55,12 +56,13 @@ nav:
 
   - Guides:
     - Overview: guides/index.md
-    - Contributing:
-      - Workflow Cheatsheet (EN): guides/contributing/cheatsheet-en.md
-      - Workflow Cheatsheet (DE): guides/contributing/cheatsheet-de.md
-      - Workflow Cheatsheet (VI): guides/contributing/cheatsheet-vi.md
-      - Workflow Cheatsheet (AR): guides/contributing/cheatsheet-ar.md
-      - Workflow Cheatsheet (IS): guides/contributing/cheatsheet-is.md
+    - Workflow:
+      - Interactive Slides: guides/contributing/index.html
+      - Cheatsheet (EN): guides/contributing/cheatsheet-en.md
+      - Cheatsheet (DE): guides/contributing/cheatsheet-de.md
+      - Cheatsheet (VI): guides/contributing/cheatsheet-vi.md
+      - Cheatsheet (AR): guides/contributing/cheatsheet-ar.md
+      - Cheatsheet (IS): guides/contributing/cheatsheet-is.md
     - Project Management: guides/project-management.md
 
   - CI:
