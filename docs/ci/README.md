@@ -139,6 +139,7 @@ Some jobs can be triggered manually without a code change.
 | `rebuild_opm_image` | build | Force rebuild Docker image (e.g., after base image update) |
 | `rerun_all_tests` | test | Run full test suite for debugging |
 | `llm_sync_package` | deploy | Generate LLM sync package on demand |
+| `build_paper` | build | Build LaTeX paper to PDF |
 
 ### When to Use
 
@@ -151,6 +152,11 @@ Some jobs can be triggered manually without a code change.
 - After OPM base image update
 - Security patches
 - When `--no-cache` build is needed
+
+**build_paper**
+- Rebuild IJACSA paper from LaTeX
+- Useful after text edits
+- Artifacts contain the PDF
 
 **rerun_all_tests**
 - Debugging flaky tests

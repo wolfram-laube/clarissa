@@ -583,3 +583,32 @@ rerun_all_tests:
       junit: junit_manual.xml
     paths:
       - junit_manual.xml
+
+build_paper:
+  stage: build
+  image: texlive/texlive:latest
+  rules:
+    # Auto-run when paper files change
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - conference/**/*
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - conference/**/*
+      when: on_success
+    # Manual trigger always available
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+    - when: never
+  script:
+    - cd conference/ijacsa-2026
+    - echo "Building CLARISSA paper..."
+    - pdflatex -interaction=nonstopmode CLARISSA_Paper_IJACSA.tex || true
+    - pdflatex -interaction=nonstopmode CLARISSA_Paper_IJACSA.tex  # Second pass for references
+    - echo "✅ Paper built successfully"
+    - ls -la *.pdf
+  artifacts:
+    paths:
+      - conference/ijacsa-2026/CLARISSA_Paper_IJACSA.pdf
+    expire_in: 4 weeks
