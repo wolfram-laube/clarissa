@@ -5,5 +5,5 @@ well a rate 100
 [clarissa<path> proposal: reduce well a rate from 100 to 90 to improve stability
 [gov] auto-approve enabled (auto_approve=1).
 [clarissa] applying change and running simulator...
-[sim] outcome: {'ran': true, 'converged': true, 'timestep_collapses': 0, 'errors': []}
+[sim] outcome: {'converged': true, 'errors': [], 'metrics': {'timestep_collapses': 0}}
 [clarissa<path> explanation: simulation stabilized after rate reduction; no divergence flags were observed.
