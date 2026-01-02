@@ -71,6 +71,11 @@ nav:
   - Simulators:
     - Adapter Matrix: simulators/adapter_matrix.md
 
+  - Publications:
+    - Overview: publications/index.md
+    - "IJACSA 2026":
+      - Abstract: publications/ijacsa-2026/abstract.md
+
 extra:
   social:
     - icon: fontawesome/brands/gitlab
