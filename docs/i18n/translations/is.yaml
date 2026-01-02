@@ -1,0 +1,225 @@
+# CLARISSA Documentation - Icelandic
+meta:
+  language_code: is
+  language_name: Icelandic
+  language_native: Íslenska
+  flag_emoji: "🇮🇸"
+  direction: ltr
+  font_family: "Space Grotesk"
+  font_import: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;600;700&display=swap"
+
+selector:
+  title: "CLARISSA GitLab Workflow"
+  subtitle: "Veldu tungumál"
+  slides_label: "Gagnvirk kynning"
+  cheatsheet_label: "Þjöppuð leiðbeining"
+  add_language_note: "Viltu bæta við tungumáli? Sjá framlagsleiðbeiningar."
+
+slides:
+  title: "CLARISSA GitLab Workflow"
+  subtitle: "Leiðbeiningar fyrir þátttakendur"
+  
+  navigation:
+    press_to_continue: "Ýttu á → eða Space til að halda áfram"
+    press_for_overview: "Esc fyrir yfirlit"
+  
+  why_workflow:
+    title: "Af hverju þetta verkflæði?"
+    without:
+      title: "Án verkflæðis"
+      items:
+        - "Commit beint á main"
+        - "Enginn veit hver gerir hvað"
+        - "Ekki hægt að rekja villur"
+        - "Ringulreið í gagnageymslunni"
+    with:
+      title: "Með verkflæði"
+      items:
+        - "Allar breytingar tengdar við issue"
+        - "Borðið sýnir hver vinnur að hverju"
+        - "Kóðarýni fyrir sameiningu"
+        - "Sjálfvirk lokun issue"
+  
+  overview:
+    title: "Yfirlit verkflæðis"
+    steps:
+      - label: "Veldu Issue"
+        number: "1"
+      - label: "Búðu til grein"
+        number: "2"
+      - label: "Commit"
+        number: "3"
+      - label: "Merge Request"
+        number: "4"
+      - label: "Rýni & sameining"
+        number: "5"
+  
+  issue_board:
+    title: "Verkefnaborðið"
+    description: "Borðið sýnir öll verkefni og stöðu þeirra"
+    columns:
+      backlog: "Backlog"
+      ready: "Tilbúið"
+      in_progress: "Í vinnslu"
+      review: "Rýni"
+      done: "Lokið"
+    pick_issue:
+      title: "Velja Issue"
+      rules:
+        - number: "1"
+          text: "Veldu issue úr Ready dálkinum"
+        - number: "2"
+          text: "Vinndu bara að einu issue í einu"
+        - number: "3"
+          text: "Færðu issue í In Progress"
+    tip: "Merki sýna forgang og tegund:"
+    priority_high_label: "= Mikilvægt"
+    type_bug_label: "= Villuleiðrétting"
+  
+  branch:
+    title: "Búa til grein"
+    warning: "Aldrei vinna beint á main!"
+    important: "Issue-númerið í upphafi greinarheitis tengir sjálfkrafa greinina við issue!"
+    naming:
+      title: "Nafnavenjur fyrir greinar"
+      format: "<issue-númer>-<stutt-lýsing>"
+      good:
+        title: "Gott"
+      bad:
+        title: "Slæmt"
+  
+  commits:
+    title: "Commit með issue-tilvísun"
+    description: "Hver commit ætti að vísa í issue"
+    formula: "Töfraformúlan:"
+    conventional:
+      title: "Conventional Commits"
+      types:
+        - prefix: "feat:"
+          description: "Nýr eiginleiki"
+        - prefix: "fix:"
+          description: "Villuleiðrétting"
+        - prefix: "docs:"
+          description: "Skjölun"
+        - prefix: "chore:"
+          description: "Viðhald"
+        - prefix: "refactor:"
+          description: "Endurskipulagning kóða"
+        - prefix: "test:"
+          description: "Prófanir"
+    magic_words:
+      title: "Töfraorðin"
+      description: "Þessi orð í commit/MR loka issue sjálfkrafa:"
+      linking_description: "Bara tengja (ekki loka):"
+      tip: "Notaðu Closes #12 í síðasta commit eða í MR-lýsingunni!"
+  
+  merge_request:
+    title: "Búa til Merge Request"
+    mr_title: "MR-titill:"
+    description_must_contain: "MR-lýsing verður að innihalda:"
+    description_items:
+      - "Hvað breyttist?"
+      - "Closes #12 (fyrir sjálfvirka lokun)"
+      - "Gátlisti fyrir rýni"
+    template:
+      title: "MR-sniðmát"
+  
+  review_merge:
+    title: "Rýni & sameining"
+    review:
+      title: "Rýni"
+      steps:
+        - "Rýnir skoðar kóða"
+        - "Athugasemdir & beiðnir um breytingar"
+        - "Bæta við commit ef þarf"
+        - "Samþykki"
+    merge:
+      title: "Sameining"
+      steps:
+        - "Smelltu á \"Merge\" hnapp"
+        - "Greinin eyðist"
+        - "Kóði fer í main"
+        - "Issue lokast sjálfkrafa!"
+    magic:
+      title: "Sjálfvirka töfran"
+      description: "Þökk sé Closes #12, þegar sameinað:"
+      flow: "MR sameinað → Issue #12 lokast"
+  
+  donts:
+    title: "Bannað"
+    items:
+      - title: "Push beint á main"
+        tip: "Notaðu alltaf grein + MR!"
+      - title: "Commit án issue-tilvísunar"
+        tip: "Settu alltaf #42 í commit!"
+      - title: "Commit leyniorð/secrets"
+        tip: "Notaðu .gitignore!"
+      - title: "Risastórt MR með 50 skrám"
+        tip: "Litlar, einbeittar breytingar!"
+      - title: "MR án lýsingar"
+        tip: "Alltaf hafa Closes #X!"
+  
+  checklist:
+    title: "Gátlisti fyrir sameiningu"
+    items:
+      - "Grein búin til úr main"
+      - "Greinarheiti inniheldur issue-númer"
+      - "Commit fylgja Conventional Commits"
+      - "Commit vísa í issue (#42)"
+      - "MR-lýsing hefur Closes #42"
+      - "Engin leyniorð í kóða"
+      - "CI pipeline grænt"
+  
+  end:
+    title: "Gleðilega þátttöku!"
+    subtitle: "Nú veistu hvernig þetta virkar."
+
+cheatsheet:
+  title: "CLARISSA GitLab Workflow - Þjöppuð leiðbeining"
+  tldr: "Issue → Grein → Commit → MR → Sameina → Issue lokast sjálfkrafa"
+  workflow_title: "Verkflæðið í 5 skrefum"
+  
+  step1:
+    title: "Veldu Issue af borðinu"
+    instructions:
+      - "Taktu issue úr **Ready** dálkinum"
+      - "Færðu í **In Progress**"
+  
+  step2:
+    title: "Búðu til grein"
+    instruction: "ALLTAF byrja á issue-númeri!"
+  
+  step3:
+    title: "Commit með issue-tilvísun"
+  
+  step4:
+    title: "Búðu til Merge Request"
+    important: "Closes #42 lokar issue sjálfkrafa við sameiningu!"
+  
+  step5:
+    title: "Rýni & sameining"
+    steps:
+      - "Rýnir skoðar kóða"
+      - "Þegar samþykkt: Smelltu á **Merge**"
+      - "Issue lokast sjálfkrafa!"
+  
+  magic_words:
+    title: "Töfraorðin"
+    description: "Þessi orð í commit eða MR loka issues sjálfkrafa:"
+  
+  donts:
+    title: "Bannað"
+    items:
+      - "Push beint á main"
+      - "Commit án issue-tilvísunar (#42)"
+      - "Commit leyniorð/secrets"
+      - "Risastórt MR með 50 skrám"
+      - "MR án Closes #X"
+  
+  pre_merge_checklist:
+    title: "Gátlisti fyrir sameiningu"
+  
+  quick_links:
+    title: "Flýtitenglar"
+  
+  footer: "Ertu með spurningu? Búðu til issue með merkinu help-wanted"

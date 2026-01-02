@@ -1,0 +1,225 @@
+# CLARISSA Documentation - Arabic (RTL)
+meta:
+  language_code: ar
+  language_name: Arabic
+  language_native: العربية
+  flag_emoji: "🇸🇦"
+  direction: rtl
+  font_family: "Cairo"
+  font_import: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+
+selector:
+  title: "CLARISSA GitLab Workflow"
+  subtitle: "اختر اللغة"
+  slides_label: "عرض تفاعلي"
+  cheatsheet_label: "ورقة مرجعية"
+  add_language_note: "تريد إضافة لغة؟ راجع دليل المساهمة."
+
+slides:
+  title: "CLARISSA GitLab Workflow"
+  subtitle: "دليل للمساهمين"
+  
+  navigation:
+    press_to_continue: "اضغط ← أو Space للمتابعة"
+    press_for_overview: "Esc لعرض النظرة العامة"
+  
+  why_workflow:
+    title: "لماذا نحتاج هذا النظام؟"
+    without:
+      title: "بدون نظام"
+      items:
+        - "Commit مباشر على main"
+        - "لا أحد يعرف من يفعل ماذا"
+        - "لا يمكن تتبع الأخطاء"
+        - "فوضى في المستودع"
+    with:
+      title: "مع النظام"
+      items:
+        - "كل تغيير مرتبط بـ issue"
+        - "اللوحة تُظهر من يعمل على ماذا"
+        - "مراجعة الكود قبل الدمج"
+        - "إغلاق تلقائي للـ issues"
+  
+  overview:
+    title: "نظرة عامة على سير العمل"
+    steps:
+      - label: "اختر Issue"
+        number: "١"
+      - label: "أنشئ Branch"
+        number: "٢"
+      - label: "Commit"
+        number: "٣"
+      - label: "Merge Request"
+        number: "٤"
+      - label: "مراجعة ودمج"
+        number: "٥"
+  
+  issue_board:
+    title: "لوحة المهام"
+    description: "اللوحة تعرض جميع المهام وحالتها"
+    columns:
+      backlog: "Backlog"
+      ready: "جاهز"
+      in_progress: "قيد التنفيذ"
+      review: "مراجعة"
+      done: "تم"
+    pick_issue:
+      title: "اختيار Issue"
+      rules:
+        - number: "١"
+          text: "اختر issue من عمود Ready"
+        - number: "٢"
+          text: "اعمل على issue واحد فقط في كل مرة"
+        - number: "٣"
+          text: "انقل الـ issue إلى In Progress"
+    tip: "التسميات تُظهر الأولوية والنوع:"
+    priority_high_label: "= مهم"
+    type_bug_label: "= إصلاح خطأ"
+  
+  branch:
+    title: "إنشاء Branch"
+    warning: "لا تعمل مباشرة على main أبداً!"
+    important: "رقم الـ issue في بداية اسم الـ branch يربط تلقائياً بين الـ branch والـ issue!"
+    naming:
+      title: "قواعد تسمية الـ Branch"
+      format: "<رقم-issue>-<وصف-قصير>"
+      good:
+        title: "صحيح"
+      bad:
+        title: "خطأ"
+  
+  commits:
+    title: "Commit مع إشارة للـ Issue"
+    description: "كل commit يجب أن يشير إلى الـ issue"
+    formula: "الصيغة السحرية:"
+    conventional:
+      title: "Conventional Commits"
+      types:
+        - prefix: "feat:"
+          description: "ميزة جديدة"
+        - prefix: "fix:"
+          description: "إصلاح خطأ"
+        - prefix: "docs:"
+          description: "توثيق"
+        - prefix: "chore:"
+          description: "صيانة"
+        - prefix: "refactor:"
+          description: "إعادة هيكلة"
+        - prefix: "test:"
+          description: "اختبارات"
+    magic_words:
+      title: "الكلمات السحرية"
+      description: "هذه الكلمات في commit أو MR تُغلق الـ issue تلقائياً:"
+      linking_description: "للربط فقط (بدون إغلاق):"
+      tip: "استخدم Closes #12 في آخر commit أو في وصف MR!"
+  
+  merge_request:
+    title: "إنشاء Merge Request"
+    mr_title: "عنوان MR:"
+    description_must_contain: "وصف MR يجب أن يحتوي:"
+    description_items:
+      - "ما الذي تغير؟"
+      - "Closes #12 (للإغلاق التلقائي)"
+      - "قائمة مراجعة"
+    template:
+      title: "قالب MR"
+  
+  review_merge:
+    title: "مراجعة ودمج"
+    review:
+      title: "مراجعة"
+      steps:
+        - "المراجع يفحص الكود"
+        - "تعليقات وتعديلات"
+        - "إضافة commits إذا لزم"
+        - "موافقة"
+    merge:
+      title: "دمج"
+      steps:
+        - "اضغط زر \"Merge\""
+        - "الـ branch يُحذف"
+        - "الكود يدخل main"
+        - "الـ issue يُغلق تلقائياً!"
+    magic:
+      title: "السحر التلقائي"
+      description: "بفضل Closes #12، عند الدمج:"
+      flow: "MR يُدمج ← Issue #12 يُغلق"
+  
+  donts:
+    title: "الممنوعات"
+    items:
+      - title: "Push مباشر على main"
+        tip: "استخدم دائماً branch + MR!"
+      - title: "Commit بدون إشارة للـ issue"
+        tip: "ضع دائماً #42 في الـ commit!"
+      - title: "Commit كلمات سر أو أسرار"
+        tip: "استخدم .gitignore!"
+      - title: "MR ضخم بـ 50 ملف"
+        tip: "تغييرات صغيرة ومركزة!"
+      - title: "MR بدون وصف"
+        tip: "دائماً اكتب Closes #X!"
+  
+  checklist:
+    title: "قائمة التحقق قبل الدمج"
+    items:
+      - "الـ Branch منشأ من main"
+      - "اسم الـ branch يحتوي رقم الـ issue"
+      - "الـ Commits تتبع Conventional Commits"
+      - "الـ Commits تشير للـ issue (#42)"
+      - "وصف MR يحتوي Closes #42"
+      - "لا توجد أسرار في الكود"
+      - "CI pipeline أخضر"
+  
+  end:
+    title: "مساهمة سعيدة!"
+    subtitle: "الآن أنت تعرف كيف تفعلها."
+
+cheatsheet:
+  title: "CLARISSA GitLab Workflow - ورقة مرجعية"
+  tldr: "Issue ← Branch ← Commit ← MR ← Merge ← الـ Issue يُغلق تلقائياً"
+  workflow_title: "سير العمل في ٥ خطوات"
+  
+  step1:
+    title: "اختيار Issue من اللوحة"
+    instructions:
+      - "خذ issue من عمود **Ready**"
+      - "انقله إلى **In Progress**"
+  
+  step2:
+    title: "إنشاء Branch"
+    instruction: "ابدأ دائماً برقم الـ issue!"
+  
+  step3:
+    title: "Commit مع إشارة للـ Issue"
+  
+  step4:
+    title: "إنشاء Merge Request"
+    important: "Closes #42 يُغلق الـ issue تلقائياً عند الدمج!"
+  
+  step5:
+    title: "مراجعة ودمج"
+    steps:
+      - "المراجع يفحص الكود"
+      - "عند الموافقة: اضغط **Merge**"
+      - "الـ Issue يُغلق تلقائياً!"
+  
+  magic_words:
+    title: "الكلمات السحرية"
+    description: "هذه الكلمات في commit أو MR تُغلق الـ issues تلقائياً:"
+  
+  donts:
+    title: "الممنوعات"
+    items:
+      - "Push مباشر على main"
+      - "Commit بدون إشارة للـ issue (#42)"
+      - "Commit كلمات سر أو أسرار"
+      - "MR ضخم بـ 50 ملف"
+      - "MR بدون Closes #X"
+  
+  pre_merge_checklist:
+    title: "قائمة التحقق قبل الدمج"
+  
+  quick_links:
+    title: "روابط سريعة"
+  
+  footer: "هل لديك سؤال؟ أنشئ issue بالوسم help-wanted"

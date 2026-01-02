@@ -1,0 +1,120 @@
+# 🦊 {{ t.cheatsheet.title }}
+
+> **TL;DR:** {{ t.cheatsheet.tldr }}
+
+---
+
+## 🔄 {{ t.cheatsheet.workflow_title }}
+
+```
+{% if meta.direction == 'rtl' %}
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│ {{ t.cheatsheet.step5.title | truncate(11) }} │←───│ {{ t.cheatsheet.step4.title | truncate(11) }} │←───│ {{ t.cheatsheet.step3.title | truncate(11) }} │←───│ {{ t.cheatsheet.step2.title | truncate(11) }} │←───│ {{ t.cheatsheet.step1.title | truncate(11) }} │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+{% else %}
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│  1. Pick    │───▶│  2. Create  │───▶│ 3. Commit  │───▶│  4. Create  │───▶│ 5. Review  │
+│    Issue    │    │   Branch    │    │   & Push   │    │     MR      │    │  & Merge   │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+{% endif %}
+```
+
+---
+
+## 1️⃣ {{ t.cheatsheet.step1.title }}
+
+```
+{{ t.cheatsheet.step1.path | default('Project → Plan → Issue Boards') }}
+```
+
+{% for instruction in t.cheatsheet.step1.instructions %}
+- {{ instruction }}
+{% endfor %}
+
+---
+
+## 2️⃣ {{ t.cheatsheet.step2.title }}
+
+```bash
+# {{ t.cheatsheet.step2.instruction | default('ALWAYS start with issue number!') }}
+{{ t.cheatsheet.step2.code | default('git checkout -b 42-short-description') }}
+```
+
+| ✅ {{ t.slides.branch.naming.good.title | default('Good') }} | ❌ {{ t.slides.branch.naming.bad.title | default('Bad') }} |
+|---------|----------|
+{% for ex in t.cheatsheet.step2.good_examples | default(['42-add-login', '12-fix-bug', '7-update-docs']) %}| `{{ ex }}` | `{{ t.cheatsheet.step2.bad_examples[loop.index0] | default('my-branch') }}` |
+{% endfor %}
+
+---
+
+## 3️⃣ {{ t.cheatsheet.step3.title }}
+
+```bash
+{{ t.cheatsheet.step3.code | default('git commit -m "type: description #42"') }}
+```
+
+### {{ t.slides.commits.conventional.title }}:
+
+| {{ 'Prefix' if meta.direction != 'rtl' else 'البادئة' }} | {{ 'Usage' if meta.direction != 'rtl' else 'الاستخدام' }} |
+|-----------|--------|
+{% for type in t.slides.commits.conventional.types %}| `{{ type.prefix }}` | {{ type.description }} |
+{% endfor %}
+
+---
+
+## 4️⃣ {{ t.cheatsheet.step4.title }}
+
+```bash
+git push -u origin 42-short-description
+```
+
+**{{ t.cheatsheet.step4.important }}**
+
+---
+
+## 5️⃣ {{ t.cheatsheet.step5.title }}
+
+{% for step in t.cheatsheet.step5.steps %}
+{{ loop.index }}. {{ step }}
+{% endfor %}
+
+---
+
+## 🔗 {{ t.cheatsheet.magic_words.title }}
+
+{{ t.cheatsheet.magic_words.description }}
+
+| {{ 'Word' if meta.direction != 'rtl' else 'الكلمة' }} | {{ 'Effect' if meta.direction != 'rtl' else 'التأثير' }} |
+|-----|-------|
+{% for item in t.cheatsheet.magic_words.closing | default([]) %}| `{{ item.word }}` | {{ item.effect }} |
+{% endfor %}
+
+---
+
+## 🚫 {{ t.cheatsheet.donts.title }}
+
+{% for item in t.cheatsheet.donts.items %}
+{{ loop.index }}. ❌ {{ item }}
+{% endfor %}
+
+---
+
+## ✅ {{ t.cheatsheet.pre_merge_checklist.title }}
+
+{% for item in t.cheatsheet.pre_merge_checklist.items | default(t.slides.checklist.items) %}
+- [ ] {{ item }}
+{% endfor %}
+
+---
+
+## 🔗 {{ t.cheatsheet.quick_links.title }}
+
+| {{ 'Resource' if meta.direction != 'rtl' else 'المورد' }} | {{ 'Path' if meta.direction != 'rtl' else 'المسار' }} |
+|---------|------|
+{% for item in t.cheatsheet.quick_links.items | default([{'name': 'Issue Board', 'path': '/-/boards'}, {'name': 'All Issues', 'path': '/-/issues'}, {'name': 'Merge Requests', 'path': '/-/merge_requests'}]) %}| {{ item.name }} | `{{ item.path }}` |
+{% endfor %}
+| {{ 'Interactive Slides' if meta.direction != 'rtl' else 'العرض التفاعلي' }} | `workflow-slides-{{ lang_code }}.html` |
+
+---
+
+*{{ t.cheatsheet.footer }}*

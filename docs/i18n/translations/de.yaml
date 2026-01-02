@@ -1,0 +1,242 @@
+# CLARISSA Documentation - German
+meta:
+  language_code: de
+  language_name: German
+  language_native: Deutsch
+  flag_emoji: "🇩🇪"
+  direction: ltr
+  font_family: "Space Grotesk"
+  font_import: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;600;700&display=swap"
+
+selector:
+  title: "CLARISSA GitLab Workflow"
+  subtitle: "Wähle deine Sprache"
+  slides_label: "Interaktive Präsentation"
+  cheatsheet_label: "Kurzreferenz"
+  add_language_note: "Möchtest du eine Sprache hinzufügen? Siehe Contribution Guide."
+
+slides:
+  title: "CLARISSA GitLab Workflow"
+  subtitle: "Leitfaden für Mitwirkende"
+  
+  navigation:
+    press_to_continue: "Drücke → oder Space zum Fortfahren"
+    press_for_overview: "Esc für Übersicht"
+  
+  why_workflow:
+    title: "Warum dieses Workflow?"
+    without:
+      title: "Ohne Workflow"
+      items:
+        - "Commit direkt auf main"
+        - "Niemand weiß, wer was macht"
+        - "Fehler nicht nachvollziehbar"
+        - "Chaos im Repository"
+    with:
+      title: "Mit Workflow"
+      items:
+        - "Alle Änderungen mit Issue verknüpft"
+        - "Board zeigt wer woran arbeitet"
+        - "Code-Review vor Merge"
+        - "Automatisches Schließen von Issues"
+  
+  overview:
+    title: "Workflow-Übersicht"
+    steps:
+      - label: "Issue wählen"
+        number: "1"
+      - label: "Branch erstellen"
+        number: "2"
+      - label: "Commit"
+        number: "3"
+      - label: "Merge Request"
+        number: "4"
+      - label: "Review & Merge"
+        number: "5"
+  
+  issue_board:
+    title: "Das Issue Board"
+    description: "Das Board zeigt alle Aufgaben und deren Status"
+    columns:
+      backlog: "Backlog"
+      ready: "Bereit"
+      in_progress: "In Arbeit"
+      review: "Review"
+      done: "Fertig"
+    pick_issue:
+      title: "Issue auswählen"
+      rules:
+        - number: "1"
+          text: "Wähle Issue aus der Ready-Spalte"
+        - number: "2"
+          text: "Arbeite nur an EINEM Issue gleichzeitig"
+        - number: "3"
+          text: "Verschiebe Issue nach In Progress"
+    tip: "Labels zeigen Priorität und Typ:"
+    priority_high_label: "= Wichtig"
+    type_bug_label: "= Fehlerbehebung"
+  
+  branch:
+    title: "Branch erstellen"
+    warning: "Niemals direkt auf main arbeiten!"
+    important: "Issue-Nummer am Anfang des Branch-Namens verknüpft automatisch Branch mit Issue!"
+    naming:
+      title: "Branch-Namenskonvention"
+      format: "<issue-nummer>-<kurze-beschreibung>"
+      good:
+        title: "Gut"
+      bad:
+        title: "Schlecht"
+  
+  commits:
+    title: "Commit mit Issue-Referenz"
+    description: "Jeder Commit sollte das Issue referenzieren"
+    formula: "Die Zauberformel:"
+    conventional:
+      title: "Conventional Commits"
+      types:
+        - prefix: "feat:"
+          description: "Neues Feature"
+        - prefix: "fix:"
+          description: "Fehlerbehebung"
+        - prefix: "docs:"
+          description: "Dokumentation"
+        - prefix: "chore:"
+          description: "Wartung"
+        - prefix: "refactor:"
+          description: "Code-Refactoring"
+        - prefix: "test:"
+          description: "Tests"
+    magic_words:
+      title: "Zauberwörter"
+      description: "Diese Wörter in Commit/MR schließen das Issue automatisch:"
+      linking_description: "Nur verknüpfen (nicht schließen):"
+      tip: "Benutze Closes #12 im letzten Commit oder in der MR-Beschreibung!"
+  
+  merge_request:
+    title: "Merge Request erstellen"
+    mr_title: "MR-Titel:"
+    description_must_contain: "MR-Beschreibung muss enthalten:"
+    description_items:
+      - "Was hat sich geändert?"
+      - "Closes #12 (für Auto-Close)"
+      - "Review-Checkliste"
+    template:
+      title: "MR-Vorlage"
+  
+  review_merge:
+    title: "Review & Merge"
+    review:
+      title: "Review"
+      steps:
+        - "Reviewer prüft Code"
+        - "Kommentare & Änderungswünsche"
+        - "Bei Bedarf Commits hinzufügen"
+        - "Genehmigung"
+    merge:
+      title: "Merge"
+      steps:
+        - "Klicke auf \"Merge\"-Button"
+        - "Branch wird gelöscht"
+        - "Code geht in main"
+        - "Issue schließt automatisch!"
+    magic:
+      title: "Die Auto-Magie"
+      description: "Dank Closes #12, beim Merge:"
+      flow: "MR gemerged → Issue #12 schließt"
+  
+  donts:
+    title: "Verboten"
+    items:
+      - title: "Push direkt auf main"
+        tip: "Immer Branch + MR verwenden!"
+      - title: "Commit ohne Issue-Referenz"
+        tip: "Immer #42 im Commit angeben!"
+      - title: "Passwörter/Secrets committen"
+        tip: "Nutze .gitignore!"
+      - title: "Riesiges MR mit 50 Dateien"
+        tip: "Kleine, fokussierte Änderungen!"
+      - title: "MR ohne Beschreibung"
+        tip: "Immer Closes #X angeben!"
+  
+  checklist:
+    title: "Checkliste vor dem Merge"
+    items:
+      - "Branch von main erstellt"
+      - "Branch-Name enthält Issue-Nummer"
+      - "Commits folgen Conventional Commits"
+      - "Commits referenzieren Issue (#42)"
+      - "MR-Beschreibung hat Closes #42"
+      - "Keine Secrets im Code"
+      - "CI Pipeline grün"
+  
+  end:
+    title: "Frohes Mitwirken!"
+    subtitle: "Jetzt weißt du, wie es geht."
+
+cheatsheet:
+  title: "CLARISSA GitLab Workflow - Kurzreferenz"
+  tldr: "Issue → Branch → Commit → MR → Merge → Issue schließt automatisch"
+  workflow_title: "Der Workflow in 5 Schritten"
+  
+  step1:
+    title: "Issue vom Board wählen"
+    path: "Project → Plan → Issue Boards"
+    instructions:
+      - "Nimm Issue aus **Ready**-Spalte"
+      - "Verschiebe nach **In Progress**"
+  
+  step2:
+    title: "Branch erstellen"
+    instruction: "IMMER mit Issue-Nummer beginnen!"
+  
+  step3:
+    title: "Commit mit Issue-Referenz"
+  
+  step4:
+    title: "Merge Request erstellen"
+    important: "Closes #42 schließt Issue automatisch beim Merge!"
+  
+  step5:
+    title: "Review & Merge"
+    steps:
+      - "Reviewer prüft Code"
+      - "Nach Genehmigung: Klicke **Merge**"
+      - "Issue schließt automatisch!"
+  
+  magic_words:
+    title: "Zauberwörter"
+    description: "Diese Wörter in Commit/MR schließen Issues automatisch:"
+    closing:
+      - word: "Closes #42"
+        effect: "Schließt Issue beim Merge"
+      - word: "Fixes #42"
+        effect: "Schließt Issue beim Merge"
+      - word: "Resolves #42"
+        effect: "Schließt Issue beim Merge"
+      - word: "#42"
+        effect: "Nur Verlinkung"
+  
+  donts:
+    title: "Verboten"
+    items:
+      - "Push direkt auf main"
+      - "Commit ohne Issue-Referenz (#42)"
+      - "Passwörter/Secrets committen"
+      - "Riesiges MR mit 50 Dateien"
+      - "MR ohne Closes #X"
+  
+  pre_merge_checklist:
+    title: "Checkliste vor dem Merge"
+    items:
+      - "Branch-Name enthält Issue-Nummer"
+      - "Commits folgen Conventional Commits"
+      - "Commits referenzieren Issue (#42)"
+      - "MR hat Closes #42"
+      - "CI Pipeline grün"
+      - "Issue-Label auf workflow::review gesetzt"
+  
+  quick_links:
+    title: "Schnelllinks"
+  
+  footer: "Hast du eine Frage? Erstelle ein Issue mit dem Label help-wanted"

@@ -1,0 +1,225 @@
+# CLARISSA Documentation - Vietnamese
+meta:
+  language_code: vi
+  language_name: Vietnamese
+  language_native: Tiếng Việt
+  flag_emoji: "🇻🇳"
+  direction: ltr
+  font_family: "Be Vietnam Pro"
+  font_import: "https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+
+selector:
+  title: "CLARISSA GitLab Workflow"
+  subtitle: "Chọn ngôn ngữ"
+  slides_label: "Slides tương tác"
+  cheatsheet_label: "Tờ ghi nhớ"
+  add_language_note: "Muốn thêm ngôn ngữ? Xem hướng dẫn đóng góp."
+
+slides:
+  title: "CLARISSA GitLab Workflow"
+  subtitle: "Hướng dẫn cho người đóng góp"
+  
+  navigation:
+    press_to_continue: "Nhấn → hoặc Space để tiếp tục"
+    press_for_overview: "Esc để xem tổng quan"
+  
+  why_workflow:
+    title: "Tại sao cần workflow này?"
+    without:
+      title: "Không có workflow"
+      items:
+        - "Commit trực tiếp vào main"
+        - "Không ai biết ai làm gì"
+        - "Không thể truy vết lỗi"
+        - "Hỗn loạn trong repository"
+    with:
+      title: "Có workflow"
+      items:
+        - "Mọi thay đổi liên kết với issue"
+        - "Board hiển thị ai đang làm gì"
+        - "Review code trước khi merge"
+        - "Tự động đóng issue"
+  
+  overview:
+    title: "Tổng quan Workflow"
+    steps:
+      - label: "Chọn Issue"
+        number: "1"
+      - label: "Tạo Branch"
+        number: "2"
+      - label: "Commit"
+        number: "3"
+      - label: "Merge Request"
+        number: "4"
+      - label: "Review & Merge"
+        number: "5"
+  
+  issue_board:
+    title: "Bảng Issue"
+    description: "Board hiển thị tất cả công việc và trạng thái"
+    columns:
+      backlog: "Backlog"
+      ready: "Sẵn sàng"
+      in_progress: "Đang làm"
+      review: "Review"
+      done: "Hoàn thành"
+    pick_issue:
+      title: "Chọn Issue"
+      rules:
+        - number: "1"
+          text: "Chọn issue từ cột Ready"
+        - number: "2"
+          text: "Chỉ làm MỘT issue mỗi lần"
+        - number: "3"
+          text: "Chuyển issue sang In Progress"
+    tip: "Label hiển thị độ ưu tiên và loại:"
+    priority_high_label: "= Quan trọng"
+    type_bug_label: "= Sửa lỗi"
+  
+  branch:
+    title: "Tạo Branch"
+    warning: "Không bao giờ làm việc trực tiếp trên main!"
+    important: "Số issue ở đầu tên branch tự động liên kết branch với issue!"
+    naming:
+      title: "Quy tắc đặt tên Branch"
+      format: "<số-issue>-<mô-tả-ngắn>"
+      good:
+        title: "Tốt"
+      bad:
+        title: "Xấu"
+  
+  commits:
+    title: "Commit với tham chiếu Issue"
+    description: "Mỗi commit nên tham chiếu đến issue"
+    formula: "Công thức kỳ diệu:"
+    conventional:
+      title: "Conventional Commits"
+      types:
+        - prefix: "feat:"
+          description: "Tính năng mới"
+        - prefix: "fix:"
+          description: "Sửa lỗi"
+        - prefix: "docs:"
+          description: "Tài liệu"
+        - prefix: "chore:"
+          description: "Bảo trì"
+        - prefix: "refactor:"
+          description: "Tái cấu trúc code"
+        - prefix: "test:"
+          description: "Tests"
+    magic_words:
+      title: "Từ kỳ diệu"
+      description: "Những từ này trong commit/MR tự động đóng issue:"
+      linking_description: "Chỉ liên kết (không đóng):"
+      tip: "Dùng Closes #12 trong commit cuối hoặc mô tả MR!"
+  
+  merge_request:
+    title: "Tạo Merge Request"
+    mr_title: "Tiêu đề MR:"
+    description_must_contain: "Mô tả MR phải có:"
+    description_items:
+      - "Thay đổi gì?"
+      - "Closes #12 (để tự động đóng)"
+      - "Checklist review"
+    template:
+      title: "Mẫu MR"
+  
+  review_merge:
+    title: "Review & Merge"
+    review:
+      title: "Review"
+      steps:
+        - "Reviewer kiểm tra code"
+        - "Bình luận & yêu cầu thay đổi"
+        - "Thêm commit nếu cần"
+        - "Phê duyệt"
+    merge:
+      title: "Merge"
+      steps:
+        - "Nhấn nút \"Merge\""
+        - "Branch bị xóa"
+        - "Code vào main"
+        - "Issue tự động đóng!"
+    magic:
+      title: "Phép màu tự động"
+      description: "Nhờ Closes #12, khi merge:"
+      flow: "MR merged → Issue #12 đóng"
+  
+  donts:
+    title: "Những điều cấm kỵ"
+    items:
+      - title: "Push trực tiếp lên main"
+        tip: "Luôn dùng branch + MR!"
+      - title: "Commit không có tham chiếu issue"
+        tip: "Luôn có #42 trong commit!"
+      - title: "Commit mật khẩu/secrets"
+        tip: "Dùng .gitignore!"
+      - title: "MR khổng lồ với 50 file"
+        tip: "Thay đổi nhỏ, tập trung!"
+      - title: "MR không có mô tả"
+        tip: "Luôn có Closes #X!"
+  
+  checklist:
+    title: "Checklist trước khi Merge"
+    items:
+      - "Branch tạo từ main"
+      - "Tên branch có số issue"
+      - "Commit theo Conventional Commits"
+      - "Commit tham chiếu issue (#42)"
+      - "Mô tả MR có Closes #42"
+      - "Không có secrets trong code"
+      - "CI pipeline xanh"
+  
+  end:
+    title: "Chúc đóng góp vui vẻ!"
+    subtitle: "Giờ bạn đã biết cách làm."
+
+cheatsheet:
+  title: "CLARISSA GitLab Workflow - Tờ ghi nhớ"
+  tldr: "Issue → Branch → Commit → MR → Merge → Issue tự động đóng"
+  workflow_title: "Workflow trong 5 bước"
+  
+  step1:
+    title: "Chọn Issue từ Board"
+    instructions:
+      - "Lấy issue từ cột **Ready**"
+      - "Chuyển sang **In Progress**"
+  
+  step2:
+    title: "Tạo Branch"
+    instruction: "LUÔN bắt đầu bằng số issue!"
+  
+  step3:
+    title: "Commit với tham chiếu Issue"
+  
+  step4:
+    title: "Tạo Merge Request"
+    important: "Closes #42 tự động đóng issue khi merge!"
+  
+  step5:
+    title: "Review & Merge"
+    steps:
+      - "Reviewer kiểm tra code"
+      - "Khi được duyệt: Nhấn **Merge**"
+      - "Issue tự động đóng!"
+  
+  magic_words:
+    title: "Từ kỳ diệu"
+    description: "Những từ này trong commit/MR tự động đóng issue:"
+  
+  donts:
+    title: "Những điều cấm kỵ"
+    items:
+      - "Push trực tiếp lên main"
+      - "Commit không có tham chiếu issue (#42)"
+      - "Commit mật khẩu/secrets"
+      - "MR khổng lồ với 50 file"
+      - "MR không có Closes #X"
+  
+  pre_merge_checklist:
+    title: "Checklist trước khi Merge"
+  
+  quick_links:
+    title: "Liên kết nhanh"
+  
+  footer: "Có câu hỏi? Tạo issue với label help-wanted"
