@@ -33,24 +33,24 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Changelog: changelog.md
 
   - Architecture:
     - Overview: architecture/README.md
     - ADRs:
       - Index: architecture/adr/index.md
-      - ADR-001 Architecture Framework: architecture/adr/ADR-001-architecture-framework.md
-      - ADR-002 Technology Stack: architecture/adr/ADR-002-technology-stack.md
-      - ADR-003 NLP Engine Selection: architecture/adr/ADR-003-nlp-engine-selection.md
-      - ADR-004 Simulator Integration: architecture/adr/ADR-004-simulator-integration.md
-      - ADR-005 Conversation Management: architecture/adr/ADR-005-conversation-management.md
-      - ADR-006 Plugin Architecture: architecture/adr/ADR-006-plugin-architecture.md
-      - ADR-007 Safety and Validation: architecture/adr/ADR-007-safety-validation.md
-      - ADR-008 Observability Strategy: architecture/adr/ADR-008-observability-strategy.md
-      - ADR-009 Knowledge Management: architecture/adr/ADR-009-knowledge-management.md
-      - ADR-010 OPM Flow Integration: architecture/adr/ADR-010-opm-flow-integration.md
-      - ADR-011 Governance Model: architecture/adr/ADR-011-governance-model.md
-      - ADR-012 Container Registry: architecture/adr/ADR-012-container-registry.md
+      - ADR-000 Template: architecture/adr/ADR-000-template.md
+      - ADR-001 Physics-Centric: architecture/adr/ADR-001-physics-centric.md
+      - ADR-002 Separation of Roles: architecture/adr/ADR-002-separation-of-roles.md
+      - ADR-003 Native Kernel: architecture/adr/ADR-003-native-kernel.md
+      - ADR-004 Dual Simulator Strategy: architecture/adr/ADR-004-dual-simulator-strategy.md
+      - ADR-005 Repo Decomposition: architecture/adr/ADR-005-repo-decomposition.md
+      - ADR-006 Noise-Free CI Artifacts: architecture/adr/ADR-006-noise-free-ci-artifacts.md
+      - ADR-007 CI as Observability Layer: architecture/adr/ADR-007-ci-as-observability-layer.md
+      - ADR-008 Governance Signals vs Enforcement: architecture/adr/ADR-008-governance-signals-vs-enforcement.md
+      - ADR-009 NLP Translation Pipeline: architecture/adr/ADR-009-nlp-translation-pipeline.md
+      - ADR-010 Project Renaming CLARISSA: architecture/adr/ADR-010-project-renaming-clarissa.md
+      - ADR-011 OPM Flow Integration: architecture/adr/ADR-011-opm-flow-integration.md
+      - ADR-012 Container Registry K8s Strategy: architecture/adr/ADR-012-container-registry-k8s-strategy.md
       - ADR-013 i18n Architecture: architecture/adr/ADR-013-i18n-architecture.md
 
   - Guides:
