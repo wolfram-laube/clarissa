@@ -89,7 +89,7 @@ nav:
   - Guides:
     - Overview: guides/index.md
     - Contributing:
-      - Workflow Cheatsheet: guides/contributing/cheatsheet.md
+      - Workflow Cheatsheet: guides/contributing/cheatsheet-en.md
       - Workflow Cheatsheet (DE): guides/contributing/cheatsheet-de.md
     - Project Management: guides/project-management.md
 
