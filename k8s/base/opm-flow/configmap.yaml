@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opm-flow-deck
+  labels:
+    app.kubernetes.io/name: opm-flow
+data:
+  simulation.DATA: |
+    -- Example ECLIPSE deck
+    -- Replace with actual simulation data
+    RUNSPEC
+    TITLE
+      Example Simulation
+    
+    DIMENS
+      10 10 3 /
+    
+    OIL
+    WATER
+    
+    METRIC
+    
+    START
+      1 JAN 2024 /
+    
+    WELLDIMS
+      2 10 2 2 /
+    
+    -- Add remaining sections as needed

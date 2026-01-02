@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: opm-flow-simulation
+  labels:
+    app.kubernetes.io/name: opm-flow
+    app.kubernetes.io/component: simulator
+spec:
+  ttlSecondsAfterFinished: 86400  # Cleanup after 24h
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: opm-flow
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: opm-flow
+          image: registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/opm-flow:latest
+          args:
+            - /data/simulation.DATA
+          volumeMounts:
+            - name: simulation-data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: "1"
+              memory: "2Gi"
+            limits:
+              cpu: "4"
+              memory: "8Gi"
+      volumes:
+        - name: simulation-data
+          configMap:
+            name: opm-flow-deck
