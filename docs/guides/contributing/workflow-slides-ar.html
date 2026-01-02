@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hướng dẫn GitLab Workflow - CLARISSA</title>
+    <title>دليل سير العمل في GitLab - CLARISSA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
         
         :root {
             --r-background-color: #0d1117;
-            --r-main-font: 'Be Vietnam Pro', sans-serif;
-            --r-main-font-size: 38px;
+            --r-main-font: 'Cairo', sans-serif;
+            --r-main-font-size: 36px;
             --r-main-color: #e6edf3;
-            --r-heading-font: 'Be Vietnam Pro', sans-serif;
+            --r-heading-font: 'Cairo', sans-serif;
             --r-heading-color: #58a6ff;
             --r-heading-text-transform: none;
             --r-code-font: 'JetBrains Mono', monospace;
@@ -29,10 +29,10 @@
             --code-bg: #161b22;
         }
         
-        .reveal { font-family: var(--r-main-font); }
+        .reveal { font-family: var(--r-main-font); direction: rtl; }
         .reveal h1, .reveal h2, .reveal h3 { font-weight: 700; text-transform: none; }
         .reveal h1 {
-            font-size: 2.5em;
+            font-size: 2.2em;
             background: linear-gradient(135deg, var(--gitlab-orange), var(--gitlab-purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -51,6 +51,8 @@
             border-radius: 6px;
             font-size: 0.85em;
             color: #79c0ff;
+            direction: ltr;
+            display: inline-block;
         }
         .reveal pre {
             background: var(--code-bg);
@@ -58,6 +60,8 @@
             border: 1px solid #30363d;
             box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             width: 100%;
+            direction: ltr;
+            text-align: left;
         }
         .reveal pre code {
             background: transparent;
@@ -71,7 +75,7 @@
             border-radius: 16px;
             padding: 1.5em;
             margin: 0.5em 0;
-            text-align: left;
+            text-align: right;
         }
         .step-number {
             display: inline-flex;
@@ -83,7 +87,7 @@
             border-radius: 50%;
             font-weight: 700;
             font-size: 1.3em;
-            margin-right: 0.5em;
+            margin-left: 0.5em;
             color: white;
         }
         .keyword {
@@ -95,11 +99,13 @@
             margin: 0.2em;
             font-family: var(--r-code-font);
             font-size: 0.8em;
+            direction: ltr;
         }
         .keyword.closes { border-color: var(--success-green); color: var(--success-green); }
         .keyword.ref { border-color: var(--r-heading-color); color: var(--r-heading-color); }
         .board-visual {
             display: flex;
+            flex-direction: row-reverse;
             gap: 10px;
             justify-content: center;
             margin: 1em 0;
@@ -109,7 +115,7 @@
             border: 1px solid #30363d;
             border-radius: 8px;
             padding: 0.5em;
-            min-width: 110px;
+            min-width: 100px;
             text-align: center;
         }
         .board-column.highlight {
@@ -117,10 +123,9 @@
             background: rgba(252, 109, 38, 0.1);
         }
         .board-column h4 {
-            font-size: 0.55em;
+            font-size: 0.5em;
             margin: 0 0 0.5em 0;
             color: #8b949e;
-            text-transform: uppercase;
         }
         .issue-card {
             background: #21262d;
@@ -128,10 +133,11 @@
             padding: 0.4em;
             margin: 0.3em 0;
             font-size: 0.5em;
-            border-left: 3px solid var(--gitlab-purple);
+            border-right: 3px solid var(--gitlab-purple);
+            direction: ltr;
         }
         .issue-card.moving {
-            border-left-color: var(--gitlab-orange);
+            border-right-color: var(--gitlab-orange);
             animation: pulse 1s infinite;
         }
         @keyframes pulse {
@@ -157,11 +163,14 @@
             color: var(--gitlab-orange);
             margin: 0 0.3em;
         }
+        .flow-arrow-rtl::after {
+            content: "←";
+        }
         .two-column {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2em;
-            text-align: left;
+            text-align: right;
         }
         .label-demo {
             display: inline-block;
@@ -170,24 +179,25 @@
             font-size: 0.7em;
             font-weight: 600;
             margin: 0.1em;
+            direction: ltr;
         }
         .label-type { background: #238636; }
         .label-priority-high { background: #ff6600; }
         .label-workflow { background: #6e49cb; }
         .checklist {
-            text-align: left;
+            text-align: right;
             list-style: none;
             padding: 0;
         }
         .checklist li {
             padding: 0.5em 0;
-            padding-left: 2em;
+            padding-right: 2em;
             position: relative;
         }
         .checklist li::before {
             content: "☐";
             position: absolute;
-            left: 0;
+            right: 0;
             color: var(--gitlab-orange);
             font-size: 1.2em;
         }
@@ -208,16 +218,19 @@
         .command-table th, .command-table td {
             padding: 0.8em;
             border: 1px solid #30363d;
-            text-align: left;
+            text-align: right;
         }
         .command-table th {
             background: var(--code-bg);
             color: var(--gitlab-orange);
         }
+        .command-table code {
+            direction: ltr;
+        }
         .lang-switch {
             position: fixed;
             top: 1em;
-            right: 1em;
+            left: 1em;
             z-index: 100;
             font-size: 0.5em;
         }
@@ -227,7 +240,7 @@
             padding: 0.5em 1em;
             border: 1px solid #30363d;
             border-radius: 6px;
-            margin-left: 0.5em;
+            margin-right: 0.5em;
         }
         .lang-switch a:hover, .lang-switch a.active {
             color: var(--gitlab-orange);
@@ -239,8 +252,8 @@
     <div class="lang-switch">
         <a href="workflow-slides-en.html">EN</a>
         <a href="workflow-slides-de.html">DE</a>
-        <a href="workflow-slides-vi.html" class="active">VI</a>
-        <a href="workflow-slides-ar.html">AR</a>
+        <a href="workflow-slides-vi.html">VI</a>
+        <a href="workflow-slides-ar.html" class="active">AR</a>
     </div>
     
     <div class="reveal">
@@ -248,39 +261,39 @@
             
             <!-- TITLE SLIDE -->
             <section>
-                <h1>🦊 CLARISSA<br>GitLab Workflow</h1>
-                <p style="font-size: 1.2em; color: #8b949e;">Hướng dẫn cho người đóng góp</p>
+                <h1>🦊 CLARISSA<br>سير العمل في GitLab</h1>
+                <p style="font-size: 1.2em; color: #8b949e;">دليل للمساهمين</p>
                 <div style="margin-top: 2em;">
                     <span class="label-demo label-type">type::feature</span>
                     <span class="label-demo label-priority-high">priority::high</span>
                     <span class="label-demo label-workflow">workflow::ready</span>
                 </div>
                 <p style="font-size: 0.6em; margin-top: 3em; color: #6e7681;">
-                    Nhấn <code>→</code> hoặc <code>Space</code> để tiếp tục<br>
-                    <code>Esc</code> để xem tổng quan
+                    اضغط <code>←</code> أو <code>Space</code> للمتابعة<br>
+                    <code>Esc</code> لعرض النظرة العامة
                 </p>
             </section>
             
             <!-- OVERVIEW -->
             <section>
-                <h2>📋 Tại sao cần Workflow này?</h2>
+                <h2>📋 لماذا نحتاج هذا النظام؟</h2>
                 <div class="two-column" style="margin-top: 1em;">
-                    <div class="warning-box">
-                        <h3 style="color: var(--danger-red); margin-top: 0;">❌ Không có Workflow</h3>
+                    <div class="success-box">
+                        <h3 style="color: var(--success-green); margin-top: 0;">✅ مع النظام</h3>
                         <ul style="font-size: 0.7em;">
-                            <li>Commit trực tiếp vào <code>main</code></li>
-                            <li>Không ai biết ai đang làm gì</li>
-                            <li>Không thể truy vết lỗi</li>
-                            <li>Repository hỗn loạn</li>
+                            <li>كل تغيير مرتبط بـ issue</li>
+                            <li>اللوحة تُظهر من يعمل على ماذا</li>
+                            <li>مراجعة الكود قبل الدمج</li>
+                            <li>إغلاق تلقائي للـ issues</li>
                         </ul>
                     </div>
-                    <div class="success-box">
-                        <h3 style="color: var(--success-green); margin-top: 0;">✅ Có Workflow</h3>
+                    <div class="warning-box">
+                        <h3 style="color: var(--danger-red); margin-top: 0;">❌ بدون نظام</h3>
                         <ul style="font-size: 0.7em;">
-                            <li>Mọi thay đổi liên kết với issue</li>
-                            <li>Board hiển thị ai đang làm gì</li>
-                            <li>Code review trước khi merge</li>
-                            <li>Tự động đóng issue</li>
+                            <li>Commit مباشر على <code>main</code></li>
+                            <li>لا أحد يعرف من يفعل ماذا</li>
+                            <li>لا يمكن تتبع الأخطاء</li>
+                            <li>فوضى في المستودع</li>
                         </ul>
                     </div>
                 </div>
@@ -288,31 +301,31 @@
             
             <!-- THE BIG PICTURE -->
             <section>
-                <h2>🔄 Tổng quan Workflow</h2>
-                <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.5em; font-size: 0.75em;">
+                <h2>🔄 نظرة عامة على سير العمل</h2>
+                <div style="display: flex; flex-direction: row-reverse; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.5em; font-size: 0.7em;">
                     <div class="workflow-box" style="padding: 0.8em; text-align: center;">
-                        <span class="step-number">1</span><br>
-                        Chọn Issue
+                        <span class="step-number">١</span><br>
+                        اختر Issue
                     </div>
-                    <span class="flow-arrow">→</span>
+                    <span class="flow-arrow">←</span>
                     <div class="workflow-box" style="padding: 0.8em; text-align: center;">
-                        <span class="step-number">2</span><br>
-                        Tạo Branch
+                        <span class="step-number">٢</span><br>
+                        أنشئ Branch
                     </div>
-                    <span class="flow-arrow">→</span>
+                    <span class="flow-arrow">←</span>
                     <div class="workflow-box" style="padding: 0.8em; text-align: center;">
-                        <span class="step-number">3</span><br>
-                        Code & Commit
+                        <span class="step-number">٣</span><br>
+                        Commit
                     </div>
-                    <span class="flow-arrow">→</span>
+                    <span class="flow-arrow">←</span>
                     <div class="workflow-box" style="padding: 0.8em; text-align: center;">
-                        <span class="step-number">4</span><br>
+                        <span class="step-number">٤</span><br>
                         Merge Request
                     </div>
-                    <span class="flow-arrow">→</span>
+                    <span class="flow-arrow">←</span>
                     <div class="workflow-box" style="padding: 0.8em; text-align: center;">
-                        <span class="step-number">5</span><br>
-                        Review & Merge
+                        <span class="step-number">٥</span><br>
+                        مراجعة ودمج
                     </div>
                 </div>
             </section>
@@ -320,8 +333,8 @@
             <!-- STEP 1: ISSUE BOARD -->
             <section>
                 <section>
-                    <h2><span class="step-number">1</span> Issue Board</h2>
-                    <p>Board hiển thị tất cả công việc và trạng thái</p>
+                    <h2><span class="step-number">١</span> لوحة المهام</h2>
+                    <p>اللوحة تعرض جميع المهام وحالتها</p>
                     <div class="board-visual">
                         <div class="board-column">
                             <h4>Backlog</h4>
@@ -329,35 +342,28 @@
                             <div class="issue-card">#5 ECLIPSE</div>
                         </div>
                         <div class="board-column highlight">
-                            <h4>Sẵn sàng</h4>
+                            <h4>جاهز</h4>
                             <div class="issue-card moving">#12 gitignore</div>
                             <div class="issue-card">#8 Docker</div>
                         </div>
                         <div class="board-column">
-                            <h4>Đang làm</h4>
+                            <h4>قيد التنفيذ</h4>
                         </div>
                         <div class="board-column">
-                            <h4>Review</h4>
+                            <h4>مراجعة</h4>
                         </div>
                         <div class="board-column">
-                            <h4>Xong</h4>
+                            <h4>تم</h4>
                         </div>
                     </div>
                 </section>
                 
                 <section>
-                    <h2>📌 Chọn Issue</h2>
+                    <h2>📌 اختيار Issue</h2>
                     <div class="workflow-box">
-                        <p><strong>Quy tắc #1:</strong> Chọn issue từ cột <code>Ready</code></p>
-                        <p><strong>Quy tắc #2:</strong> Chỉ làm <em>một</em> issue tại một thời điểm</p>
-                        <p><strong>Quy tắc #3:</strong> Chuyển issue sang <code>In Progress</code></p>
-                    </div>
-                    <div class="success-box" style="font-size: 0.8em;">
-                        <strong>💡 Mẹo:</strong> Labels cho biết độ ưu tiên và loại:
-                        <div style="margin-top: 0.5em;">
-                            <span class="label-demo label-priority-high">priority::high</span> = Quan trọng<br>
-                            <span class="label-demo label-type">type::bug</span> = Sửa lỗi
-                        </div>
+                        <p><strong>قاعدة #١:</strong> اختر issue من عمود <code>Ready</code></p>
+                        <p><strong>قاعدة #٢:</strong> اعمل على issue <em>واحد</em> فقط في كل مرة</p>
+                        <p><strong>قاعدة #٣:</strong> انقل الـ issue إلى <code>In Progress</code></p>
                     </div>
                 </section>
             </section>
@@ -365,38 +371,38 @@
             <!-- STEP 2: BRANCH -->
             <section>
                 <section>
-                    <h2><span class="step-number">2</span> Tạo Branch</h2>
-                    <p>Không bao giờ làm việc trực tiếp trên <code>main</code>!</p>
-                    <pre><code class="language-bash"># Tên branch LUÔN bắt đầu bằng số issue!
+                    <h2><span class="step-number">٢</span> إنشاء Branch</h2>
+                    <p>لا تعمل مباشرة على <code>main</code> أبداً!</p>
+                    <pre><code class="language-bash"># اسم الـ branch يبدأ دائماً برقم الـ issue!
 git checkout -b 12-extend-gitignore
 
-# Hoặc trong GitLab UI: 
-# Mở issue → Nút "Create merge request"</code></pre>
+# أو في واجهة GitLab:
+# افتح issue ← زر "Create merge request"</code></pre>
                     <div class="warning-box" style="font-size: 0.8em;">
-                        <strong>⚠️ Quan trọng:</strong> Số issue ở đầu tên branch 
-                        tự động liên kết branch với issue!
+                        <strong>⚠️ مهم:</strong> رقم الـ issue في بداية اسم الـ branch 
+                        يربط تلقائياً بين الـ branch والـ issue!
                     </div>
                 </section>
                 
                 <section>
-                    <h2>🏷️ Quy ước đặt tên Branch</h2>
+                    <h2>🏷️ قواعد تسمية الـ Branch</h2>
                     <table class="command-table">
                         <tr>
-                            <th>Định dạng</th>
-                            <td><code>&lt;số-issue&gt;-&lt;mô-tả-ngắn&gt;</code></td>
+                            <th>الصيغة</th>
+                            <td><code>&lt;رقم-issue&gt;-&lt;وصف-قصير&gt;</code></td>
                         </tr>
                         <tr>
-                            <th>✅ Tốt</th>
+                            <th>✅ صحيح</th>
                             <td>
                                 <code>12-extend-gitignore</code><br>
                                 <code>42-fix-login-bug</code>
                             </td>
                         </tr>
                         <tr>
-                            <th>❌ Xấu</th>
+                            <th>❌ خطأ</th>
                             <td>
-                                <code>fix-stuff</code> (không có số issue)<br>
-                                <code>my-branch</code> (vô nghĩa)
+                                <code>fix-stuff</code> (بدون رقم issue)<br>
+                                <code>my-branch</code> (بلا معنى)
                             </td>
                         </tr>
                     </table>
@@ -406,67 +412,63 @@ git checkout -b 12-extend-gitignore
             <!-- STEP 3: COMMITS -->
             <section>
                 <section>
-                    <h2><span class="step-number">3</span> Commit với tham chiếu Issue</h2>
-                    <p>Mỗi commit nên tham chiếu đến issue</p>
-                    <pre><code class="language-bash"># Công thức kỳ diệu:
-git commit -m "type: mô tả #12"
+                    <h2><span class="step-number">٣</span> Commit مع إشارة للـ Issue</h2>
+                    <p>كل commit يجب أن يشير إلى الـ issue</p>
+                    <pre><code class="language-bash"># الصيغة السحرية:
+git commit -m "type: وصف #12"
 
-# Ví dụ:
-git commit -m "fix: sửa lỗi null pointer #42"
-git commit -m "feat: thêm xác thực user #7"
-git commit -m "docs: cập nhật README #15"</code></pre>
+# أمثلة:
+git commit -m "fix: إصلاح null pointer #42"
+git commit -m "feat: إضافة مصادقة المستخدم #7"
+git commit -m "docs: تحديث README #15"</code></pre>
                 </section>
                 
                 <section>
                     <h2>📝 Conventional Commits</h2>
                     <table class="command-table">
                         <tr>
-                            <th>Prefix</th>
-                            <th>Sử dụng</th>
+                            <th>البادئة</th>
+                            <th>الاستخدام</th>
                         </tr>
                         <tr>
                             <td><code>feat:</code></td>
-                            <td>Tính năng mới</td>
+                            <td>ميزة جديدة</td>
                         </tr>
                         <tr>
                             <td><code>fix:</code></td>
-                            <td>Sửa lỗi</td>
+                            <td>إصلاح خطأ</td>
                         </tr>
                         <tr>
                             <td><code>docs:</code></td>
-                            <td>Tài liệu</td>
+                            <td>توثيق</td>
                         </tr>
                         <tr>
                             <td><code>chore:</code></td>
-                            <td>Bảo trì</td>
+                            <td>صيانة</td>
                         </tr>
                         <tr>
                             <td><code>refactor:</code></td>
-                            <td>Tái cấu trúc code</td>
+                            <td>إعادة هيكلة</td>
                         </tr>
                         <tr>
                             <td><code>test:</code></td>
-                            <td>Thêm/sửa tests</td>
+                            <td>اختبارات</td>
                         </tr>
                     </table>
                 </section>
                 
                 <section>
-                    <h2>🔗 Từ khóa kỳ diệu</h2>
-                    <p>Những từ này trong commit/MR tự động đóng issue:</p>
+                    <h2>🔗 الكلمات السحرية</h2>
+                    <p>هذه الكلمات في commit أو MR تُغلق الـ issue تلقائياً:</p>
                     <div style="margin: 1em 0;">
                         <span class="keyword closes">Closes #12</span>
                         <span class="keyword closes">Fixes #12</span>
                         <span class="keyword closes">Resolves #12</span>
                     </div>
-                    <p style="font-size: 0.8em;">Chỉ liên kết (không đóng):</p>
+                    <p style="font-size: 0.8em;">للربط فقط (بدون إغلاق):</p>
                     <div>
                         <span class="keyword ref">#12</span>
                         <span class="keyword ref">Related to #12</span>
-                    </div>
-                    <div class="success-box" style="margin-top: 1em; font-size: 0.8em;">
-                        <strong>🎯 Best Practice:</strong> Dùng <code>Closes #12</code> trong commit cuối 
-                        hoặc trong mô tả MR!
                     </div>
                 </section>
             </section>
@@ -474,123 +476,95 @@ git commit -m "docs: cập nhật README #15"</code></pre>
             <!-- STEP 4: MERGE REQUEST -->
             <section>
                 <section>
-                    <h2><span class="step-number">4</span> Tạo Merge Request</h2>
-                    <pre><code class="language-bash"># Push branch
+                    <h2><span class="step-number">٤</span> إنشاء Merge Request</h2>
+                    <pre><code class="language-bash"># رفع الـ branch
 git push -u origin 12-extend-gitignore
 
-# GitLab sẽ hiện link để tạo MR!</code></pre>
+# GitLab سيعرض رابط لإنشاء MR!</code></pre>
                     <div class="workflow-box">
-                        <p><strong>Tiêu đề MR:</strong> <code>chore: mở rộng .gitignore cho OPM</code></p>
-                        <p><strong>Mô tả MR phải có:</strong></p>
+                        <p><strong>عنوان MR:</strong> <code>chore: توسيع .gitignore لـ OPM</code></p>
+                        <p><strong>وصف MR يجب أن يحتوي:</strong></p>
                         <ul style="font-size: 0.8em;">
-                            <li>Đã thay đổi gì?</li>
-                            <li><code>Closes #12</code> (để tự đóng)</li>
-                            <li>Checklist review</li>
+                            <li>ما الذي تغير؟</li>
+                            <li><code>Closes #12</code> (للإغلاق التلقائي)</li>
+                            <li>قائمة مراجعة</li>
                         </ul>
                     </div>
-                </section>
-                
-                <section>
-                    <h2>📋 Template MR</h2>
-                    <pre><code class="language-markdown">## Tóm tắt
-Mô tả ngắn về thay đổi.
-
-## Thay đổi
-- Mục 1
-- Mục 2
-
-## Liên quan
-Closes #12
-
-## Checklist
-- [ ] Code đã test
-- [ ] Tài liệu đã cập nhật</code></pre>
                 </section>
             </section>
             
             <!-- STEP 5: MERGE -->
             <section>
                 <section>
-                    <h2><span class="step-number">5</span> Review & Merge</h2>
+                    <h2><span class="step-number">٥</span> مراجعة ودمج</h2>
                     <div class="two-column">
                         <div>
-                            <h3 style="color: var(--warning-yellow);">👀 Review</h3>
+                            <h3 style="color: var(--success-green);">✅ دمج</h3>
                             <ul style="font-size: 0.7em;">
-                                <li>Reviewer kiểm tra code</li>
-                                <li>Góp ý & yêu cầu sửa</li>
-                                <li>Push thêm commits nếu cần</li>
-                                <li>Approve</li>
+                                <li>اضغط زر "Merge"</li>
+                                <li>الـ branch يُحذف</li>
+                                <li>الكود يدخل <code>main</code></li>
+                                <li><strong>الـ issue يُغلق تلقائياً!</strong></li>
                             </ul>
                         </div>
                         <div>
-                            <h3 style="color: var(--success-green);">✅ Merge</h3>
+                            <h3 style="color: var(--warning-yellow);">👀 مراجعة</h3>
                             <ul style="font-size: 0.7em;">
-                                <li>Click nút "Merge"</li>
-                                <li>Branch bị xóa</li>
-                                <li>Code vào <code>main</code></li>
-                                <li><strong>Issue tự động đóng!</strong></li>
+                                <li>المراجع يفحص الكود</li>
+                                <li>تعليقات وتعديلات</li>
+                                <li>إضافة commits إذا لزم</li>
+                                <li>موافقة</li>
                             </ul>
                         </div>
                     </div>
                 </section>
                 
                 <section>
-                    <h2>🎉 Phép màu tự động</h2>
-                    <p>Nhờ <code>Closes #12</code>, khi merge:</p>
+                    <h2>🎉 السحر التلقائي</h2>
+                    <p>بفضل <code>Closes #12</code>، عند الدمج:</p>
                     <div style="font-size: 1.5em; margin: 1em 0;">
-                        MR merged <span class="flow-arrow">→</span> Issue #12 đóng
-                    </div>
-                    <div class="board-visual">
-                        <div class="board-column">
-                            <h4>Review</h4>
-                        </div>
-                        <div class="board-column highlight" style="border-color: var(--success-green);">
-                            <h4>Đã đóng ✅</h4>
-                            <div class="issue-card" style="border-left-color: var(--success-green);">#12 gitignore</div>
-                        </div>
+                        Issue #12 يُغلق <span class="flow-arrow">←</span> MR يُدمج
                     </div>
                 </section>
             </section>
             
             <!-- DON'TS -->
             <section>
-                <h2>🚫 Những điều cấm kỵ</h2>
+                <h2>🚫 الممنوعات</h2>
                 <div class="warning-box">
-                    <ol style="font-size: 0.8em; text-align: left;">
-                        <li><strong>Push trực tiếp vào <code>main</code></strong><br>
-                            <span style="color: #8b949e;">→ Luôn dùng branch + MR!</span></li>
-                        <li><strong>Commit không có tham chiếu issue</strong><br>
-                            <span style="color: #8b949e;">→ Luôn có <code>#42</code> trong commit!</span></li>
-                        <li><strong>Commit secrets/mật khẩu</strong><br>
-                            <span style="color: #8b949e;">→ Dùng <code>.gitignore</code>!</span></li>
-                        <li><strong>MR khổng lồ với 50 files</strong><br>
-                            <span style="color: #8b949e;">→ Thay đổi nhỏ, tập trung!</span></li>
-                        <li><strong>MR không có mô tả</strong><br>
-                            <span style="color: #8b949e;">→ Luôn có "Closes #X"!</span></li>
+                    <ol style="font-size: 0.8em; text-align: right;">
+                        <li><strong>Push مباشر على <code>main</code></strong><br>
+                            <span style="color: #8b949e;">← استخدم دائماً branch + MR!</span></li>
+                        <li><strong>Commit بدون إشارة للـ issue</strong><br>
+                            <span style="color: #8b949e;">← ضع دائماً <code>#42</code> في الـ commit!</span></li>
+                        <li><strong>Commit كلمات سر أو أسرار</strong><br>
+                            <span style="color: #8b949e;">← استخدم <code>.gitignore</code>!</span></li>
+                        <li><strong>MR ضخم بـ 50 ملف</strong><br>
+                            <span style="color: #8b949e;">← تغييرات صغيرة ومركزة!</span></li>
                     </ol>
                 </div>
             </section>
             
             <!-- CHECKLIST -->
             <section>
-                <h2>✅ Checklist trước Merge</h2>
+                <h2>✅ قائمة التحقق قبل الدمج</h2>
                 <ul class="checklist" style="font-size: 0.8em;">
-                    <li class="done">Branch tạo từ <code>main</code></li>
-                    <li class="done">Tên branch có số issue</li>
-                    <li class="done">Commits theo Conventional Commits</li>
-                    <li class="done">Commits tham chiếu issue (<code>#42</code>)</li>
-                    <li class="done">Mô tả MR có <code>Closes #42</code></li>
-                    <li class="done">Không có secrets trong code</li>
-                    <li class="done">CI pipeline xanh</li>
+                    <li class="done">الـ Branch منشأ من <code>main</code></li>
+                    <li class="done">اسم الـ branch يحتوي رقم الـ issue</li>
+                    <li class="done">الـ Commits تتبع Conventional Commits</li>
+                    <li class="done">الـ Commits تشير للـ issue (<code>#42</code>)</li>
+                    <li class="done">وصف MR يحتوي <code>Closes #42</code></li>
+                    <li class="done">لا توجد أسرار في الكود</li>
+                    <li class="done">CI pipeline أخضر</li>
                 </ul>
             </section>
             
             <!-- END -->
             <section>
                 <span class="big-emoji">🦊</span>
-                <h2>Chúc bạn đóng góp vui vẻ!</h2>
-                <p style="color: #8b949e;">Giờ bạn đã biết cách làm rồi.</p>
-                <p style="font-size: 0.7em; margin-top: 2em;">
+                <h2>!مساهمة سعيدة</h2>
+                <p style="color: #8b949e;">الآن أنت تعرف كيف تفعلها.</p>
+                <p style="font-size: 0.7em; margin-top: 2em; direction: ltr;">
                     <span class="keyword ref">#issue</span>
                     <span class="flow-arrow">→</span>
                     <span class="keyword ref">branch</span>
@@ -613,6 +587,7 @@ Closes #12
             hash: true,
             slideNumber: 'c/t',
             transition: 'slide',
+            rtl: true,
             plugins: [ RevealHighlight ]
         });
     </script>
