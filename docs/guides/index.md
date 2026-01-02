@@ -8,8 +8,8 @@ New to the project? Start here:
 
 | Guide | Description | Format |
 |-------|-------------|--------|
-| [GitLab Workflow (Interactive)](contributing/workflow-slides.html) | Complete contributor onboarding with visual examples | HTML Slides |
-| [Workflow Cheatsheet](contributing/cheatsheet.md) | Quick reference for daily use | Markdown |
+| [GitLab Workflow (Language Selector)](contributing/index.html) | Complete contributor onboarding with visual examples | HTML Slides |
+| [Workflow Cheatsheet](contributing/cheatsheet-en.md) | Quick reference for daily use | Markdown |
 | [Project Management](project-management.md) | Issue tracking, labels, and board usage | Markdown |
 
 ## 🌍 Language Versions
@@ -25,14 +25,14 @@ Documentation is available in multiple languages:
 
 Everything you need to contribute code to CLARISSA:
 
-- **[GitLab Workflow Slides](contributing/workflow-slides.html)** - Interactive presentation covering:
+- **[GitLab Workflow Slides](contributing/index.html)** - Interactive presentation covering:
     - Issue board usage
     - Branch naming conventions
     - Conventional Commits format
     - Merge request best practices
     - Automatic issue closing
 
-- **[Workflow Cheatsheet](contributing/cheatsheet.md)** - One-page quick reference
+- **[Workflow Cheatsheet](contributing/cheatsheet-en.md)** - One-page quick reference
 
 ### Project Management
 

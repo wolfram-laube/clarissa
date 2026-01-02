@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLARISSA GitLab Workflow Guide - Select Language</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fc6d26, #6e49cb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #8b949e;
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .language-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .language-card {
+            background: linear-gradient(135deg, #161b22, #1c2128);
+            border: 2px solid #30363d;
+            border-radius: 16px;
+            padding: 2rem;
+            text-decoration: none;
+            color: #e6edf3;
+            transition: all 0.3s ease;
+        }
+        
+        .language-card:hover {
+            border-color: #fc6d26;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(252, 109, 38, 0.2);
+        }
+        
+        .flag {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .lang-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+        
+        .lang-native {
+            color: #8b949e;
+            font-size: 1rem;
+        }
+        
+        .formats {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #30363d;
+        }
+        
+        .formats h2 {
+            color: #58a6ff;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .format-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .format-link {
+            color: #8b949e;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .format-link:hover {
+            color: #fc6d26;
+            border-color: #fc6d26;
+        }
+        
+        footer {
+            margin-top: 3rem;
+            color: #6e7681;
+            font-size: 0.85rem;
+        }
+        
+        footer a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🦊 CLARISSA Workflow Guide</h1>
+        <p class="subtitle">Select your language / Wähle deine Sprache</p>
+        
+        <div class="language-grid">
+            <a href="workflow-slides-en.html" class="language-card">
+                <div class="flag">🇬🇧</div>
+                <div class="lang-name">English</div>
+                <div class="lang-native">Interactive Slides</div>
+            </a>
+            
+            <a href="workflow-slides-de.html" class="language-card">
+                <div class="flag">🇩🇪</div>
+                <div class="lang-name">Deutsch</div>
+                <div class="lang-native">Interaktive Präsentation</div>
+            </a>
+        </div>
+        
+        <div class="formats">
+            <h2>📋 Quick Reference / Kurzreferenz</h2>
+            <div class="format-links">
+                <a href="cheatsheet-en.md" class="format-link">🇬🇧 Cheatsheet (EN)</a>
+                <a href="cheatsheet-de.md" class="format-link">🇩🇪 Cheatsheet (DE)</a>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Part of <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/irena">CLARISSA</a> Documentation</p>
+        </footer>
+    </div>
+</body>
+</html>
