@@ -84,6 +84,14 @@ nav:
     - ADR-009 NLP Pipeline: architecture/adr/ADR-009-nlp-translation-pipeline.md
     - ADR-010 Project Rename: architecture/adr/ADR-010-project-renaming-clarissa.md
     - ADR-011 OPM Flow Integration: architecture/adr/ADR-011-opm-flow-integration.md
+    - ADR-012 Container Registry: architecture/adr/ADR-012-container-registry-k8s-strategy.md
+
+  - Guides:
+    - Overview: guides/index.md
+    - Contributing:
+      - Workflow Cheatsheet: guides/contributing/cheatsheet.md
+      - Workflow Cheatsheet (DE): guides/contributing/cheatsheet-de.md
+    - Project Management: guides/project-management.md
 
   - CI:
     - How to Read CI Results: ci/README.md

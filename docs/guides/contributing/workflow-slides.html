@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,15 +29,8 @@
             --code-bg: #161b22;
         }
         
-        .reveal {
-            font-family: var(--r-main-font);
-        }
-        
-        .reveal h1, .reveal h2, .reveal h3 {
-            font-weight: 700;
-            text-transform: none;
-        }
-        
+        .reveal { font-family: var(--r-main-font); }
+        .reveal h1, .reveal h2, .reveal h3 { font-weight: 700; text-transform: none; }
         .reveal h1 {
             font-size: 2.5em;
             background: linear-gradient(135deg, var(--gitlab-orange), var(--gitlab-purple));
@@ -45,14 +38,12 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
         .reveal h2 {
             color: var(--r-heading-color);
             border-bottom: 3px solid var(--gitlab-orange);
             padding-bottom: 0.3em;
             display: inline-block;
         }
-        
         .reveal code {
             font-family: var(--r-code-font);
             background: var(--code-bg);
@@ -61,7 +52,6 @@
             font-size: 0.85em;
             color: #79c0ff;
         }
-        
         .reveal pre {
             background: var(--code-bg);
             border-radius: 12px;
@@ -69,14 +59,12 @@
             box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             width: 100%;
         }
-        
         .reveal pre code {
             background: transparent;
             padding: 1em;
             font-size: 0.7em;
             line-height: 1.5;
         }
-        
         .workflow-box {
             background: linear-gradient(135deg, #161b22, #1c2128);
             border: 2px solid #30363d;
@@ -85,12 +73,10 @@
             margin: 0.5em 0;
             text-align: left;
         }
-        
         .workflow-box.active {
             border-color: var(--gitlab-orange);
             box-shadow: 0 0 30px rgba(252, 109, 38, 0.3);
         }
-        
         .step-number {
             display: inline-flex;
             align-items: center;
@@ -104,12 +90,6 @@
             margin-right: 0.5em;
             color: white;
         }
-        
-        .emoji-icon {
-            font-size: 1.5em;
-            margin-right: 0.3em;
-        }
-        
         .keyword {
             display: inline-block;
             background: var(--code-bg);
@@ -120,18 +100,15 @@
             font-family: var(--r-code-font);
             font-size: 0.8em;
         }
-        
         .keyword.closes { border-color: var(--success-green); color: var(--success-green); }
         .keyword.fixes { border-color: var(--warning-yellow); color: var(--warning-yellow); }
         .keyword.ref { border-color: var(--r-heading-color); color: var(--r-heading-color); }
-        
         .board-visual {
             display: flex;
             gap: 10px;
             justify-content: center;
             margin: 1em 0;
         }
-        
         .board-column {
             background: var(--code-bg);
             border: 1px solid #30363d;
@@ -140,19 +117,16 @@
             min-width: 120px;
             text-align: center;
         }
-        
         .board-column.highlight {
             border-color: var(--gitlab-orange);
             background: rgba(252, 109, 38, 0.1);
         }
-        
         .board-column h4 {
             font-size: 0.6em;
             margin: 0 0 0.5em 0;
             color: #8b949e;
             text-transform: uppercase;
         }
-        
         .issue-card {
             background: #21262d;
             border-radius: 6px;
@@ -161,17 +135,14 @@
             font-size: 0.5em;
             border-left: 3px solid var(--gitlab-purple);
         }
-        
         .issue-card.moving {
             border-left-color: var(--gitlab-orange);
             animation: pulse 1s infinite;
         }
-        
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
         }
-        
         .warning-box {
             background: rgba(248, 81, 73, 0.1);
             border: 2px solid var(--danger-red);
@@ -179,7 +150,6 @@
             padding: 1em;
             margin: 1em 0;
         }
-        
         .success-box {
             background: rgba(63, 185, 80, 0.1);
             border: 2px solid var(--success-green);
@@ -187,20 +157,17 @@
             padding: 1em;
             margin: 1em 0;
         }
-        
         .flow-arrow {
             font-size: 2em;
             color: var(--gitlab-orange);
             margin: 0 0.3em;
         }
-        
         .two-column {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2em;
             text-align: left;
         }
-        
         .label-demo {
             display: inline-block;
             padding: 0.2em 0.6em;
@@ -209,25 +176,21 @@
             font-weight: 600;
             margin: 0.1em;
         }
-        
         .label-type { background: #238636; }
         .label-priority-high { background: #ff6600; }
         .label-priority-med { background: #d29922; }
         .label-workflow { background: #6e49cb; }
         .label-component { background: #1f6feb; }
-        
         .checklist {
             text-align: left;
             list-style: none;
             padding: 0;
         }
-        
         .checklist li {
             padding: 0.5em 0;
             padding-left: 2em;
             position: relative;
         }
-        
         .checklist li::before {
             content: "☐";
             position: absolute;
@@ -235,43 +198,29 @@
             color: var(--gitlab-orange);
             font-size: 1.2em;
         }
-        
         .checklist li.done::before {
             content: "☑";
             color: var(--success-green);
         }
-        
-        footer.slide-footer {
-            position: absolute;
-            bottom: 1em;
-            left: 1em;
-            font-size: 0.5em;
-            color: #8b949e;
-        }
-        
         .big-emoji {
             font-size: 4em;
             display: block;
             margin: 0.5em 0;
         }
-        
         .command-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.7em;
         }
-        
         .command-table th, .command-table td {
             padding: 0.8em;
             border: 1px solid #30363d;
             text-align: left;
         }
-        
         .command-table th {
             background: var(--code-bg);
             color: var(--gitlab-orange);
         }
-        
         .progress-bar {
             height: 6px;
             background: #30363d;
@@ -279,78 +228,98 @@
             overflow: hidden;
             margin: 1em 0;
         }
-        
         .progress-bar-fill {
             height: 100%;
             background: linear-gradient(90deg, var(--gitlab-orange), var(--success-green));
             border-radius: 3px;
         }
+        .lang-switch {
+            position: fixed;
+            top: 1em;
+            right: 1em;
+            z-index: 100;
+            font-size: 0.5em;
+        }
+        .lang-switch a {
+            color: #8b949e;
+            text-decoration: none;
+            padding: 0.5em 1em;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            margin-left: 0.5em;
+        }
+        .lang-switch a:hover, .lang-switch a.active {
+            color: var(--gitlab-orange);
+            border-color: var(--gitlab-orange);
+        }
     </style>
 </head>
 <body>
+    <div class="lang-switch">
+        <a href="workflow-slides.html" class="active">EN</a>
+        <a href="workflow-slides-de.html">DE</a>
+    </div>
+    
     <div class="reveal">
         <div class="slides">
             
             <!-- TITLE SLIDE -->
             <section>
                 <h1>🦊 CLARISSA<br>GitLab Workflow</h1>
-                <p style="font-size: 1.2em; color: #8b949e;">Deppensichere Anleitung für Contributors</p>
+                <p style="font-size: 1.2em; color: #8b949e;">Contributor Onboarding Guide</p>
                 <div style="margin-top: 2em;">
                     <span class="label-demo label-type">type::feature</span>
                     <span class="label-demo label-priority-high">priority::high</span>
                     <span class="label-demo label-workflow">workflow::ready</span>
                 </div>
                 <p style="font-size: 0.6em; margin-top: 3em; color: #6e7681;">
-                    Drücke <code>→</code> oder <code>Space</code> zum Weiterblättern<br>
-                    <code>Esc</code> für Übersicht • <code>S</code> für Speaker Notes
+                    Press <code>→</code> or <code>Space</code> to navigate<br>
+                    <code>Esc</code> for overview • <code>S</code> for speaker notes
                 </p>
             </section>
             
             <!-- OVERVIEW -->
             <section>
-                <h2>📋 Warum dieser Workflow?</h2>
+                <h2>📋 Why This Workflow?</h2>
                 <div class="two-column" style="margin-top: 1em;">
                     <div class="warning-box">
-                        <h3 style="color: var(--danger-red); margin-top: 0;">❌ Ohne Workflow</h3>
+                        <h3 style="color: var(--danger-red); margin-top: 0;">❌ Without Workflow</h3>
                         <ul style="font-size: 0.7em;">
-                            <li>Commits direkt auf <code>main</code></li>
-                            <li>Niemand weiß, wer woran arbeitet</li>
-                            <li>Bugs lassen sich nicht zurückverfolgen</li>
-                            <li>Chaos im Repository</li>
+                            <li>Commits directly to <code>main</code></li>
+                            <li>No one knows who's working on what</li>
+                            <li>Bugs can't be traced back</li>
+                            <li>Repository chaos</li>
                         </ul>
                     </div>
                     <div class="success-box">
-                        <h3 style="color: var(--success-green); margin-top: 0;">✅ Mit Workflow</h3>
+                        <h3 style="color: var(--success-green); margin-top: 0;">✅ With Workflow</h3>
                         <ul style="font-size: 0.7em;">
-                            <li>Jede Änderung ist einem Issue zugeordnet</li>
-                            <li>Board zeigt, wer woran arbeitet</li>
-                            <li>Code-Reviews vor dem Merge</li>
-                            <li>Automatische Issue-Schließung</li>
+                            <li>Every change linked to an issue</li>
+                            <li>Board shows who's working on what</li>
+                            <li>Code reviews before merge</li>
+                            <li>Automatic issue closing</li>
                         </ul>
                     </div>
                 </div>
-                <aside class="notes">
-                    Der Workflow schützt das Repository vor versehentlichen Fehlern und macht die Zusammenarbeit transparent.
-                </aside>
             </section>
             
             <!-- THE BIG PICTURE -->
             <section>
-                <h2>🔄 Der Workflow im Überblick</h2>
+                <h2>🔄 The Workflow at a Glance</h2>
                 <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.5em; font-size: 0.8em;">
                     <div class="workflow-box" style="padding: 0.8em; text-align: center;">
                         <span class="step-number">1</span><br>
-                        Issue wählen
+                        Pick Issue
                     </div>
                     <span class="flow-arrow">→</span>
                     <div class="workflow-box" style="padding: 0.8em; text-align: center;">
                         <span class="step-number">2</span><br>
-                        Branch erstellen
+                        Create Branch
                     </div>
                     <span class="flow-arrow">→</span>
                     <div class="workflow-box" style="padding: 0.8em; text-align: center;">
                         <span class="step-number">3</span><br>
-                        Coden & Committen
+                        Code & Commit
                     </div>
                     <span class="flow-arrow">→</span>
                     <div class="workflow-box" style="padding: 0.8em; text-align: center;">
@@ -372,7 +341,7 @@
             <section>
                 <section>
                     <h2><span class="step-number">1</span> Issue Board</h2>
-                    <p>Das Board zeigt alle Aufgaben und ihren Status</p>
+                    <p>The board shows all tasks and their status</p>
                     <div class="board-visual">
                         <div class="board-column">
                             <h4>Backlog</h4>
@@ -400,17 +369,17 @@
                 </section>
                 
                 <section>
-                    <h2>📌 Issue auswählen</h2>
+                    <h2>📌 Selecting an Issue</h2>
                     <div class="workflow-box">
-                        <p><strong>Regel #1:</strong> Nimm dir ein Issue aus der <code>Ready</code>-Spalte</p>
-                        <p><strong>Regel #2:</strong> Arbeite nur an <em>einem</em> Issue gleichzeitig</p>
-                        <p><strong>Regel #3:</strong> Ziehe das Issue nach <code>In Progress</code></p>
+                        <p><strong>Rule #1:</strong> Pick an issue from the <code>Ready</code> column</p>
+                        <p><strong>Rule #2:</strong> Work on only <em>one</em> issue at a time</p>
+                        <p><strong>Rule #3:</strong> Move the issue to <code>In Progress</code></p>
                     </div>
                     <div class="success-box" style="font-size: 0.8em;">
-                        <strong>💡 Tipp:</strong> Die Labels zeigen Priorität und Typ:
+                        <strong>💡 Tip:</strong> Labels indicate priority and type:
                         <div style="margin-top: 0.5em;">
-                            <span class="label-demo label-priority-high">priority::high</span> = Wichtig, bald machen<br>
-                            <span class="label-demo label-type">type::bug</span> = Fehler beheben
+                            <span class="label-demo label-priority-high">priority::high</span> = Important, do soon<br>
+                            <span class="label-demo label-type">type::bug</span> = Fix a defect
                         </div>
                     </div>
                 </section>
@@ -419,28 +388,28 @@
             <!-- STEP 2: BRANCH -->
             <section>
                 <section>
-                    <h2><span class="step-number">2</span> Branch erstellen</h2>
-                    <p>Niemals direkt auf <code>main</code> arbeiten!</p>
-                    <pre><code class="language-bash"># Branch-Name beginnt IMMER mit der Issue-Nummer!
+                    <h2><span class="step-number">2</span> Create Branch</h2>
+                    <p>Never work directly on <code>main</code>!</p>
+                    <pre><code class="language-bash"># Branch name ALWAYS starts with issue number!
 git checkout -b 12-extend-gitignore
 
-# Alternativ in GitLab: 
-# Issue öffnen → "Create merge request" Button</code></pre>
+# Alternative in GitLab UI: 
+# Open issue → "Create merge request" button</code></pre>
                     <div class="warning-box" style="font-size: 0.8em;">
-                        <strong>⚠️ Wichtig:</strong> Die Issue-Nummer am Anfang des Branch-Namens 
-                        verknüpft Branch automatisch mit dem Issue!
+                        <strong>⚠️ Important:</strong> The issue number at the start of the branch name 
+                        automatically links the branch to the issue!
                     </div>
                 </section>
                 
                 <section>
-                    <h2>🏷️ Branch-Naming Convention</h2>
+                    <h2>🏷️ Branch Naming Convention</h2>
                     <table class="command-table">
                         <tr>
                             <th>Format</th>
-                            <td><code>&lt;issue-nr&gt;-&lt;kurze-beschreibung&gt;</code></td>
+                            <td><code>&lt;issue-nr&gt;-&lt;short-description&gt;</code></td>
                         </tr>
                         <tr>
-                            <th>✅ Gut</th>
+                            <th>✅ Good</th>
                             <td>
                                 <code>12-extend-gitignore</code><br>
                                 <code>42-fix-login-bug</code><br>
@@ -448,11 +417,11 @@ git checkout -b 12-extend-gitignore
                             </td>
                         </tr>
                         <tr>
-                            <th>❌ Schlecht</th>
+                            <th>❌ Bad</th>
                             <td>
-                                <code>fix-stuff</code> (keine Issue-Nr)<br>
-                                <code>mein-branch</code> (nichtssagend)<br>
-                                <code>test123</code> (????)
+                                <code>fix-stuff</code> (no issue number)<br>
+                                <code>my-branch</code> (meaningless)<br>
+                                <code>test123</code> (?????)
                             </td>
                         </tr>
                     </table>
@@ -462,12 +431,12 @@ git checkout -b 12-extend-gitignore
             <!-- STEP 3: COMMITS -->
             <section>
                 <section>
-                    <h2><span class="step-number">3</span> Commits mit Issue-Referenz</h2>
-                    <p>Jeder Commit sollte das Issue referenzieren</p>
-                    <pre><code class="language-bash"># Die magische Formel:
-git commit -m "typ: beschreibung #12"
+                    <h2><span class="step-number">3</span> Commits with Issue Reference</h2>
+                    <p>Every commit should reference the issue</p>
+                    <pre><code class="language-bash"># The magic formula:
+git commit -m "type: description #12"
 
-# Beispiele:
+# Examples:
 git commit -m "fix: resolve null pointer #42"
 git commit -m "feat: add user authentication #7"
 git commit -m "docs: update README #15"</code></pre>
@@ -478,51 +447,51 @@ git commit -m "docs: update README #15"</code></pre>
                     <table class="command-table">
                         <tr>
                             <th>Prefix</th>
-                            <th>Verwendung</th>
+                            <th>Usage</th>
                         </tr>
                         <tr>
                             <td><code>feat:</code></td>
-                            <td>Neue Funktion</td>
+                            <td>New feature</td>
                         </tr>
                         <tr>
                             <td><code>fix:</code></td>
-                            <td>Bugfix</td>
+                            <td>Bug fix</td>
                         </tr>
                         <tr>
                             <td><code>docs:</code></td>
-                            <td>Dokumentation</td>
+                            <td>Documentation</td>
                         </tr>
                         <tr>
                             <td><code>chore:</code></td>
-                            <td>Maintenance, Aufräumen</td>
+                            <td>Maintenance, cleanup</td>
                         </tr>
                         <tr>
                             <td><code>refactor:</code></td>
-                            <td>Code-Umbau ohne Funktionsänderung</td>
+                            <td>Code restructuring without behavior change</td>
                         </tr>
                         <tr>
                             <td><code>test:</code></td>
-                            <td>Tests hinzufügen/ändern</td>
+                            <td>Adding/modifying tests</td>
                         </tr>
                     </table>
                 </section>
                 
                 <section>
-                    <h2>🔗 Die magischen Keywords</h2>
-                    <p>Diese Wörter im Commit/MR schließen Issues automatisch:</p>
+                    <h2>🔗 The Magic Keywords</h2>
+                    <p>These words in commit/MR automatically close issues:</p>
                     <div style="margin: 1em 0;">
                         <span class="keyword closes">Closes #12</span>
                         <span class="keyword closes">Fixes #12</span>
                         <span class="keyword closes">Resolves #12</span>
                     </div>
-                    <p style="font-size: 0.8em;">Nur verlinken (ohne zu schließen):</p>
+                    <p style="font-size: 0.8em;">Link only (without closing):</p>
                     <div>
                         <span class="keyword ref">#12</span>
                         <span class="keyword ref">Related to #12</span>
                     </div>
                     <div class="success-box" style="margin-top: 1em; font-size: 0.8em;">
-                        <strong>🎯 Best Practice:</strong> <code>Closes #12</code> im letzten Commit 
-                        oder in der MR-Beschreibung verwenden!
+                        <strong>🎯 Best Practice:</strong> Use <code>Closes #12</code> in the final commit 
+                        or in the MR description!
                     </div>
                 </section>
             </section>
@@ -530,18 +499,18 @@ git commit -m "docs: update README #15"</code></pre>
             <!-- STEP 4: MERGE REQUEST -->
             <section>
                 <section>
-                    <h2><span class="step-number">4</span> Merge Request erstellen</h2>
-                    <pre><code class="language-bash"># Branch pushen
+                    <h2><span class="step-number">4</span> Create Merge Request</h2>
+                    <pre><code class="language-bash"># Push branch
 git push -u origin 12-extend-gitignore
 
-# GitLab zeigt dann einen Link zum MR-Erstellen!</code></pre>
+# GitLab will show a link to create the MR!</code></pre>
                     <div class="workflow-box">
                         <p><strong>MR Title:</strong> <code>chore: extend .gitignore for OPM artifacts</code></p>
-                        <p><strong>MR Description muss enthalten:</strong></p>
+                        <p><strong>MR Description must include:</strong></p>
                         <ul style="font-size: 0.8em;">
-                            <li>Was wurde geändert?</li>
-                            <li><code>Closes #12</code> (für Auto-Close)</li>
-                            <li>Checklist für Review</li>
+                            <li>What was changed?</li>
+                            <li><code>Closes #12</code> (for auto-close)</li>
+                            <li>Review checklist</li>
                         </ul>
                     </div>
                 </section>
@@ -549,24 +518,24 @@ git push -u origin 12-extend-gitignore
                 <section>
                     <h2>📋 MR Template</h2>
                     <pre><code class="language-markdown">## Summary
-Kurze Beschreibung der Änderungen.
+Brief description of changes.
 
 ## Changes
-- Punkt 1
-- Punkt 2
+- Item 1
+- Item 2
 
 ## Related
 Closes #12
 
 ## Checklist
-- [ ] Code getestet
-- [ ] Dokumentation aktualisiert
-- [ ] Keine Secrets committed</code></pre>
+- [ ] Code tested
+- [ ] Documentation updated
+- [ ] No secrets committed</code></pre>
                 </section>
                 
                 <section>
-                    <h2>🏷️ Issue-Status aktualisieren</h2>
-                    <p>Nach MR-Erstellung: Issue auf <code>Review</code> setzen</p>
+                    <h2>🏷️ Update Issue Status</h2>
+                    <p>After creating MR: Move issue to <code>Review</code></p>
                     <div class="board-visual">
                         <div class="board-column">
                             <h4>Backlog</h4>
@@ -598,27 +567,27 @@ Closes #12
                         <div>
                             <h3 style="color: var(--warning-yellow);">👀 Review</h3>
                             <ul style="font-size: 0.7em;">
-                                <li>Reviewer schaut Code an</li>
-                                <li>Kommentare & Änderungswünsche</li>
-                                <li>Bei Bedarf: Commits nachschieben</li>
-                                <li>Approval erteilen</li>
+                                <li>Reviewer examines code</li>
+                                <li>Comments & change requests</li>
+                                <li>If needed: push more commits</li>
+                                <li>Give approval</li>
                             </ul>
                         </div>
                         <div>
                             <h3 style="color: var(--success-green);">✅ Merge</h3>
                             <ul style="font-size: 0.7em;">
-                                <li>"Merge" Button klicken</li>
-                                <li>Branch wird gelöscht</li>
-                                <li>Code landet auf <code>main</code></li>
-                                <li><strong>Issue wird automatisch geschlossen!</strong></li>
+                                <li>Click "Merge" button</li>
+                                <li>Branch gets deleted</li>
+                                <li>Code lands on <code>main</code></li>
+                                <li><strong>Issue closes automatically!</strong></li>
                             </ul>
                         </div>
                     </div>
                 </section>
                 
                 <section>
-                    <h2>🎉 Automatische Magie</h2>
-                    <p>Durch <code>Closes #12</code> passiert beim Merge:</p>
+                    <h2>🎉 The Automatic Magic</h2>
+                    <p>Thanks to <code>Closes #12</code>, on merge:</p>
                     <div style="font-size: 1.5em; margin: 1em 0;">
                         MR merged <span class="flow-arrow">→</span> Issue #12 closed
                     </div>
@@ -639,27 +608,27 @@ Closes #12
                 <h2>📖 Quick Reference</h2>
                 <table class="command-table" style="font-size: 0.6em;">
                     <tr>
-                        <th>Aktion</th>
-                        <th>Befehl / Ort</th>
+                        <th>Action</th>
+                        <th>Command / Location</th>
                     </tr>
                     <tr>
                         <td>Issue Board</td>
                         <td><code>Project → Plan → Issue Boards</code></td>
                     </tr>
                     <tr>
-                        <td>Branch erstellen</td>
-                        <td><code>git checkout -b 42-beschreibung</code></td>
+                        <td>Create Branch</td>
+                        <td><code>git checkout -b 42-description</code></td>
                     </tr>
                     <tr>
-                        <td>Commit mit Referenz</td>
+                        <td>Commit with Reference</td>
                         <td><code>git commit -m "feat: add thing #42"</code></td>
                     </tr>
                     <tr>
-                        <td>Issue auto-schließen</td>
-                        <td><code>Closes #42</code> in MR-Description</td>
+                        <td>Auto-close Issue</td>
+                        <td><code>Closes #42</code> in MR description</td>
                     </tr>
                     <tr>
-                        <td>Push & MR</td>
+                        <td>Push & Create MR</td>
                         <td><code>git push -u origin branch-name</code></td>
                     </tr>
                 </table>
@@ -667,53 +636,53 @@ Closes #12
             
             <!-- DON'TS -->
             <section>
-                <h2>🚫 Die Todsünden</h2>
+                <h2>🚫 The Cardinal Sins</h2>
                 <div class="warning-box">
                     <ol style="font-size: 0.8em; text-align: left;">
-                        <li><strong>Direkt auf <code>main</code> pushen</strong><br>
-                            <span style="color: #8b949e;">→ Immer Branch + MR!</span></li>
-                        <li><strong>Commits ohne Issue-Referenz</strong><br>
-                            <span style="color: #8b949e;">→ Immer <code>#42</code> im Commit!</span></li>
-                        <li><strong>Secrets/Passwörter committen</strong><br>
-                            <span style="color: #8b949e;">→ <code>.gitignore</code> nutzen!</span></li>
-                        <li><strong>Riesige MRs mit 50 Dateien</strong><br>
-                            <span style="color: #8b949e;">→ Kleine, fokussierte Änderungen!</span></li>
-                        <li><strong>MR ohne Beschreibung</strong><br>
-                            <span style="color: #8b949e;">→ Immer "Closes #X" + Summary!</span></li>
+                        <li><strong>Pushing directly to <code>main</code></strong><br>
+                            <span style="color: #8b949e;">→ Always use branch + MR!</span></li>
+                        <li><strong>Commits without issue reference</strong><br>
+                            <span style="color: #8b949e;">→ Always include <code>#42</code> in commit!</span></li>
+                        <li><strong>Committing secrets/passwords</strong><br>
+                            <span style="color: #8b949e;">→ Use <code>.gitignore</code>!</span></li>
+                        <li><strong>Huge MRs with 50 files</strong><br>
+                            <span style="color: #8b949e;">→ Small, focused changes!</span></li>
+                        <li><strong>MR without description</strong><br>
+                            <span style="color: #8b949e;">→ Always include "Closes #X" + summary!</span></li>
                     </ol>
                 </div>
             </section>
             
             <!-- CHECKLIST -->
             <section>
-                <h2>✅ Vor jedem Merge prüfen</h2>
+                <h2>✅ Pre-Merge Checklist</h2>
                 <ul class="checklist" style="font-size: 0.8em;">
-                    <li class="done">Branch von <code>main</code> erstellt</li>
-                    <li class="done">Branch-Name enthält Issue-Nummer</li>
-                    <li class="done">Commits folgen Conventional Commits</li>
-                    <li class="done">Commits referenzieren Issue (<code>#42</code>)</li>
-                    <li class="done">MR-Description enthält <code>Closes #42</code></li>
-                    <li class="done">Keine Secrets im Code</li>
-                    <li class="done">Tests laufen durch (CI grün)</li>
-                    <li class="done">Issue-Label auf <code>workflow::review</code></li>
+                    <li class="done">Branch created from <code>main</code></li>
+                    <li class="done">Branch name includes issue number</li>
+                    <li class="done">Commits follow Conventional Commits</li>
+                    <li class="done">Commits reference issue (<code>#42</code>)</li>
+                    <li class="done">MR description includes <code>Closes #42</code></li>
+                    <li class="done">No secrets in code</li>
+                    <li class="done">Tests pass (CI green)</li>
+                    <li class="done">Issue label set to <code>workflow::review</code></li>
                 </ul>
             </section>
             
             <!-- HELP -->
             <section>
-                <h2>🆘 Hilfe & Links</h2>
+                <h2>🆘 Help & Links</h2>
                 <div class="workflow-box" style="font-size: 0.8em;">
                     <p><strong>📋 Issue Board:</strong><br>
                     <code>gitlab.com/.../irena/-/boards</code></p>
                     
-                    <p><strong>📝 Alle Issues:</strong><br>
+                    <p><strong>📝 All Issues:</strong><br>
                     <code>gitlab.com/.../irena/-/issues</code></p>
                     
                     <p><strong>📖 PM Guide:</strong><br>
                     <code>docs/guides/project-management.md</code></p>
                     
-                    <p><strong>❓ Fragen?</strong><br>
-                    Issue erstellen mit Label <code>help-wanted</code></p>
+                    <p><strong>❓ Questions?</strong><br>
+                    Create an issue with label <code>help-wanted</code></p>
                 </div>
             </section>
             
@@ -721,7 +690,7 @@ Closes #12
             <section>
                 <span class="big-emoji">🦊</span>
                 <h2>Happy Contributing!</h2>
-                <p style="color: #8b949e;">Jetzt weißt du, wie's geht.</p>
+                <p style="color: #8b949e;">Now you know how it's done.</p>
                 <p style="font-size: 0.7em; margin-top: 2em;">
                     <span class="keyword ref">#issue</span>
                     <span class="flow-arrow">→</span>
@@ -748,11 +717,7 @@ Closes #12
             showSlideNumber: 'all',
             transition: 'slide',
             backgroundTransition: 'fade',
-            plugins: [ RevealNotes, RevealHighlight ],
-            // Keyboard shortcuts
-            keyboard: {
-                27: function() { Reveal.toggleOverview(); }, // ESC
-            }
+            plugins: [ RevealNotes, RevealHighlight ]
         });
     </script>
 </body>
