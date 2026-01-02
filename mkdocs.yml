@@ -75,7 +75,8 @@ nav:
     - Overview: publications/index.md
     - "IJACSA 2026":
       - Abstract: publications/ijacsa-2026/abstract.md
-    - Paper Workflow: publications/paper-workflow.md
+    - "Paper bearbeiten (einfach)": publications/paper-editing-simple.md
+    - "Paper Workflow (technisch)": publications/paper-workflow.md
 
 extra:
   social:
