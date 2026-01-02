@@ -306,6 +306,18 @@ architecture_graphs:
       - docs/architecture/rendered/
   allow_failure: true
 
+
+mkdocs_nav_check:
+  stage: test
+  image: python:3.11-slim
+  script:
+    - pip install pyyaml -q
+    - python scripts/check_mkdocs_nav.py
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - when: never
+
 tests_rerun:
   stage: test
   <<: *python_base
