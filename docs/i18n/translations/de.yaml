@@ -240,3 +240,63 @@ cheatsheet:
     title: "Schnelllinks"
   
   footer: "Hast du eine Frage? Erstelle ein Issue mit dem Label help-wanted"
+
+# Paper editing guide (simple)
+paper_editing:
+  title: "✏️ Paper bearbeiten - Kurzanleitung"
+  subtitle: "Für alle, die einfach nur Text ändern wollen - ohne Terminal, ohne Installation."
+  how_it_works: "So funktioniert's"
+  steps: "Schritte"
+  example: "Beispiel"
+  example_short: "z.B."
+  before: "VORHER"
+  after: "NACHHER"
+  done: "Fertig"
+  done_explanation: "Ein Merge Request wird erstellt. Das Team reviewed die Änderung und baut das PDF neu."
+  
+  step1:
+    title: "Schritt 1: Datei öffnen"
+    line1: "Gehe zu"
+    link_text: "Paper LaTeX-Datei"
+    line2: "Klicke auf"
+  
+  step2:
+    title: "Schritt 2: Änderungen machen"
+    line1: "Ändere den Text direkt im Editor"
+    line2: "LaTeX-Befehle (mit \\) möglichst nicht anfassen"
+    line3: "Bei Unsicherheit: nur den Text zwischen {} ändern"
+  
+  step3:
+    title: "Schritt 3: Speichern"
+    line1: "Scrolle nach unten"
+    line2: "Wähle 'Create new branch'"
+    line3: "Gib einen Namen ein"
+    line4: "Aktiviere"
+    line5: "Klicke"
+  
+  build_pdf:
+    title: "PDF automatisch bauen lassen"
+    intro: "Nach dem Merge wird das PDF automatisch neu gebaut. Du kannst es auch manuell triggern:"
+    step1: "Gehe zu"
+    step2: "Klicke"
+    step3: "Wähle deinen Branch"
+    step4: "Klicke"
+    step5: "Warte bis"
+    step5b: "erscheint, klicke"
+    result: "Das neue PDF findest du dann unter **Job artifacts**."
+  
+  faq:
+    title: "Häufige Fragen"
+    q1: "Kann ich das PDF direkt bearbeiten?"
+    a1: "Nein - das PDF wird aus der .tex Datei generiert. Änderungen am PDF gehen beim nächsten Build verloren."
+    q2: "Was wenn ich einen Fehler mache?"
+    a2: "Kein Problem! Deine Änderung geht erst in einen 'Merge Request' - das Team schaut drüber bevor es live geht."
+    q3: "Wie ändere ich eine Abbildung?"
+    a3: "Die Abbildungen sind PNG-Dateien in `conference/ijacsa-2026/figures/`. Du kannst sie herunterladen, bearbeiten, und als neue Datei hochladen."
+    q4: "Wo sehe ich das fertige PDF?"
+    a4: "Aktuelles PDF herunterladen"
+  
+  help:
+    title: "Hilfe"
+    text: "Probleme? Erstelle ein"
+    with_label: "mit Label"

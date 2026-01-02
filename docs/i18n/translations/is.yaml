@@ -223,3 +223,63 @@ cheatsheet:
     title: "Flýtitenglar"
   
   footer: "Ertu með spurningu? Búðu til issue með merkinu help-wanted"
+
+# Paper editing guide (simple)
+paper_editing:
+  title: "✏️ Breyta grein - Stuttar leiðbeiningar"
+  subtitle: "Fyrir alla sem vilja bara breyta texta - án skipanalínu, án uppsetningar."
+  how_it_works: "Svona virkar þetta"
+  steps: "skref"
+  example: "Dæmi"
+  example_short: "t.d."
+  before: "FYRIR"
+  after: "EFTIR"
+  done: "Lokið"
+  done_explanation: "Samrunabeiðni verður búin til. Teymið fer yfir breytinguna og býr til nýja PDF."
+  
+  step1:
+    title: "Skref 1: Opnaðu skrána"
+    line1: "Farðu í"
+    link_text: "LaTeX skrá greinarinnar"
+    line2: "Smelltu á"
+  
+  step2:
+    title: "Skref 2: Gerðu breytingar"
+    line1: "Breyttu textanum beint í ritlinum"
+    line2: "Reyndu að snerta ekki LaTeX skipanir (með \\)"
+    line3: "Ef þú ert óviss: breyttu aðeins textanum á milli {}"
+  
+  step3:
+    title: "Skref 3: Vista"
+    line1: "Skrollaðu niður"
+    line2: "Veldu 'Create new branch'"
+    line3: "Sláðu inn nafn"
+    line4: "Virkjaðu"
+    line5: "Smelltu"
+  
+  build_pdf:
+    title: "Búa til PDF sjálfvirkt"
+    intro: "Eftir samruna er PDF búin til sjálfvirkt. Þú getur líka keyrt það handvirkt:"
+    step1: "Farðu í"
+    step2: "Smelltu"
+    step3: "Veldu greinina þína"
+    step4: "Smelltu"
+    step5: "Bíddu þar til"
+    step5b: "birtist, smelltu"
+    result: "Þú finnur nýju PDF undir **Job artifacts**."
+  
+  faq:
+    title: "Algengar spurningar"
+    q1: "Get ég breytt PDF beint?"
+    a1: "Nei - PDF er búin til úr .tex skránni. Breytingar á PDF tapast við næstu keyrslu."
+    q2: "Hvað ef ég geri mistök?"
+    a2: "Ekkert mál! Breytingin þín fer fyrst í 'Samrunabeiðni' - teymið fer yfir hana áður en hún verður virk."
+    q3: "Hvernig breyti ég mynd?"
+    a3: "Myndirnar eru PNG skrár í `conference/ijacsa-2026/figures/`. Þú getur hlaðið þeim niður, breytt og hlaðið upp sem nýjum skrám."
+    q4: "Hvar get ég séð fullunna PDF?"
+    a4: "Sækja núverandi PDF"
+  
+  help:
+    title: "Hjálp"
+    text: "Vandamál? Búðu til"
+    with_label: "með merkingu"

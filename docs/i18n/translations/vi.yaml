@@ -223,3 +223,63 @@ cheatsheet:
     title: "Liên kết nhanh"
   
   footer: "Có câu hỏi? Tạo issue với label help-wanted"
+
+# Paper editing guide (simple)
+paper_editing:
+  title: "✏️ Chỉnh sửa bài báo - Hướng dẫn nhanh"
+  subtitle: "Dành cho tất cả những ai chỉ muốn thay đổi văn bản - không cần terminal, không cần cài đặt."
+  how_it_works: "Cách thực hiện"
+  steps: "bước"
+  example: "Ví dụ"
+  example_short: "vd"
+  before: "TRƯỚC"
+  after: "SAU"
+  done: "Hoàn thành"
+  done_explanation: "Một Merge Request sẽ được tạo. Nhóm sẽ xem xét thay đổi và tạo PDF mới."
+  
+  step1:
+    title: "Bước 1: Mở tệp"
+    line1: "Đi đến"
+    link_text: "Tệp LaTeX bài báo"
+    line2: "Nhấp vào"
+  
+  step2:
+    title: "Bước 2: Thực hiện thay đổi"
+    line1: "Chỉnh sửa văn bản trực tiếp trong trình soạn thảo"
+    line2: "Cố gắng không chạm vào các lệnh LaTeX (có \\)"
+    line3: "Nếu không chắc: chỉ thay đổi văn bản giữa {}"
+  
+  step3:
+    title: "Bước 3: Lưu"
+    line1: "Cuộn xuống"
+    line2: "Chọn 'Create new branch'"
+    line3: "Nhập tên"
+    line4: "Bật"
+    line5: "Nhấp"
+  
+  build_pdf:
+    title: "Tự động tạo PDF"
+    intro: "Sau khi merge, PDF sẽ được tạo tự động. Bạn cũng có thể kích hoạt thủ công:"
+    step1: "Đi đến"
+    step2: "Nhấp"
+    step3: "Chọn branch của bạn"
+    step4: "Nhấp"
+    step5: "Đợi cho đến khi"
+    step5b: "xuất hiện, nhấp"
+    result: "Bạn sẽ tìm thấy PDF mới trong **Job artifacts**."
+  
+  faq:
+    title: "Câu hỏi thường gặp"
+    q1: "Tôi có thể chỉnh sửa PDF trực tiếp không?"
+    a1: "Không - PDF được tạo từ tệp .tex. Các thay đổi trong PDF sẽ bị mất khi build lần sau."
+    q2: "Nếu tôi mắc lỗi thì sao?"
+    a2: "Không sao! Thay đổi của bạn sẽ vào 'Merge Request' trước - nhóm sẽ xem xét trước khi áp dụng."
+    q3: "Làm thế nào để thay đổi hình ảnh?"
+    a3: "Các hình ảnh là tệp PNG trong `conference/ijacsa-2026/figures/`. Bạn có thể tải xuống, chỉnh sửa và tải lên dưới dạng tệp mới."
+    q4: "Tôi có thể xem PDF hoàn thành ở đâu?"
+    a4: "Tải PDF hiện tại"
+  
+  help:
+    title: "Trợ giúp"
+    text: "Có vấn đề? Tạo một"
+    with_label: "với nhãn"
