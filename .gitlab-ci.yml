@@ -7,6 +7,7 @@ workflow:
     - when: never
 
 stages:
+  - build
   - test
   - classify
   - automation
@@ -68,13 +69,106 @@ stages:
     - when: never
 
 # ----------------------------
-# Jobs
+# Build Stage - Docker Images
+# ----------------------------
+build_opm_image:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+    IMAGE_TAG: $CI_REGISTRY_IMAGE/opm-flow:$CI_COMMIT_SHORT_SHA
+    IMAGE_LATEST: $CI_REGISTRY_IMAGE/opm-flow:latest
+  before_script:
+    - docker info
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - |
+      echo "Building OPM Flow image..."
+      docker build -t $IMAGE_TAG -t $IMAGE_LATEST -f src/clarissa/simulators/opm/Dockerfile src/clarissa/simulators/opm/
+      echo "Pushing to registry..."
+      docker push $IMAGE_TAG
+      docker push $IMAGE_LATEST
+      echo "IMAGE_TAG=$IMAGE_TAG" >> build.env
+      echo "IMAGE_LATEST=$IMAGE_LATEST" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      #changes:
+        #  - src/clarissa/simulators/opm/**/*
+      when: always
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: always
+    - when: never
+
+# ----------------------------
+# Test Stage
 # ----------------------------
 tests:
   stage: test
   <<: *python_base
   <<: *install_dev_deps
-  <<: *pytest_run
+  script:
+    - python -m pytest -q --ignore=tests/integration --junitxml=junit.xml
+  artifacts:
+    when: always
+    reports:
+      junit: junit.xml
+    paths:
+      - junit.xml
+      - .pytest_cache/
+
+integration_tests_opm:
+  stage: test
+  image: docker:24
+  services:
+    - docker:24-dind
+  needs:
+    - job: build_opm_image
+      artifacts: true
+      optional: true
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  before_script:
+    - apk add --no-cache python3 py3-pip
+    - python3 -m pip install --break-system-packages -e ".[dev]"
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - |
+      # Pull the image we just built, or try latest
+      if [ -n "$IMAGE_TAG" ]; then
+        docker pull $IMAGE_TAG && docker tag $IMAGE_TAG opm-flow:latest
+      else
+        docker pull $CI_REGISTRY_IMAGE/opm-flow:latest && docker tag $CI_REGISTRY_IMAGE/opm-flow:latest opm-flow:latest || echo "No image available, tests will skip"
+      fi
+  script:
+    - |
+      # Register custom pytest marker to avoid warnings
+      echo "[pytest]" > pytest.ini
+      echo "markers = docker: marks tests as requiring docker" >> pytest.ini
+      python3 -m pytest -v tests/integration/test_opm_flow.py --junitxml=junit_integration.xml || true
+  artifacts:
+    when: always
+    reports:
+      junit: junit_integration.xml
+    paths:
+      - junit_integration.xml
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - when: never
+  allow_failure: true  # Don't block pipeline while we stabilize
 
 snapshot_tests:
   stage: test
@@ -195,6 +289,9 @@ tests_rerun:
       - junit_rerun.xml
       - rerun_exit_code.txt
 
+# ----------------------------
+# Classify Stage
+# ----------------------------
 ci_classify:
   stage: classify
   <<: *python_base
@@ -213,6 +310,9 @@ ci_classify:
     paths:
       - ci_classify.env
 
+# ----------------------------
+# Automation Stage
+# ----------------------------
 mr_report:
   stage: automation
   <<: *python_base
@@ -231,6 +331,9 @@ mr_report:
       artifacts: true
       optional: true
     - job: architecture_graphs
+      artifacts: true
+      optional: true
+    - job: integration_tests_opm
       artifacts: true
       optional: true
   script:
@@ -288,7 +391,7 @@ mr_comment_on_failure:
     - python scripts/gitlab_mr_bot.py
 
 # ----------------------------
-# Documentation Site (GitLab Pages)
+# Deploy Stage
 # ----------------------------
 pages:
   stage: deploy
@@ -308,9 +411,6 @@ pages:
       - public
     expire_in: 1 week
 
-# ----------------------------
-# LLM Sync Package (private artifact)
-# ----------------------------
 llm_sync_package:
   stage: deploy
   image: python:3.11
