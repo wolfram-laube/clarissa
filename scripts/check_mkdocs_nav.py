@@ -50,12 +50,21 @@ def main():
         actual_files.add(str(rel_path))
 
     # Files generated at CI time (not in repo but valid nav entries)
+    # Files generated at CI time by build_i18n_docs.py
     generated_files = {
+        # Cheatsheets (markdown)
         "guides/contributing/cheatsheet-en.md",
         "guides/contributing/cheatsheet-de.md",
         "guides/contributing/cheatsheet-vi.md",
         "guides/contributing/cheatsheet-ar.md",
         "guides/contributing/cheatsheet-is.md",
+        # HTML files (slides, selector)
+        "guides/contributing/index.html",
+        "guides/contributing/workflow-slides-en.html",
+        "guides/contributing/workflow-slides-de.html",
+        "guides/contributing/workflow-slides-vi.html",
+        "guides/contributing/workflow-slides-ar.html",
+        "guides/contributing/workflow-slides-is.html",
     }
 
     # Check for missing files (in nav but not in docs/)
