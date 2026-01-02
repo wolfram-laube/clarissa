@@ -100,8 +100,8 @@ build_opm_image:
       dotenv: build.env
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      changes:
-        - src/clarissa/simulators/opm/**/*
+      #changes:
+        #  - src/clarissa/simulators/opm/**/*
       when: always
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: always
