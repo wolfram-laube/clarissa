@@ -16,8 +16,9 @@ New to the project? Start here:
 
 Documentation is available in multiple languages:
 
-- **English** (primary): All guides
+- **English**: [Workflow Slides (EN)](contributing/workflow-slides-en.html) • [Cheatsheet (EN)](contributing/cheatsheet-en.md)
 - **Deutsch**: [Workflow Slides (DE)](contributing/workflow-slides-de.html) • [Cheatsheet (DE)](contributing/cheatsheet-de.md)
+- **Tiếng Việt**: [Workflow Slides (VI)](contributing/workflow-slides-vi.html) • [Cheatsheet (VI)](contributing/cheatsheet-vi.md)
 
 ## 📋 Guide Index
 
@@ -32,7 +33,7 @@ Everything you need to contribute code to CLARISSA:
     - Merge request best practices
     - Automatic issue closing
 
-- **[Workflow Cheatsheet](contributing/cheatsheet-en.md)** - One-page quick reference
+- **Workflow Cheatsheets** - One-page quick reference in [EN](contributing/cheatsheet-en.md) | [DE](contributing/cheatsheet-de.md) | [VI](contributing/cheatsheet-vi.md)
 
 ### Project Management
 
@@ -50,6 +51,18 @@ Everything you need to contribute code to CLARISSA:
 | [All Issues](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues) | Full issue list |
 | [Merge Requests](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/merge_requests) | Open MRs |
 | [CI/CD Pipelines](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/pipelines) | Build status |
+
+## ➕ Adding a New Language
+
+To add a new language translation:
+
+1. Create `workflow-slides-XX.html` (copy from any existing language)
+2. Create `cheatsheet-XX.md` (copy from any existing language)
+3. Update `contributing/index.html` language selector
+4. Update this index page
+5. Update language switcher in all `workflow-slides-*.html` files
+
+Where `XX` is the [ISO 639-1 language code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes).
 
 ## ❓ Need Help?
 
