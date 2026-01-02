@@ -67,7 +67,8 @@ extra_javascript:
   - https://unpkg.com/mermaid@10/dist/mermaid.esm.min.mjs
 
 nav:
-  - Home: CI_WORKFLOW_AUTOMATION.md
+  - Home: index.md
+  - CI Workflow: CI_WORKFLOW_AUTOMATION.md
 
   - Architecture:
     - Overview: architecture/README.md
@@ -82,6 +83,7 @@ nav:
     - ADR-008 Governance Signals: architecture/adr/ADR-008-governance-signals-vs-enforcement.md
     - ADR-009 NLP Pipeline: architecture/adr/ADR-009-nlp-translation-pipeline.md
     - ADR-010 Project Rename: architecture/adr/ADR-010-project-renaming-clarissa.md
+    - ADR-011 OPM Flow Integration: architecture/adr/ADR-011-opm-flow-integration.md
 
   - CI:
     - How to Read CI Results: ci/README.md
@@ -95,4 +97,4 @@ extra:
       link: https://gitlab.com/wolfram_laube/blauweiss_llc/irena
   generator: false
 
-copyright: Copyright &copy; 2025 BlauWeiss LLC
+copyright: Copyright &copy; 2025-2026 BlauWeiss LLC
