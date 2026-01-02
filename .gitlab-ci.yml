@@ -4,6 +4,9 @@ workflow:
       when: always
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: always
+    # Trigger on semantic version tags (v1.0.0, v2.1.3, etc.)
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+      when: always
     - when: never
 
 stages:
@@ -81,29 +84,54 @@ build_opm_image:
     DOCKER_HOST: tcp://docker:2376
     DOCKER_TLS_VERIFY: 1
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
-    IMAGE_TAG: $CI_REGISTRY_IMAGE/opm-flow:$CI_COMMIT_SHORT_SHA
-    IMAGE_LATEST: $CI_REGISTRY_IMAGE/opm-flow:latest
+    IMAGE_BASE: $CI_REGISTRY_IMAGE/opm-flow
   before_script:
     - docker info
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
     - |
       echo "Building OPM Flow image..."
-      docker build -t $IMAGE_TAG -t $IMAGE_LATEST -f src/clarissa/simulators/opm/Dockerfile src/clarissa/simulators/opm/
-      echo "Pushing to registry..."
-      docker push $IMAGE_TAG
-      docker push $IMAGE_LATEST
-      echo "IMAGE_TAG=$IMAGE_TAG" >> build.env
-      echo "IMAGE_LATEST=$IMAGE_LATEST" >> build.env
+      
+      # Always tag with commit SHA for traceability
+      docker build -t $IMAGE_BASE:$CI_COMMIT_SHORT_SHA -f src/clarissa/simulators/opm/Dockerfile src/clarissa/simulators/opm/
+      
+      # Tag strategy based on context (ADR-012)
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        # Release: semantic version tag (e.g., v1.2.3)
+        echo "Release build: tagging as $CI_COMMIT_TAG"
+        docker tag $IMAGE_BASE:$CI_COMMIT_SHORT_SHA $IMAGE_BASE:$CI_COMMIT_TAG
+        docker tag $IMAGE_BASE:$CI_COMMIT_SHORT_SHA $IMAGE_BASE:latest
+        
+        # Push all tags
+        docker push $IMAGE_BASE:$CI_COMMIT_SHORT_SHA
+        docker push $IMAGE_BASE:$CI_COMMIT_TAG
+        docker push $IMAGE_BASE:latest
+        
+        echo "IMAGE_TAG=$IMAGE_BASE:$CI_COMMIT_TAG" >> build.env
+      else
+        # Development: SHA + latest
+        echo "Development build: tagging as $CI_COMMIT_SHORT_SHA and latest"
+        docker tag $IMAGE_BASE:$CI_COMMIT_SHORT_SHA $IMAGE_BASE:latest
+        
+        docker push $IMAGE_BASE:$CI_COMMIT_SHORT_SHA
+        docker push $IMAGE_BASE:latest
+        
+        echo "IMAGE_TAG=$IMAGE_BASE:$CI_COMMIT_SHORT_SHA" >> build.env
+      fi
+      
+      echo "IMAGE_LATEST=$IMAGE_BASE:latest" >> build.env
   artifacts:
     reports:
       dotenv: build.env
   rules:
+    # Always build on MRs
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      #changes:
-        #  - src/clarissa/simulators/opm/**/*
       when: always
+    # Always build on main
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: always
+    # Always build on version tags
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
       when: always
     - when: never
 
@@ -123,6 +151,11 @@ tests:
     paths:
       - junit.xml
       - .pytest_cache/
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+    - when: never
 
 integration_tests_opm:
   stage: test
@@ -167,8 +200,10 @@ integration_tests_opm:
       when: on_success
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+      when: on_success
     - when: never
-  allow_failure: true  # Don't block pipeline while we stabilize
+  allow_failure: true
 
 snapshot_tests:
   stage: test
@@ -179,7 +214,6 @@ snapshot_tests:
       set -e
       mkdir -p tests/golden tests/golden/snapshots tests/golden/diffs
 
-      # Create a default summary to avoid artifact warnings
       echo '# Snapshot diffs' > tests/golden/summary.md
       echo '' >> tests/golden/summary.md
       echo '_No snapshot diffs produced._' >> tests/golden/summary.md
@@ -189,7 +223,6 @@ snapshot_tests:
         tests/golden/test_cli_help_snapshot.py \
         tests/golden/test_cli_demo_snapshot.py || EXIT=$?
 
-      # If diffs exist, overwrite summary with real content
       if [ -d tests/golden/diffs ] && ls -1 tests/golden/diffs/*.diff >/dev/null 2>&1; then
         echo '# Snapshot diffs' > tests/golden/summary.md
         echo '' >> tests/golden/summary.md
@@ -208,6 +241,11 @@ snapshot_tests:
     paths:
       - tests/golden/snapshots/
       - tests/golden/summary.md
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+    - when: never
 
 contract_tests:
   stage: test
@@ -225,6 +263,11 @@ contract_tests:
     paths:
       - tests/contracts/summary.md
       - pytest_contracts.log
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+    - when: never
 
 governance_impact:
   stage: test
@@ -309,6 +352,10 @@ ci_classify:
       dotenv: ci_classify.env
     paths:
       - ci_classify.env
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - when: never
 
 # ----------------------------
 # Automation Stage
