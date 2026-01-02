@@ -7,6 +7,9 @@ workflow:
     # Trigger on semantic version tags (v1.0.0, v2.1.3, etc.)
     - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
       when: always
+    # Allow manual trigger via "Run pipeline" button
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: always
     - when: never
 
 stages:
@@ -485,6 +488,9 @@ llm_sync_package:
       when: on_success
     - if: '$CI_PIPELINE_SOURCE == "push"'
       when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
     - when: never
   script:
     - |
@@ -500,3 +506,80 @@ llm_sync_package:
       - clarissa_sync_medium.md
       - clarissa_sync_diff.md
     expire_in: 4 weeks
+
+# ----------------------------
+# Manual Trigger Jobs
+# ----------------------------
+# These jobs can be triggered via:
+#   1. GitLab UI: CI/CD → Pipelines → Run Pipeline → Select job
+#   2. API: POST /projects/:id/pipeline with variables
+
+rebuild_docs:
+  stage: deploy
+  image: python:3.11
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+    - when: never
+  before_script:
+    - pip install mkdocs mkdocs-material pymdown-extensions jinja2 pyyaml
+  script:
+    - echo "Rebuilding documentation..."
+    - python scripts/build_i18n_docs.py
+    - mkdocs build --site-dir public
+    - |
+      mkdir -p public/guides/contributing
+      cp docs/guides/contributing/*.html public/guides/contributing/ 2>/dev/null || true
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 day
+  environment:
+    name: docs-preview
+    url: https://wolfram_laube.gitlab.io/blauweiss_llc/irena/
+
+rebuild_opm_image:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+    - when: never
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+    IMAGE_BASE: $CI_REGISTRY_IMAGE/opm-flow
+  before_script:
+    - docker info
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - |
+      echo "Manual rebuild of OPM Flow image..."
+      docker build --no-cache -t $IMAGE_BASE:$CI_COMMIT_SHORT_SHA -f src/clarissa/simulators/opm/Dockerfile src/clarissa/simulators/opm/
+      docker tag $IMAGE_BASE:$CI_COMMIT_SHORT_SHA $IMAGE_BASE:latest
+      docker push $IMAGE_BASE:$CI_COMMIT_SHORT_SHA
+      docker push $IMAGE_BASE:latest
+      echo "✅ Pushed: $IMAGE_BASE:$CI_COMMIT_SHORT_SHA"
+      echo "✅ Pushed: $IMAGE_BASE:latest"
+
+rerun_all_tests:
+  stage: test
+  <<: *python_base
+  <<: *install_dev_deps
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+    - when: never
+  script:
+    - echo "Running full test suite (manual trigger)..."
+    - python -m pytest -v --junitxml=junit_manual.xml
+  artifacts:
+    when: always
+    reports:
+      junit: junit_manual.xml
+    paths:
+      - junit_manual.xml
