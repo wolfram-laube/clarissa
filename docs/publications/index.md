@@ -45,11 +45,23 @@ conference/
     └── supplementary/             # Additional materials
 ```
 
-## Contributing to Publications
+## ✏️ Paper bearbeiten
 
-To update the paper:
+| Guide | Für wen |
+|-------|---------|
+| **[Paper bearbeiten (einfach)](paper-editing-simple.md)** | Co-Authors, Non-Techies - nur Web-UI, kein Terminal |
+| **[Paper Workflow (technisch)](paper-workflow.md)** | Entwickler - LaTeX, Git, CI |
 
-1. Edit `conference/ijacsa-2026/CLARISSA_Paper_IJACSA.tex`
-2. Regenerate PDF
-3. Commit both `.tex` and `.pdf`
-4. Update figures in `figures/` if needed
+### Kurzversion
+
+**Ohne technische Kenntnisse:**
+1. [LaTeX-Datei öffnen](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/conference/ijacsa-2026/CLARISSA_Paper_IJACSA.tex)
+2. "Edit" klicken
+3. Text ändern, "Commit"
+4. CI baut das PDF automatisch!
+
+**Mit technischen Kenntnissen:**
+1. Branch erstellen
+2. `.tex` editieren
+3. `pdflatex` lokal oder CI nutzen
+4. MR erstellen
