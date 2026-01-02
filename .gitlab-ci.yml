@@ -449,10 +449,15 @@ pages:
     - when: never
   before_script:
     - pip install mkdocs mkdocs-material pymdown-extensions
-    - apt-get update && apt-get install -y pandoc || true
   script:
-    - python scripts/build_docs.py
+    # Build MkDocs site from docs/ directory
     - mkdocs build --site-dir public
+    # Copy static HTML files that MkDocs doesn't process (reveal.js slides, etc.)
+    - |
+      echo "Copying static HTML files..."
+      mkdir -p public/guides/contributing
+      cp docs/guides/contributing/*.html public/guides/contributing/ 2>/dev/null || echo "No HTML files to copy"
+      ls -la public/guides/contributing/ 2>/dev/null || true
   artifacts:
     paths:
       - public
