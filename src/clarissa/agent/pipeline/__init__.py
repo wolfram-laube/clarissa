@@ -11,6 +11,7 @@ Stages:
 6. Deck Validation
 
 Each stage exposes a Protocol for testability and swappable implementations.
+Validation checkpoints between stages enforce the three-state decision pattern.
 """
 
 from clarissa.agent.pipeline.protocols import (
@@ -33,6 +34,13 @@ from clarissa.agent.pipeline.entities import (
     RateValue,
     PressureValue,
 )
+from clarissa.agent.pipeline.validation import (
+    ValidationCheckpoint,
+    ValidationResult,
+    CheckpointDecision,
+    StageThresholds,
+    create_checkpoint,
+)
 
 __all__ = [
     # Protocols
@@ -52,4 +60,10 @@ __all__ = [
     "RuleBasedEntityExtractor",
     "RateValue",
     "PressureValue",
+    # Validation
+    "ValidationCheckpoint",
+    "ValidationResult",
+    "CheckpointDecision",
+    "StageThresholds",
+    "create_checkpoint",
 ]
