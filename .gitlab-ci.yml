@@ -671,100 +671,122 @@ upload_invoice:
     - job: build_invoice
       artifacts: true
   rules:
-    # Only run after successful build_invoice on main
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       changes:
         - billing/output/**/*.typ
       when: on_success
-    # Manual trigger
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: manual
       allow_failure: true
     - when: never
-  variables:
-    GOOGLE_APPLICATION_CREDENTIALS: $GOOGLE_SERVICE_ACCOUNT_KEY
   script:
     - pip install google-auth google-api-python-client -q
     - |
       python3 << 'PYEOF'
-      import os
-      import json
-      from pathlib import Path
-      from google.oauth2 import service_account
-      from googleapiclient.discovery import build
-      from googleapiclient.http import MediaFileUpload
+import os
+import json
+from pathlib import Path
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
 
-      SCOPES = ['https://www.googleapis.com/auth/drive']
-      FOLDER_ID = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
+# Full drive scope for shared drives
+SCOPES = ['https://www.googleapis.com/auth/drive']
+FOLDER_ID = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
 
-      # Get credentials from file variable
-      key_path = os.environ.get('GOOGLE_SERVICE_ACCOUNT_KEY')
-      if os.path.isfile(key_path):
-          credentials = service_account.Credentials.from_service_account_file(key_path, scopes=SCOPES)
-      else:
-          credentials = service_account.Credentials.from_service_account_info(json.loads(key_path), scopes=SCOPES)
+key_path = os.environ.get('GOOGLE_SERVICE_ACCOUNT_KEY')
+if os.path.isfile(key_path):
+    credentials = service_account.Credentials.from_service_account_file(key_path, scopes=SCOPES)
+else:
+    credentials = service_account.Credentials.from_service_account_info(json.loads(key_path), scopes=SCOPES)
 
-      service = build('drive', 'v3', credentials=credentials)
+service = build('drive', 'v3', credentials=credentials)
 
-      def get_or_create_folder(parent_id, name):
-          query = f"name='{name}' and '{parent_id}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false"
-          results = service.files().list(q=query, fields="files(id)", supportsAllDrives=True).execute()
-          if results.get('files'):
-              return results['files'][0]['id']
-          meta = {'name': name, 'mimeType': 'application/vnd.google-apps.folder', 'parents': [parent_id]}
-          return service.files().create(body=meta, fields='id', supportsAllDrives=True).execute()['id']
+def get_or_create_folder(parent_id, name):
+    query = f"name='{name}' and '{parent_id}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false"
+    results = service.files().list(
+        q=query, 
+        fields="files(id)",
+        supportsAllDrives=True,
+        includeItemsFromAllDrives=True
+    ).execute()
+    if results.get('files'):
+        print(f"  📁 Found folder: {name}")
+        return results['files'][0]['id']
+    meta = {
+        'name': name, 
+        'mimeType': 'application/vnd.google-apps.folder', 
+        'parents': [parent_id]
+    }
+    folder = service.files().create(
+        body=meta, 
+        fields='id',
+        supportsAllDrives=True
+    ).execute()
+    print(f"  📁 Created folder: {name}")
+    return folder['id']
 
-      def upload_file(folder_id, file_path):
-          name = file_path.name
-          query = f"name='{name}' and '{folder_id}' in parents and trashed=false"
-          results = service.files().list(q=query, fields="files(id)", supportsAllDrives=True).execute()
-          media = MediaFileUpload(str(file_path), mimetype='application/pdf')
-          
-          if results.get('files'):
-              service.files().update(fileId=results['files'][0]['id'], media_body=media, supportsAllDrives=True).execute()
-              print(f"🔄 Updated: {name}")
-          else:
-              meta = {'name': name, 'parents': [folder_id]}
-              service.files().create(body=meta, media_body=media, fields='id', supportsAllDrives=True).execute()
-              print(f"✅ Uploaded: {name}")
+def upload_file(folder_id, file_path):
+    name = file_path.name
+    query = f"name='{name}' and '{folder_id}' in parents and trashed=false"
+    results = service.files().list(
+        q=query, 
+        fields="files(id)",
+        supportsAllDrives=True,
+        includeItemsFromAllDrives=True
+    ).execute()
+    media = MediaFileUpload(str(file_path), mimetype='application/pdf')
+    
+    if results.get('files'):
+        service.files().update(
+            fileId=results['files'][0]['id'], 
+            media_body=media,
+            supportsAllDrives=True
+        ).execute()
+        print(f"🔄 Updated: {name}")
+    else:
+        meta = {'name': name, 'parents': [folder_id]}
+        service.files().create(
+            body=meta, 
+            media_body=media, 
+            fields='id',
+            supportsAllDrives=True
+        ).execute()
+        print(f"✅ Uploaded: {name}")
 
-      # Find and upload all PDFs
-      pdf_dir = Path('billing/output')
-      pdfs = list(pdf_dir.glob('*.pdf'))
+pdf_dir = Path('billing/output')
+pdfs = list(pdf_dir.glob('*.pdf'))
 
-      if not pdfs:
-          print("⚠️ No PDFs found to upload")
-          exit(0)
+if not pdfs:
+    print("⚠️ No PDFs found")
+    exit(0)
 
-      print(f"📤 Uploading {len(pdfs)} file(s) to Google Drive...")
+print(f"📤 Uploading {len(pdfs)} file(s)...")
 
-      # Group by year/month from filename (e.g., 2026-01_timesheet_nemensis.pdf)
-      for pdf in pdfs:
-          # Try to extract year-month from filename
-          name = pdf.stem
-          if name.startswith('20') and '-' in name[:7]:
-              year_month = name[:7]  # "2026-01"
-              year, month = year_month.split('-')
-              # Get client from filename
-              parts = name.split('_')
-              client = parts[2] if len(parts) > 2 else 'misc'
-              folder_path = f"{year}/{month}_{client}"
-          elif name.startswith('AR_'):
-              # Invoice: AR_001_2026_client.pdf
-              parts = name.split('_')
-              year = parts[2] if len(parts) > 2 else '2026'
-              client = parts[3] if len(parts) > 3 else 'misc'
-              folder_path = f"{year}/{client}"
-          else:
-              folder_path = "misc"
+for pdf in pdfs:
+    name = pdf.stem
+    if name.startswith('20') and '-' in name[:7]:
+        year, month = name[:7].split('-')
+        parts = name.split('_')
+        client = parts[2] if len(parts) > 2 else 'misc'
+        folder_path = f"{year}/{month}_{client}"
+    elif name.startswith('AR_'):
+        parts = name.split('_')
+        year = parts[2] if len(parts) > 2 else '2026'
+        client = parts[3] if len(parts) > 3 else 'misc'
+        folder_path = f"{year}/{client}"
+    else:
+        folder_path = "misc"
 
-          # Create folder path
-          current = FOLDER_ID
-          for folder in folder_path.split('/'):
-              current = get_or_create_folder(current, folder)
-          
-          upload_file(current, pdf)
+    current = FOLDER_ID
+    for folder in folder_path.split('/'):
+        current = get_or_create_folder(current, folder)
+    
+    upload_file(current, pdf)
 
-      print(f"\n🔗 https://drive.google.com/drive/folders/{FOLDER_ID}")
+print(f"
+🔗 https://drive.google.com/drive/folders/{FOLDER_ID}")
+
       PYEOF
     - echo "✅ Upload complete"
+
