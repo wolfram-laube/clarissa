@@ -694,7 +694,7 @@ upload_invoice:
       from googleapiclient.discovery import build
       from googleapiclient.http import MediaFileUpload
 
-      SCOPES = ['https://www.googleapis.com/auth/drive.file']
+      SCOPES = ['https://www.googleapis.com/auth/drive']
       FOLDER_ID = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
 
       # Get credentials from file variable
@@ -708,24 +708,24 @@ upload_invoice:
 
       def get_or_create_folder(parent_id, name):
           query = f"name='{name}' and '{parent_id}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false"
-          results = service.files().list(q=query, fields="files(id)").execute()
+          results = service.files().list(q=query, fields="files(id)", supportsAllDrives=True).execute()
           if results.get('files'):
               return results['files'][0]['id']
           meta = {'name': name, 'mimeType': 'application/vnd.google-apps.folder', 'parents': [parent_id]}
-          return service.files().create(body=meta, fields='id').execute()['id']
+          return service.files().create(body=meta, fields='id', supportsAllDrives=True).execute()['id']
 
       def upload_file(folder_id, file_path):
           name = file_path.name
           query = f"name='{name}' and '{folder_id}' in parents and trashed=false"
-          results = service.files().list(q=query, fields="files(id)").execute()
+          results = service.files().list(q=query, fields="files(id)", supportsAllDrives=True).execute()
           media = MediaFileUpload(str(file_path), mimetype='application/pdf')
           
           if results.get('files'):
-              service.files().update(fileId=results['files'][0]['id'], media_body=media).execute()
+              service.files().update(fileId=results['files'][0]['id'], media_body=media, supportsAllDrives=True).execute()
               print(f"🔄 Updated: {name}")
           else:
               meta = {'name': name, 'parents': [folder_id]}
-              service.files().create(body=meta, media_body=media, fields='id').execute()
+              service.files().create(body=meta, media_body=media, fields='id', supportsAllDrives=True).execute()
               print(f"✅ Uploaded: {name}")
 
       # Find and upload all PDFs
