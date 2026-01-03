@@ -83,6 +83,9 @@ nav:
       - Íslenska: publications/paper-editing-is.md
     - "Paper Workflow (technisch)": publications/paper-workflow.md
 
+  - Billing:
+    - Time Tracking & Invoicing: guides/billing.md
+
 extra:
   social:
     - icon: fontawesome/brands/gitlab
