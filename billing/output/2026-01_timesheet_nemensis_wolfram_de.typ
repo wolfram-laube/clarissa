@@ -1,7 +1,7 @@
 // BLAUWEISS Timesheet - 2026-01
 // Client: nemensis AG Deutschland
 // Consultant: Wolfram Laube
-// Generated: 2026-01-03 17:08
+// Generated: 2026-01-03 17:25
 
 #import "../templates/timesheet.typ": timesheet
 
@@ -10,7 +10,7 @@
   month: 1,
   client_name: "nemensis AG Deutschland",
   client_short: "NEM",
-  project_name: "00003153",
+  project_name: "CLARISSA Development",
   contract_number: "00003153",
   consultant_name: "Wolfram Laube",
   country: "AT",
@@ -18,6 +18,6 @@
   approver_name: "Max Mustermann",
   approver_title: "Projektleiter",
   daily_entries: (
-    "3": (6.0, "CLARISSA: NLP Pipeline Development"),
+    "2": (6.0, "CLARISSA: NLP Pipeline Development"),
   ),
 )

@@ -1,7 +1,7 @@
 // BLAUWEISS Timesheet - 2026-01
 // Client: nemensis AG Deutschland
 // Consultant: Ian Matejka
-// Generated: 2026-01-03 17:08
+// Generated: 2026-01-03 17:25
 
 #import "../templates/timesheet.typ": timesheet
 
@@ -10,7 +10,7 @@
   month: 1,
   client_name: "nemensis AG Deutschland",
   client_short: "NEM",
-  project_name: "00003153",
+  project_name: "CLARISSA Development",
   contract_number: "00003153",
   consultant_name: "Ian Matejka",
   country: "AT",
@@ -18,6 +18,8 @@
   approver_name: "Max Mustermann",
   approver_title: "Projektleiter",
   daily_entries: (
-    "3": (20.0, "CLARISSA: Docker Integration & OPM Flow Setup"),
+    "5": (8.0, "Docker Setup & Configuration"),
+    "6": (8.0, "OPM Flow Integration"),
+    "7": (4.0, "Testing & Documentation"),
   ),
 )

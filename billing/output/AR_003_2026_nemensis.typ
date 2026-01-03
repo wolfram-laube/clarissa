@@ -1,7 +1,7 @@
-// BLAUWEISS Invoice - AR_002_2026
+// BLAUWEISS Invoice - AR_003_2026
 // Client: nemensis AG Deutschland
 // Period: 2026-01
-// Generated: 2026-01-03 17:08
+// Generated: 2026-01-03 17:21
 //
 // Hours breakdown:
 //   - Wolfram Laube: 6.0h
@@ -11,7 +11,7 @@
 #import "../templates/rechnung-de.typ": invoice
 
 #invoice(
-  invoice_number: "AR_002_2026",
+  invoice_number: "AR_003_2026",
   invoice_date: "03. Januar 2026",
   client_name: "nemensis AG Deutschland",
   client_address: "Alter Wall 69",
