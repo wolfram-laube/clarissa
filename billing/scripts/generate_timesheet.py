@@ -2,7 +2,10 @@
 """
 CLARISSA Timesheet Generator
 
-Generates timesheets from GitLab Time Tracking data.
+Generates timesheets from GitLab Time Tracking data using GraphQL API.
+
+The GraphQL API correctly returns the `spentAt` date, unlike the Notes API
+which only shows the note creation date.
 
 Usage:
     # Single consultant
@@ -20,10 +23,8 @@ Requirements:
 import argparse
 import json
 import os
-import re
-import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from collections import defaultdict
 from typing import Optional
@@ -44,8 +45,8 @@ TEMPLATES_DIR = BILLING_DIR / "templates"
 OUTPUT_DIR = BILLING_DIR / "output"
 
 # GitLab API
-GITLAB_API_URL = os.environ.get("GITLAB_API_URL", "https://gitlab.com/api/v4")
-GITLAB_PROJECT_ID = os.environ.get("GITLAB_PROJECT_ID", "77260390")
+GITLAB_GRAPHQL_URL = os.environ.get("GITLAB_GRAPHQL_URL", "https://gitlab.com/api/graphql")
+GITLAB_PROJECT_PATH = os.environ.get("GITLAB_PROJECT_PATH", "wolfram_laube/blauweiss_llc/irena")
 GITLAB_TOKEN = os.environ.get("GITLAB_TOKEN", "")
 
 
@@ -59,18 +60,20 @@ def load_config() -> dict:
         return yaml.safe_load(f)
 
 
-def fetch_time_entries(
-    project_id: str,
+def fetch_time_entries_graphql(
+    project_path: str,
     year: int,
     month: int,
     gitlab_label: str,
     gitlab_username: Optional[str] = None
 ) -> dict:
     """
-    Fetch time tracking entries from GitLab for a specific month.
+    Fetch time tracking entries from GitLab using GraphQL API.
+    
+    The GraphQL API correctly returns `spentAt` date, unlike the REST Notes API.
     
     Args:
-        project_id: GitLab project ID
+        project_path: GitLab project path (e.g., "wolfram_laube/blauweiss_llc/irena")
         year: Year (e.g., 2026)
         month: Month (1-12)
         gitlab_label: Label to filter issues (e.g., "client:nemensis")
@@ -85,7 +88,10 @@ def fetch_time_entries(
         print("   export GITLAB_TOKEN='glpat-xxx'")
         return {}
     
-    headers = {"PRIVATE-TOKEN": GITLAB_TOKEN}
+    headers = {
+        "Authorization": f"Bearer {GITLAB_TOKEN}",
+        "Content-Type": "application/json"
+    }
     
     # Calculate date range
     start_date = datetime(year, month, 1)
@@ -96,91 +102,148 @@ def fetch_time_entries(
     
     entries_by_day = defaultdict(list)
     
-    # Fetch issues with the client label
-    url = f"{GITLAB_API_URL}/projects/{project_id}/issues"
-    params = {
-        "labels": gitlab_label,
-        "state": "all",
-        "per_page": 100,
-        "updated_after": (start_date - timedelta(days=7)).isoformat(),
+    # GraphQL query to fetch issues with timelogs
+    query = """
+    query($projectPath: ID!, $labelName: String!, $cursor: String) {
+      project(fullPath: $projectPath) {
+        issues(labelName: [$labelName], state: all, first: 50, after: $cursor) {
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+          nodes {
+            iid
+            title
+            timelogs {
+              nodes {
+                spentAt
+                timeSpent
+                user {
+                  username
+                }
+              }
+            }
+          }
+        }
+      }
     }
+    """
     
-    print(f"   Fetching issues with label '{gitlab_label}'...")
-    response = requests.get(url, headers=headers, params=params)
+    print(f"   Fetching issues with label '{gitlab_label}' via GraphQL...")
     
-    if response.status_code != 200:
-        print(f"❌ Error fetching issues: {response.status_code}")
-        print(f"   {response.text[:200]}")
-        return {}
+    cursor = None
+    total_issues = 0
     
-    issues = response.json()
-    print(f"   Found {len(issues)} issues")
-    
-    for issue in issues:
-        issue_iid = issue["iid"]
-        issue_title = issue["title"]
+    while True:
+        variables = {
+            "projectPath": project_path,
+            "labelName": gitlab_label,
+            "cursor": cursor
+        }
         
-        # Get time tracking notes (system notes about /spend)
-        notes_url = f"{GITLAB_API_URL}/projects/{project_id}/issues/{issue_iid}/notes"
-        notes_params = {"per_page": 100, "sort": "asc"}
-        notes_response = requests.get(notes_url, headers=headers, params=notes_params)
+        response = requests.post(
+            GITLAB_GRAPHQL_URL,
+            headers=headers,
+            json={"query": query, "variables": variables}
+        )
         
-        if notes_response.status_code != 200:
-            continue
+        if response.status_code != 200:
+            print(f"❌ GraphQL error: {response.status_code}")
+            print(f"   {response.text[:200]}")
+            return {}
         
-        notes = notes_response.json()
+        data = response.json()
         
-        for note in notes:
-            # Only system notes about time tracking
-            if not note.get("system", False):
-                continue
+        if "errors" in data:
+            print(f"❌ GraphQL query errors:")
+            for error in data["errors"]:
+                print(f"   {error.get('message', error)}")
+            return {}
+        
+        project_data = data.get("data", {}).get("project")
+        if not project_data:
+            print(f"❌ Project not found: {project_path}")
+            return {}
+        
+        issues_data = project_data.get("issues", {})
+        issues = issues_data.get("nodes", [])
+        total_issues += len(issues)
+        
+        for issue in issues:
+            issue_title = issue.get("title", "")
+            timelogs = issue.get("timelogs", {}).get("nodes", [])
             
-            body = note.get("body", "")
-            author = note.get("author", {})
-            author_username = author.get("username", "")
-            created_at = note.get("created_at", "")
-            
-            # Filter by username if specified
-            if gitlab_username and author_username != gitlab_username:
-                continue
-            
-            # Parse time tracking notes
-            # Formats: 
-            #   "added 2h of time spent"
-            #   "added 2h 30m of time spent"
-            #   "added 30m of time spent"
-            #   "subtracted 1h of time spent"
-            #   "added 4h of time spent at 2026-01-03"
-            time_match = re.search(
-                r"(added|subtracted)\s+(?:(\d+)h)?\s*(?:(\d+)m)?\s+of time spent(?:\s+at\s+(\d{4}-\d{2}-\d{2}))?",
-                body
-            )
-            
-            if time_match:
-                action = time_match.group(1)
-                hours = int(time_match.group(2) or 0)
-                minutes = int(time_match.group(3) or 0)
-                specific_date = time_match.group(4)
+            for timelog in timelogs:
+                spent_at_str = timelog.get("spentAt")
+                time_spent_seconds = timelog.get("timeSpent", 0)
+                user = timelog.get("user", {})
+                username = user.get("username", "")
                 
-                total_hours = hours + minutes / 60
+                # Filter by username if specified
+                if gitlab_username and username != gitlab_username:
+                    continue
                 
-                if action == "subtracted":
-                    total_hours = -total_hours
+                if not spent_at_str:
+                    continue
                 
-                # Use specific date if provided, otherwise note creation date
-                if specific_date:
-                    entry_date = datetime.strptime(specific_date, "%Y-%m-%d")
-                else:
-                    entry_date = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+                # Parse date - format: "2026-01-03T17:02:13Z"
+                try:
+                    spent_at = datetime.fromisoformat(spent_at_str.replace("Z", "+00:00"))
+                except ValueError:
+                    continue
                 
                 # Check if within our target month
-                if start_date <= entry_date.replace(tzinfo=None) < end_date:
-                    day = entry_date.day
-                    # Truncate description if too long
-                    desc = issue_title[:50] + "..." if len(issue_title) > 50 else issue_title
-                    entries_by_day[day].append((total_hours, desc))
+                spent_at_naive = spent_at.replace(tzinfo=None)
+                if not (start_date <= spent_at_naive < end_date):
+                    continue
+                
+                # Convert seconds to hours
+                hours = time_spent_seconds / 3600
+                
+                # Skip negative entries (corrections) for display purposes
+                # They're still included in the total calculation
+                if hours == 0:
+                    continue
+                
+                day = spent_at.day
+                desc = issue_title[:50] + "..." if len(issue_title) > 50 else issue_title
+                entries_by_day[day].append((hours, desc))
+        
+        # Pagination
+        page_info = issues_data.get("pageInfo", {})
+        if page_info.get("hasNextPage"):
+            cursor = page_info.get("endCursor")
+        else:
+            break
+    
+    print(f"   Found {total_issues} issues")
     
     return dict(entries_by_day)
+
+
+def consolidate_entries(entries: dict) -> dict:
+    """
+    Consolidate entries per day - sum hours and combine descriptions.
+    Handles negative entries (time corrections).
+    """
+    consolidated = {}
+    
+    for day, day_entries in entries.items():
+        total_hours = sum(h for h, _ in day_entries)
+        
+        # Skip days with zero or negative net time
+        if total_hours <= 0:
+            continue
+        
+        # Combine unique descriptions
+        descriptions = list(set(d for _, d in day_entries if d))
+        desc = "; ".join(descriptions[:2])
+        if len(descriptions) > 2:
+            desc += f" (+{len(descriptions)-2} more)"
+        
+        consolidated[day] = [(total_hours, desc)]
+    
+    return consolidated
 
 
 def generate_timesheet_typ(
@@ -201,10 +264,12 @@ def generate_timesheet_typ(
         total_hours = sum(h for h, _ in day_entries)
         # Combine descriptions
         descriptions = list(set(d for _, d in day_entries))
-        desc = "; ".join(descriptions[:2])  # Max 2 descriptions
+        desc = "; ".join(descriptions[:2])
         if len(descriptions) > 2:
             desc += f" (+{len(descriptions)-2} more)"
-        daily_entries_parts.append(f'    "{day}": ({total_hours}, "{desc}"),')
+        # Escape quotes in description
+        desc = desc.replace('"', '\\"')
+        daily_entries_parts.append(f'    "{day}": ({total_hours:.2f}, "{desc}"),')
     
     daily_entries_str = "\n".join(daily_entries_parts) if daily_entries_parts else "    // No entries"
     
@@ -264,9 +329,9 @@ def generate_timesheet(
     print(f"   Consultant: {consultant_config['name']} (@{gitlab_username})")
     print(f"   Period: {year}-{month:02d}")
     
-    # Fetch time entries
-    entries = fetch_time_entries(
-        GITLAB_PROJECT_ID,
+    # Fetch time entries via GraphQL
+    entries = fetch_time_entries_graphql(
+        GITLAB_PROJECT_PATH,
         year,
         month,
         gitlab_label,
@@ -275,6 +340,13 @@ def generate_timesheet(
     
     if not entries:
         print("   ⚠️ No time entries found")
+        return None
+    
+    # Consolidate entries per day
+    entries = consolidate_entries(entries)
+    
+    if not entries:
+        print("   ⚠️ No positive time entries after consolidation")
         return None
     
     # Calculate total
@@ -306,7 +378,8 @@ def generate_timesheet(
         "lang": lang,
         "total_hours": total_hours,
         "entries": {str(k): v for k, v in entries.items()},
-        "generated_at": datetime.now().isoformat()
+        "generated_at": datetime.now().isoformat(),
+        "api_source": "graphql"  # Mark that this used GraphQL API
     }
     sync_file = output_file.with_suffix(".sync.json")
     with open(sync_file, "w", encoding="utf-8") as f:
@@ -317,7 +390,7 @@ def generate_timesheet(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate timesheets from GitLab time tracking",
+        description="Generate timesheets from GitLab time tracking (GraphQL API)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -328,8 +401,8 @@ Examples:
     %(prog)s --client nemensis --period 2026-01 --all-consultants
     
 Environment:
-    GITLAB_TOKEN     GitLab Personal Access Token (required)
-    GITLAB_PROJECT_ID  Project ID (default: 77260390)
+    GITLAB_TOKEN        GitLab Personal Access Token (required)
+    GITLAB_PROJECT_PATH Project path (default: wolfram_laube/blauweiss_llc/irena)
 """
     )
     parser.add_argument("--client", "-c", required=True, help="Client ID from clients.yaml")
