@@ -13,6 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `spent_at` dates now correctly captured (was showing note creation date)
   - `generate_timesheet.py` properly consolidates entries per day
 
+- **Billing Automation: Scheduled Pipeline**
+  - Added `generate_timesheets` CI job for automated monthly generation
+  - Created scheduled pipeline (1st of month at 6am Vienna time)
+  - Workflow rules now support `schedule` pipeline source
+  - Manual trigger available with `GENERATE_TIMESHEETS=true` variable
+
+
 ### Added
 - ADR-011: OPM Flow Simulator Integration
 - `SimulatorAdapter` abstract base class in `src/clarissa/simulators/base.py`
