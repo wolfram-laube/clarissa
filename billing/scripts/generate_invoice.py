@@ -350,6 +350,7 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="Show what would be generated")
     parser.add_argument("--no-pdf", action="store_true", help="Generate .typ only, no PDF")
     parser.add_argument("--date", help="Invoice date (YYYY-MM-DD), default: today")
+    parser.add_argument("--upload", action="store_true", help="Upload to Google Drive after generation")
     
     args = parser.parse_args()
     
@@ -486,7 +487,49 @@ def main():
             print(f"📎 Timesheet attached: {timesheet_pdf}")
     
     if not args.no_pdf:
-        compile_pdf(typ_file)
+        invoice_pdf = compile_pdf(typ_file)
+    
+    # Upload to Google Drive
+    if args.upload and not args.dry_run:
+        try:
+            from upload_to_drive import upload_file, get_credentials, ensure_folder_path
+            from googleapiclient.discovery import build
+            
+            print("\n📤 Uploading to Google Drive...")
+            
+            credentials = get_credentials()
+            service = build('drive', 'v3', credentials=credentials)
+            
+            root_folder = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
+            if root_folder:
+                # Create folder structure: YYYY/MM_client/
+                if args.from_timesheet:
+                    year = timesheet_data["year"]
+                    month = timesheet_data["month"]
+                else:
+                    year = invoice_date.year
+                    month = invoice_date.month
+                
+                folder_path = f"{year}/{month:02d}_{client_id}"
+                target_folder = ensure_folder_path(service, root_folder, folder_path)
+                
+                # Upload invoice PDF
+                if invoice_pdf and invoice_pdf.exists():
+                    upload_file(service, target_folder, invoice_pdf)
+                
+                # Upload timesheet PDF if exists
+                if args.from_timesheet:
+                    timesheet_pdf = Path(args.from_timesheet).with_suffix(".pdf")
+                    if timesheet_pdf.exists():
+                        upload_file(service, target_folder, timesheet_pdf)
+                
+                print(f"🔗 https://drive.google.com/drive/folders/{target_folder}")
+            else:
+                print("⚠️ GOOGLE_DRIVE_FOLDER_ID not set - skipping upload")
+        except ImportError:
+            print("⚠️ Google API libraries not installed - skipping upload")
+        except Exception as e:
+            print(f"⚠️ Upload failed: {e}")
     
     print(f"\n✅ Invoice package complete!")
 
