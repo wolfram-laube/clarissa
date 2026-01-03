@@ -69,6 +69,10 @@ nav:
     - How to Read CI Results: ci/README.md
 
   - Simulators:
+    - Overview: simulators/index.md
+    - Adapter Contract: simulators/adapter-contract.md
+    - OPM Flow Guide: simulators/opm-flow.md
+    - Kubernetes Jobs: simulators/k8s-jobs.md
     - Adapter Matrix: simulators/adapter_matrix.md
 
   - Publications:
