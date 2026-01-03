@@ -43,6 +43,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Unit conversion utilities (RateValue, PressureValue)
   - Required/optional entity validation per intent
 
+- **Validation Checkpoint Framework** (`src/clarissa/agent/pipeline/validation.py`)
+  - Three-state decision pattern: PROCEED, CLARIFY, ROLLBACK/FAIL
+  - Per-stage threshold configuration via `StageThresholds`
+  - Clarification prompt generation
+  - Decision history tracking and summary
+  - Factory: `create_checkpoint(strict=True)`
+
 - ADR-011: OPM Flow Simulator Integration
 - `SimulatorAdapter` abstract base class in `src/clarissa/simulators/base.py`
 - `OPMFlowAdapter` for OPM Flow integration via Docker
