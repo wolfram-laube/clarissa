@@ -2,15 +2,21 @@
 """
 CLARISSA Invoice Generator (Typst)
 
-Generates professional invoices from GitLab Time Tracking data using Typst.
+Generates professional invoices from GitLab Time Tracking data or timesheets.
 
 Usage:
+    # From timesheet (recommended)
+    python generate_invoice.py --from-timesheet billing/output/2026-01_timesheet_nemensis_de.typ
+    
+    # Direct from GitLab (legacy)
     python generate_invoice.py --client oxy --period 2025-12
+    
+    # Manual entry
     python generate_invoice.py --client nemensis --hours 184 --remote
-    python generate_invoice.py --client oxy --hours 184 --dry-run
 """
 
 import argparse
+import json
 import os
 import re
 import subprocess
@@ -269,9 +275,74 @@ def compile_pdf(typ_file: Path) -> Path:
         return None
 
 
+def parse_timesheet_for_invoice(typ_file: Path) -> dict:
+    """
+    Parse a timesheet .typ file and extract hours for invoice.
+    
+    Returns: {
+        "client_id": str,
+        "year": int,
+        "month": int,
+        "total_hours": float,
+        "daily_entries": dict,
+    }
+    """
+    # Load sync data for metadata
+    sync_file = typ_file.with_suffix(".sync.json")
+    if sync_file.exists():
+        with open(sync_file, "r", encoding="utf-8") as f:
+            sync_data = json.load(f)
+    else:
+        sync_data = {}
+    
+    # Parse timesheet
+    with open(typ_file, "r", encoding="utf-8") as f:
+        content = f.read()
+    
+    # Extract daily entries
+    match = re.search(r'daily_entries:\s*\((.*?)\)\s*,?\s*\)', content, re.DOTALL)
+    if not match:
+        return None
+    
+    entries_block = match.group(1)
+    
+    total_hours = 0
+    daily_entries = {}
+    
+    for entry_match in re.finditer(r'"(\d+)":\s*\((\d+(?:\.\d+)?),\s*"([^"]*)"\)', entries_block):
+        day = int(entry_match.group(1))
+        hours = float(entry_match.group(2))
+        description = entry_match.group(3)
+        daily_entries[day] = {"hours": hours, "description": description}
+        total_hours += hours
+    
+    # Extract year/month from filename or content
+    year = sync_data.get("year")
+    month = sync_data.get("month")
+    client_id = sync_data.get("client_id")
+    
+    if not year or not month:
+        # Try to parse from filename: 2026-01_timesheet_nemensis_de.typ
+        name_match = re.match(r'(\d{4})-(\d{2})_timesheet_(\w+)', typ_file.stem)
+        if name_match:
+            year = int(name_match.group(1))
+            month = int(name_match.group(2))
+            client_id = name_match.group(3)
+    
+    return {
+        "client_id": client_id,
+        "year": year,
+        "month": month,
+        "total_hours": total_hours,
+        "daily_entries": daily_entries,
+        "timesheet_file": typ_file,
+    }
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Generate invoice from GitLab time tracking (Typst)")
-    parser.add_argument("--client", "-c", required=True, help="Client ID from clients.yaml")
+    parser = argparse.ArgumentParser(description="Generate invoice from timesheet or GitLab (Typst)")
+    parser.add_argument("--from-timesheet", "-t", help="Generate from timesheet .typ file")
+    parser.add_argument("--client", "-c", help="Client ID from clients.yaml")
     parser.add_argument("--period", "-p", help="Billing period (YYYY-MM)")
     parser.add_argument("--hours", type=float, help="Manual hours entry")
     parser.add_argument("--remote", action="store_true", help="Hours are remote (default)")
@@ -285,43 +356,93 @@ def main():
     # Load config
     config = load_config()
     
-    if args.client not in config["clients"]:
-        print(f"❌ Unknown client: {args.client}")
-        print(f"Available clients: {', '.join(config['clients'].keys())}")
-        sys.exit(1)
-    
-    client_config = config["clients"][args.client]
-    
-    # Determine hours
-    remote_hours = 0
-    onsite_hours = 0
-    
-    if args.hours:
-        if args.onsite:
-            onsite_hours = args.hours
-        else:
-            remote_hours = args.hours
-    elif args.period:
-        time_data = fetch_gitlab_time(GITLAB_PROJECT_ID, args.period)
-        if time_data:
-            remote_hours = time_data["remote_hours"]
-            onsite_hours = time_data["onsite_hours"]
-            print(f"📊 Time from GitLab:")
-            print(f"   Remote: {remote_hours}h")
-            print(f"   On-site: {onsite_hours}h")
-            print(f"   Issues: {len(time_data['issues'])}")
-        else:
-            print("❌ Could not fetch time data from GitLab")
+    # Mode 1: From timesheet
+    if args.from_timesheet:
+        typ_file = Path(args.from_timesheet)
+        if not typ_file.exists():
+            typ_file = OUTPUT_DIR / args.from_timesheet
+        
+        if not typ_file.exists():
+            print(f"❌ Timesheet not found: {args.from_timesheet}")
             sys.exit(1)
-    else:
-        print("❌ Specify either --period or --hours")
-        sys.exit(1)
+        
+        print(f"📄 Reading timesheet: {typ_file}")
+        
+        timesheet_data = parse_timesheet_for_invoice(typ_file)
+        if not timesheet_data:
+            print("❌ Could not parse timesheet")
+            sys.exit(1)
+        
+        client_id = timesheet_data["client_id"]
+        if client_id not in config["clients"]:
+            print(f"❌ Unknown client in timesheet: {client_id}")
+            sys.exit(1)
+        
+        client_config = config["clients"][client_id]
+        remote_hours = timesheet_data["total_hours"]
+        onsite_hours = 0  # TODO: Support onsite in timesheet
+        
+        # Invoice date from timesheet period
+        if args.date:
+            invoice_date = datetime.strptime(args.date, "%Y-%m-%d")
+        else:
+            # Default to end of timesheet month
+            year = timesheet_data["year"]
+            month = timesheet_data["month"]
+            if month == 12:
+                invoice_date = datetime(year + 1, 1, 1)
+            else:
+                invoice_date = datetime(year, month + 1, 1)
+        
+        print(f"📊 From timesheet:")
+        print(f"   Period: {timesheet_data['year']}-{timesheet_data['month']:02d}")
+        print(f"   Days with entries: {len(timesheet_data['daily_entries'])}")
+        print(f"   Total hours: {remote_hours}")
     
-    # Invoice date
-    if args.date:
-        invoice_date = datetime.strptime(args.date, "%Y-%m-%d")
+    # Mode 2: Direct (legacy)
     else:
-        invoice_date = datetime.now()
+        if not args.client:
+            print("❌ Specify --client or --from-timesheet")
+            sys.exit(1)
+        
+        if args.client not in config["clients"]:
+            print(f"❌ Unknown client: {args.client}")
+            print(f"Available clients: {', '.join(config['clients'].keys())}")
+            sys.exit(1)
+        
+        client_id = args.client
+        client_config = config["clients"][client_id]
+        
+        # Determine hours
+        remote_hours = 0
+        onsite_hours = 0
+        
+        if args.hours:
+            if args.onsite:
+                onsite_hours = args.hours
+            else:
+                remote_hours = args.hours
+        elif args.period:
+            time_data = fetch_gitlab_time(GITLAB_PROJECT_ID, args.period)
+            if time_data:
+                remote_hours = time_data["remote_hours"]
+                onsite_hours = time_data["onsite_hours"]
+                print(f"📊 Time from GitLab:")
+                print(f"   Remote: {remote_hours}h")
+                print(f"   On-site: {onsite_hours}h")
+                print(f"   Issues: {len(time_data['issues'])}")
+            else:
+                print("❌ Could not fetch time data from GitLab")
+                sys.exit(1)
+        else:
+            print("❌ Specify --period, --hours, or --from-timesheet")
+            sys.exit(1)
+        
+        # Invoice date
+        if args.date:
+            invoice_date = datetime.strptime(args.date, "%Y-%m-%d")
+        else:
+            invoice_date = datetime.now()
     
     # Get invoice number
     invoice_number = get_next_invoice_number(invoice_date.year, dry_run=args.dry_run)
@@ -345,9 +466,9 @@ def main():
         print("\n⚠️  Dry run - no files generated")
         return
     
-    # Generate
+    # Generate invoice
     typ_file = generate_invoice_typst(
-        args.client,
+        client_id,
         client_config,
         remote_hours,
         onsite_hours,
@@ -355,8 +476,19 @@ def main():
         invoice_number
     )
     
+    # Also compile timesheet PDF if from-timesheet mode
+    if args.from_timesheet:
+        timesheet_typ = Path(args.from_timesheet)
+        if not timesheet_typ.exists():
+            timesheet_typ = OUTPUT_DIR / args.from_timesheet
+        timesheet_pdf = compile_pdf(timesheet_typ)
+        if timesheet_pdf:
+            print(f"📎 Timesheet attached: {timesheet_pdf}")
+    
     if not args.no_pdf:
         compile_pdf(typ_file)
+    
+    print(f"\n✅ Invoice package complete!")
 
 
 if __name__ == "__main__":
