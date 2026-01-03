@@ -5,7 +5,7 @@
 consultants:
   wolfram:
     name: "Wolfram Laube"
-    gitlab_username: "wolfram_laube"
+    gitlab_username: "wolfram.laube"
     email: "wolfram@blauweiss-edv.com"
   ian:
     name: "Ian Matejka"
