@@ -1,6 +1,7 @@
 // BLAUWEISS Invoice - AR_002_2026
 // Client: nemensis AG Deutschland
 // Period: 2026-01
+// CI rebuild trigger
 // Generated: 2026-01-03 17:08
 //
 // Hours breakdown:
