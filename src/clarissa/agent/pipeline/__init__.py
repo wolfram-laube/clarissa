@@ -23,8 +23,19 @@ from clarissa.agent.pipeline.protocols import (
     DeckValidator,
     PipelineController,
 )
+from clarissa.agent.pipeline.intent import (
+    RuleBasedRecognizer,
+    HybridRecognizer,
+    create_recognizer,
+)
+from clarissa.agent.pipeline.entities import (
+    RuleBasedEntityExtractor,
+    RateValue,
+    PressureValue,
+)
 
 __all__ = [
+    # Protocols
     "StageResult",
     "SpeechRecognizer",
     "IntentRecognizer",
@@ -33,4 +44,12 @@ __all__ = [
     "SyntaxGenerator",
     "DeckValidator",
     "PipelineController",
+    # Intent Recognition
+    "RuleBasedRecognizer",
+    "HybridRecognizer",
+    "create_recognizer",
+    # Entity Extraction
+    "RuleBasedEntityExtractor",
+    "RateValue",
+    "PressureValue",
 ]
