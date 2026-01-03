@@ -36,7 +36,6 @@ clients:
     rates:
       remote: 105
       onsite: 120
-    invoice_prefix: "OP"
 
   # Example EU client (English)
   example_nl:
@@ -55,7 +54,6 @@ clients:
     rates:
       remote: 105
       onsite: 120
-    invoice_prefix: "NL"
 
   # Example German client
   nemensis:
@@ -74,13 +72,16 @@ clients:
     rates:
       remote: 105
       onsite: 120
-    invoice_prefix: "DE"
 
 # Invoice number format
 # Pattern: {prefix}_{client_short}{sequence}_{year}
 # Example: OP_AR001_2025
+# Invoice number format
+# Pattern: AR_{sequence}_{year}
+# Example: AR_015_2026
 invoice_numbering:
-  pattern: "{prefix}_{client_short}{sequence:03d}_{year}"
+  prefix: "AR"
+  pattern: "{prefix}_{sequence:03d}_{year}"
   sequence_file: "billing/config/sequences.yaml"
 
 # GitLab Time Tracking labels

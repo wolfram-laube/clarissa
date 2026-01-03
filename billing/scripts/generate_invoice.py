@@ -55,24 +55,20 @@ def save_sequences(sequences: dict) -> None:
 
 
 def get_next_invoice_number(client_id: str, client_config: dict, year: int) -> str:
-    """Generate next invoice number for client."""
+    """Generate next invoice number (global AR_XXX_YYYY format)."""
     sequences = load_sequences()
     
     year_str = str(year)
     if year_str not in sequences["sequences"]:
-        sequences["sequences"][year_str] = {}
+        sequences["sequences"][year_str] = 1
     
-    if client_id not in sequences["sequences"][year_str]:
-        sequences["sequences"][year_str][client_id] = 1
+    seq = sequences["sequences"][year_str]
     
-    seq = sequences["sequences"][year_str][client_id]
-    prefix = client_config.get("invoice_prefix", "INV")
-    short = client_config.get("short", client_id.upper()[:3])
-    
-    invoice_number = f"{prefix}_{short}{seq:03d}_{year}"
+    # Global AR_ prefix for all invoices
+    invoice_number = f"AR_{seq:03d}_{year}"
     
     # Increment for next time
-    sequences["sequences"][year_str][client_id] = seq + 1
+    sequences["sequences"][year_str] = seq + 1
     save_sequences(sequences)
     
     return invoice_number
