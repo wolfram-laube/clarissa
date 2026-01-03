@@ -21,15 +21,14 @@ bank:
 
 # Client definitions
 clients:
-  # Example US client
+  # US client example
   oxy:
     name: "Occidental Petroleum Corporation"
     short: "OXY"
     template: "invoice-en-us"
     currency: "USD"
     address:
-      line1: "5 Greenway Plaza"
-      line2: "Suite 110"
+      line1: "5 Greenway Plaza, Suite 110"
       city: "Houston, TX 77046"
       country: "USA"
     contract_number: "00003151"
@@ -37,7 +36,7 @@ clients:
       remote: 105
       onsite: 120
 
-  # Example EU client (English)
+  # EU client example (English)
   example_nl:
     name: "Example Company B.V."
     short: "EXNL"
@@ -45,7 +44,6 @@ clients:
     currency: "EUR"
     address:
       line1: "Keizersgracht 123"
-      line2: ""
       city: "1015 CW Amsterdam"
       country: "The Netherlands"
     registration_id: "KVK: 12345678"
@@ -55,7 +53,7 @@ clients:
       remote: 105
       onsite: 120
 
-  # Example German client
+  # German client
   nemensis:
     name: "nemensis AG Deutschland"
     short: "NEM"
@@ -63,7 +61,6 @@ clients:
     currency: "EUR"
     address:
       line1: "Alter Wall 69"
-      line2: ""
       city: "D - 20457 Hamburg"
       country: ""
     registration_id: "HRB. NR.: 181535 Hamburg"
@@ -74,9 +71,6 @@ clients:
       onsite: 120
 
 # Invoice number format
-# Pattern: {prefix}_{client_short}{sequence}_{year}
-# Example: OP_AR001_2025
-# Invoice number format
 # Pattern: AR_{sequence}_{year}
 # Example: AR_015_2026
 invoice_numbering:
@@ -85,7 +79,6 @@ invoice_numbering:
   sequence_file: "billing/config/sequences.yaml"
 
 # GitLab Time Tracking labels
-# These labels in GitLab issues are used to categorize time for billing
 gitlab_labels:
   billable: "billable"
   remote: "work::remote"
