@@ -32,6 +32,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 7 stage Protocols: SpeechRecognizer, IntentRecognizer, EntityExtractor, AssetValidator, SyntaxGenerator, DeckValidator, PipelineController
   - Runtime-checkable for isinstance() support
 
+- **Intent Recognition Stage** (`src/clarissa/agent/pipeline/intent.py`)
+  - RuleBasedRecognizer with 22 intent patterns
+  - HybridRecognizer (rules + LLM fallback)
+  - Factory function `create_recognizer()`
+  - Confidence scoring and alternatives
+
+- **Entity Extraction Stage** (`src/clarissa/agent/pipeline/entities.py`)
+  - 8 entity types: wells, rates, pressures, dates, durations, fluids, well types, grid locations
+  - Unit conversion utilities (RateValue, PressureValue)
+  - Required/optional entity validation per intent
+
 - ADR-011: OPM Flow Simulator Integration
 - `SimulatorAdapter` abstract base class in `src/clarissa/simulators/base.py`
 - `OPMFlowAdapter` for OPM Flow integration via Docker
