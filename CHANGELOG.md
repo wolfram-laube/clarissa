@@ -21,6 +21,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Added
+- **Intent Taxonomy** (`src/clarissa/agent/intents/taxonomy.json`)
+  - 6 categories: simulation_control, well_operations, schedule_operations, query_operations, validation, help_and_info
+  - 22 distinct intents with examples, required/optional entities, ECLIPSE keyword mappings
+  - 17 entity type definitions with validation patterns
+  - Confidence thresholds per intent
+
+- **NLP Pipeline Protocols** (`src/clarissa/agent/pipeline/protocols.py`)
+  - `StageResult` dataclass with validation invariants
+  - 7 stage Protocols: SpeechRecognizer, IntentRecognizer, EntityExtractor, AssetValidator, SyntaxGenerator, DeckValidator, PipelineController
+  - Runtime-checkable for isinstance() support
+
 - ADR-011: OPM Flow Simulator Integration
 - `SimulatorAdapter` abstract base class in `src/clarissa/simulators/base.py`
 - `OPMFlowAdapter` for OPM Flow integration via Docker
