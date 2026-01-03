@@ -2,19 +2,21 @@
 
 ## 🎯 Aktueller Stand
 
-Das Billing-System ist **funktionsfähig aber noch nicht produktionsreif**.
+Das Billing-System ist **funktionsfähig** nach dem GraphQL-Fix.
 
 ### Was funktioniert ✅
 - Zeit tracken via GitLab `/spend` Command
+- **`spent_at` Datum wird korrekt erfasst** (via GraphQL API) ✨ FIXED
 - Timesheets generieren (pro Consultant)
 - Konsolidierte Rechnung aus mehreren Timesheets
 - CI/CD Pipeline: `.typ` → PDF → Google Drive Upload
 - Google Drive Shared Drive Integration (BLAUWEISS-EDV-LLC)
+- Negative Zeiteinträge (Korrekturen) werden korrekt verarbeitet
 
-### Was noch nicht funktioniert ❌
-- `spent_at` Datum wird von GitLab API nicht im Note-Body zurückgegeben
-- Daher: Alle Zeiteinträge landen auf dem Tag des API-Calls, nicht dem echten Arbeitstag
-- Username-Filter funktioniert nur wenn User selbst `/spend` eingibt (nicht via API)
+### Was noch offen ist 🔧
+- Template-Validierung (Typst compile check vor Upload)
+- Scheduled Pipeline am Monatsanfang (P3)
+- Approval-Workflow mit Flag in .sync.json (P3)
 
 ---
 
@@ -28,7 +30,7 @@ billing/
 │   ├── clients.yaml          # Kunden, Stundensätze, Consultants, gitlab_label
 │   └── sequences.yaml        # Rechnungsnummern-Zähler
 ├── scripts/
-│   ├── generate_timesheet.py # Hauptscript - HAT BUGS (siehe unten)
+│   ├── generate_timesheet.py # ✅ FIXED - Nutzt GraphQL API für korrekte Datums
 │   ├── generate_invoice.py   # Liest .sync.json, konsolidiert, erstellt Rechnung
 │   └── upload_to_drive.py    # Google Drive Upload mit Shared Drive Support
 ├── templates/
@@ -46,28 +48,44 @@ billing/
 
 ---
 
-## 🐛 Hauptproblem: Time Entry Parsing
+## ✅ GELÖST: Time Entry Parsing (P1)
 
-### Das Problem
+### Das Problem (war)
+Die Notes-API gab nur das Note-Erstellungsdatum zurück, nicht das `spent_at` Datum:
 ```python
-# GitLab Note Body zeigt:
+# GitLab Note Body zeigte:
 "added 8h of time spent at 2026-01-03 17:07:57 UTC"
 #                         ^^^^^^^^^^^^^^^^^^^^^^
-#                         Das ist das NOTE-Erstellungsdatum!
-#                         NICHT das spent_at Datum!
+#                         Das war das NOTE-Erstellungsdatum!
 ```
 
-Wenn User `/spend 8h 2026-01-05` eingibt, speichert GitLab das `spent_at` intern, aber die Notes-API gibt es nicht zurück.
+### Die Lösung: GraphQL API
+Die GraphQL API gibt `spentAt` korrekt zurück:
+```graphql
+query {
+  project(fullPath: "wolfram_laube/blauweiss_llc/irena") {
+    issues(labelName: ["client:nemensis"]) {
+      nodes {
+        title
+        timelogs {
+          nodes {
+            spentAt      # ← Korrektes Datum!
+            timeSpent    # ← Sekunden
+            user { username }
+          }
+        }
+      }
+    }
+  }
+}
+```
 
-### Mögliche Lösungen
-1. **Timelogs API** - `GET /projects/:id/issues/:iid/timelogs` (eventuell nur Premium?)
-2. **User Time Logs** - `GET /users/:id/timelogs` 
-3. **GraphQL API** - Könnte mehr Details liefern
-4. **Workaround:** Issue-Title als "Bucket" nutzen, Datum aus Title parsen
-
-### Test-Issues
-- Issue #36: Wolfram's Zeit (6h)
-- Issue #37: Ian's Zeit (20h) - Hat kaputte Einträge vom Testen
+### Implementierung
+`generate_timesheet.py` wurde von REST Notes API auf GraphQL umgestellt:
+- `fetch_time_entries_graphql()` ersetzt `fetch_time_entries()`
+- Pagination via `cursor` für große Datenmengen
+- `consolidate_entries()` summiert Stunden pro Tag
+- Negative Einträge (Korrekturen) werden korrekt verarbeitet
 
 ---
 
@@ -99,13 +117,13 @@ clients:
 
 ---
 
-## 🔄 Gewünschter Flow (Ziel)
+## 🔄 Workflow (funktioniert)
 
 ```
 1. User arbeitet an Issue mit Label "client:nemensis"
-2. User: /spend 4h 2026-01-15
+2. User: /spend 4h 2026-01-15   ← Datum wird korrekt erfasst!
 3. Ende Monat: generate_timesheet.py --client nemensis --all-consultants
-   → Erstellt pro Consultant ein Timesheet mit korrekten Tagen
+   → Erstellt pro Consultant ein Timesheet mit korrekten Tagen ✅
 4. Timesheets werden geprüft & unterschrieben
 5. generate_invoice.py --client nemensis --period 2026-01
    → Liest alle Timesheets, erstellt EINE konsolidierte Rechnung
@@ -114,22 +132,17 @@ clients:
 
 ---
 
-## 🚀 Nächste Schritte (Priorität)
+## 🚀 Nächste Schritte
 
-### P1: Time Entry Parsing fixen
-- GitLab Timelogs API testen
-- Oder GraphQL API probieren
-- `generate_timesheet.py` entsprechend anpassen
+### P2: Edge Cases (optional)
+- [ ] Was wenn `/spend` ohne Datum? → Nutzt aktuelles Datum (OK)
+- [ ] Mehrere Einträge am selben Tag → Werden konsolidiert (OK)
+- [ ] Zeitzone-Handling → UTC wird genutzt, lokale Zeit für Display
 
-### P2: Edge Cases
-- Was wenn `/spend` ohne Datum?
-- Negative Zeit (Korrekturen)?
-- Mehrere Einträge am selben Tag konsolidieren
-
-### P3: Automatisierung
-- Scheduled Pipeline am Monatsanfang
-- Notification wenn Timesheet bereit
-- Approval-Flag in .sync.json
+### P3: Automatisierung (nice-to-have)
+- [ ] Scheduled Pipeline am Monatsanfang
+- [ ] Notification wenn Timesheet bereit
+- [ ] Approval-Flag in .sync.json
 
 ---
 
@@ -150,6 +163,7 @@ Service Account: claude-assistant@myk8sproject-207017.iam.gserviceaccount.com
 ```bash
 # Timesheet generieren
 export GITLAB_TOKEN="glpat-xxx"
+export GITLAB_PROJECT_PATH="wolfram_laube/blauweiss_llc/irena"
 python billing/scripts/generate_timesheet.py --client nemensis --period 2026-01 --consultant wolfram
 
 # Alle Consultants
@@ -161,3 +175,10 @@ python billing/scripts/generate_invoice.py --client nemensis --period 2026-01
 # Lokal Typst kompilieren
 cd billing && typst compile --root . output/2026-01_timesheet_nemensis_wolfram_de.typ
 ```
+
+---
+
+## 🧪 Test-Issues
+
+- Issue #36: Wolfram's Zeit - `client:nemensis` Label
+- Issue #37: Docker Integration - `client:nemensis` Label (hat Test-Einträge)
