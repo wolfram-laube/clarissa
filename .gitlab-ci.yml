@@ -615,7 +615,7 @@ build_paper:
 
 build_invoice:
   stage: build
-  image: ghcr.io/typst/typst:latest
+  image: alpine:latest
   rules:
     # Auto-run when invoice templates change
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
@@ -632,6 +632,12 @@ build_invoice:
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: manual
     - when: never
+  before_script:
+    - apk add --no-cache curl tar xz fontconfig
+    - curl -L "https://github.com/typst/typst/releases/download/v0.12.0/typst-x86_64-unknown-linux-musl.tar.xz" -o /tmp/typst.tar.xz
+    - tar xf /tmp/typst.tar.xz -C /tmp
+    - mv /tmp/typst-x86_64-unknown-linux-musl/typst /usr/local/bin/
+    - typst --version
   script:
     - echo "Building invoices with Typst..."
     - cd billing/output
