@@ -5,8 +5,16 @@ CLARISSA Timesheet Generator
 Generates timesheets from GitLab Time Tracking data.
 
 Usage:
-    python generate_timesheet.py --client nemensis --period 2026-01
-    python generate_timesheet.py --client oxy --period 2026-01 --lang en
+    # Single consultant
+    python generate_timesheet.py --client nemensis --period 2026-01 --consultant wolfram
+    
+    # All consultants for a client
+    python generate_timesheet.py --client nemensis --period 2026-01 --all-consultants
+    
+Requirements:
+    - GitLab issues must have label matching client's gitlab_label (e.g., "client:nemensis")
+    - Time is tracked via /spend command on issues
+    - GITLAB_TOKEN environment variable must be set
 """
 
 import argparse
@@ -18,8 +26,15 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from collections import defaultdict
+from typing import Optional
 
-import yaml
+try:
+    import yaml
+    import requests
+except ImportError as e:
+    print(f"❌ Missing dependency: {e}")
+    print("   pip install pyyaml requests")
+    sys.exit(1)
 
 # Paths
 SCRIPT_DIR = Path(__file__).parent
@@ -35,26 +50,39 @@ GITLAB_TOKEN = os.environ.get("GITLAB_TOKEN", "")
 
 
 def load_config() -> dict:
-    """Load client configuration."""
+    """Load client and consultant configuration."""
     config_file = CONFIG_DIR / "clients.yaml"
+    if not config_file.exists():
+        print(f"❌ Config not found: {config_file}")
+        sys.exit(1)
     with open(config_file, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
-def fetch_time_entries(project_id: str, year: int, month: int) -> dict:
+def fetch_time_entries(
+    project_id: str,
+    year: int,
+    month: int,
+    gitlab_label: str,
+    gitlab_username: Optional[str] = None
+) -> dict:
     """
     Fetch time tracking entries from GitLab for a specific month.
     
-    Returns dict: {day: [(hours, description, issue_iid), ...]}
+    Args:
+        project_id: GitLab project ID
+        year: Year (e.g., 2026)
+        month: Month (1-12)
+        gitlab_label: Label to filter issues (e.g., "client:nemensis")
+        gitlab_username: Optional - filter by who spent the time
+    
+    Returns:
+        dict: {day: [(hours, description, issue_title), ...]}
     """
     if not GITLAB_TOKEN:
-        print("❌ GITLAB_TOKEN not set")
-        return {}
-    
-    try:
-        import requests
-    except ImportError:
-        print("❌ 'requests' not installed")
+        print("❌ GITLAB_TOKEN environment variable not set")
+        print("   Export your GitLab Personal Access Token:")
+        print("   export GITLAB_TOKEN='glpat-xxx'")
         return {}
     
     headers = {"PRIVATE-TOKEN": GITLAB_TOKEN}
@@ -66,31 +94,36 @@ def fetch_time_entries(project_id: str, year: int, month: int) -> dict:
     else:
         end_date = datetime(year, month + 1, 1)
     
-    # Fetch all issues with time tracking
     entries_by_day = defaultdict(list)
     
-    # Get issues updated in this period
+    # Fetch issues with the client label
     url = f"{GITLAB_API_URL}/projects/{project_id}/issues"
     params = {
+        "labels": gitlab_label,
         "state": "all",
         "per_page": 100,
-        "updated_after": (start_date - timedelta(days=30)).isoformat(),
+        "updated_after": (start_date - timedelta(days=7)).isoformat(),
     }
     
+    print(f"   Fetching issues with label '{gitlab_label}'...")
     response = requests.get(url, headers=headers, params=params)
+    
     if response.status_code != 200:
         print(f"❌ Error fetching issues: {response.status_code}")
+        print(f"   {response.text[:200]}")
         return {}
     
     issues = response.json()
+    print(f"   Found {len(issues)} issues")
     
     for issue in issues:
         issue_iid = issue["iid"]
         issue_title = issue["title"]
         
-        # Get time tracking notes for this issue
+        # Get time tracking notes (system notes about /spend)
         notes_url = f"{GITLAB_API_URL}/projects/{project_id}/issues/{issue_iid}/notes"
-        notes_response = requests.get(notes_url, headers=headers, params={"per_page": 100})
+        notes_params = {"per_page": 100, "sort": "asc"}
+        notes_response = requests.get(notes_url, headers=headers, params=notes_params)
         
         if notes_response.status_code != 200:
             continue
@@ -98,167 +131,212 @@ def fetch_time_entries(project_id: str, year: int, month: int) -> dict:
         notes = notes_response.json()
         
         for note in notes:
+            # Only system notes about time tracking
+            if not note.get("system", False):
+                continue
+            
             body = note.get("body", "")
+            author = note.get("author", {})
+            author_username = author.get("username", "")
             created_at = note.get("created_at", "")
             
+            # Filter by username if specified
+            if gitlab_username and author_username != gitlab_username:
+                continue
+            
             # Parse time tracking notes
-            # Format: "added 2h of time spent" or "subtracted 1h of time spent"
-            time_match = re.search(r"(added|subtracted)\s+(\d+)h(?:\s+(\d+)m)?\s+of time spent", body)
+            # Formats: 
+            #   "added 2h of time spent"
+            #   "added 2h 30m of time spent"
+            #   "added 30m of time spent"
+            #   "subtracted 1h of time spent"
+            #   "added 4h of time spent at 2026-01-03"
+            time_match = re.search(
+                r"(added|subtracted)\s+(?:(\d+)h)?\s*(?:(\d+)m)?\s+of time spent(?:\s+at\s+(\d{4}-\d{2}-\d{2}))?",
+                body
+            )
             
             if time_match:
                 action = time_match.group(1)
-                hours = int(time_match.group(2))
+                hours = int(time_match.group(2) or 0)
                 minutes = int(time_match.group(3) or 0)
+                specific_date = time_match.group(4)
+                
                 total_hours = hours + minutes / 60
                 
                 if action == "subtracted":
                     total_hours = -total_hours
                 
-                # Parse the date from created_at
-                note_date = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+                # Use specific date if provided, otherwise note creation date
+                if specific_date:
+                    entry_date = datetime.strptime(specific_date, "%Y-%m-%d")
+                else:
+                    entry_date = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
                 
-                # Check if note is within our month
-                if start_date <= note_date.replace(tzinfo=None) < end_date:
-                    day = note_date.day
-                    
-                    # Truncate title if too long
-                    short_title = issue_title[:40] + "..." if len(issue_title) > 40 else issue_title
-                    
-                    entries_by_day[day].append({
-                        "hours": total_hours,
-                        "description": f"#{issue_iid}: {short_title}",
-                        "issue_iid": issue_iid,
-                        "note_id": note["id"],
-                    })
+                # Check if within our target month
+                if start_date <= entry_date.replace(tzinfo=None) < end_date:
+                    day = entry_date.day
+                    # Truncate description if too long
+                    desc = issue_title[:50] + "..." if len(issue_title) > 50 else issue_title
+                    entries_by_day[day].append((total_hours, desc))
     
-    # Aggregate per day
-    daily_entries = {}
-    for day, entries in entries_by_day.items():
-        total_hours = sum(e["hours"] for e in entries)
-        descriptions = "; ".join(e["description"] for e in entries)
-        daily_entries[day] = {
-            "hours": round(total_hours, 1),
-            "description": descriptions,
-            "entries": entries,  # Keep original for sync
-        }
-    
-    return daily_entries
+    return dict(entries_by_day)
 
 
 def generate_timesheet_typ(
-    client_id: str,
-    client_config: dict,
     year: int,
     month: int,
-    lang: str,
-    daily_entries: dict,
-    gitlab_data: dict,  # Original data for sync
-) -> Path:
-    """Generate Typst timesheet file."""
+    client_id: str,
+    client_config: dict,
+    consultant_id: str,
+    consultant_config: dict,
+    entries: dict,
+    lang: str = "de"
+) -> str:
+    """Generate Typst timesheet content."""
     
-    # Load template
-    template_file = TEMPLATES_DIR / "timesheet.typ"
-    with open(template_file, "r", encoding="utf-8") as f:
-        template = f.read()
+    # Build daily_entries string
+    daily_entries_parts = []
+    for day, day_entries in sorted(entries.items()):
+        total_hours = sum(h for h, _ in day_entries)
+        # Combine descriptions
+        descriptions = list(set(d for _, d in day_entries))
+        desc = "; ".join(descriptions[:2])  # Max 2 descriptions
+        if len(descriptions) > 2:
+            desc += f" (+{len(descriptions)-2} more)"
+        daily_entries_parts.append(f'    "{day}": ({total_hours}, "{desc}"),')
     
-    # Build daily_entries for Typst
-    entries_str = ",\n    ".join(
-        f'"{day}": ({data["hours"]}, "{data["description"]}")'
-        for day, data in sorted(daily_entries.items())
-    )
+    daily_entries_str = "\n".join(daily_entries_parts) if daily_entries_parts else "    // No entries"
     
-    # Determine country from client config (default AT)
-    country = "AT"
-    address = client_config.get("address", {})
-    if "Deutschland" in address.get("city", "") or "Germany" in address.get("country", ""):
-        country = "DE"
+    # Determine country from consultant or default
+    country = "AT"  # Default
     
-    # Replace the example call at the end
-    new_call = f'''#timesheet(
+    # Get approver info
+    approver = client_config.get("approver", {})
+    approver_name = approver.get("name", "")
+    approver_title = approver.get("title", "")
+    
+    content = f'''// BLAUWEISS Timesheet - {year}-{month:02d}
+// Client: {client_config.get('name', '')}
+// Consultant: {consultant_config.get('name', '')}
+// Generated: {datetime.now().strftime("%Y-%m-%d %H:%M")}
+
+#import "../templates/timesheet.typ": timesheet
+
+#timesheet(
   year: {year},
   month: {month},
   client_name: "{client_config.get('name', '')}",
   client_short: "{client_config.get('short', '')}",
-  project_name: "Consulting Services",
+  project_name: "{client_config.get('contract_number', '')}",
   contract_number: "{client_config.get('contract_number', '')}",
-  consultant_name: "Wolfram Laube",
+  consultant_name: "{consultant_config.get('name', '')}",
   country: "{country}",
   lang: "{lang}",
+  approver_name: "{approver_name}",
+  approver_title: "{approver_title}",
   daily_entries: (
-    {entries_str}
+{daily_entries_str}
   ),
-)'''
+)
+'''
+    return content
+
+
+def generate_timesheet(
+    client_id: str,
+    consultant_id: str,
+    year: int,
+    month: int,
+    lang: str,
+    config: dict
+) -> Optional[Path]:
+    """Generate a single timesheet for one consultant."""
     
-    # Replace example timesheet call
-    template = re.sub(
-        r'// Example:.*?#timesheet\([^)]+\)',
-        f'// Generated timesheet\n{new_call}',
-        template,
-        flags=re.DOTALL
+    client_config = config["clients"][client_id]
+    consultant_config = config["consultants"][consultant_id]
+    
+    gitlab_label = client_config.get("gitlab_label", f"client:{client_id}")
+    gitlab_username = consultant_config.get("gitlab_username")
+    
+    print(f"\n📋 Generating timesheet:")
+    print(f"   Client: {client_config['name']}")
+    print(f"   Consultant: {consultant_config['name']} (@{gitlab_username})")
+    print(f"   Period: {year}-{month:02d}")
+    
+    # Fetch time entries
+    entries = fetch_time_entries(
+        GITLAB_PROJECT_ID,
+        year,
+        month,
+        gitlab_label,
+        gitlab_username
     )
     
-    # Create output filename
+    if not entries:
+        print("   ⚠️ No time entries found")
+        return None
+    
+    # Calculate total
+    total_hours = sum(sum(h for h, _ in day_entries) for day_entries in entries.values())
+    print(f"   ✅ Found {total_hours:.1f} hours across {len(entries)} days")
+    
+    # Generate Typst content
+    content = generate_timesheet_typ(
+        year, month, client_id, client_config,
+        consultant_id, consultant_config, entries, lang
+    )
+    
+    # Write output file
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    output_file = OUTPUT_DIR / f"{year}-{month:02d}_timesheet_{client_id}_{lang}.typ"
+    filename = f"{year}-{month:02d}_timesheet_{client_id}_{consultant_id}_{lang}.typ"
+    output_file = OUTPUT_DIR / filename
     
     with open(output_file, "w", encoding="utf-8") as f:
-        f.write(template)
+        f.write(content)
     
-    # Save GitLab sync data (original state for later comparison)
-    sync_file = OUTPUT_DIR / f"{year}-{month:02d}_timesheet_{client_id}_{lang}.sync.json"
+    print(f"   📄 Generated: {output_file.name}")
+    
+    # Also write sync metadata
     sync_data = {
         "client_id": client_id,
+        "consultant_id": consultant_id,
         "year": year,
         "month": month,
         "lang": lang,
-        "generated_at": datetime.now().isoformat(),
-        "gitlab_entries": {str(k): v for k, v in gitlab_data.items()},
+        "total_hours": total_hours,
+        "entries": {str(k): v for k, v in entries.items()},
+        "generated_at": datetime.now().isoformat()
     }
+    sync_file = output_file.with_suffix(".sync.json")
     with open(sync_file, "w", encoding="utf-8") as f:
-        json.dump(sync_data, f, indent=2, ensure_ascii=False)
-    
-    # Copy logo
-    logo_src = TEMPLATES_DIR / "logo.jpg"
-    logo_dst = OUTPUT_DIR / "logo.jpg"
-    if logo_src.exists() and not logo_dst.exists():
-        import shutil
-        shutil.copy(logo_src, logo_dst)
-    
-    print(f"✅ Generated: {output_file}")
-    print(f"✅ Sync data: {sync_file}")
+        json.dump(sync_data, f, indent=2)
     
     return output_file
 
 
-def compile_pdf(typ_file: Path) -> Path:
-    """Compile Typst file to PDF."""
-    pdf_file = typ_file.with_suffix(".pdf")
-    
-    result = subprocess.run(
-        ["typst", "compile", str(typ_file), str(pdf_file)],
-        capture_output=True,
-        text=True,
-        cwd=typ_file.parent
-    )
-    
-    if result.returncode != 0:
-        print(f"⚠️ Typst warnings/errors:\n{result.stderr}")
-    
-    if pdf_file.exists():
-        print(f"✅ PDF generated: {pdf_file}")
-        return pdf_file
-    else:
-        print("❌ PDF generation failed")
-        return None
-
-
 def main():
-    parser = argparse.ArgumentParser(description="Generate timesheet from GitLab time tracking")
+    parser = argparse.ArgumentParser(
+        description="Generate timesheets from GitLab time tracking",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+    # Single consultant
+    %(prog)s --client nemensis --period 2026-01 --consultant wolfram
+    
+    # All consultants for a client
+    %(prog)s --client nemensis --period 2026-01 --all-consultants
+    
+Environment:
+    GITLAB_TOKEN     GitLab Personal Access Token (required)
+    GITLAB_PROJECT_ID  Project ID (default: 77260390)
+"""
+    )
     parser.add_argument("--client", "-c", required=True, help="Client ID from clients.yaml")
-    parser.add_argument("--period", "-p", required=True, help="Period YYYY-MM")
-    parser.add_argument("--lang", "-l", default="de", help="Language: en, de, vi, ar, is")
-    parser.add_argument("--no-pdf", action="store_true", help="Generate .typ only")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be fetched")
+    parser.add_argument("--period", "-p", required=True, help="Period as YYYY-MM")
+    parser.add_argument("--consultant", help="Consultant ID (from clients.yaml consultants)")
+    parser.add_argument("--all-consultants", action="store_true", help="Generate for all consultants")
+    parser.add_argument("--lang", "-l", default="de", help="Language (de, en, vi, ar, is)")
     
     args = parser.parse_args()
     
@@ -266,71 +344,65 @@ def main():
     try:
         year, month = map(int, args.period.split("-"))
     except ValueError:
-        print("❌ Invalid period format. Use YYYY-MM")
+        print(f"❌ Invalid period format: {args.period}")
+        print("   Use YYYY-MM (e.g., 2026-01)")
         sys.exit(1)
     
     # Load config
     config = load_config()
     
-    if args.client not in config["clients"]:
+    # Validate client
+    if args.client not in config.get("clients", {}):
         print(f"❌ Unknown client: {args.client}")
-        print(f"Available: {', '.join(config['clients'].keys())}")
+        available = [k for k in config.get("clients", {}).keys() if not k.startswith("_")]
+        print(f"   Available: {', '.join(available)}")
         sys.exit(1)
     
     client_config = config["clients"][args.client]
     
-    print(f"📅 Fetching time entries for {year}-{month:02d}...")
-    print(f"👤 Client: {client_config['name']}")
+    # Determine which consultants to process
+    if args.all_consultants:
+        consultant_ids = client_config.get("consultants", [])
+        if not consultant_ids:
+            print(f"❌ No consultants configured for client '{args.client}'")
+            sys.exit(1)
+        print(f"🔄 Generating timesheets for {len(consultant_ids)} consultants...")
+    elif args.consultant:
+        if args.consultant not in config.get("consultants", {}):
+            print(f"❌ Unknown consultant: {args.consultant}")
+            available = list(config.get("consultants", {}).keys())
+            print(f"   Available: {', '.join(available)}")
+            sys.exit(1)
+        consultant_ids = [args.consultant]
+    else:
+        print("❌ Specify --consultant or --all-consultants")
+        sys.exit(1)
     
-    # Fetch from GitLab
-    gitlab_data = fetch_time_entries(GITLAB_PROJECT_ID, year, month)
+    # Generate timesheets
+    generated = []
+    for consultant_id in consultant_ids:
+        result = generate_timesheet(
+            args.client,
+            consultant_id,
+            year,
+            month,
+            args.lang,
+            config
+        )
+        if result:
+            generated.append(result)
     
-    if not gitlab_data:
-        print("⚠️ No time entries found in GitLab for this period")
-        if not args.dry_run:
-            print("   Creating empty timesheet for manual entry...")
-            gitlab_data = {}
+    # Summary
+    print(f"\n{'='*50}")
+    print(f"✅ Generated {len(generated)} timesheet(s)")
+    for f in generated:
+        print(f"   📄 {f.name}")
     
-    # Prepare daily entries
-    daily_entries = {
-        day: {"hours": data["hours"], "description": data["description"]}
-        for day, data in gitlab_data.items()
-    }
-    
-    total_hours = sum(d["hours"] for d in daily_entries.values())
-    
-    print(f"\n📊 Summary:")
-    print(f"   Days with entries: {len(daily_entries)}")
-    print(f"   Total hours: {total_hours}")
-    
-    if daily_entries:
-        print(f"\n📋 Entries:")
-        for day in sorted(daily_entries.keys()):
-            data = daily_entries[day]
-            print(f"   {day:2d}. → {data['hours']:5.1f}h  {data['description'][:50]}")
-    
-    if args.dry_run:
-        print("\n⚠️ Dry run - no files generated")
-        return
-    
-    # Generate timesheet
-    typ_file = generate_timesheet_typ(
-        args.client,
-        client_config,
-        year,
-        month,
-        args.lang,
-        daily_entries,
-        gitlab_data,
-    )
-    
-    if not args.no_pdf:
-        compile_pdf(typ_file)
-    
-    print(f"\n💡 Next steps:")
-    print(f"   1. Review/edit: {typ_file}")
-    print(f"   2. Sync changes: python billing/scripts/sync_timesheet.py {typ_file}")
-    print(f"   3. Generate invoice: python billing/scripts/generate_invoice.py --from-timesheet {typ_file}")
+    if generated:
+        print(f"\nNext steps:")
+        print(f"   1. Review and get approvals")
+        print(f"   2. Generate invoice:")
+        print(f"      python generate_invoice.py --client {args.client} --period {args.period}")
 
 
 if __name__ == "__main__":

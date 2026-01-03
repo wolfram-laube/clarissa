@@ -1,6 +1,21 @@
 # BLAUWEISS Client Configuration
 # Used by generate_timesheet.py and generate_invoice.py
 
+# Consultant definitions (referenced by clients)
+consultants:
+  wolfram:
+    name: "Wolfram Laube"
+    gitlab_username: "wolfram_laube"
+    email: "wolfram@blauweiss-edv.com"
+  ian:
+    name: "Ian Matejka"
+    gitlab_username: "ian.matejka"
+    email: "ian.matejka@gmail.com"
+  ryan:
+    name: "Ryan Matejka"
+    gitlab_username: "ryan.m.matejka"
+    email: "ryan.m.matejka@gmail.com"
+
 clients:
   nemensis:
     name: "nemensis AG Deutschland"
@@ -13,12 +28,18 @@ clients:
     contract_number: "00003153"
     template: "rechnung-de"
     currency: "EUR"
+    gitlab_label: "client:nemensis"    # Label to filter issues
     rates:
       remote: 105
       onsite: 120
     approver:
       name: "Max Mustermann"
       title: "Projektleiter"
+    # Which consultants work for this client
+    consultants:
+      - wolfram
+      - ian
+      - ryan
 
   oxy:
     name: "Occidental Petroleum Corporation"
@@ -31,12 +52,15 @@ clients:
     contract_number: "OXY-2026-001"
     template: "invoice-en-us"
     currency: "USD"
+    gitlab_label: "client:oxy"
     rates:
       remote: 150
       onsite: 175
     approver:
       name: "John Smith"
       title: "Project Manager"
+    consultants:
+      - wolfram
 
   # Template for new clients
   _template:
@@ -48,11 +72,13 @@ clients:
     reg_id: ""
     vat_id: ""
     contract_number: ""
-    template: "rechnung-de"  # or: invoice-en-us, invoice-en-eu
-    currency: "EUR"          # or: USD
+    template: "rechnung-de"
+    currency: "EUR"
+    gitlab_label: "client:xxx"
     rates:
       remote: 100
       onsite: 120
     approver:
       name: "Approver Name"
       title: "Title"
+    consultants: []
