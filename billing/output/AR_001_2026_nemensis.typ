@@ -70,10 +70,10 @@
   grid(
     columns: (1fr, 1fr),
     [
-      text(size: 8pt, fill: bw_gray)[An:] \
-      text(weight: "bold")[#client_name] \
-      client_address \
-      client_city \
+      #text(size: 8pt, fill: bw_gray)[An:] \
+      #text(weight: "bold")[#client_name] \
+      #client_address \
+      #client_city \
       #if client_reg_id != "" [#client_reg_id \ ]
     ],
     align(right)[
@@ -152,7 +152,7 @@
 // =====================================================
 // RECHNUNG für nemensis AG Deutschland - Januar 2026
 // Basierend auf Timesheet: 2026-01_timesheet_nemensis_de.typ
-// Stunden: 184h remote @ EUR 105
+// Stunden: 184h remote @ EUR 105 = EUR 19.320
 // =====================================================
 
 #invoice(
