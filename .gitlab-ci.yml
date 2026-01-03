@@ -10,6 +10,9 @@ workflow:
     # Allow manual trigger via "Run pipeline" button
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: always
+    # Allow scheduled pipelines (billing automation)
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: always
     - when: never
 
 stages:
@@ -631,6 +634,46 @@ build_paper:
       - conference/ijacsa-2026/CLARISSA_Paper_IJACSA.pdf
     expire_in: 4 weeks
 
+# =============================================================================
+# BILLING AUTOMATION: Monthly Timesheet Generation
+# =============================================================================
+# Trigger: Scheduled pipeline (1st of month) or manual with GENERATE_TIMESHEETS=true
+# Setup: GitLab CI/CD > Schedules > Cron: "0 6 1 * *" > Variable: BILLING_RUN=true
+# =============================================================================
+generate_timesheets:
+  stage: build
+  image: python:3.11-slim
+  variables:
+    GITLAB_PROJECT_PATH: "wolfram_laube/blauweiss_llc/irena"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $BILLING_RUN == "true"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "web" && $GENERATE_TIMESHEETS == "true"'
+      when: on_success
+    - when: never
+  before_script:
+    - pip install pyyaml requests -q
+  script:
+    - |
+      echo "=== Monthly Timesheet Generation ==="
+      if [ -n "$BILLING_PERIOD" ]; then
+        PERIOD="$BILLING_PERIOD"
+      else
+        PERIOD=$(date -d "last month" +%Y-%m)
+      fi
+      echo "Period: $PERIOD"
+      cd billing/scripts
+      for CLIENT in nemensis; do
+        echo "--- Client: $CLIENT ---"
+        python generate_timesheet.py --client "$CLIENT" --period "$PERIOD" --all-consultants || echo "No entries for $CLIENT"
+      done
+      ls -la ../output/*.typ 2>/dev/null || echo "No timesheets generated"
+  artifacts:
+    paths:
+      - billing/output/*.typ
+      - billing/output/*.sync.json
+    expire_in: 8 weeks
+
 build_invoice:
   stage: build
   image: alpine:latest
@@ -681,10 +724,6 @@ build_invoice:
     paths:
       - billing/output/*.pdf
     expire_in: 8 weeks
-
-# Upload billing documents to Google Drive
-upload_invoice:
-  stage: deploy
 
 # Upload billing documents to Google Drive
 upload_invoice:
