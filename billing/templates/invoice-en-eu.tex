@@ -1,0 +1,162 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+% Page geometry
+\geometry{top=2.5cm, bottom=3cm, left=2cm, right=2cm}
+
+% Colors - BlauWeiss corporate
+\definecolor{bwgreen}{RGB}{141,198,63}
+\definecolor{bwblue}{RGB}{0,174,239}
+\definecolor{bwgray}{RGB}{128,128,128}
+\definecolor{tablehead}{RGB}{213,232,240}
+\definecolor{alertbg}{RGB}{255,248,220}
+
+% Hyperlinks
+\hypersetup{colorlinks=true, linkcolor=bwblue, urlcolor=bwblue}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\small\color{bwgray}Raiba St. Florian/Schärding | BIC: RZOOAT2L522}
+\fancyfoot[C]{\small\color{bwgray}IBAN: AT46 2032 6000 0007 0623}
+\fancyfoot[R]{\small\color{bwgray}\href{https://www.blauweiss-edv.com}{www.blauweiss-edv.com}}
+
+% Variables - TO BE REPLACED BY SCRIPT
+\newcommand{\invoicenumber}{VAR_INVOICE_NUMBER}
+\newcommand{\invoicedate}{VAR_INVOICE_DATE}
+\newcommand{\contractnumber}{VAR_CONTRACT_NUMBER}
+\newcommand{\clientname}{VAR_CLIENT_NAME}
+\newcommand{\clientaddress}{VAR_CLIENT_ADDRESS}
+\newcommand{\clientcity}{VAR_CLIENT_CITY}
+\newcommand{\clientcountry}{VAR_CLIENT_COUNTRY}
+\newcommand{\clientregid}{VAR_CLIENT_REG_ID}
+\newcommand{\clientvatid}{VAR_CLIENT_VAT_ID}
+% Line items
+\newcommand{\remotehours}{VAR_REMOTE_HOURS}
+\newcommand{\remoterate}{VAR_REMOTE_RATE}
+\newcommand{\remoteamount}{VAR_REMOTE_AMOUNT}
+\newcommand{\onsitehours}{VAR_ONSITE_HOURS}
+\newcommand{\onsiterate}{VAR_ONSITE_RATE}
+\newcommand{\onsiteamount}{VAR_ONSITE_AMOUNT}
+\newcommand{\totalnet}{VAR_TOTAL_NET}
+
+\begin{document}
+
+% Header with logo
+\begin{minipage}[t]{0.5\textwidth}
+\vspace{0pt}
+\includegraphics[width=5cm]{logo.png}
+\end{minipage}%
+\begin{minipage}[t]{0.5\textwidth}
+\vspace{0pt}
+\raggedleft
+\textbf{BLAUWEISS-EDV LLC}\\[0.3em]
+106 Stratford St\\
+Houston, TX 77006\\
+USA\\[0.5em]
+\textcolor{bwblue}{+1 832 517 1100}\\
+\textcolor{bwblue}{\href{mailto:info@blauweiss-edv.com}{info@blauweiss-edv.com}}
+\end{minipage}
+
+\vspace{1.5cm}
+
+% Client address block
+\clientname\\
+\clientaddress\\
+\clientcity\\
+\clientcountry\\[0.3em]
+\clientregid\\
+VAT ID: \clientvatid
+
+\vspace{1cm}
+
+% Invoice details
+\begin{tabularx}{\textwidth}{@{}XX@{}}
+\textcolor{bwblue}{\textbf{Invoice:}} \invoicenumber &
+\textbf{Date:} \textcolor{bwblue}{\invoicedate}
+\end{tabularx}
+
+\vspace{0.5cm}
+
+% Payment info box
+\fcolorbox{bwgray}{alertbg}{
+\begin{minipage}{0.95\textwidth}
+\textbf{ATTENTION!} Please note the bank details: IBAN AT46 2032 6000 0007 0623\\
+\small\textcolor{bwgray}{Payments held in trust by M. Matejka until US company account is opened}
+\end{minipage}
+}
+
+\vspace{1cm}
+
+Dear Sir or Madam,
+
+With reference to project contract no. \textbf{\contractnumber}, we hereby invoice the following services, enclosed with the service report:
+
+\vspace{0.5cm}
+
+% VAT Note box
+\fcolorbox{bwgray}{white}{
+\begin{minipage}{0.95\textwidth}
+\textbf{VAT Note:} VAT reverse charge -- customer to account for VAT\\
+\small (per Article 196 of Directive 2006/112/EC)
+\end{minipage}
+}
+
+\vspace{0.5cm}
+
+% Invoice table
+\begin{tabularx}{\textwidth}{|X|r|r|r|}
+\hline
+\rowcolor{tablehead}
+\textbf{Description} & \textbf{Quantity} & \textbf{Unit Price} & \textbf{Amount} \\
+\hline
+Remote consulting services & \remotehours\ hrs & EUR \remoterate & EUR \remoteamount \\
+\hline
+On-site consulting services & \onsitehours\ hrs & EUR \onsiterate & EUR \onsiteamount \\
+\hline
+\multicolumn{3}{|r|}{\textbf{Total (net)}} & \textbf{EUR \totalnet} \\
+\hline
+\end{tabularx}
+
+\vspace{0.5cm}
+
+\small\textcolor{bwgray}{No VAT charged -- reverse charge applies, customer is liable for VAT}\\
+\small\textcolor{bwgray}{Customer VAT ID: \clientvatid}
+
+\vspace{0.5cm}
+
+We thank you for your trust and the good cooperation. Please remit the invoice amount to the bank account stated above according to the agreed payment terms.
+
+For this invoice:
+\begin{itemize}
+\item 3\% discount for immediate payment (1-2 days)
+\end{itemize}
+
+\vspace{0.3cm}
+
+Kind regards,
+
+\vspace{1.5cm}
+
+\rule{6cm}{0.4pt}\\
+Authorized Signature
+
+\vspace{0.5cm}
+
+\textbf{Enclosure:}
+\begin{itemize}
+\item Service Report
+\item Digital Signature
+\end{itemize}
+
+\end{document}
