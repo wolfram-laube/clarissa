@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Billing System: Time Entry Parsing**
+  - Switched from REST Notes API to GraphQL API for time tracking
+  - `spent_at` dates now correctly captured (was showing note creation date)
+  - `generate_timesheet.py` properly consolidates entries per day
+
 ### Added
 - ADR-011: OPM Flow Simulator Integration
 - `SimulatorAdapter` abstract base class in `src/clarissa/simulators/base.py`
