@@ -665,13 +665,14 @@ build_invoice:
     - typst --version
   script:
     - echo "Building invoices with Typst..."
-    - cd billing/output
-    - cp ../templates/logo.jpg . 2>/dev/null || true
+    - cd billing
+    - cp templates/logo.jpg output/ 2>/dev/null || true
     - |
+      cd output
       for f in *.typ; do
         if [ -f "$f" ]; then
           echo "Compiling $f..."
-          typst compile "$f"
+          typst compile --root .. "$f"
         fi
       done
     - echo "✅ Invoices built"
