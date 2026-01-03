@@ -28,13 +28,24 @@ python billing/scripts/generate_invoice.py --client oxy --hours 184
 
 ### 3. Get Your PDF
 
-Find it in `billing/output/OP_OXY001_2025.pdf`
+Find it in `billing/output/AR_001_2026_oxy.pdf`
+
+---
+
+## Invoice Numbering
+
+Format: `AR_{sequence}_{year}`
+
+| Example | Meaning |
+|---------|---------|
+| `AR_001_2026` | 1st invoice of 2026 |
+| `AR_015_2026` | 15th invoice of 2026 |
+
+Global sequence across all clients.
 
 ---
 
 ## Time Tracking Labels
-
-Use these labels on issues for proper billing categorization:
 
 | Label | Meaning |
 |-------|---------|
@@ -47,11 +58,13 @@ Use these labels on issues for proper billing categorization:
 
 ## Invoice Templates
 
+Built with [Typst](https://typst.app/) for modern typography (Poppins font).
+
 | Template | Use Case | Currency | VAT |
 |----------|----------|----------|-----|
-| `invoice-en-us` | US customers | USD | None |
-| `invoice-en-eu` | EU customers (English) | EUR | Reverse Charge |
-| `rechnung-de` | DE/AT customers (German) | EUR | Reverse Charge |
+| `invoice-en-us.typ` | US customers | USD | None |
+| `invoice-en-eu.typ` | EU customers | EUR | Reverse Charge |
+| `rechnung-de.typ` | DE/AT customers | EUR | Reverse Charge |
 
 ---
 
@@ -63,9 +76,10 @@ billing/
 │   ├── clients.yaml      # Client definitions
 │   └── sequences.yaml    # Invoice number tracking
 ├── templates/
-│   ├── invoice-en-us.tex
-│   ├── invoice-en-eu.tex
-│   └── rechnung-de.tex
+│   ├── invoice-en-us.typ # US (USD)
+│   ├── invoice-en-eu.typ # EU (EUR)
+│   ├── rechnung-de.typ   # German (EUR)
+│   └── logo.jpg
 ├── scripts/
 │   └── generate_invoice.py
 └── output/               # Generated invoices
@@ -82,7 +96,7 @@ clients:
   newclient:
     name: "New Client Inc."
     short: "NC"
-    template: "invoice-en-us"  # or invoice-en-eu, rechnung-de
+    template: "invoice-en-us"
     currency: "USD"
     address:
       line1: "123 Main St"
@@ -92,7 +106,6 @@ clients:
     rates:
       remote: 105
       onsite: 120
-    invoice_prefix: "NC"
 ```
 
 ---
@@ -103,7 +116,7 @@ clients:
 # Preview without generating
 python billing/scripts/generate_invoice.py --client oxy --hours 100 --dry-run
 
-# Generate .tex only (no PDF)
+# Generate .typ only (no PDF)
 python billing/scripts/generate_invoice.py --client oxy --hours 100 --no-pdf
 
 # Custom invoice date
@@ -115,11 +128,19 @@ python billing/scripts/generate_invoice.py --client oxy --hours 40 --onsite
 
 ---
 
+## CI Integration
+
+The `build_invoice` job automatically compiles `.typ` files to PDF when templates change.
+
+Manual trigger: Run pipeline → Select `build_invoice`
+
+---
+
 ## Requirements
 
 ```bash
-# LaTeX (for PDF generation)
-sudo apt install texlive-latex-recommended texlive-latex-extra texlive-lang-german
+# Typst (for PDF generation)
+curl -fsSL https://typst.community/typst-install/install.sh | sh
 
 # Python dependencies
 pip install pyyaml requests
