@@ -612,3 +612,40 @@ build_paper:
     paths:
       - conference/ijacsa-2026/CLARISSA_Paper_IJACSA.pdf
     expire_in: 4 weeks
+
+build_invoice:
+  stage: build
+  image: ghcr.io/typst/typst:latest
+  rules:
+    # Auto-run when invoice templates change
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - billing/templates/**/*
+        - billing/output/**/*.typ
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - billing/templates/**/*
+        - billing/output/**/*.typ
+      when: on_success
+    # Manual trigger always available
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+    - when: never
+  script:
+    - echo "Building invoices with Typst..."
+    - cd billing/output
+    - cp ../templates/logo.jpg . 2>/dev/null || true
+    - |
+      for f in *.typ; do
+        if [ -f "$f" ]; then
+          echo "Compiling $f..."
+          typst compile "$f"
+        fi
+      done
+    - echo "✅ Invoices built"
+    - ls -la *.pdf 2>/dev/null || echo "No PDFs generated"
+  artifacts:
+    paths:
+      - billing/output/*.pdf
+    expire_in: 8 weeks
