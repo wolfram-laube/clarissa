@@ -1,0 +1,12 @@
+# Invoice sequence numbers per client per year
+# Updated automatically by generate_invoice.py
+
+sequences:
+  2025:
+    oxy: 1
+    example_nl: 1
+    nemensis: 1
+  2026:
+    oxy: 1
+    example_nl: 1
+    nemensis: 1
