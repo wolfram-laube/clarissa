@@ -1,12 +1,12 @@
-# 💰 CLARISSA Billing System
+# 💰 CLARISSA Billing System (Typst)
 
-Generate professional invoices from GitLab Time Tracking data.
+Generate professional invoices from GitLab Time Tracking data using [Typst](https://typst.app/).
 
 ## Quick Start
 
 ```bash
 # Generate invoice from manual hours
-python billing/scripts/generate_invoice.py --client oxy --hours 184 --remote
+python billing/scripts/generate_invoice.py --client oxy --hours 184
 
 # Generate invoice from GitLab time tracking
 export GITLAB_TOKEN="your-token"
@@ -22,161 +22,154 @@ python billing/scripts/generate_invoice.py --client oxy --hours 184 --dry-run
 billing/
 ├── config/
 │   ├── clients.yaml      # Client definitions, rates, templates
-│   └── sequences.yaml    # Invoice number tracking
+│   └── sequences.yaml    # Invoice number tracking (AR_XXX_YYYY)
 ├── templates/
-│   ├── invoice-en-us.tex # US customers (USD, no VAT)
-│   ├── invoice-en-eu.tex # EU customers (EUR, reverse charge)
-│   ├── rechnung-de.tex   # DE/AT customers (German, reverse charge)
-│   └── logo.png          # Company logo
-├── output/               # Generated invoices
-│   ├── OP_OXY001_2025.tex
-│   └── OP_OXY001_2025.pdf
+│   ├── invoice-en-us.typ # US customers (USD, no VAT)
+│   ├── invoice-en-eu.typ # EU customers (EUR, reverse charge)
+│   ├── rechnung-de.typ   # DE/AT customers (German, reverse charge)
+│   └── logo.jpg          # Company logo
+├── output/               # Generated invoices (.typ + .pdf)
 ├── scripts/
 │   └── generate_invoice.py
 └── README.md
 ```
 
+## Invoice Templates
+
+| Template | Use Case | Currency | VAT | Language |
+|----------|----------|----------|-----|----------|
+| `invoice-en-us` | US customers | USD | None | English |
+| `invoice-en-eu` | EU customers | EUR | Reverse Charge | English |
+| `rechnung-de` | DE/AT customers | EUR | Reverse Charge | German |
+
+All templates use **Poppins** font for a modern, clean look.
+
+## Invoice Numbering
+
+Format: `AR_{sequence}_{year}`
+
+Examples:
+- `AR_001_2026` - First invoice of 2026
+- `AR_015_2026` - 15th invoice of 2026
+
+Global sequence across all clients, tracked in `config/sequences.yaml`.
+
 ## Workflow
 
 ### 1. Track Time in GitLab
 
-Use GitLab quick actions in issues:
-
 ```
 /spend 2h              # Log 2 hours
-/spend 4h 2025-12-15   # Log 4 hours on specific date
-/estimate 8h           # Set estimate
+/spend 4h 2025-12-15   # Log on specific date
 ```
 
-Label issues for billing:
-- `billable` - Include in invoice
+Labels:
 - `work::remote` - Remote work (default rate)
 - `work::onsite` - On-site work (higher rate)
-- `non-billable` - Exclude from invoice
 
 ### 2. Generate Invoice
 
 ```bash
-# From GitLab time tracking
 python billing/scripts/generate_invoice.py \
-    --client oxy \
+    --client nemensis \
     --period 2025-12
-
-# Manual entry
-python billing/scripts/generate_invoice.py \
-    --client oxy \
-    --hours 184 \
-    --remote
 ```
 
-### 3. Review and Send
+### 3. Get Your PDF
 
-Generated files in `billing/output/`:
-- `.tex` - LaTeX source (editable)
-- `.pdf` - Final invoice
+Output in `billing/output/AR_001_2026_nemensis.pdf`
 
-## Client Configuration
+## Adding a New Client
 
 Edit `billing/config/clients.yaml`:
 
 ```yaml
 clients:
-  oxy:
-    name: "Occidental Petroleum Corporation"
-    short: "OXY"
-    template: "invoice-en-us"    # Which template to use
-    currency: "USD"
+  newclient:
+    name: "New Client Inc."
+    short: "NC"
+    template: "invoice-en-us"  # or invoice-en-eu, rechnung-de
+    currency: "USD"            # or EUR
     address:
-      line1: "5 Greenway Plaza"
-      city: "Houston, TX 77046"
+      line1: "123 Main St"
+      city: "New York, NY 10001"
       country: "USA"
-    contract_number: "00003151"
+    contract_number: "00003154"
+    # For EU clients, add:
+    # registration_id: "KVK: 12345678"
+    # vat_id: "NL123456789B01"
     rates:
-      remote: 105               # USD/EUR per hour
+      remote: 105
       onsite: 120
-    invoice_prefix: "OP"        # For invoice number
-```
-
-## Templates
-
-| Template | Use Case | Currency | VAT |
-|----------|----------|----------|-----|
-| `invoice-en-us` | US customers | USD | None |
-| `invoice-en-eu` | EU customers (English) | EUR | Reverse Charge |
-| `rechnung-de` | DE/AT customers | EUR | Reverse Charge |
-
-### Customizing Templates
-
-Templates use LaTeX with variables:
-- `VAR_INVOICE_NUMBER` - Auto-generated
-- `VAR_CLIENT_NAME` - From config
-- `VAR_REMOTE_HOURS` - Hours tracked
-- etc.
-
-To modify layout, edit the `.tex` files directly.
-
-## Invoice Numbering
-
-Format: `{PREFIX}_{SHORT}{SEQ}_{YEAR}`
-
-Example: `OP_OXY001_2025`
-
-Sequences tracked in `config/sequences.yaml` - auto-incremented.
-
-## Requirements
-
-```bash
-# LaTeX (for PDF generation)
-sudo apt install texlive-latex-recommended texlive-latex-extra texlive-lang-german
-
-# Python
-pip install pyyaml requests
-```
-
-## Environment Variables
-
-```bash
-export GITLAB_TOKEN="glpat-xxx"           # For time tracking integration
-export GITLAB_PROJECT_ID="77260390"       # Project to fetch from
-export GITLAB_API_URL="https://gitlab.com/api/v4"
 ```
 
 ## Command Reference
 
-```
-usage: generate_invoice.py [-h] --client CLIENT [--period PERIOD]
-                           [--hours HOURS] [--remote] [--onsite]
-                           [--dry-run] [--no-pdf] [--date DATE]
+```bash
+# Basic usage
+python billing/scripts/generate_invoice.py --client CLIENT --hours HOURS
 
-Options:
-  --client, -c    Client ID from clients.yaml (required)
+# Options
+  --client, -c    Client ID (required)
   --period, -p    Billing period YYYY-MM (fetches from GitLab)
   --hours         Manual hours entry
-  --remote        Hours are remote work (default)
-  --onsite        Hours are on-site work
-  --dry-run       Preview without generating files
-  --no-pdf        Generate .tex only, skip PDF compilation
+  --remote        Hours are remote (default)
+  --onsite        Hours are on-site
+  --dry-run       Preview without generating
+  --no-pdf        Generate .typ only
   --date          Invoice date YYYY-MM-DD (default: today)
 ```
 
-## Tips
+## Requirements
 
-### Multiple Line Items
-
-For complex invoices, edit the generated `.tex` file before compiling:
-1. Generate with `--no-pdf`
-2. Edit the `.tex` file
-3. Run `pdflatex` manually
-
-### Batch Processing
+### Typst
 
 ```bash
-# Generate invoices for all clients for a period
-for client in oxy nemensis example_nl; do
-    python billing/scripts/generate_invoice.py -c $client -p 2025-12
-done
+# Linux
+curl -fsSL https://typst.community/typst-install/install.sh | sh
+
+# macOS
+brew install typst
+
+# Or download from https://github.com/typst/typst/releases
 ```
 
-### Logo
+### Python
 
-Place your logo as `billing/templates/logo.png` (recommended: 400x150px).
+```bash
+pip install pyyaml requests
+```
+
+### Fonts
+
+Templates use **Poppins** font. Install if not available:
+
+```bash
+# Ubuntu/Debian
+sudo apt install fonts-poppins
+
+# Or download from Google Fonts
+```
+
+## CI Integration
+
+The CI pipeline automatically builds invoices when `.typ` files are changed:
+
+```yaml
+build_invoice:
+  stage: build
+  image: ghcr.io/typst/typst:latest
+  script:
+    - typst compile billing/output/*.typ
+  artifacts:
+    paths:
+      - billing/output/*.pdf
+```
+
+## Why Typst?
+
+- ✅ Modern, clean typography
+- ✅ Fast compilation (10x faster than LaTeX)
+- ✅ Simple, readable syntax
+- ✅ No complex package management
+- ✅ Built-in PDF generation
