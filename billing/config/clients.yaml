@@ -1,86 +1,58 @@
-# CLARISSA Billing Configuration
-# Client definitions and rate settings
+# BLAUWEISS Client Configuration
+# Used by generate_timesheet.py and generate_invoice.py
 
-defaults:
-  currency_us: USD
-  currency_eu: EUR
-  remote_rate_usd: 105
-  remote_rate_eur: 105
-  onsite_rate_usd: 120
-  onsite_rate_eur: 120
-  payment_terms: "Net 30"
-  discount_early: "3%"
-  discount_days: 5
-
-# Bank details (constant)
-bank:
-  iban: "AT46 2032 6000 0007 0623"
-  bic: "RZOOAT2L522"
-  bank_name: "Raiba St. Florian/Schärding"
-  note: "Payments held in trust by M. Matejka until US company account is opened"
-
-# Client definitions
 clients:
-  # US client example
-  oxy:
-    name: "Occidental Petroleum Corporation"
-    short: "OXY"
-    template: "invoice-en-us"
-    currency: "USD"
-    address:
-      line1: "5 Greenway Plaza, Suite 110"
-      city: "Houston, TX 77046"
-      country: "USA"
-    contract_number: "00003151"
-    rates:
-      remote: 105
-      onsite: 120
-
-  # EU client example (English)
-  example_nl:
-    name: "Example Company B.V."
-    short: "EXNL"
-    template: "invoice-en-eu"
-    currency: "EUR"
-    address:
-      line1: "Keizersgracht 123"
-      city: "1015 CW Amsterdam"
-      country: "The Netherlands"
-    registration_id: "KVK: 12345678"
-    vat_id: "NL123456789B01"
-    contract_number: "00003152"
-    rates:
-      remote: 105
-      onsite: 120
-
-  # German client
   nemensis:
     name: "nemensis AG Deutschland"
     short: "NEM"
-    template: "rechnung-de"
-    currency: "EUR"
     address:
-      line1: "Alter Wall 69"
+      street: "Alter Wall 69"
       city: "D - 20457 Hamburg"
-      country: ""
-    registration_id: "HRB. NR.: 181535 Hamburg"
+    reg_id: "HRB. NR.: 181535 Hamburg"
     vat_id: "DE310161615"
     contract_number: "00003153"
+    template: "rechnung-de"
+    currency: "EUR"
     rates:
       remote: 105
       onsite: 120
+    approver:
+      name: "Max Mustermann"
+      title: "Projektleiter"
 
-# Invoice number format
-# Pattern: AR_{sequence}_{year}
-# Example: AR_015_2026
-invoice_numbering:
-  prefix: "AR"
-  pattern: "{prefix}_{sequence:03d}_{year}"
-  sequence_file: "billing/config/sequences.yaml"
+  oxy:
+    name: "Occidental Petroleum Corporation"
+    short: "OXY"
+    address:
+      street: "5 Greenway Plaza, Suite 110"
+      city: "Houston, TX 77046, USA"
+    reg_id: ""
+    vat_id: ""
+    contract_number: "OXY-2026-001"
+    template: "invoice-en-us"
+    currency: "USD"
+    rates:
+      remote: 150
+      onsite: 175
+    approver:
+      name: "John Smith"
+      title: "Project Manager"
 
-# GitLab Time Tracking labels
-gitlab_labels:
-  billable: "billable"
-  remote: "work::remote"
-  onsite: "work::onsite"
-  non_billable: "non-billable"
+  # Template for new clients
+  _template:
+    name: "Client Name"
+    short: "CLT"
+    address:
+      street: "Street Address"
+      city: "City, ZIP"
+    reg_id: ""
+    vat_id: ""
+    contract_number: ""
+    template: "rechnung-de"  # or: invoice-en-us, invoice-en-eu
+    currency: "EUR"          # or: USD
+    rates:
+      remote: 100
+      onsite: 120
+    approver:
+      name: "Approver Name"
+      title: "Title"
