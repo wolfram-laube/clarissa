@@ -1,0 +1,399 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CLARISSA Intent Taxonomy",
+  "description": "Comprehensive taxonomy of user intents for reservoir simulation commands",
+  "version": "1.0.0",
+  "categories": {
+    "simulation_control": {
+      "description": "Commands to control simulation execution",
+      "intents": {
+        "RUN_SIMULATION": {
+          "description": "Execute a simulation run",
+          "examples": [
+            "Run the simulation",
+            "Start the model",
+            "Execute CASE1",
+            "Begin simulation run"
+          ],
+          "required_entities": [],
+          "optional_entities": ["case_name", "end_date", "output_options"],
+          "eclipse_keywords": ["RUNSPEC", "SCHEDULE"],
+          "confidence_threshold": 0.85
+        },
+        "STOP_SIMULATION": {
+          "description": "Halt a running simulation",
+          "examples": [
+            "Stop the simulation",
+            "Abort the run",
+            "Cancel execution"
+          ],
+          "required_entities": [],
+          "optional_entities": ["case_name"],
+          "eclipse_keywords": ["END"],
+          "confidence_threshold": 0.90
+        },
+        "RESTART_SIMULATION": {
+          "description": "Continue simulation from a checkpoint",
+          "examples": [
+            "Restart from January",
+            "Continue from checkpoint",
+            "Resume the run from 2025-01-01"
+          ],
+          "required_entities": ["restart_date"],
+          "optional_entities": ["case_name", "restart_file"],
+          "eclipse_keywords": ["RESTART"],
+          "confidence_threshold": 0.85
+        }
+      }
+    },
+    "well_operations": {
+      "description": "Commands related to well management",
+      "intents": {
+        "ADD_WELL": {
+          "description": "Define a new well in the model",
+          "examples": [
+            "Add a producer called PROD-01",
+            "Create new well at I=10 J=15",
+            "Define injector INJ-A"
+          ],
+          "required_entities": ["well_name", "well_type"],
+          "optional_entities": ["location_i", "location_j", "depth", "completion_info"],
+          "eclipse_keywords": ["WELSPECS", "COMPDAT"],
+          "confidence_threshold": 0.85
+        },
+        "MODIFY_WELL": {
+          "description": "Change well parameters or configuration",
+          "examples": [
+            "Change PROD-01 skin factor to 2",
+            "Update well INJ-A perforation interval",
+            "Modify completion for PROD-02"
+          ],
+          "required_entities": ["well_name"],
+          "optional_entities": ["parameter", "value", "completion_info"],
+          "eclipse_keywords": ["COMPDAT", "WCONPROD", "WCONINJE"],
+          "confidence_threshold": 0.80
+        },
+        "SHUT_WELL": {
+          "description": "Shut in (close) a well",
+          "examples": [
+            "Shut PROD-01",
+            "Close well INJ-A",
+            "Shut in producer for workover"
+          ],
+          "required_entities": ["well_name"],
+          "optional_entities": ["effective_date", "reason"],
+          "eclipse_keywords": ["WELOPEN"],
+          "confidence_threshold": 0.90
+        },
+        "OPEN_WELL": {
+          "description": "Open a previously shut well",
+          "examples": [
+            "Open PROD-01",
+            "Bring INJ-A back online",
+            "Resume production from PROD-02"
+          ],
+          "required_entities": ["well_name"],
+          "optional_entities": ["effective_date"],
+          "eclipse_keywords": ["WELOPEN"],
+          "confidence_threshold": 0.90
+        },
+        "SET_RATE": {
+          "description": "Set production or injection rate for a well",
+          "examples": [
+            "Set PROD-01 oil rate to 500 STB/day",
+            "Change INJ-A water injection to 1000 BBL/day",
+            "Limit gas production to 5 MMSCF/day"
+          ],
+          "required_entities": ["well_name", "rate_value", "rate_type"],
+          "optional_entities": ["phase", "effective_date", "rate_unit"],
+          "eclipse_keywords": ["WCONPROD", "WCONINJE"],
+          "confidence_threshold": 0.85
+        },
+        "SET_PRESSURE": {
+          "description": "Set bottomhole or tubing head pressure constraint",
+          "examples": [
+            "Set BHP for PROD-01 to 2000 psi",
+            "Change minimum BHP to 1500 psia",
+            "Set THP constraint to 500 psi"
+          ],
+          "required_entities": ["well_name", "pressure_value"],
+          "optional_entities": ["pressure_type", "effective_date", "pressure_unit"],
+          "eclipse_keywords": ["WCONPROD", "WCONINJE"],
+          "confidence_threshold": 0.85
+        }
+      }
+    },
+    "schedule_operations": {
+      "description": "Commands for schedule/timeline management",
+      "intents": {
+        "SET_DATE": {
+          "description": "Set or advance simulation date",
+          "examples": [
+            "Advance to January 2026",
+            "Set date to 2025-06-01",
+            "Move forward 3 months"
+          ],
+          "required_entities": ["target_date"],
+          "optional_entities": [],
+          "eclipse_keywords": ["DATES"],
+          "confidence_threshold": 0.90
+        },
+        "ADD_TIMESTEP": {
+          "description": "Insert a specific timestep",
+          "examples": [
+            "Add 30 day timestep",
+            "Insert monthly reports",
+            "Create daily output for next month"
+          ],
+          "required_entities": ["timestep_size"],
+          "optional_entities": ["timestep_unit", "count", "start_date"],
+          "eclipse_keywords": ["TSTEP", "DATES"],
+          "confidence_threshold": 0.85
+        },
+        "MODIFY_SCHEDULE": {
+          "description": "General schedule modifications",
+          "examples": [
+            "Change production schedule after June",
+            "Update injection pattern from July",
+            "Modify drilling sequence"
+          ],
+          "required_entities": [],
+          "optional_entities": ["start_date", "end_date", "description"],
+          "eclipse_keywords": ["SCHEDULE"],
+          "confidence_threshold": 0.75
+        }
+      }
+    },
+    "query_operations": {
+      "description": "Commands to retrieve or analyze data",
+      "intents": {
+        "GET_PRODUCTION": {
+          "description": "Query production data",
+          "examples": [
+            "Show PROD-01 oil production",
+            "What is the field gas rate?",
+            "Get cumulative water production"
+          ],
+          "required_entities": [],
+          "optional_entities": ["well_name", "phase", "time_range", "aggregation"],
+          "eclipse_keywords": ["SUMMARY"],
+          "confidence_threshold": 0.85
+        },
+        "GET_PRESSURE": {
+          "description": "Query pressure data",
+          "examples": [
+            "What is reservoir pressure at PROD-01?",
+            "Show average field pressure",
+            "Get BHP history for INJ-A"
+          ],
+          "required_entities": [],
+          "optional_entities": ["well_name", "pressure_type", "time_range"],
+          "eclipse_keywords": ["SUMMARY"],
+          "confidence_threshold": 0.85
+        },
+        "COMPARE_SCENARIOS": {
+          "description": "Compare multiple simulation runs",
+          "examples": [
+            "Compare BASE and HIGH cases",
+            "Show difference between scenarios",
+            "What's the production delta?"
+          ],
+          "required_entities": ["scenario_a", "scenario_b"],
+          "optional_entities": ["metric", "time_range"],
+          "eclipse_keywords": [],
+          "confidence_threshold": 0.80
+        },
+        "GET_SUMMARY": {
+          "description": "Get overall simulation summary",
+          "examples": [
+            "Show simulation summary",
+            "What are the key results?",
+            "Give me the highlights"
+          ],
+          "required_entities": [],
+          "optional_entities": ["case_name", "metrics"],
+          "eclipse_keywords": ["SUMMARY"],
+          "confidence_threshold": 0.80
+        }
+      }
+    },
+    "validation": {
+      "description": "Commands for deck and physics validation",
+      "intents": {
+        "VALIDATE_DECK": {
+          "description": "Check deck syntax and structure",
+          "examples": [
+            "Validate the deck",
+            "Check for syntax errors",
+            "Is the input file correct?"
+          ],
+          "required_entities": [],
+          "optional_entities": ["case_name", "section"],
+          "eclipse_keywords": [],
+          "confidence_threshold": 0.90
+        },
+        "CHECK_PHYSICS": {
+          "description": "Verify physics consistency",
+          "examples": [
+            "Check material balance",
+            "Verify PVT consistency",
+            "Is the initialization correct?"
+          ],
+          "required_entities": [],
+          "optional_entities": ["check_type", "tolerance"],
+          "eclipse_keywords": [],
+          "confidence_threshold": 0.85
+        },
+        "PREVIEW_CHANGES": {
+          "description": "Preview what changes would be made",
+          "examples": [
+            "What would this change do?",
+            "Preview the modification",
+            "Show me the diff"
+          ],
+          "required_entities": [],
+          "optional_entities": ["change_description"],
+          "eclipse_keywords": [],
+          "confidence_threshold": 0.80
+        }
+      }
+    },
+    "help_and_info": {
+      "description": "Help, documentation, and informational queries",
+      "intents": {
+        "GET_HELP": {
+          "description": "Request help or documentation",
+          "examples": [
+            "Help with WCONPROD",
+            "How do I set injection rate?",
+            "What does COMPDAT do?"
+          ],
+          "required_entities": [],
+          "optional_entities": ["topic", "keyword"],
+          "eclipse_keywords": [],
+          "confidence_threshold": 0.85
+        },
+        "EXPLAIN_ERROR": {
+          "description": "Explain a simulation error",
+          "examples": [
+            "What does error 123 mean?",
+            "Why did convergence fail?",
+            "Explain the warning"
+          ],
+          "required_entities": [],
+          "optional_entities": ["error_code", "error_message"],
+          "eclipse_keywords": [],
+          "confidence_threshold": 0.85
+        },
+        "SUGGEST_FIX": {
+          "description": "Request suggestions for fixing issues",
+          "examples": [
+            "How do I fix this?",
+            "What should I change?",
+            "Suggest a solution"
+          ],
+          "required_entities": [],
+          "optional_entities": ["problem_description", "error_context"],
+          "eclipse_keywords": [],
+          "confidence_threshold": 0.80
+        }
+      }
+    }
+  },
+  "entities": {
+    "well_name": {
+      "type": "string",
+      "pattern": "^[A-Z0-9_-]+$",
+      "description": "Name of a well (e.g., PROD-01, INJ-A)",
+      "examples": ["PROD-01", "INJ-A", "WELL_123"]
+    },
+    "well_type": {
+      "type": "enum",
+      "values": ["PRODUCER", "INJECTOR", "OBSERVATION"],
+      "description": "Type of well"
+    },
+    "rate_value": {
+      "type": "number",
+      "description": "Numeric rate value",
+      "examples": [500, 1000.5, 5000000]
+    },
+    "rate_type": {
+      "type": "enum",
+      "values": ["OIL", "WATER", "GAS", "LIQUID", "RESERVOIR_VOIDAGE"],
+      "description": "Type of rate being set"
+    },
+    "rate_unit": {
+      "type": "enum",
+      "values": ["STB/DAY", "BBL/DAY", "MSCF/DAY", "MMSCF/DAY", "M3/DAY"],
+      "description": "Unit of rate measurement"
+    },
+    "pressure_value": {
+      "type": "number",
+      "description": "Numeric pressure value",
+      "examples": [2000, 1500.5, 4500]
+    },
+    "pressure_type": {
+      "type": "enum",
+      "values": ["BHP", "THP", "RESERVOIR"],
+      "description": "Type of pressure"
+    },
+    "pressure_unit": {
+      "type": "enum",
+      "values": ["PSI", "PSIA", "BAR", "BARA", "KPA"],
+      "description": "Unit of pressure measurement"
+    },
+    "target_date": {
+      "type": "date",
+      "format": "YYYY-MM-DD",
+      "description": "Target date for operations",
+      "examples": ["2025-01-01", "2026-06-15"]
+    },
+    "timestep_size": {
+      "type": "number",
+      "description": "Size of timestep",
+      "examples": [1, 30, 90]
+    },
+    "timestep_unit": {
+      "type": "enum",
+      "values": ["DAY", "MONTH", "YEAR"],
+      "description": "Unit of timestep"
+    },
+    "phase": {
+      "type": "enum",
+      "values": ["OIL", "WATER", "GAS", "LIQUID"],
+      "description": "Fluid phase"
+    },
+    "location_i": {
+      "type": "integer",
+      "description": "I-index in grid"
+    },
+    "location_j": {
+      "type": "integer",
+      "description": "J-index in grid"
+    },
+    "case_name": {
+      "type": "string",
+      "description": "Name of simulation case",
+      "examples": ["CASE1", "BASE", "HIGH_PERM"]
+    },
+    "scenario_a": {
+      "type": "string",
+      "description": "First scenario for comparison"
+    },
+    "scenario_b": {
+      "type": "string",
+      "description": "Second scenario for comparison"
+    }
+  },
+  "metadata": {
+    "created": "2026-01-03",
+    "author": "CLARISSA Team",
+    "eclipse_version": "2019.3+",
+    "opm_version": "2023.10+",
+    "notes": [
+      "Confidence thresholds are initial recommendations; tune per deployment",
+      "Entity patterns should be extended for specific asset naming conventions",
+      "ECLIPSE keywords are indicative; actual generation depends on context"
+    ]
+  }
+}
