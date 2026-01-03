@@ -1,4 +1,3 @@
-// Pipeline test v2: Shared Drive fix
 // BLAUWEISS Timesheet / Leistungsschein
 // Automatically handles month lengths, weekends, and holidays (DE/AT)
 // Multi-language support: EN, DE, VI, AR, IS
@@ -16,6 +15,8 @@
   // Daily hours as dictionary: day -> (hours, description)
   daily_entries: (:),
   logo_path: "logo.jpg",
+  approver_name: "",      // Name of person approving the timesheet
+  approver_title: "",     // Title/role of approver
 ) = {
   // Colors
   let bw_blue = rgb("#00aeef")
@@ -483,11 +484,23 @@
     columns: (1fr, 1fr),
     gutter: 2cm,
     [
+      #text(size: 9pt, weight: "bold")[#consultant_name]
+      #v(0.1cm)
+      #text(size: 8pt, fill: bw_gray)[BlauWeiss EDV LLC]
+      #v(0.8cm)
       #line(length: 6cm)
       #v(0.2cm)
       #text(size: 8pt)[#tr("sig_date"), #tr("sig_consultant")]
     ],
     [
+      #if approver_name != "" [
+        #text(size: 9pt, weight: "bold")[#approver_name]
+        #v(0.1cm)
+        #text(size: 8pt, fill: bw_gray)[#if approver_title != "" [#approver_title, ] #client_name]
+      ] else [
+        #v(1.1cm)
+      ]
+      #v(0.8cm)
       #line(length: 6cm)
       #v(0.2cm)
       #text(size: 8pt)[#tr("sig_date"), #tr("sig_client")]
@@ -506,6 +519,8 @@
   consultant_name: "Wolfram Laube",
   country: "AT",
   lang: "de",
+  approver_name: "Max Mustermann",
+  approver_title: "Projektleiter",
   daily_entries: (
     "2": (8, "Architecture review"),
     "5": (6, "API development"),
