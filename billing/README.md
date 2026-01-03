@@ -1,175 +1,266 @@
 # 💰 CLARISSA Billing System (Typst)
 
-Generate professional invoices from GitLab Time Tracking data using [Typst](https://typst.app/).
+Generate professional invoices and timesheets with bidirectional GitLab sync.
 
-## Quick Start
+## 🔄 Complete Workflow
 
-```bash
-# Generate invoice from manual hours
-python billing/scripts/generate_invoice.py --client oxy --hours 184
-
-# Generate invoice from GitLab time tracking
-export GITLAB_TOKEN="your-token"
-python billing/scripts/generate_invoice.py --client nemensis --period 2025-12
-
-# Preview without generating (dry run)
-python billing/scripts/generate_invoice.py --client oxy --hours 184 --dry-run
+```
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│    GitLab (/spend)  ◄────────────────►  Timesheet.typ      │
+│         │                    ▲                │             │
+│         │                    │                │             │
+│         ▼                    │                ▼             │
+│    [generate_timesheet.py]   │   [Manual Edits]            │
+│         │                    │                │             │
+│         ▼                    │                │             │
+│    timesheet.typ ────────────┘                │             │
+│         │                                     │             │
+│         │      [sync_timesheet.py] ◄──────────┘             │
+│         │                                                   │
+│         ▼                                                   │
+│    [generate_invoice.py --from-timesheet]                  │
+│         │                                                   │
+│         ▼                                                   │
+│    invoice.pdf + timesheet.pdf                             │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Directory Structure
+## 🚀 Quick Start
+
+### Step 1: Track Time in GitLab
+
+```bash
+# In any issue comment:
+/spend 4h           # Log 4 hours today
+/spend 2h 2026-01-15  # Log 2 hours on specific date
+```
+
+### Step 2: Generate Timesheet
+
+```bash
+export GITLAB_TOKEN="glpat-xxx"
+
+python billing/scripts/generate_timesheet.py \
+    --client nemensis \
+    --period 2026-01 \
+    --lang de
+```
+
+Output:
+- `billing/output/2026-01_timesheet_nemensis_de.typ` (editable)
+- `billing/output/2026-01_timesheet_nemensis_de.pdf`
+- `billing/output/2026-01_timesheet_nemensis_de.sync.json` (for sync)
+
+### Step 3: Review & Edit (if needed)
+
+```bash
+# Edit the timesheet to add forgotten entries
+vim billing/output/2026-01_timesheet_nemensis_de.typ
+
+# Change:
+#   "15": (4, "Meeting"),
+# To:
+#   "15": (6, "Meeting + Documentation"),
+```
+
+### Step 4: Sync Changes Back to GitLab
+
+```bash
+python billing/scripts/sync_timesheet.py \
+    billing/output/2026-01_timesheet_nemensis_de.typ
+```
+
+This creates/updates a "⏱️ Timesheet Corrections" issue with `/spend` entries.
+
+### Step 5: Generate Invoice
+
+```bash
+python billing/scripts/generate_invoice.py \
+    --from-timesheet billing/output/2026-01_timesheet_nemensis_de.typ
+```
+
+Output:
+- `billing/output/AR_001_2026_nemensis.typ`
+- `billing/output/AR_001_2026_nemensis.pdf`
+- Timesheet PDF also compiled as attachment
+
+## 📁 Directory Structure
 
 ```
 billing/
 ├── config/
-│   ├── clients.yaml      # Client definitions, rates, templates
-│   └── sequences.yaml    # Invoice number tracking (AR_XXX_YYYY)
+│   ├── clients.yaml      # Client definitions
+│   └── sequences.yaml    # Invoice numbering
 ├── templates/
-│   ├── invoice-en-us.typ # US customers (USD, no VAT)
-│   ├── invoice-en-eu.typ # EU customers (EUR, reverse charge)
-│   ├── rechnung-de.typ   # DE/AT customers (German, reverse charge)
-│   └── logo.jpg          # Company logo
-├── output/               # Generated invoices (.typ + .pdf)
+│   ├── invoice-en-us.typ # US customers
+│   ├── invoice-en-eu.typ # EU customers (reverse charge)
+│   ├── rechnung-de.typ   # German customers
+│   ├── timesheet.typ     # Timesheet template (i18n)
+│   └── logo.jpg
 ├── scripts/
-│   └── generate_invoice.py
+│   ├── generate_timesheet.py  # GitLab → Timesheet
+│   ├── sync_timesheet.py      # Timesheet → GitLab
+│   └── generate_invoice.py    # Timesheet → Invoice
+├── output/
+│   ├── 2026-01_timesheet_nemensis_de.typ
+│   ├── 2026-01_timesheet_nemensis_de.pdf
+│   ├── 2026-01_timesheet_nemensis_de.sync.json
+│   ├── AR_001_2026_nemensis.typ
+│   └── AR_001_2026_nemensis.pdf
 └── README.md
 ```
 
-## Invoice Templates
+## 🌍 Languages
 
-| Template | Use Case | Currency | VAT | Language |
-|----------|----------|----------|-----|----------|
-| `invoice-en-us` | US customers | USD | None | English |
-| `invoice-en-eu` | EU customers | EUR | Reverse Charge | English |
-| `rechnung-de` | DE/AT customers | EUR | Reverse Charge | German |
+Timesheets support 5 languages:
 
-All templates use **Poppins** font for a modern, clean look.
+| Code | Language | Example |
+|------|----------|---------|
+| `en` | English | Timesheet / Service Report |
+| `de` | Deutsch | Leistungsschein / Timesheet |
+| `vi` | Tiếng Việt | Bảng Chấm Công |
+| `ar` | العربية | كشف الحضور |
+| `is` | Íslenska | Tímaskýrsla |
 
-## Invoice Numbering
+```bash
+python billing/scripts/generate_timesheet.py -c nemensis -p 2026-01 --lang vi
+```
+
+## 📋 Invoice Templates
+
+| Template | Use Case | Currency | VAT |
+|----------|----------|----------|-----|
+| `invoice-en-us.typ` | US customers | USD | None |
+| `invoice-en-eu.typ` | EU customers | EUR | Reverse Charge |
+| `rechnung-de.typ` | DE/AT customers | EUR | Reverse Charge |
+
+## 🔢 Invoice Numbering
 
 Format: `AR_{sequence}_{year}`
 
-Examples:
-- `AR_001_2026` - First invoice of 2026
-- `AR_015_2026` - 15th invoice of 2026
+Examples: `AR_001_2026`, `AR_015_2026`
 
 Global sequence across all clients, tracked in `config/sequences.yaml`.
 
-## Workflow
+## ⚙️ Configuration
 
-### 1. Track Time in GitLab
-
-```
-/spend 2h              # Log 2 hours
-/spend 4h 2025-12-15   # Log on specific date
-```
-
-Labels:
-- `work::remote` - Remote work (default rate)
-- `work::onsite` - On-site work (higher rate)
-
-### 2. Generate Invoice
-
-```bash
-python billing/scripts/generate_invoice.py \
-    --client nemensis \
-    --period 2025-12
-```
-
-### 3. Get Your PDF
-
-Output in `billing/output/AR_001_2026_nemensis.pdf`
-
-## Adding a New Client
+### Adding a Client
 
 Edit `billing/config/clients.yaml`:
 
 ```yaml
 clients:
   newclient:
-    name: "New Client Inc."
+    name: "New Client GmbH"
     short: "NC"
-    template: "invoice-en-us"  # or invoice-en-eu, rechnung-de
-    currency: "USD"            # or EUR
+    template: "rechnung-de"  # or invoice-en-us, invoice-en-eu
+    currency: "EUR"
     address:
-      line1: "123 Main St"
-      city: "New York, NY 10001"
-      country: "USA"
+      line1: "Hauptstraße 1"
+      city: "D - 10115 Berlin"
+      country: ""
+    registration_id: "HRB 12345 Berlin"
+    vat_id: "DE123456789"
     contract_number: "00003154"
-    # For EU clients, add:
-    # registration_id: "KVK: 12345678"
-    # vat_id: "NL123456789B01"
     rates:
       remote: 105
       onsite: 120
 ```
 
-## Command Reference
+## 🛠️ Command Reference
+
+### generate_timesheet.py
 
 ```bash
 # Basic usage
-python billing/scripts/generate_invoice.py --client CLIENT --hours HOURS
+python generate_timesheet.py --client CLIENT --period YYYY-MM
 
 # Options
   --client, -c    Client ID (required)
-  --period, -p    Billing period YYYY-MM (fetches from GitLab)
-  --hours         Manual hours entry
-  --remote        Hours are remote (default)
-  --onsite        Hours are on-site
-  --dry-run       Preview without generating
+  --period, -p    Period YYYY-MM (required)
+  --lang, -l      Language: en, de, vi, ar, is (default: de)
   --no-pdf        Generate .typ only
-  --date          Invoice date YYYY-MM-DD (default: today)
+  --dry-run       Show what would be fetched
 ```
 
-## Requirements
-
-### Typst
+### sync_timesheet.py
 
 ```bash
-# Linux
+# Basic usage
+python sync_timesheet.py TIMESHEET.typ
+
+# Options
+  --dry-run       Show changes without syncing
+  --force         Sync even if no changes
+```
+
+### generate_invoice.py
+
+```bash
+# From timesheet (recommended)
+python generate_invoice.py --from-timesheet TIMESHEET.typ
+
+# Direct (legacy)
+python generate_invoice.py --client CLIENT --hours 184
+python generate_invoice.py --client CLIENT --period 2026-01
+
+# Options
+  --from-timesheet, -t    Generate from timesheet file
+  --client, -c            Client ID
+  --period, -p            Fetch from GitLab for period
+  --hours                 Manual hours entry
+  --remote/--onsite       Type of hours
+  --date                  Invoice date YYYY-MM-DD
+  --no-pdf                Generate .typ only
+  --dry-run               Preview only
+```
+
+## 📅 Holiday Support
+
+Timesheets automatically mark:
+
+- 🔴 **Weekends** (Saturday, Sunday)
+- 🟡 **Holidays** (DE and AT)
+
+Including Easter-based holidays:
+- Karfreitag (DE only)
+- Ostermontag
+- Christi Himmelfahrt
+- Pfingstmontag
+- Fronleichnam
+
+## 🔧 Requirements
+
+```bash
+# Typst
 curl -fsSL https://typst.community/typst-install/install.sh | sh
 
-# macOS
-brew install typst
-
-# Or download from https://github.com/typst/typst/releases
-```
-
-### Python
-
-```bash
+# Python
 pip install pyyaml requests
+
+# Environment
+export GITLAB_TOKEN="glpat-xxx"
+export GITLAB_PROJECT_ID="77260390"
 ```
 
-### Fonts
+## 🎨 Customization
 
-Templates use **Poppins** font. Install if not available:
+### Colors
 
-```bash
-# Ubuntu/Debian
-sudo apt install fonts-poppins
+Edit the color definitions in `timesheet.typ`:
 
-# Or download from Google Fonts
+```typst
+let weekend_color = rgb("#ff6b6b")   // Bold red
+let holiday_color = rgb("#ffd93d")    // Bold yellow
+let header_color = rgb("#00aeef")     // BlauWeiss blue
 ```
 
-## CI Integration
+### Font
 
-The CI pipeline automatically builds invoices when `.typ` files are changed:
+All templates use **Poppins** for a modern look. Change in templates:
 
-```yaml
-build_invoice:
-  stage: build
-  image: ghcr.io/typst/typst:latest
-  script:
-    - typst compile billing/output/*.typ
-  artifacts:
-    paths:
-      - billing/output/*.pdf
+```typst
+set text(font: "Poppins", size: 10pt)
 ```
-
-## Why Typst?
-
-- ✅ Modern, clean typography
-- ✅ Fast compilation (10x faster than LaTeX)
-- ✅ Simple, readable syntax
-- ✅ No complex package management
-- ✅ Built-in PDF generation
