@@ -744,3 +744,38 @@ upload_invoice:
   script:
     - pip install google-auth google-api-python-client -q
     - python billing/scripts/upload_to_drive.py billing/output/*.pdf
+# =============================================================================
+# LLM Relay: Claude ↔ IRENA Communication
+# =============================================================================
+
+relay:irena:
+  stage: automation
+  image: python:3.11-slim
+  rules:
+    - changes:
+        - handoffs/handoff_to_irena.md
+      when: always
+    - when: never
+  before_script:
+    - pip install openai requests --quiet
+    - apt-get update && apt-get install -y curl --quiet
+  script:
+    - echo "📥 Processing handoff to IRENA..."
+    - python scripts/relay.py --process
+    - |
+      if [ -f handoffs/handoff_to_claude.md ]; then
+        echo "📤 Pushing IRENA response..."
+        ENCODED_CONTENT=$(base64 -w 0 handoffs/handoff_to_claude.md)
+        curl --silent --request PUT \
+          --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+          --header "Content-Type: application/json" \
+          --data "{\"branch\": \"main\", \"encoding\": \"base64\", \"content\": \"${ENCODED_CONTENT}\", \"commit_message\": \"feat(relay): IRENA auto-response [skip ci]\"}" \
+          "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/repository/files/handoffs%2Fhandoff_to_claude.md"
+        echo "✅ Response pushed!"
+      else
+        echo "❌ No response generated"
+        exit 1
+      fi
+  variables:
+    OPENAI_API_KEY: ${OPENAI_API_KEY}
+    GITLAB_TOKEN: ${GITLAB_TOKEN}
