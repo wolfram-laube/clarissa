@@ -200,6 +200,25 @@ class RuleBasedRecognizer:
                 r"\b(show|get|what|display)\b.*\b(group)\b.*\b(production|rate|output)\b",
                 r"\b(group)\b.*\b(gor|water\s*cut|production)\b",
             ],
+            # Aquifer Operations (Claude + IRENA consensus)
+            "ADD_AQUIFER": [
+                r"\b(add|create|define)\b.*\b(aquifer)\b",
+                r"\b(carter[- ]?tracy|fetkovich)\b.*\b(aquifer)\b",
+                r"\b(aquifer)\b.*\b(volume|permeability)\b",
+            ],
+            "CONNECT_AQUIFER": [
+                r"\b(connect|link|attach)\b.*\b(aquifer)\b",
+                r"\b(aquifer)\b.*\b(to|with)\b.*\b(block|cell|grid)\b",
+            ],
+            "ADD_NUMERICAL_AQUIFER": [
+                r"\b(numerical|numeric|grid[- ]?based)\b.*\b(aquifer)\b",
+                r"\b(aquifer)\b.*\b(numerical|in cells|in grid)\b",
+            ],
+            "GET_AQUIFER_STATUS": [
+                r"\b(show|get|display|what)\b.*\b(aquifer)\b.*\b(influx|status|pressure)\b",
+                r"\b(aquifer)\b.*\b(influx|rate|pressure)\b",
+            ],
+
         }
         
         for intent, keyword_list in intent_keywords.items():
