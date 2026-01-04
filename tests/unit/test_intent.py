@@ -183,13 +183,13 @@ class TestHybridRecognizer:
     """Tests for HybridRecognizer."""
     
     def test_uses_rules_for_clear_input(self):
-        recognizer = HybridRecognizer()
+        recognizer = HybridRecognizer(rule_threshold=0.7)
         result = recognizer.recognize("Run the simulation")
         assert result.success
         assert result.metadata.get("recognizer") == "rule_based"
     
     def test_returns_result_for_ambiguous_input(self):
-        recognizer = HybridRecognizer()
+        recognizer = HybridRecognizer(rule_threshold=0.7)
         result = recognizer.recognize("maybe do something with the well")
         # Should still return something (even if low confidence)
         # because LLM is not implemented yet
@@ -240,5 +240,6 @@ def test_intent_recognition_parametrized(text, expected_intent):
     recognizer = RuleBasedRecognizer(confidence_threshold=0.5)
     result = recognizer.recognize(text)
     assert result.data is not None, f"No match for: {text}"
+    assert "intent" in result.data, f"No intent key in result for: {text}"
     assert result.data["intent"] == expected_intent, \
         f"Expected {expected_intent} for '{text}', got {result.data['intent']}"
