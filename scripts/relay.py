@@ -127,12 +127,11 @@ def get_file_contents(paths: list[str], max_lines: int = 150) -> dict[str, str]:
 
 def gitlab_api(endpoint: str) -> dict | list | str | None:
     """Make GitLab API request returning JSON."""
-    token = get_gitlab_token()
+    token = os.environ.get(GITLAB_TOKEN_ENV, GITLAB_TOKEN_DEFAULT)
     url = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/{endpoint}"
     req = urllib.request.Request(url, headers={"PRIVATE-TOKEN": token})
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
-            import json
             return json.loads(resp.read().decode())
     except Exception as e:
         print(f"⚠️  GitLab API error: {e}")
