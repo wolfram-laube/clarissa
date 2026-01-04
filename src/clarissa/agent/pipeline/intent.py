@@ -179,6 +179,27 @@ class RuleBasedRecognizer:
                 r"\b(how|suggest|recommend)\b.*\b(fix|solve|resolve)\b",
                 r"\b(what should|suggestion)\b",
             ],
+            # Group Operations (IRENA recommendation)
+            "ADD_GROUP": [
+                r"\b(add|create|define|new)\b.*\b(group)\b",
+                r"\b(group)\b.*\b(add|create|new)\b",
+            ],
+            "MODIFY_GROUP": [
+                r"\b(modify|change|update|edit)\b.*\b(group)\b",
+                r"\b(add|move|assign)\b.*\b(to|from)\b.*\b(group)\b",
+                r"\b(group)\b.*\b(hierarchy|structure)\b",
+            ],
+            "SET_GROUP_RATE": [
+                r"\b(set|change|modify|limit)\b.*\b(group)\b.*\b(rate|production|injection)\b",
+                r"\b(group)\b.*\b(rate|target|limit|constraint)\b",
+                r"\b(optimize)\b.*\b(group|field)\b.*\b(rate|injection|production)\b",
+                r"\btweak\b.*\b(water\s*cut|watercut)\b",
+                r"\b(adjust|set|change)\b.*\b(gor|gas[- ]?oil[- ]?ratio)\b",
+            ],
+            "GET_GROUP_PRODUCTION": [
+                r"\b(show|get|what|display)\b.*\b(group)\b.*\b(production|rate|output)\b",
+                r"\b(group)\b.*\b(gor|water\s*cut|production)\b",
+            ],
         }
         
         for intent, keyword_list in intent_keywords.items():
