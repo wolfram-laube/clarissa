@@ -75,7 +75,8 @@ class RuleBasedRecognizer:
         intent_keywords = {
             # Simulation control
             "RUN_SIMULATION": [
-                r"\b(run|start|execute|begin|launch)\b.*\b(simulation|model|case|run)\b", r"\b(execute|run)\b.*[A-Z0-9_-]+\b",
+                r"\b(run|start|execute|begin|launch)\b.*\b(simulation|model|case|run)\b",
+                r"\b(execute|run)\b\s+[A-Z][A-Z0-9_-]*",
                 r"\b(simulation|model)\b.*\b(run|start|execute)\b",
             ],
             "STOP_SIMULATION": [
@@ -97,7 +98,8 @@ class RuleBasedRecognizer:
                 r"\b(well)\b.*\b(modify|change|update)\b",
             ],
             "SHUT_WELL": [
-                r"\b(shut|close|shut-in|shutin)\b.*\b(well|producer|injector)\b", r"\b(shut|close)\b.*\b[A-Z][A-Z0-9_-]*\d+\b",
+                r"\b(shut|close|shut-in|shutin)\b.*\b(well|producer|injector)\b",
+                r"\b(shut|close)\b\s+[A-Z][A-Z0-9_-]*\d+",
                 r"\b(well)\b.*\b(shut|close)\b",
             ],
             "OPEN_WELL": [
