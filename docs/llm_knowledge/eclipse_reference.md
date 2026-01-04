@@ -165,3 +165,94 @@ pressure_kpa = pressure_psi * 6.89476
 4. **Rate must be positive**
 5. **BHP must be reasonable** (typically 500-10000 psi)
 6. **Grid indices must be valid** (within DIMENS)
+---
+
+## Group Operations (IRENA Contribution)
+
+### GRUPTREE - Group Hierarchy Definition
+
+Defines the hierarchy of production or injection groups in the field.
+
+#### Syntax
+```eclipse
+GRUPTREE
+-- Child     Parent
+  'GROUP1'   'FIELD' /
+  'GROUP2'   'GROUP1' /
+/
+```
+
+| Parameter | Description |
+|-----------|-------------|
+| Child | Name of the subgroup |
+| Parent | Name of the parent group or FIELD |
+
+#### Example: Multi-level hierarchy
+```eclipse
+GRUPTREE
+  'NORTH'    'FIELD' /
+  'SOUTH'    'FIELD' /
+  'PLATFORM_A' 'NORTH' /
+  'PLATFORM_B' 'NORTH' /
+/
+```
+
+---
+
+### GCONPROD - Group Production Control
+
+Controls production targets for an entire group of wells.
+
+#### Syntax
+```eclipse
+GCONPROD
+-- Group   Status  Control  OilRate  WaterRate  GasRate  LiqRate  ResvRate  BHP
+  'GROUP1' 'OPEN'  'ORAT'   10000    1*         1*       1*       1*        500 /
+/
+```
+
+| Parameter | Values | Description |
+|-----------|--------|-------------|
+| Group | string | Group name |
+| Status | OPEN/SHUT | Group status |
+| Control | ORAT/WRAT/GRAT/LRAT/RESV/BHP | Control mode |
+| Rates | number or 1* | Target rates (1* = no limit) |
+
+#### Control Modes
+- `ORAT` - Oil rate control
+- `WRAT` - Water rate control  
+- `GRAT` - Gas rate control
+- `LRAT` - Liquid rate control
+- `RESV` - Reservoir volume rate control
+- `BHP` - Bottom-hole pressure control
+
+---
+
+### GCONINJE - Group Injection Control
+
+Controls injection rates at the group level.
+
+#### Syntax
+```eclipse
+GCONINJE
+-- Group   Type    Status  Mode   Rate   ResvRate  BHP
+  'GROUP1' 'WATER' 'OPEN'  'RATE' 5000   1*        3000 /
+/
+```
+
+| Parameter | Values | Description |
+|-----------|--------|-------------|
+| Group | string | Injection group name |
+| Type | WATER/GAS/OIL | Injection fluid type |
+| Status | OPEN/SHUT | Group status |
+| Mode | RATE/RESV/BHP | Control mode |
+| Rate | number | Surface injection rate |
+| BHP | number | Max bottom-hole pressure |
+
+#### Example: Water injection group
+```eclipse
+GCONINJE
+  'NORTH_INJ' 'WATER' 'OPEN' 'RATE' 15000 1* 4500 /
+  'SOUTH_INJ' 'WATER' 'OPEN' 'RATE' 12000 1* 4500 /
+/
+```
