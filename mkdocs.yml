@@ -76,6 +76,12 @@ nav:
     - GPU Support: simulators/gpu-support.md
     - Adapter Matrix: simulators/adapter_matrix.md
 
+  - ECLIPSE:
+    - Overview: eclipse/index.md
+    - Deck Structure: eclipse/deck-structure.md
+    - Keyword Reference: eclipse/keyword-reference.md
+    - Common Errors: eclipse/common-errors.md
+
   - Publications:
     - Overview: publications/index.md
     - "IJACSA 2026":
