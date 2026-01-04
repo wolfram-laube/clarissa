@@ -122,7 +122,8 @@ class TestCheckpointDecisions:
     def test_rollback_stage_chain(self, checkpoint):
         """Test that rollback points to previous stage."""
         stages = [
-            ("intent_recognition", None),  # First stage, no rollback
+            ("speech_recognition", None),  # First stage, no rollback
+            ("intent_recognition", "speech_recognition"),
             ("entity_extraction", "intent_recognition"),
             ("asset_validation", "entity_extraction"),
             ("syntax_generation", "asset_validation"),
