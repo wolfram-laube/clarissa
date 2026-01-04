@@ -73,6 +73,7 @@ nav:
     - Adapter Contract: simulators/adapter-contract.md
     - OPM Flow Guide: simulators/opm-flow.md
     - Kubernetes Jobs: simulators/k8s-jobs.md
+    - GPU Support: simulators/gpu-support.md
     - Adapter Matrix: simulators/adapter_matrix.md
 
   - Publications:
