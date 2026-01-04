@@ -73,6 +73,99 @@ def gitlab_fetch(path: str) -> str | None:
         return None
 
 
+
+def get_recent_commits(n: int = 5) -> list[dict]:
+    """Fetch recent commits with diffs."""
+    commits = gitlab_api(f"repository/commits?per_page={n}")
+    if not commits or isinstance(commits, str):
+        return []
+    
+    result = []
+    for c in commits:
+        commit_detail = gitlab_api(f"repository/commits/{c['id']}/diff")
+        result.append({
+            "sha": c["short_id"],
+            "message": c["title"],
+            "date": c["created_at"][:10],
+            "author": c.get("author_name", "unknown"),
+            "diff_summary": summarize_diff(commit_detail) if commit_detail else ""
+        })
+    return result
+
+
+def summarize_diff(diff: list) -> str:
+    """Summarize a diff into readable format."""
+    if not diff:
+        return ""
+    
+    summary = []
+    for file_diff in diff[:10]:  # Limit to 10 files
+        path = file_diff.get("new_path", file_diff.get("old_path", "unknown"))
+        
+        # Count additions/deletions
+        diff_text = file_diff.get("diff", "")
+        additions = diff_text.count("\n+") - diff_text.count("\n+++")
+        deletions = diff_text.count("\n-") - diff_text.count("\n---")
+        
+        summary.append(f"  {path}: +{additions}/-{deletions}")
+    
+    return "\n".join(summary)
+
+
+def get_file_contents(paths: list[str], max_lines: int = 150) -> dict[str, str]:
+    """Fetch multiple file contents from GitLab."""
+    result = {}
+    for path in paths:
+        content = gitlab_fetch(path)
+        if content:
+            lines = content.split("\n")
+            if len(lines) > max_lines:
+                content = "\n".join(lines[:80]) + "\n\n# ... truncated ...\n\n" + "\n".join(lines[-40:])
+            result[path] = content
+    return result
+
+
+def gitlab_api(endpoint: str) -> dict | list | str | None:
+    """Make GitLab API request returning JSON."""
+    token = get_gitlab_token()
+    url = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/{endpoint}"
+    req = urllib.request.Request(url, headers={"PRIVATE-TOKEN": token})
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            import json
+            return json.loads(resp.read().decode())
+    except Exception as e:
+        print(f"⚠️  GitLab API error: {e}")
+        return None
+
+
+def build_repo_context(include_diff: bool = True, include_files: list[str] = None) -> str:
+    """Build repository context for the handoff."""
+    context_parts = []
+    
+    # Recent commits with diffs
+    if include_diff:
+        commits = get_recent_commits(5)
+        if commits:
+            context_parts.append("## 📝 Recent Commits\n")
+            for c in commits:
+                context_parts.append(f"### `{c['sha']}` - {c['message']} ({c['date']})")
+                if c['diff_summary']:
+                    context_parts.append(f"```\n{c['diff_summary']}\n```")
+            context_parts.append("")
+    
+    # Specific file contents
+    if include_files:
+        files = get_file_contents(include_files)
+        if files:
+            context_parts.append("## 📁 Relevant Code\n")
+            for path, content in files.items():
+                ext = path.split(".")[-1]
+                context_parts.append(f"### `{path}`\n```{ext}\n{content}\n```\n")
+    
+    return "\n".join(context_parts)
+
+
 def load_knowledge_base() -> str:
     """Load all knowledge base files from GitLab."""
     knowledge = []
@@ -155,8 +248,28 @@ def process_handoff(dry_run: bool = False) -> bool:
     system_prompt = build_system_prompt(knowledge)
     
     # Call API
+    # Add repo context to handoff
+    print("📦 Building repository context...")
+    
+    # Check if handoff requests specific files
+    include_files = []
+    if "taxonomy.json" in handoff_content.lower():
+        include_files.append("src/clarissa/agent/intents/taxonomy.json")
+    if "intent.py" in handoff_content.lower() or "intent" in handoff_content.lower():
+        include_files.append("src/clarissa/agent/pipeline/intent.py")
+    if "entities.py" in handoff_content.lower() or "entity" in handoff_content.lower():
+        include_files.append("src/clarissa/agent/pipeline/entities.py")
+    
+    repo_context = build_repo_context(
+        include_diff=True,
+        include_files=include_files if include_files else None
+    )
+    
+    # Combine handoff with repo context
+    full_handoff = handoff_content + "\n\n---\n\n# Repository Context\n\n" + repo_context
+    
     print("🤖 Calling OpenAI API...")
-    response = call_openai_api(system_prompt, handoff_content, dry_run)
+    response = call_openai_api(system_prompt, full_handoff, dry_run)
     
     if response.startswith("ERROR"):
         print(f"❌ {response}")
