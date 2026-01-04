@@ -120,7 +120,7 @@ WELL_NAME_PATTERN = re.compile(
 # Rate patterns
 RATE_PATTERN = re.compile(
     r'(\d+(?:[.,]\d+)?)\s*'  # Number (with optional decimal)
-    r'(stb|bbl|barrel|mscf|mmscf|m3|m³)\s*'  # Volume unit
+    r'(stb|bbl|barrels?|mscf|mmscf|m3|m³)\s*'  # Volume unit
     r'(?:per\s*|/)?\s*'  # Separator
     r'(day|d)\b',  # Time unit
     re.IGNORECASE
@@ -228,7 +228,7 @@ class RuleBasedEntityExtractor:
         entities = []
         
         # Common non-well words to exclude
-        excluded = {"set", "get", "run", "the", "and", "for", "all", "day", "oil", 
+        excluded = {"set", "get", "run", "the", "and", "for", "all", "day", "oil", "open", "shut", "show", "add", "new", "close", "stop", "start", 
                    "gas", "bhp", "thp", "psi", "bar", "stb", "bbl", "jan", "feb",
                    "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"}
         
