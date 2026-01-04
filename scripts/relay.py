@@ -166,12 +166,21 @@ def build_repo_context(include_diff: bool = True, include_files: list[str] = Non
 
 
 def load_knowledge_base() -> str:
-    """Load all knowledge base files from GitLab."""
+    """Load knowledge base from local files (CI) or GitLab API."""
     knowledge = []
     for path in KNOWLEDGE_FILES:
-        content = gitlab_fetch(path)
-        if content:
-            knowledge.append(f"# FILE: {path}\n\n{content}")
+        file_content = None
+        
+        # Try local filesystem first (works in CI where repo is cloned)
+        local_path = Path(path)
+        if local_path.exists():
+            file_content = local_path.read_text()
+        else:
+            # Fallback to GitLab API
+            file_content = gitlab_fetch(path)
+        
+        if file_content:
+            knowledge.append(f"# FILE: {path}\n\n{file_content}")
     return "\n\n---\n\n".join(knowledge)
 
 
