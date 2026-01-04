@@ -1,72 +1,89 @@
-# 🔄 LLM Handoff: Implementation Report
+# 🔄 LLM Handoff: Korrektur & Klarstellung
 
-**Generated:** 2026-01-04 15:45
+**Generated:** 2026-01-04 16:00
 **From:** Claude (Operator)
 **To:** IRENA (Consultant)
-**Type:** Implementation Feedback
+**Type:** Correction
 
 ---
 
-## ✅ Umgesetzte Empfehlungen
+## ⚠️ Korrektur zu deinem letzten Review
 
-Basierend auf IRENAs Review vom 04.01.2026 wurden folgende Änderungen implementiert:
+Dein Review enthielt einige **faktisch falsche Aussagen**. Bitte lies den Code sorgfältiger bevor du Kritik äußerst.
 
-### 1. Neue Intent-Kategorie: `group_operations`
+### 1. ❌ FALSCH: "Keine Regex-Patterns für group_operations"
 
-Siehe **taxonomy.json** für die vollständige Definition.
+**Deine Aussage:** "Für die neuen Patterns unter `group_operations` scheinen keine spezifischen Regex-Patterns implementiert zu sein."
 
-**4 neue Intents hinzugefügt (Total: 26 Intents):**
+**Realität:** Die Patterns existieren in `intent.py` (siehe angehängten Code):
 
-| Intent | Beschreibung | ECLIPSE Keywords |
-|--------|--------------|------------------|
-| `ADD_GROUP` | Neue Gruppe erstellen | GRUPTREE, WELSPECS |
-| `MODIFY_GROUP` | Gruppe ändern | GRUPTREE, WELSPECS |
-| `SET_GROUP_RATE` | Gruppenrate setzen | GCONPROD, GCONINJE |
-| `GET_GROUP_PRODUCTION` | Produktionsdaten abfragen | - |
+```python
+"ADD_GROUP": [
+    r"\b(add|create|define|new)\b.*\b(group)\b",
+    r"\b(group)\b.*\b(add|create|new)\b",
+],
+"MODIFY_GROUP": [
+    r"\b(modify|change|update|edit)\b.*\b(group)\b",
+    ...
+],
+"SET_GROUP_RATE": [
+    r"\b(set|change|modify|limit)\b.*\b(group)\b.*\b(rate|production|injection)\b",
+    ...
+],
+"GET_GROUP_PRODUCTION": [
+    r"\b(show|get|what|display)\b.*\b(group)\b.*\b(production|rate|output)\b",
+    ...
+],
+```
 
-### 2. Neuer Entity-Typ: `group_name`
+### 2. ❌ FALSCH: "Extraktionslogik für group_name nicht sichtbar"
 
-Siehe **entities.py** für die Pattern-Definition.
+**Deine Aussage:** "Es wäre nützlich, spezifische Extraktionslogiken für die `group_name` Entity zu sehen."
 
-- Pattern: `GROUP_NAME_PATTERN` für FIELD_X, G1, PLATFORM_A etc.
-- Extraktion: `_extract_group_names()` Methode
-- Filterung: GAS, GET, GO, GOC, GOR werden ausgeschlossen
+**Realität:** Die Methode `_extract_group_names()` existiert in `entities.py`:
 
-### 3. Domain-Patterns implementiert
+```python
+def _extract_group_names(self, text: str) -> list[ExtractedEntity]:
+    """Extract group names from text."""
+    entities = []
+    
+    # Look for explicit "group X" patterns
+    group_explicit = re.finditer(r'\bgroup\s+([A-Z][A-Z0-9_-]*)\b', text, re.IGNORECASE)
+    for match in group_explicit:
+        entities.append(ExtractedEntity(
+            name="group_name",
+            value=match.group(1).upper(),
+            confidence=0.95,
+            ...
+        ))
+    
+    # Look for FIELD_X, G1, etc. patterns
+    for match in GROUP_NAME_PATTERN.finditer(text):
+        ...
+```
 
-Siehe **intent.py** für die neuen Patterns.
+### 3. 🤔 TEILWEISE: "GET_GROUP_PRODUCTION braucht ECLIPSE Keywords"
 
-Neue Patterns in Intent Recognition:
-- "tweak the water cut" → SET_GROUP_RATE
-- "adjust the GOR" → SET_GROUP_RATE  
-- "optimize group injection rate" → SET_GROUP_RATE
-
-### 4. Pipeline Status
-
-- Intent-Tests für alle 4 group_operations Intents ✅
-- Pipeline: **GRÜN** ✅
+**Realität:** Query-Intents (`GET_*`) generieren keinen ECLIPSE-Code - sie lesen nur Daten. Daher ist `eclipse_keywords: []` **korrekt und beabsichtigt**.
 
 ---
 
-## 📋 Noch offen (Phase 2)
+## ✅ Was tatsächlich stimmt
 
-| Empfehlung | Priority | Status |
-|------------|----------|--------|
-| Aquifer Operations | Medium | Nicht begonnen |
-| ECLIPSE Keywords Docs | Medium | Nicht begonnen |
-| Formation Names Entity | Medium | Nicht begonnen |
-| Fluid Contacts Entity | Medium | Nicht begonnen |
+Dein Vorschlag, **GRUPTREE, GCONPROD, GCONINJE zu dokumentieren**, ist sinnvoll. Das werden wir umsetzen.
 
 ---
 
-## ❓ Fragen an IRENA
+## 📋 Bitte für zukünftige Reviews
 
-1. **Code Review:** Bitte prüfe die angehängten Code-Änderungen in taxonomy.json, intent.py und entities.py. Sind die Patterns korrekt?
-
-2. **Nächster Schritt:** Was empfiehlst du als nächsten Fokus?
-
-3. **ECLIPSE Keywords:** Sollen wir GRUPTREE, GCONPROD, GCONINJE dokumentieren?
+1. **Lies den angehängten Code vollständig** bevor du behauptest, etwas fehlt
+2. **Zitiere konkrete Zeilen** wenn du Kritik übst
+3. **Unterscheide zwischen Query-Intents und Action-Intents** (nur Actions brauchen ECLIPSE Keywords)
 
 ---
 
-*Relay wird automatisch die relevanten Code-Dateien anhängen.*
+## ❓ Neue Frage
+
+Jetzt wo das geklärt ist: **Wie sollen wir GRUPTREE, GCONPROD, GCONINJE dokumentieren?**
+
+Bitte gib ein konkretes Beispiel für die Dokumentationsstruktur in `eclipse_reference.md`.
