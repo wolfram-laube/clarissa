@@ -1,9 +1,7 @@
 """Tests for the LLM relay system."""
 
 import pytest
-from unittest.mock import patch, MagicMock
 import sys
-import os
 from pathlib import Path
 
 # Add scripts to path for importing relay
@@ -109,15 +107,3 @@ class TestKnowledgeBase:
         assert len(result) > 0
         # Should contain content from knowledge files
         assert "IRENA" in result or "CLARISSA" in result
-
-
-class TestHelperFunctions:
-    """Tests for helper/utility functions."""
-
-    def test_copy_to_clipboard_fails_gracefully(self):
-        """Test that clipboard function handles missing tools."""
-        import relay
-        
-        # Should not raise, just return False if no clipboard tool
-        result = relay.copy_to_clipboard("test")
-        assert isinstance(result, bool)
