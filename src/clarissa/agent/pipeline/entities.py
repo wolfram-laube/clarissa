@@ -123,6 +123,28 @@ GROUP_NAME_PATTERN = re.compile(
     re.IGNORECASE
 )
 
+# Aquifer patterns (Claude + IRENA consensus)
+AQUIFER_ID_PATTERN = re.compile(
+    r'\b(AQ[A-Z0-9_]*|AQUIFER[-_]?[A-Z0-9]*)\b',
+    re.IGNORECASE
+)
+
+AQUIFER_TYPE_PATTERN = re.compile(
+    r'\b(fetkovich|carter[- ]?tracy|numerical|numeric|analytical)\b',
+    re.IGNORECASE
+)
+
+VOLUME_PATTERN = re.compile(
+    r'(\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*(?:m[³3]|m3|cubic\s*m(?:eters?)?)?',
+    re.IGNORECASE
+)
+
+CELL_RANGE_PATTERN = re.compile(
+    r'(\d+)\s*[-,:]\s*(\d+)\s*[-,:]\s*(\d+)(?:\s*(?:to|through|:)\s*(\d+))?',
+    re.IGNORECASE
+)
+
+
 # Rate patterns
 RATE_PATTERN = re.compile(
     r'(\d+(?:[.,]\d+)?)\s*'  # Number (with optional decimal)
@@ -283,6 +305,62 @@ class RuleBasedEntityExtractor:
                             end=match.end(1),
                             raw_text=match.group(0)
                         ))
+        
+        return entities
+
+
+    def _extract_aquifer_ids(self, text: str) -> list[ExtractedEntity]:
+        """Extract aquifer IDs from text."""
+        entities = []
+        
+        # Explicit "aquifer X" pattern
+        for match in re.finditer(r'\baquifer\s+([A-Z][A-Z0-9_-]*)\b', text, re.IGNORECASE):
+            entities.append(ExtractedEntity(
+                name="aquifer_id",
+                value=match.group(1).upper(),
+                confidence=0.95,
+                start=match.start(1),
+                end=match.end(1),
+                raw_text=match.group(0)
+            ))
+        
+        # AQ1, AQUIFER_NORTH patterns
+        for match in AQUIFER_ID_PATTERN.finditer(text):
+            val = match.group(1).upper()
+            if not any(e.value == val for e in entities):
+                entities.append(ExtractedEntity(
+                    name="aquifer_id",
+                    value=val,
+                    confidence=0.85,
+                    start=match.start(1),
+                    end=match.end(1),
+                    raw_text=match.group(0)
+                ))
+        
+        return entities
+
+    def _extract_aquifer_types(self, text: str) -> list[ExtractedEntity]:
+        """Extract aquifer type from text."""
+        entities = []
+        
+        for match in AQUIFER_TYPE_PATTERN.finditer(text):
+            val = match.group(1).lower().replace("-", "_").replace(" ", "_")
+            # Normalize
+            if "carter" in val:
+                val = "carter_tracy"
+            elif "fetko" in val:
+                val = "fetkovich"
+            elif "numer" in val:
+                val = "numerical"
+            
+            entities.append(ExtractedEntity(
+                name="aquifer_type",
+                value=val,
+                confidence=0.95,
+                start=match.start(1),
+                end=match.end(1),
+                raw_text=match.group(0)
+            ))
         
         return entities
 
@@ -536,6 +614,8 @@ class RuleBasedEntityExtractor:
         all_entities: list[ExtractedEntity] = []
         all_entities.extend(self._extract_well_names(text))
         all_entities.extend(self._extract_group_names(text))
+        all_entities.extend(self._extract_aquifer_ids(text))
+        all_entities.extend(self._extract_aquifer_types(text))
         all_entities.extend(self._extract_rates(text))
         all_entities.extend(self._extract_pressures(text))
         all_entities.extend(self._extract_dates(text))
