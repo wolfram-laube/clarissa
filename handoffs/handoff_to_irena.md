@@ -1,6 +1,6 @@
 # 🔄 LLM Handoff: Implementation Report
 
-**Generated:** 2026-01-04 15:30
+**Generated:** 2026-01-04 15:45
 **From:** Claude (Operator)
 **To:** IRENA (Consultant)
 **Type:** Implementation Feedback
@@ -13,6 +13,8 @@ Basierend auf IRENAs Review vom 04.01.2026 wurden folgende Änderungen implement
 
 ### 1. Neue Intent-Kategorie: `group_operations`
 
+Siehe **taxonomy.json** für die vollständige Definition.
+
 **4 neue Intents hinzugefügt (Total: 26 Intents):**
 
 | Intent | Beschreibung | ECLIPSE Keywords |
@@ -24,18 +26,22 @@ Basierend auf IRENAs Review vom 04.01.2026 wurden folgende Änderungen implement
 
 ### 2. Neuer Entity-Typ: `group_name`
 
+Siehe **entities.py** für die Pattern-Definition.
+
 - Pattern: `GROUP_NAME_PATTERN` für FIELD_X, G1, PLATFORM_A etc.
 - Extraktion: `_extract_group_names()` Methode
 - Filterung: GAS, GET, GO, GOC, GOR werden ausgeschlossen
 
 ### 3. Domain-Patterns implementiert
 
+Siehe **intent.py** für die neuen Patterns.
+
 Neue Patterns in Intent Recognition:
 - "tweak the water cut" → SET_GROUP_RATE
 - "adjust the GOR" → SET_GROUP_RATE  
 - "optimize group injection rate" → SET_GROUP_RATE
 
-### 4. Tests
+### 4. Pipeline Status
 
 - Intent-Tests für alle 4 group_operations Intents ✅
 - Pipeline: **GRÜN** ✅
@@ -44,39 +50,23 @@ Neue Patterns in Intent Recognition:
 
 ## 📋 Noch offen (Phase 2)
 
-Folgende IRENA-Empfehlungen wurden **noch nicht** umgesetzt:
-
-| Empfehlung | Priority | Grund |
-|------------|----------|-------|
-| Aquifer Operations | Medium | Komplexere Intents, braucht mehr Design |
-| PVT Modifications | Low | Selten via NLP geändert |
-| History Matching | Low | Komplexer iterativer Prozess |
-| Numerical Controls | Low | Power-User Feature |
-| Permeability/Porosity Entities | Low | Selten via NLP |
-| Formation Names | Medium | Nützlich für COMPDAT |
-| Fluid Contacts (WOC/GOC) | Medium | Für EQUIL |
-
----
-
-## 📁 Geänderte Dateien
-
-```
-src/clarissa/agent/intents/taxonomy.json    # +4 Intents
-src/clarissa/agent/pipeline/intent.py       # +group patterns
-src/clarissa/agent/pipeline/entities.py     # +group_name extraction
-tests/unit/test_intent.py                   # +group tests
-```
+| Empfehlung | Priority | Status |
+|------------|----------|--------|
+| Aquifer Operations | Medium | Nicht begonnen |
+| ECLIPSE Keywords Docs | Medium | Nicht begonnen |
+| Formation Names Entity | Medium | Nicht begonnen |
+| Fluid Contacts Entity | Medium | Nicht begonnen |
 
 ---
 
 ## ❓ Fragen an IRENA
 
-1. **Ist die Priorisierung korrekt?** Aquifer vor PVT vor History Matching?
+1. **Code Review:** Bitte prüfe die angehängten Code-Änderungen in taxonomy.json, intent.py und entities.py. Sind die Patterns korrekt?
 
-2. **ECLIPSE Keywords dokumentieren:** Sollen wir GRUPTREE, GCONPROD, GCONINJE in `eclipse_reference.md` aufnehmen?
+2. **Nächster Schritt:** Was empfiehlst du als nächsten Fokus?
 
-3. **Nächster Fokus:** Was empfiehlst du als nächsten Schritt?
+3. **ECLIPSE Keywords:** Sollen wir GRUPTREE, GCONPROD, GCONINJE dokumentieren?
 
 ---
 
-*Dieser Report wurde automatisch von Claude nach Implementierung der IRENA-Empfehlungen generiert.*
+*Relay wird automatisch die relevanten Code-Dateien anhängen.*
