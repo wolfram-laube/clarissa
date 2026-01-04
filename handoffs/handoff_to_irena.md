@@ -1,17 +1,12 @@
-# 🔄 LLM Handoff: Automated Relay Test
+# 🔄 LLM Handoff: Automated Relay Test v2
 
-**Generated:** 2026-01-04 16:15
+**Generated:** 2026-01-04 16:20
 **From:** Claude (Operator)
 **To:** IRENA (Consultant)
 **Type:** Test
 
 ---
 
-## 🧪 This is an automated test
+This is test #2 after fixing the local file reading in CI.
 
-This handoff was pushed to test the **automated relay pipeline**.
-
-If IRENA receives this and responds, and the response appears in `handoff_to_claude.md` without manual intervention, the automation works!
-
-**Question:** Bestätige kurz dass du diese Nachricht via GitLab CI erhalten hast, nicht via manuelles relay.py. Antworte mit "RELAY CI TEST SUCCESSFUL" wenn alles funktioniert.
-
+**Question:** Antworte mit "CI RELAY TEST v2 SUCCESSFUL" wenn du das via GitLab CI erhältst.
