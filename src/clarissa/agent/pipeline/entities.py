@@ -117,6 +117,12 @@ WELL_NAME_PATTERN = re.compile(
     re.IGNORECASE
 )
 
+# Group name patterns - similar to well names but also supports FIELD, G1, etc.
+GROUP_NAME_PATTERN = re.compile(
+    r'\b(?:group\s+)?([A-Z][A-Z0-9]*[-_]?[A-Z0-9]*|FIELD[-_]?[A-Z0-9]*)\b',
+    re.IGNORECASE
+)
+
 # Rate patterns
 RATE_PATTERN = re.compile(
     r'(\d+(?:[.,]\d+)?)\s*'  # Number (with optional decimal)
@@ -246,6 +252,41 @@ class RuleBasedEntityExtractor:
         
         return entities
     
+    def _extract_group_names(self, text: str) -> list[ExtractedEntity]:
+        """Extract group names from text."""
+        entities = []
+        
+        # Look for explicit "group X" patterns
+        group_explicit = re.finditer(r'\bgroup\s+([A-Z][A-Z0-9_-]*)\b', text, re.IGNORECASE)
+        for match in group_explicit:
+            entities.append(ExtractedEntity(
+                name="group_name",
+                value=match.group(1).upper(),
+                confidence=0.95,
+                start=match.start(1),
+                end=match.end(1),
+                raw_text=match.group(0)
+            ))
+        
+        # Look for FIELD_X, G1, etc. patterns when not already captured
+        for match in GROUP_NAME_PATTERN.finditer(text):
+            name = match.group(1).upper()
+            # Filter out well-like names and common words
+            if name.startswith(("FIELD", "PLATFORM", "REGION")) or (name.startswith("G") and len(name) <= 3):
+                if name not in {"GAS", "GET", "GO", "GOC", "GOR"}:
+                    if not any(e.value == name for e in entities):
+                        entities.append(ExtractedEntity(
+                            name="group_name",
+                            value=name,
+                            confidence=0.8,
+                            start=match.start(1),
+                            end=match.end(1),
+                            raw_text=match.group(0)
+                        ))
+        
+        return entities
+
+
     def _extract_rates(self, text: str) -> list[ExtractedEntity]:
         """Extract rate values from text."""
         entities = []
@@ -494,6 +535,7 @@ class RuleBasedEntityExtractor:
         # Extract all possible entities
         all_entities: list[ExtractedEntity] = []
         all_entities.extend(self._extract_well_names(text))
+        all_entities.extend(self._extract_group_names(text))
         all_entities.extend(self._extract_rates(text))
         all_entities.extend(self._extract_pressures(text))
         all_entities.extend(self._extract_dates(text))
