@@ -508,6 +508,78 @@
           "eclipse_keywords": []
         }
       }
+    },
+    "aquifer_operations": {
+      "description": "Operations for managing analytical and numerical aquifers",
+      "intents": {
+        "ADD_AQUIFER": {
+          "description": "Add an analytical aquifer (Fetkovich or Carter-Tracy)",
+          "examples": [
+            "add Carter-Tracy aquifer AQ1 with volume 1E6",
+            "create Fetkovich aquifer",
+            "define aquifer with permeability 100 mD"
+          ],
+          "required_entities": [
+            "aquifer_id"
+          ],
+          "optional_entities": [
+            "aquifer_type",
+            "volume_value",
+            "permeability_value"
+          ],
+          "eclipse_keywords": [
+            "AQUFETP",
+            "AQUCT"
+          ]
+        },
+        "CONNECT_AQUIFER": {
+          "description": "Connect aquifer to reservoir cells",
+          "examples": [
+            "connect AQ1 to blocks 10,15,1 through 10,15,5",
+            "link aquifer to cells in layer 10",
+            "attach aquifer AQ1 to grid block 5,5,3"
+          ],
+          "required_entities": [
+            "aquifer_id"
+          ],
+          "optional_entities": [
+            "cell_range",
+            "grid_location"
+          ],
+          "eclipse_keywords": [
+            "AQUANCON"
+          ]
+        },
+        "ADD_NUMERICAL_AQUIFER": {
+          "description": "Define numerical aquifer cells in the grid",
+          "examples": [
+            "define numerical aquifer in cells 1-5,1-5,10",
+            "add numerical aquifer zone",
+            "create grid-based aquifer in layer 15"
+          ],
+          "required_entities": [],
+          "optional_entities": [
+            "cell_range"
+          ],
+          "eclipse_keywords": [
+            "AQUNUM"
+          ]
+        },
+        "GET_AQUIFER_STATUS": {
+          "description": "Query aquifer influx and status",
+          "examples": [
+            "show aquifer influx",
+            "what is the aquifer pressure",
+            "get AQ1 status",
+            "display aquifer water influx rate"
+          ],
+          "required_entities": [],
+          "optional_entities": [
+            "aquifer_id"
+          ],
+          "eclipse_keywords": []
+        }
+      }
     }
   },
   "entities": {
@@ -663,7 +735,7 @@
       "Entity patterns should be extended for specific asset naming conventions",
       "ECLIPSE keywords are indicative; actual generation depends on context"
     ],
-    "total_intents": 26,
-    "version": "1.1.0"
+    "total_intents": 30,
+    "version": "1.2.0"
   }
 }
