@@ -25,6 +25,47 @@ curl -H "PRIVATE-TOKEN: glpat-B2kbE0n56oTpioepn5ZT-W86MQp1OnN4Y3gK.01.1007svpwt"
 
 ---
 
+## GCP (Google Cloud Platform)
+
+| Key | Value |
+|-----|-------|
+| Project ID | `myk8sproject-207017` |
+| Service Account | `claude-assistant@myk8sproject-207017.iam.gserviceaccount.com` |
+| Region | `europe-west1` |
+| Zone | `europe-west1-b` |
+
+### GitLab Runner VM
+
+| Key | Value |
+|-----|-------|
+| Instance Name | `gitlab-runner-clarissa` |
+| Machine Type | `e2-small` (~$13/mo) or `e2-micro` (~$6/mo) |
+| Status | ⏳ **Not yet created** |
+| Runner Token | `<GET FROM GITLAB: Settings → CI/CD → Runners>` |
+
+**Setup:**
+```bash
+# 1. Get Runner Token from GitLab
+#    Settings → CI/CD → Runners → New project runner
+
+# 2. Run setup script
+./scripts/setup_gcp_runner.sh <RUNNER_TOKEN>
+```
+
+**Management:**
+```bash
+# SSH
+gcloud compute ssh gitlab-runner-clarissa --zone=europe-west1-b
+
+# Stop (saves money when not in use)
+gcloud compute instances stop gitlab-runner-clarissa --zone=europe-west1-b
+
+# Start
+gcloud compute instances start gitlab-runner-clarissa --zone=europe-west1-b
+```
+
+---
+
 ## LLM APIs
 
 ### OpenAI (ChatGPT / IRENA)
@@ -58,6 +99,16 @@ Diese Werte sind auch als CI Variables gesetzt (Settings → CI/CD → Variables
 
 ---
 
+## Google Drive
+
+| Key | Value |
+|-----|-------|
+| Folder ID | `1qh0skTeyRNs4g9KwAhpd3J8Yj_XENIFs` |
+| Folder URL | https://drive.google.com/drive/folders/1qh0skTeyRNs4g9KwAhpd3J8Yj_XENIFs |
+| Purpose | LLM sync packages, backups |
+
+---
+
 ## Quick Reference für Claude
 
 ```bash
@@ -70,10 +121,6 @@ export ANTHROPIC_API_KEY="sk-ant-api03-PtzCre0KXDAgcARd6uXdKaYGF0zv9ukQrNxpCzpre
 
 ---
 
-*Last updated: 2026-01-04*
-
----
-
 ## Backup Location
 
 This document is automatically synced to Google Drive:
@@ -82,4 +129,5 @@ This document is automatically synced to Google Drive:
 
 ---
 
+*Last updated: 2026-01-05*
 *Auto-sync enabled via GitLab CI*
