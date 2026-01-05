@@ -71,3 +71,15 @@ export ANTHROPIC_API_KEY="sk-ant-api03-PtzCre0KXDAgcARd6uXdKaYGF0zv9ukQrNxpCzpre
 ---
 
 *Last updated: 2026-01-04*
+
+---
+
+## Backup Location
+
+This document is automatically synced to Google Drive:
+- **Folder:** https://drive.google.com/drive/folders/1qh0skTeyRNs4g9KwAhpd3J8Yj_XENIFs
+- **Trigger:** Any change to `docs/infrastructure.md` in GitLab
+
+---
+
+*Auto-sync enabled via GitLab CI*
