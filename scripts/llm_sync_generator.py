@@ -30,6 +30,7 @@ DEFAULT_BRANCH = "main"
 
 # Files to always include in full
 CORE_FILES = [
+    "docs/infrastructure.md",  # Credentials reference for LLM sessions
     ".gitlab-ci.yml",
     "mkdocs.yml",
     "README.md",
