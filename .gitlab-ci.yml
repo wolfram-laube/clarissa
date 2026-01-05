@@ -779,3 +779,51 @@ relay:irena:
   variables:
     OPENAI_API_KEY: ${OPENAI_API_KEY}
     GITLAB_TOKEN: ${GITLAB_TOKEN}
+
+# ============================================
+# Google Drive Sync
+# ============================================
+
+sync_infrastructure:
+  stage: deploy
+  image: python:3.11-slim
+  rules:
+    - changes:
+        - docs/infrastructure.md
+      when: always
+    - when: never
+  before_script:
+    - pip install google-auth google-api-python-client --quiet
+    - echo "${GOOGLE_SERVICE_ACCOUNT_KEY}" > /tmp/service_account.json
+  script:
+    - |
+      python3 << 'PYTHON'
+      from google.oauth2 import service_account
+      from googleapiclient.discovery import build
+      from googleapiclient.http import MediaFileUpload
+      
+      SCOPES = ['https://www.googleapis.com/auth/drive.file']
+      FOLDER_ID = '1qh0skTeyRNs4g9KwAhpd3J8Yj_XENIFs'
+      
+      creds = service_account.Credentials.from_service_account_file(
+          '/tmp/service_account.json', scopes=SCOPES)
+      service = build('drive', 'v3', credentials=creds)
+      
+      results = service.files().list(
+          q=f"name='infrastructure.md' and '{FOLDER_ID}' in parents and trashed=false",
+          fields="files(id)"
+      ).execute()
+      files = results.get('files', [])
+      
+      media = MediaFileUpload('docs/infrastructure.md', mimetype='text/markdown')
+      
+      if files:
+          service.files().update(fileId=files[0]['id'], media_body=media).execute()
+          print("✅ Updated infrastructure.md in Google Drive")
+      else:
+          service.files().create(
+              body={'name': 'infrastructure.md', 'parents': [FOLDER_ID]},
+              media_body=media
+          ).execute()
+          print("✅ Created infrastructure.md in Google Drive")
+      PYTHON
