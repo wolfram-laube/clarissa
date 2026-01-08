@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLARISSA: A Conversational Agent Architecture for Democratizing Reservoir Simulation</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --spe-blue: #003366;
+            --spe-light: #e8f0f8;
+            --text-gray: #333;
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            color: var(--text-gray);
+            background: #fff;
+        }
+        
+        header {
+            text-align: center;
+            border-bottom: 3px solid var(--spe-blue);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .conference-info {
+            color: var(--spe-blue);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            color: var(--spe-blue);
+            font-size: 1.8rem;
+            margin: 0.5rem 0;
+            line-height: 1.3;
+        }
+        
+        .subtitle {
+            font-style: italic;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        
+        .authors {
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+        
+        .authors .name { font-weight: bold; }
+        .authors .affiliation { font-style: italic; color: #555; }
+        
+        h2 {
+            color: var(--spe-blue);
+            font-size: 1.3rem;
+            border-bottom: 1px solid var(--spe-blue);
+            padding-bottom: 0.3rem;
+            margin-top: 2rem;
+        }
+        
+        .abstract-section {
+            text-align: justify;
+            hyphens: auto;
+        }
+        
+        .keywords {
+            background: var(--spe-light);
+            padding: 0.8rem 1rem;
+            border-left: 4px solid var(--spe-blue);
+            margin: 1.5rem 0;
+        }
+        
+        .keywords strong { color: var(--spe-blue); }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        
+        th {
+            background: var(--spe-blue);
+            color: white;
+            padding: 0.6rem;
+            text-align: left;
+        }
+        
+        td {
+            padding: 0.5rem 0.6rem;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:nth-child(even) { background: var(--spe-light); }
+        
+        .diagram-container {
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+        
+        .diagram-container h4 {
+            color: var(--spe-blue);
+            margin: 0 0 1rem 0;
+            font-size: 1rem;
+        }
+        
+        .mermaid {
+            text-align: center;
+        }
+        
+        footer {
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ddd;
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+        }
+        
+        @media print {
+            body { max-width: none; padding: 1cm; }
+            .diagram-container { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="conference-info">SPE Europe Energy Conference 2026</div>
+        <h1>CLARISSA: A Conversational Agent Architecture for Democratizing Reservoir Simulation</h1>
+        <div class="subtitle">Technical Category: Digitalization / Reservoir Simulation</div>
+        <div class="authors">
+            <span class="name">Wolfram Laube</span><br>
+            <span class="affiliation">Independent Researcher, Austria</span>
+        </div>
+    </header>
+
+    <section class="abstract-section">
+        <h2>Abstract</h2>
+        
+        <p>Reservoir simulation remains underutilized across the full spectrum of reservoir engineering - field development planning, production surveillance, forecasting, reserves booking, and exploration risking - despite decades of software advancement. The barrier is not computational; modern solvers are fast and robust. The barrier is accessibility. Graphical user interfaces, designed to simplify simulation, have shifted complexity from keyword syntax to labyrinthine menus. Subject matter experts bypass these interfaces entirely, writing decks in text editors as they have for decades. Meanwhile, practicing reservoir engineers - those who optimize producing assets, justify infill drilling, and defend reserves estimates - cannot readily access simulation because the tooling demands specialist knowledge they lack time to acquire.</p>
+
+        <p>This paper introduces <strong>CLARISSA</strong> (Conversational Language Agent for Reservoir Integrated Simulation System Analysis), a phased AI agent architecture that replaces the GUI paradigm with physics-aware conversational interaction. Rather than requiring users to navigate software, CLARISSA enables reservoir engineers to build and iterate on simulation models through natural language dialogue.</p>
+
+        <p>Recent work has demonstrated generative AI assistants that help engineers query existing models and retrieve simulator documentation (SPE-221987). CLARISSA addresses a different problem: generating complete, validated input decks from natural language specifications while maintaining simulator-in-the-loop feedback for physics-grounded reasoning. The architecture combines large language models for planning and human interaction, reinforcement learning for optimizing action sequences based on numerical outcomes such as convergence behavior, and neuro-symbolic components enforcing engineering constraints and safety boundaries.</p>
+
+        <p>CLARISSA integrates OPM Flow as primary execution backend, enabling a web-based service model accessible to operators without commercial simulation licenses. When third-party validation is required, Eclipse-format decks can be exported for execution on industry-standard platforms. Physics-aware validation during conversational elicitation flags inconsistencies before simulation; for incomplete specifications, the system suggests defaults informed by analog databases, explicitly documenting assumptions for engineering review.</p>
+
+        <p>To enable systematic evaluation, we introduce <strong>RIGOR</strong> (Reservoir Input Generation Output Review), a benchmark framework assessing deck generation across four dimensions: syntactic validity, semantic correctness, physical plausibility, and conversational efficiency. RIGOR defines complexity tiers from foundational single-well models through pattern floods to multi-phase compositional scenarios.</p>
+
+        <p>CLARISSA evolves through three phases: syntactic assistance for deck generation and debugging, physics-informed support incorporating simulation feedback loops, and ultimately field-specialized agents embedded in operational teams. This paper presents the architectural foundations and Phase I implementation targeting syntactic deck generation with validation.</p>
+
+        <p><em>The binding constraint on simulation adoption has never been solver performance. It is human cognitive load and workflow friction. CLARISSA addresses that constraint directly.</em></p>
+    </section>
+
+    <div class="keywords">
+        <strong>Keywords:</strong> Reservoir Simulation, Generative AI, Large Language Models, Natural Language Processing, OPM Flow, Conversational Agents, Deck Generation
+    </div>
+
+    <section>
+        <h2>Architecture Overview</h2>
+        <div class="diagram-container">
+            <h4>Figure 1: CLARISSA System Architecture</h4>
+            <pre class="mermaid">
+flowchart TB
+    subgraph USER["User Interface Layer"]
+        CUI[Conversational UI]
+        WEB[Web Interface]
+    end
+
+    subgraph CORE["CLARISSA Core"]
+        LLM[LLM Layer<br/>Planning and Reasoning]
+        RL[RL Agent<br/>Action Optimization]
+        NSC[Neuro-Symbolic<br/>Constraints and Governance]
+    end
+
+    subgraph SIMULATION["Simulation Layer"]
+        VAL[Physics Validator]
+        GEN[Deck Generator]
+        OPM[OPM Flow]
+        EXP[Eclipse Export]
+    end
+
+    subgraph KNOWLEDGE["Knowledge Layer"]
+        VDB[(Vector Store<br/>Simulator KB)]
+        ADB[(Analog Database)]
+        CDB[(Corrections DB)]
+    end
+
+    CUI <--> LLM
+    WEB <--> CUI
+    LLM <--> RL
+    LLM <--> NSC
+    NSC -.->|enforces| RL
+    
+    LLM --> VAL
+    VAL --> GEN
+    GEN --> OPM
+    GEN --> EXP
+    
+    OPM -->|feedback| RL
+    
+    VDB --> LLM
+    ADB --> VAL
+    CDB --> LLM
+            </pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>Development Phases</h2>
+        <div class="diagram-container">
+            <h4>Figure 2: CLARISSA Phased Evolution</h4>
+            <pre class="mermaid">
+timeline
+    title CLARISSA Development Phases
+    
+    section Phase I
+        Syntactic Assistance : Deck generation from NL
+                            : Syntax validation
+                            : OPM Flow integration
+                            : Basic error correction
+    
+    section Phase II  
+        Physics-Informed : Simulator-in-loop learning
+                        : Convergence optimization
+                        : Sensitivity analysis
+                        : Analog-based defaults
+    
+    section Phase III
+        Field-Specialized : Embedded operational agents
+                         : Asset-specific tuning
+                         : Real-time surveillance
+                         : Autonomous workflows
+            </pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>Comparison with Prior Work</h2>
+        <p>The following diagram illustrates the key differences between CLARISSA and the Envoy system described in SPE-221987:</p>
+        
+        <div class="diagram-container">
+            <h4>Figure 3: Envoy (SPE-221987) vs CLARISSA</h4>
+            <pre class="mermaid">
+flowchart LR
+    subgraph ENVOY["Envoy SPE-221987"]
+        direction TB
+        E1[Query existing models]
+        E2[Retrieve documentation]
+        E3[RAG + Callbacks]
+        E4[ECHELON<br/>Proprietary]
+        E1 --> E3
+        E2 --> E3
+        E3 --> E4
+    end
+
+    subgraph CLARISSA_BOX["CLARISSA"]
+        direction TB
+        C1[Generate new decks]
+        C2[Physics validation]
+        C3[RL + Neuro-symbolic]
+        C4[OPM Flow<br/>Open Source]
+        C1 --> C3
+        C2 --> C3
+        C3 --> C4
+    end
+
+    ENVOY -.->|evolution| CLARISSA_BOX
+            </pre>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Aspect</th>
+                    <th>Envoy (SPE-221987)</th>
+                    <th>CLARISSA</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Primary Function</strong></td>
+                    <td>Query existing models</td>
+                    <td>Generate complete decks</td>
+                </tr>
+                <tr>
+                    <td><strong>Interaction Mode</strong></td>
+                    <td>Q&amp;A on loaded model</td>
+                    <td>Elicitation dialogue</td>
+                </tr>
+                <tr>
+                    <td><strong>Simulator</strong></td>
+                    <td>ECHELON (proprietary)</td>
+                    <td>OPM Flow (open source)</td>
+                </tr>
+                <tr>
+                    <td><strong>Architecture</strong></td>
+                    <td>RAG + Callback Agents</td>
+                    <td>RL + Neuro-symbolic + Loop</td>
+                </tr>
+                <tr>
+                    <td><strong>Learning</strong></td>
+                    <td>Static knowledge bases</td>
+                    <td>Adaptive via sim feedback</td>
+                </tr>
+                <tr>
+                    <td><strong>Availability</strong></td>
+                    <td>Commercial license</td>
+                    <td>Web-based, license-free</td>
+                </tr>
+                <tr>
+                    <td><strong>Validation</strong></td>
+                    <td>Post-hoc analysis</td>
+                    <td>Pre-execution physics check</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>RIGOR Benchmark Framework</h2>
+        <div class="diagram-container">
+            <h4>Figure 4: RIGOR Evaluation Framework</h4>
+            <pre class="mermaid">
+flowchart TB
+    subgraph DIMS["Evaluation Dimensions"]
+        D1[Syntactic Validity]
+        D2[Semantic Correctness]
+        D3[Physical Plausibility]
+        D4[Conversational Efficiency]
+    end
+
+    subgraph TIERS["Complexity Tiers"]
+        direction LR
+        T1[Tier 1<br/>Single-Well<br/>Linear Flow]
+        T2[Tier 2<br/>Pattern Flood<br/>Multi-Well]
+        T3[Tier 3<br/>Multi-Phase<br/>Compositional]
+    end
+
+    D1 --> TIERS
+    D2 --> TIERS
+    D3 --> TIERS
+    D4 --> TIERS
+
+    T1 -->|progression| T2
+    T2 -->|progression| T3
+            </pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>Conversation Flow Example</h2>
+        <div class="diagram-container">
+            <h4>Figure 5: Example Interaction Sequence</h4>
+            <pre class="mermaid">
+sequenceDiagram
+    participant E as Engineer
+    participant C as CLARISSA
+    participant V as Validator
+    participant S as OPM Flow
+
+    E->>C: I need a waterflood model, 5-spot pattern, 40 acre spacing
+    C->>C: Parse intent, identify gaps
+    C->>E: What is the reservoir depth and initial pressure?
+    E->>C: 8500 ft TVD, 3800 psi
+    C->>V: Validate physics constraints
+    V-->>C: Pressure gradient plausible
+    C->>C: Generate ECLIPSE deck
+    C->>E: Assumed 200 md perm from analogs. Confirm or adjust?
+    E->>C: Use 150 md
+    C->>S: Execute simulation
+    S-->>C: Results + convergence data
+    C->>E: Complete. Water breakthrough 18 months. Sensitivity?
+            </pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>Technical Stack</h2>
+        <div class="diagram-container">
+            <h4>Figure 6: Technology Components</h4>
+            <pre class="mermaid">
+flowchart LR
+    subgraph UI["Frontend"]
+        A["Web UI"]
+        B["REST API"]
+    end
+    
+    subgraph CORE["Core"]
+        C["LLM Claude/GPT"]
+        D["RL Agent"]
+        E["Constraint Engine"]
+    end
+    
+    subgraph SIM["Simulation"]
+        F["OPM Flow"]
+        G["Deck Generator"]
+        H["Result Parser"]
+    end
+
+    UI --> CORE --> SIM
+            </pre>
+        </div>
+    </section>
+
+    <footer>
+        <p>SPE Europe Energy Conference 2026 - Abstract Submission</p>
+        <p>Prepared with CLARISSA Project Documentation System</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#e8f0f8',
+                primaryTextColor: '#003366',
+                primaryBorderColor: '#003366',
+                lineColor: '#003366',
+                secondaryColor: '#f0f0f0',
+                tertiaryColor: '#fff'
+            }
+        });
+    </script>
+</body>
+</html>

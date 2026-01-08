@@ -1,0 +1,19 @@
+flowchart LR
+    subgraph UI["Frontend"]
+        A["Web UI"]
+        B["REST API"]
+    end
+    
+    subgraph CORE["Core"]
+        C["LLM (Claude/GPT)"]
+        D["RL Agent"]
+        E["Constraint Engine"]
+    end
+    
+    subgraph SIM["Simulation"]
+        F["OPM Flow"]
+        G["Deck Generator"]
+        H["Result Parser"]
+    end
+
+    UI --> CORE --> SIM

@@ -1,0 +1,41 @@
+flowchart TB
+    subgraph USER["User Interface Layer"]
+        CUI[Conversational UI]
+        WEB[Web Interface]
+    end
+
+    subgraph CORE["CLARISSA Core"]
+        LLM[LLM Layer<br/>Planning & Reasoning]
+        RL[RL Agent<br/>Action Optimization]
+        NSC[Neuro-Symbolic<br/>Constraints & Governance]
+    end
+
+    subgraph SIMULATION["Simulation Layer"]
+        VAL[Physics Validator]
+        GEN[Deck Generator]
+        OPM[OPM Flow]
+        EXP[Eclipse Export]
+    end
+
+    subgraph KNOWLEDGE["Knowledge Layer"]
+        VDB[(Vector Store<br/>Simulator KB)]
+        ADB[(Analog Database)]
+        CDB[(Corrections DB)]
+    end
+
+    CUI <--> LLM
+    WEB <--> CUI
+    LLM <--> RL
+    LLM <--> NSC
+    NSC -.->|enforces| RL
+    
+    LLM --> VAL
+    VAL --> GEN
+    GEN --> OPM
+    GEN --> EXP
+    
+    OPM -->|feedback| RL
+    
+    VDB --> LLM
+    ADB --> VAL
+    CDB --> LLM

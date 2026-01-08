@@ -1,0 +1,22 @@
+flowchart TB
+    subgraph DIMS["Evaluation Dimensions"]
+        D1[Syntactic Validity]
+        D2[Semantic Correctness]
+        D3[Physical Plausibility]
+        D4[Conversational Efficiency]
+    end
+
+    subgraph TIERS["Complexity Tiers"]
+        direction LR
+        T1[Tier 1<br/>Single-Well<br/>Linear Flow]
+        T2[Tier 2<br/>Pattern Flood<br/>Multi-Well]
+        T3[Tier 3<br/>Multi-Phase<br/>Compositional]
+    end
+
+    D1 --> TIERS
+    D2 --> TIERS
+    D3 --> TIERS
+    D4 --> TIERS
+
+    T1 -->|progression| T2
+    T2 -->|progression| T3
