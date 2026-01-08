@@ -1,0 +1,62 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{booktabs}
+
+\title{\textbf{CLARISSA: A Conversational Agent Architecture for Democratizing Reservoir Simulation}}
+\author{Wolfram Laube$^1$ \and Mike [Surname]$^2$\\[0.5em]{\small $^1$Independent Researcher, Austria \quad $^2$[Affiliation]}}
+\date{SPE Europe Energy Conference 2026\\Technical Category: Digitalization / Reservoir Simulation}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Reservoir simulation remains underutilized across the full spectrum of reservoir engineering---field development planning, production surveillance, forecasting, reserves booking, and exploration risking---despite decades of software advancement. The barrier is not computational; modern solvers are fast and robust. The barrier is accessibility. Graphical user interfaces, designed to simplify simulation, have shifted complexity from keyword syntax to labyrinthine menus. Subject matter experts bypass these interfaces entirely, writing decks in text editors as they have for decades. Meanwhile, practicing reservoir engineers---those who optimize producing assets, justify infill drilling, and defend reserves estimates---cannot readily access simulation because the tooling demands specialist knowledge they lack time to acquire.
+
+This paper introduces CLARISSA (Conversational Language Agent for Reservoir Integrated Simulation System Analysis), a phased AI agent architecture that replaces the GUI paradigm with physics-aware conversational interaction. Rather than requiring users to navigate software, CLARISSA enables reservoir engineers to build and iterate on simulation models through natural language dialogue.
+
+Recent work has demonstrated generative AI assistants that help engineers query existing models and retrieve simulator documentation (SPE-221987). CLARISSA addresses a different problem: generating complete, validated input decks from natural language specifications while maintaining simulator-in-the-loop feedback for physics-grounded reasoning. The architecture combines large language models for planning and human interaction, reinforcement learning for optimizing action sequences based on numerical outcomes such as convergence behavior, and neuro-symbolic components enforcing engineering constraints and safety boundaries.
+
+CLARISSA integrates OPM Flow as primary execution backend, enabling a web-based service model accessible to operators without commercial simulation licenses. When third-party validation is required, Eclipse-format decks can be exported for execution on industry-standard platforms. Physics-aware validation during conversational elicitation flags inconsistencies before simulation; for incomplete specifications, the system suggests defaults informed by analog databases, explicitly documenting assumptions for engineering review.
+
+To enable systematic evaluation, we introduce RIGOR (Reservoir Input Generation Output Review), a benchmark framework assessing deck generation across four dimensions: syntactic validity, semantic correctness, physical plausibility, and conversational efficiency. RIGOR defines complexity tiers from foundational single-well models through pattern floods to multi-phase compositional scenarios.
+
+CLARISSA evolves through three phases: syntactic assistance for deck generation and debugging, physics-informed support incorporating simulation feedback loops, and ultimately field-specialized agents embedded in operational teams. This paper presents the architectural foundations and Phase~I implementation targeting syntactic deck generation with validation.
+
+The binding constraint on simulation adoption has never been solver performance. It is human cognitive load and workflow friction. CLARISSA addresses that constraint directly.
+\end{abstract}
+
+\noindent\textbf{Keywords:} Reservoir Simulation, Generative AI, Conversational Interface, Natural Language Processing, OPM Flow, Automation
+
+\section*{Key Differentiators from Prior Work}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Aspect} & \textbf{Envoy (SPE-221987)} & \textbf{CLARISSA} \\
+\midrule
+Primary Function & Query existing models & Generate complete decks \\
+Interaction Mode & Q\&A on loaded model & Elicitation dialogue \\
+Simulator & ECHELON (proprietary) & OPM Flow (open source) \\
+Architecture & RAG + Callback Agents & RL + Neuro-symbolic + Loop \\
+Learning & Static knowledge bases & Adaptive via sim feedback \\
+Availability & Commercial license & Web-based, license-free \\
+Validation & Post-hoc analysis & Pre-execution physics check \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section*{Development Phases}
+
+\textbf{Phase I --- Syntactic Assistance:} Deck generation from natural language, syntax validation, OPM Flow integration, basic error correction.
+
+\textbf{Phase II --- Physics-Informed:} Simulator-in-loop learning, convergence optimization, sensitivity analysis, analog-based defaults.
+
+\textbf{Phase III --- Field-Specialized:} Embedded operational agents, asset-specific tuning, real-time surveillance, autonomous workflows.
+
+\vfill
+\noindent\rule{\textwidth}{0.4pt}
+{\small Word Count: 448 | Prepared for SPE Europe Energy Conference 2026 | \today}
+
+\end{document}
