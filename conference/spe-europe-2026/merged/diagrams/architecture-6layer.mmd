@@ -1,0 +1,42 @@
+flowchart TB
+    subgraph USER["User Interface Layer"]
+        VOICE["Voice Input"]
+        TEXT["Text Chat"]
+        WEB["Web Interface"]
+        API["REST API"]
+    end
+
+    subgraph TRANSLATION["Translation Layer"]
+        NLP[NL Parser]
+        CONF[Confidence Scorer]
+        ROLL[Rollback Manager]
+    end
+
+    subgraph CORE["CLARISSA Core"]
+        LLM[LLM Layer]
+        RL[RL Agent]
+        NSC[Neuro-Symbolic]
+    end
+
+    subgraph VALIDATION["Validation Layer"]
+        SYN[Syntax]
+        SEM[Semantic]
+        PHY[Physics]
+    end
+
+    subgraph GENERATION["Generation Layer"]
+        GEN[Deck Generator]
+        TPL[Templates]
+        DEF[Defaults]
+    end
+
+    subgraph SIMULATION["Simulation Layer"]
+        OPM[OPM Flow]
+        EXP[Eclipse Export]
+        RES[Results]
+    end
+
+    USER --> TRANSLATION --> CORE
+    CORE <--> VALIDATION
+    CORE --> GENERATION --> SIMULATION
+    SIMULATION -->|feedback| CORE

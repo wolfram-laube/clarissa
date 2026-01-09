@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLARISSA: A Conversational User Interface for Democratizing Reservoir Simulation</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --spe-blue: #003366;
+            --spe-light: #e8f0f8;
+            --accent: #0066cc;
+            --text: #333;
+            --border: #ddd;
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            color: var(--text);
+            background: #fff;
+        }
+        
+        header {
+            text-align: center;
+            border-bottom: 4px solid var(--spe-blue);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--spe-light) 0%, #fff 100%);
+            padding: 2rem;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .conference-badge {
+            display: inline-block;
+            background: var(--spe-blue);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+        
+        .category {
+            color: var(--accent);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        h1 {
+            color: var(--spe-blue);
+            font-size: 2rem;
+            margin: 0.5rem 0;
+            line-height: 1.3;
+        }
+        
+        h1 .acronym {
+            font-variant: small-caps;
+            letter-spacing: 2px;
+        }
+        
+        .authors {
+            margin-top: 1.5rem;
+            font-size: 1rem;
+        }
+        
+        .author { 
+            display: inline-block;
+            margin: 0.3rem 1rem;
+        }
+        .author .name { font-weight: bold; }
+        .author .affiliation { font-style: italic; color: #666; font-size: 0.9rem; }
+        
+        h2 {
+            color: var(--spe-blue);
+            font-size: 1.4rem;
+            border-bottom: 2px solid var(--spe-blue);
+            padding-bottom: 0.4rem;
+            margin-top: 2.5rem;
+        }
+        
+        h3 {
+            color: var(--accent);
+            font-size: 1.15rem;
+            margin-top: 1.8rem;
+        }
+        
+        .abstract-box {
+            background: var(--spe-light);
+            border-left: 5px solid var(--spe-blue);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: justify;
+        }
+        
+        .keywords {
+            background: #f5f5f5;
+            padding: 0.8rem 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+        
+        .keywords strong { color: var(--spe-blue); }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        
+        th {
+            background: var(--spe-blue);
+            color: white;
+            padding: 0.8rem;
+            text-align: left;
+        }
+        
+        td {
+            padding: 0.7rem 0.8rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        tr:nth-child(even) { background: var(--spe-light); }
+        
+        .diagram-container {
+            background: #fafafa;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+        
+        .diagram-container h4 {
+            color: var(--spe-blue);
+            margin: 0 0 1rem 0;
+            font-size: 1rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+        
+        .mermaid {
+            text-align: center;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff 100%);
+            border: 1px solid #f0d000;
+            border-left: 4px solid #f0a000;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .capability-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .capability-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .capability-item h5 {
+            color: var(--spe-blue);
+            margin: 0 0 0.5rem 0;
+            font-size: 1rem;
+        }
+        
+        .capability-item p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        
+        footer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--border);
+            text-align: center;
+            color: #666;
+        }
+        
+        @media print {
+            body { max-width: none; padding: 1cm; font-size: 10pt; }
+            .diagram-container { break-inside: avoid; }
+            header { background: white; }
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            .author { display: block; margin: 0.5rem 0; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <span class="conference-badge">SPE Europe Energy Conference 2026</span>
+        <div class="category">05 Digital Transformation and AI → 05.6 ML/AI in Subsurface Operations</div>
+        <h1><span class="acronym">CLARISSA</span>: A Conversational User Interface for Democratizing Reservoir Simulation</h1>
+        <div class="authors">
+            <span class="author"><span class="name">Wolfram Laube</span><br><span class="affiliation">Independent Researcher, Austria</span></span>
+            <span class="author"><span class="name">Douglas Perschke</span><br><span class="affiliation">[Affiliation TBD]</span></span>
+            <span class="author"><span class="name">Mike [TBD]</span><br><span class="affiliation">[Affiliation TBD]</span></span>
+        </div>
+    </header>
+
+    <div class="abstract-box">
+        <h2 style="margin-top: 0; border: none;">Abstract</h2>
+        <p>Reservoir simulation remains underutilized across the full spectrum of reservoir engineering—field development planning, production surveillance, forecasting, reserves booking, and exploration risking—despite decades of software advancement. The barrier is not computational; modern solvers are fast and robust. <strong>The barrier is accessibility.</strong></p>
+        
+        <p>This paper introduces <strong>CLARISSA</strong> (Conversational Language Agent for Reservoir Integrated Simulation System Analysis), which replaces the GUI paradigm with a Conversational User Interface (CUI). Rather than requiring users to navigate software, CLARISSA enables reservoir engineers to build and iterate on simulation models through natural language dialogue—including <em>voice input for hands-free field operations</em>.</p>
+        
+        <p>Recent work has demonstrated generative AI assistants that help engineers query existing models (SPE-221987). CLARISSA addresses a different problem: <strong>generating complete, validated input decks from natural language specifications</strong>. The architecture combines large language models, reinforcement learning for action optimization, and neuro-symbolic components enforcing engineering constraints.</p>
+        
+        <p>CLARISSA executes simulations via OPM Flow, enabling license-free web-based access. To enable systematic evaluation, we introduce <strong>RIGOR</strong> (Reservoir Input Generation Output Review), a benchmark spanning coreflood models to mid-conversation compositional EOS pivots.</p>
+        
+        <p><em>The binding constraint on simulation adoption has never been solver performance. It is human cognitive load and workflow friction. CLARISSA addresses that constraint directly.</em></p>
+    </div>
+
+    <div class="keywords">
+        <strong>Keywords:</strong> Reservoir Simulation, Conversational UI, Voice Interface, Generative AI, Large Language Models, OPM Flow, Deck Generation, ECLIPSE, Reinforcement Learning, Neuro-symbolic AI
+    </div>
+
+    <h2>1. System Architecture</h2>
+    <p>The CLARISSA architecture comprises six primary layers, each addressing distinct concerns while maintaining loose coupling through well-defined interfaces:</p>
+
+    <div class="diagram-container">
+        <h4>Figure 1: CLARISSA Six-Layer Architecture</h4>
+        <pre class="mermaid">
+flowchart TB
+    subgraph USER["👤 User Interface Layer"]
+        VOICE["🎤 Voice Input<br/>Field Operations"]
+        TEXT["💬 Text Chat<br/>Technical Discussion"]
+        WEB["🌐 Web Interface<br/>Visual Feedback"]
+        API["🔌 REST API<br/>Programmatic Access"]
+    end
+
+    subgraph TRANSLATION["🔄 Translation Layer"]
+        NLP[NL Parser]
+        CONF[Confidence Scorer]
+        ROLL[Rollback Manager]
+    end
+
+    subgraph CORE["🧠 CLARISSA Core"]
+        LLM[LLM Layer<br/>Planning and Reasoning]
+        RL[RL Agent<br/>Action Optimization]
+        NSC[Neuro-Symbolic<br/>Constraints]
+    end
+
+    subgraph VALIDATION["✓ Validation Layer"]
+        SYN[Syntax Validator]
+        SEM[Semantic Checker]
+        PHY[Physics Validator]
+    end
+
+    subgraph GENERATION["📝 Generation Layer"]
+        GEN[Deck Generator]
+        TPL[Template Engine]
+        DEF[Default Suggester]
+    end
+
+    subgraph SIMULATION["⚙️ Simulation Layer"]
+        OPM[OPM Flow<br/>Open Source]
+        EXP[Eclipse Export]
+        RES[Result Parser]
+    end
+
+    subgraph KNOWLEDGE["📚 Knowledge Layer"]
+        VDB[(Vector Store)]
+        ADB[(Analog DB)]
+        CDB[(Corrections)]
+    end
+
+    USER --> TRANSLATION
+    TRANSLATION --> CORE
+    CORE <--> VALIDATION
+    CORE --> GENERATION
+    GENERATION --> SIMULATION
+    
+    CONF -.->|low confidence| USER
+    ROLL -.->|failure| TRANSLATION
+    
+    OPM -->|feedback| RL
+    
+    KNOWLEDGE --> CORE
+    ADB --> DEF
+        </pre>
+    </div>
+
+    <div class="capability-list">
+        <div class="capability-item">
+            <h5>🎤 Voice-First Design</h5>
+            <p>Hands-free operation from field tablets during well site visits. Whisper-based speech recognition with domain vocabulary.</p>
+        </div>
+        <div class="capability-item">
+            <h5>🔄 Graceful Degradation</h5>
+            <p>Low-confidence interpretations trigger clarification requests. Failed validations roll back to last valid state.</p>
+        </div>
+        <div class="capability-item">
+            <h5>📊 Analog-Informed Defaults</h5>
+            <p>Missing parameters suggested from basin-specific analog databases. All assumptions explicitly documented.</p>
+        </div>
+        <div class="capability-item">
+            <h5>🆓 License-Free Execution</h5>
+            <p>OPM Flow backend enables operators without commercial licenses to run rigorous simulations.</p>
+        </div>
+    </div>
+
+    <h2>2. Development Phases</h2>
+
+    <div class="diagram-container">
+        <h4>Figure 2: CLARISSA Phased Evolution</h4>
+        <pre class="mermaid">
+timeline
+    title CLARISSA Development Roadmap
+    
+    section Phase I
+        Syntactic Assistance : Deck generation from NL
+                            : Syntax validation
+                            : OPM Flow integration
+                            : Voice input prototype
+                            : Basic error correction
+    
+    section Phase II  
+        Physics-Informed : Simulator-in-loop learning
+                        : Convergence optimization
+                        : Sensitivity workflows
+                        : Confidence scoring
+                        : Analog-based defaults
+    
+    section Phase III
+        Field-Specialized : Embedded operational agents
+                         : Asset-specific tuning
+                         : Real-time surveillance
+                         : Multi-user collaboration
+                         : Autonomous workflows
+        </pre>
+    </div>
+
+    <h2>3. Comparison with Prior Work</h2>
+    
+    <div class="diagram-container">
+        <h4>Figure 3: Evolution from Query-Based to Generation-Based Paradigm</h4>
+        <pre class="mermaid">
+flowchart LR
+    subgraph ENVOY["Envoy (SPE-221987)"]
+        direction TB
+        E1[Query existing models]
+        E2[Retrieve documentation]
+        E3[RAG + Callbacks]
+        E4[ECHELON<br/>Proprietary]
+        E1 --> E3
+        E2 --> E3
+        E3 --> E4
+    end
+
+    subgraph CLARISSA_SYS["CLARISSA"]
+        direction TB
+        C1[Generate new decks]
+        C2[Physics validation]
+        C3[RL + Neuro-symbolic]
+        C4[OPM Flow<br/>Open Source]
+        C1 --> C3
+        C2 --> C3
+        C3 --> C4
+    end
+
+    ENVOY -.->|evolution| CLARISSA_SYS
+        </pre>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Aspect</th>
+                <th>Envoy (SPE-221987)</th>
+                <th>CLARISSA</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Primary Function</strong></td><td>Query existing models</td><td>Generate complete decks</td></tr>
+            <tr><td><strong>Interaction Mode</strong></td><td>Text Q&A on loaded model</td><td>Voice + Text elicitation</td></tr>
+            <tr><td><strong>Input Modalities</strong></td><td>Text chat only</td><td>Voice, Text, Web, API</td></tr>
+            <tr><td><strong>Simulator</strong></td><td>ECHELON (proprietary)</td><td>OPM Flow (open source)</td></tr>
+            <tr><td><strong>Architecture</strong></td><td>RAG + Callback Agents</td><td>RL + Neuro-symbolic + Feedback</td></tr>
+            <tr><td><strong>Learning</strong></td><td>Static knowledge bases</td><td>Adaptive via sim feedback</td></tr>
+            <tr><td><strong>Error Handling</strong></td><td>Manual correction</td><td>Auto rollback + clarification</td></tr>
+            <tr><td><strong>Validation</strong></td><td>Post-hoc analysis</td><td>Pre-execution physics check</td></tr>
+            <tr><td><strong>Availability</strong></td><td>Commercial license required</td><td>Web-based, license-free</td></tr>
+        </tbody>
+    </table>
+
+    <h2>4. RIGOR Benchmark Framework</h2>
+
+    <div class="diagram-container">
+        <h4>Figure 4: RIGOR Evaluation Dimensions and Complexity Tiers</h4>
+        <pre class="mermaid">
+flowchart TB
+    subgraph DIMS["Evaluation Dimensions"]
+        D1["🔤 Syntactic Validity<br/>Parser acceptance"]
+        D2["📐 Semantic Correctness<br/>Logical consistency"]
+        D3["⚛️ Physical Plausibility<br/>Engineering bounds"]
+        D4["💬 Conversational Efficiency<br/>Turns to completion"]
+    end
+
+    subgraph TIERS["Complexity Tiers"]
+        T1["Tier 1: Foundational<br/>━━━━━━━━━━━━━<br/>Linear displacement<br/>Laboratory coreflood<br/>Single-phase flow"]
+        T2["Tier 2: Intermediate<br/>━━━━━━━━━━━━━<br/>Pattern flood (5-spot)<br/>40-acre spacing<br/>Multi-well black-oil"]
+        T3["Tier 3: Advanced<br/>━━━━━━━━━━━━━<br/>Mid-conversation pivot<br/>Black-oil → Comp. EOS<br/>Tertiary recovery"]
+    end
+
+    D1 --> T1
+    D2 --> T1
+    D3 --> T1
+    D4 --> T1
+    
+    T1 -->|progression| T2
+    T2 -->|progression| T3
+        </pre>
+    </div>
+
+    <div class="highlight-box">
+        <strong>RIGOR Tier 3 Challenge:</strong> Mid-conversation conversion of a black-oil waterflood into a compositional equation-of-state model for tertiary recovery evaluation—testing the system's ability to handle fundamental model pivots without starting over.
+    </div>
+
+    <h2>5. Example Interaction</h2>
+
+    <div class="diagram-container">
+        <h4>Figure 5: Voice-Based Field Interaction Sequence</h4>
+        <pre class="mermaid">
+sequenceDiagram
+    participant E as 👷 Field Engineer
+    participant C as 🤖 CLARISSA
+    participant V as ✓ Validator
+    participant S as ⚙️ OPM Flow
+
+    Note over E: Voice input from field tablet
+    E->>C: I need a waterflood model, 5-spot pattern, 40 acre spacing
+    C->>C: Parse intent (confidence: 0.92)
+    C->>E: What is the reservoir depth and initial pressure?
+    E->>C: 8500 ft TVD, about 3800 psi
+    C->>V: Validate pressure gradient
+    V-->>C: 0.45 psi/ft plausible
+    C->>C: Generate ECLIPSE deck
+    C->>E: Assumed 200 md perm from Permian analogs. Confirm?
+    E->>C: Use 150 md, we have core data
+    Note over C: Update deck, log assumption override
+    C->>S: Execute simulation
+    S-->>C: Results + convergence data
+    C->>E: Complete in 47s. Breakthrough at 18 months. Sensitivity?
+    E->>C: Yes, try 20 and 80 acres
+    C->>C: Queue sensitivity runs
+        </pre>
+    </div>
+
+    <h2>6. Technical Stack</h2>
+
+    <div class="diagram-container">
+        <h4>Figure 6: Technology Components</h4>
+        <pre class="mermaid">
+flowchart LR
+    subgraph FRONTEND["Frontend"]
+        A["Web UI<br/>(React)"]
+        B["Voice SDK<br/>(Whisper)"]
+        C["REST API<br/>(FastAPI)"]
+    end
+    
+    subgraph CORE["Core"]
+        D["LLM<br/>(Claude/GPT)"]
+        E["RL Agent<br/>(PPO)"]
+        F["Constraints<br/>(Z3/Prolog)"]
+    end
+    
+    subgraph BACKEND["Backend"]
+        G["OPM Flow"]
+        H["Deck Gen"]
+        I["Result Parser"]
+        J["Vector DB"]
+    end
+
+    FRONTEND --> CORE --> BACKEND
+        </pre>
+    </div>
+
+    <h2>7. Conclusions</h2>
+    
+    <p>CLARISSA represents a paradigm shift in reservoir simulation accessibility:</p>
+    
+    <ul>
+        <li><strong>First CUI-based system</strong> for complete simulation deck generation (vs. query-only assistants)</li>
+        <li><strong>Voice-enabled field workflows</strong> previously impossible with traditional interfaces</li>
+        <li><strong>License-free execution</strong> via OPM Flow removes barriers for operators</li>
+        <li><strong>RIGOR benchmark</strong> provides first standardized evaluation framework for conversational simulation systems</li>
+        <li><strong>Hybrid AI architecture</strong> combines LLM reasoning, RL optimization, and neuro-symbolic constraints for engineering-grade reliability</li>
+    </ul>
+    
+    <p><em>The binding constraint on simulation adoption has never been solver performance. It is human cognitive load and workflow friction. CLARISSA addresses that constraint directly.</em></p>
+
+    <h2>References</h2>
+    <ol>
+        <li>K. Wiegand et al., "Using Generative AI to Build a Reservoir Simulation Assistant," SPE-221987-MS, ADIPEC 2024.</li>
+        <li>OPM Flow Documentation, Open Porous Media Initiative, <a href="https://opm-project.org">https://opm-project.org</a></li>
+    </ol>
+
+    <footer>
+        <p><strong>SPE Europe Energy Conference 2026</strong></p>
+        <p>Abstract Submission | Category 05.6 ML/AI in Subsurface Operations</p>
+        <p style="font-size: 0.85rem; color: #888;">Generated with CLARISSA Documentation System</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#e8f0f8',
+                primaryTextColor: '#003366',
+                primaryBorderColor: '#003366',
+                lineColor: '#0066cc',
+                secondaryColor: '#f0f0f0',
+                tertiaryColor: '#fff',
+                fontSize: '14px'
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            },
+            sequence: {
+                useMaxWidth: true
+            }
+        });
+    </script>
+</body>
+</html>
