@@ -827,3 +827,137 @@ sync_infrastructure:
           ).execute()
           print("✅ Created infrastructure.md in Google Drive")
       PYTHON
+
+
+# =============================================================================
+# DOCUMENT MERGE: LLM-Powered Multi-Author Collaboration (ADR-014)
+# =============================================================================
+# Enables Doug (DOCX) + Mike/Wolfram (Markdown) to collaborate on SPE abstract
+# Pipeline triggers on changes to conference/spe-europe-2026/sources/
+# =============================================================================
+
+doc_merge:normalize:
+  stage: build
+  image: pandoc/core:latest
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - conference/spe-europe-2026/sources/**/*
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "web" && $DOC_MERGE == "true"'
+      when: on_success
+    - when: never
+  script:
+    - |
+      mkdir -p normalized
+      DOC_PATH="conference/spe-europe-2026/sources"
+      
+      echo "=== Normalizing DOCX files ==="
+      for docx in ${DOC_PATH}/doug/*.docx; do
+        [ -f "$docx" ] || continue
+        name=$(basename "$docx" .docx)
+        echo "Converting: $docx"
+        pandoc "$docx" -t markdown -o "normalized/doug-${name}.md" --wrap=none
+      done
+      
+      echo "=== Copying Markdown files ==="
+      for md in ${DOC_PATH}/mike/*.md ${DOC_PATH}/wolfram/*.md; do
+        [ -f "$md" ] || continue
+        [ "$(basename "$md")" = "README.md" ] && continue
+        name=$(basename "$md")
+        author=$(echo "$md" | grep -oP 'sources/\K[^/]+')
+        echo "Copying: $md -> normalized/${author}-${name}"
+        cp "$md" "normalized/${author}-${name}"
+      done
+      
+      echo "=== Normalized files ==="
+      ls -la normalized/ || echo "No files to normalize"
+  artifacts:
+    paths:
+      - normalized/
+    expire_in: 1 day
+
+doc_merge:compare:
+  stage: test
+  image: python:3.11-slim
+  needs:
+    - job: doc_merge:normalize
+      artifacts: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - conference/spe-europe-2026/sources/**/*
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "web" && $DOC_MERGE == "true"'
+      when: on_success
+    - when: never
+  before_script:
+    - pip install anthropic -q
+  script:
+    - python conference/spe-europe-2026/scripts/doc_compare.py
+  artifacts:
+    paths:
+      - comparison-report.json
+    expire_in: 1 week
+
+doc_merge:merge:
+  stage: automation
+  image: python:3.11-slim
+  needs:
+    - job: doc_merge:normalize
+      artifacts: true
+    - job: doc_merge:compare
+      artifacts: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - conference/spe-europe-2026/sources/**/*
+      when: manual
+    - if: '$CI_PIPELINE_SOURCE == "web" && $DOC_MERGE == "true"'
+      when: manual
+    - when: never
+  before_script:
+    - pip install anthropic -q
+  script:
+    - python conference/spe-europe-2026/scripts/doc_do_merge.py
+  artifacts:
+    paths:
+      - merged-output.md
+      - merge-log.json
+    expire_in: 1 week
+
+doc_merge:generate:
+  stage: deploy
+  image: pandoc/latex:latest
+  needs:
+    - job: doc_merge:merge
+      artifacts: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - conference/spe-europe-2026/sources/**/*
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "web" && $DOC_MERGE == "true"'
+      when: on_success
+    - when: never
+  script:
+    - |
+      mkdir -p doc-outputs
+      
+      if [ ! -f merged-output.md ]; then
+        echo "No merged document found"
+        exit 1
+      fi
+      
+      echo "=== Generating outputs ==="
+      pandoc merged-output.md -o doc-outputs/abstract-merged.pdf --pdf-engine=xelatex -V geometry:margin=2.5cm || echo "PDF failed"
+      pandoc merged-output.md -o doc-outputs/abstract-merged.html --standalone --metadata title="CLARISSA - SPE Europe 2026"
+      pandoc merged-output.md -o doc-outputs/abstract-merged.docx
+      cp merged-output.md doc-outputs/abstract-canonical.md
+      
+      echo "=== Generated files ==="
+      ls -la doc-outputs/
+  artifacts:
+    paths:
+      - doc-outputs/
+    expire_in: 4 weeks
