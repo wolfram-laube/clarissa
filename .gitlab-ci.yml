@@ -865,7 +865,7 @@ doc_merge:normalize:
         [ -f "$md" ] || continue
         [ "$(basename "$md")" = "README.md" ] && continue
         name=$(basename "$md")
-        author=$(echo "$md" | grep -oP 'sources/\K[^/]+')
+        author=$(basename $(dirname "$md"))
         echo "Copying: $md -> normalized/${author}-${name}"
         cp "$md" "normalized/${author}-${name}"
       done
