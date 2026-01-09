@@ -1,0 +1,376 @@
+# .gitlab-ci.yml - Document Merge Pipeline
+# Add this to your existing pipeline or use as standalone
+
+variables:
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}  # Set in GitLab CI/CD Variables
+  OPENAI_API_KEY: ${OPENAI_API_KEY}        # Fallback
+  DOC_BASE_PATH: "conference/spe-europe-2026"
+
+stages:
+  - detect
+  - normalize  
+  - compare
+  - merge
+  - generate
+  - commit
+
+# ============================================================
+# Stage 1: Detect which author files changed
+# ============================================================
+detect_changes:
+  stage: detect
+  image: alpine:latest
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - "conference/spe-europe-2026/sources/**/*"
+  script:
+    - apk add --no-cache git
+    - |
+      echo "Detecting changes in source documents..."
+      
+      # Get changed files
+      git diff --name-only ${CI_COMMIT_BEFORE_SHA:-HEAD~1} ${CI_COMMIT_SHA} > changed_files.txt
+      cat changed_files.txt
+      
+      # Detect by author
+      grep -q "sources/doug" changed_files.txt && echo "DOUG_CHANGED=true" >> build.env || true
+      grep -q "sources/mike" changed_files.txt && echo "MIKE_CHANGED=true" >> build.env || true
+      grep -q "sources/wolfram" changed_files.txt && echo "WOLFRAM_CHANGED=true" >> build.env || true
+      
+      # Any source change triggers merge
+      grep -q "sources/" changed_files.txt && echo "SOURCES_CHANGED=true" >> build.env || true
+      
+      cat build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+    paths:
+      - changed_files.txt
+    expire_in: 1 hour
+
+# ============================================================
+# Stage 2: Normalize all formats to Markdown
+# ============================================================
+normalize_documents:
+  stage: normalize
+  image: pandoc/core:latest
+  needs:
+    - detect_changes
+  rules:
+    - if: $SOURCES_CHANGED == "true"
+  script:
+    - |
+      mkdir -p normalized
+      
+      echo "=== Normalizing DOCX files ==="
+      for docx in ${DOC_BASE_PATH}/sources/doug/*.docx; do
+        [ -f "$docx" ] || continue
+        name=$(basename "$docx" .docx)
+        echo "Converting: $docx"
+        pandoc "$docx" -t markdown -o "normalized/${name}.md" \
+          --wrap=none \
+          --extract-media=normalized/media
+      done
+      
+      echo "=== Copying Markdown files ==="
+      for md in ${DOC_BASE_PATH}/sources/mike/*.md ${DOC_BASE_PATH}/sources/wolfram/*.md; do
+        [ -f "$md" ] || continue
+        name=$(basename "$md")
+        author=$(echo "$md" | grep -oP 'sources/\K[^/]+')
+        echo "Copying: $md -> normalized/${author}-${name}"
+        cp "$md" "normalized/${author}-${name}"
+      done
+      
+      echo "=== Normalized files ==="
+      ls -la normalized/
+  artifacts:
+    paths:
+      - normalized/
+    expire_in: 1 hour
+
+# ============================================================
+# Stage 3: LLM Semantic Comparison
+# ============================================================
+llm_compare:
+  stage: compare
+  image: python:3.11-slim
+  needs:
+    - normalize_documents
+  rules:
+    - if: $SOURCES_CHANGED == "true"
+  before_script:
+    - pip install anthropic openai
+  script:
+    - |
+      python3 << 'PYTHON_SCRIPT'
+import os
+import json
+import anthropic
+from pathlib import Path
+
+def compare_documents():
+    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    
+    # Read canonical (if exists)
+    canonical_path = Path("${DOC_BASE_PATH}/canonical/abstract.md")
+    base_content = canonical_path.read_text() if canonical_path.exists() else ""
+    
+    # Read all normalized inputs
+    inputs = {}
+    for md_file in Path("normalized").glob("*.md"):
+        inputs[md_file.stem] = md_file.read_text()
+    
+    if not inputs:
+        print("No input files to compare")
+        return
+    
+    prompt = f"""Analyze these document versions and identify:
+1. What each version adds that others don't have
+2. Conflicting statements between versions
+3. Suggested merge strategy
+
+BASE (canonical):
+<base>
+{base_content[:10000] if base_content else "No existing canonical version"}
+</base>
+
+VERSIONS:
+"""
+    for name, content in inputs.items():
+        prompt += f"\n<{name}>\n{content[:5000]}\n</{name}>\n"
+    
+    prompt += """
+Output JSON:
+{
+  "versions_analyzed": ["list of version names"],
+  "unique_contributions": {"version_name": ["list of unique additions"]},
+  "conflicts": [{"topic": "...", "positions": {"v1": "...", "v2": "..."}, "recommendation": "..."}],
+  "merge_strategy": "description of recommended merge approach"
+}"""
+
+    response = client.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=4000,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    
+    # Extract JSON from response
+    result_text = response.content[0].text
+    
+    # Try to parse JSON
+    try:
+        # Find JSON in response
+        start = result_text.find('{')
+        end = result_text.rfind('}') + 1
+        result = json.loads(result_text[start:end])
+    except:
+        result = {"raw_analysis": result_text}
+    
+    Path("comparison-report.json").write_text(json.dumps(result, indent=2))
+    print(json.dumps(result, indent=2))
+
+compare_documents()
+PYTHON_SCRIPT
+  artifacts:
+    paths:
+      - comparison-report.json
+    expire_in: 1 week
+
+# ============================================================
+# Stage 4: LLM Semantic Merge (Manual Trigger)
+# ============================================================
+llm_merge:
+  stage: merge
+  image: python:3.11-slim
+  needs:
+    - normalize_documents
+    - llm_compare
+  rules:
+    - if: $SOURCES_CHANGED == "true"
+      when: manual  # Require human approval!
+  before_script:
+    - pip install anthropic
+  script:
+    - |
+      python3 << 'PYTHON_SCRIPT'
+import os
+import json
+import anthropic
+from pathlib import Path
+from datetime import datetime
+
+def merge_documents():
+    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    
+    # Read canonical
+    canonical_path = Path("${DOC_BASE_PATH}/canonical/abstract.md")
+    base_content = canonical_path.read_text() if canonical_path.exists() else ""
+    
+    # Read comparison report
+    comparison = json.loads(Path("comparison-report.json").read_text())
+    
+    # Read all inputs
+    inputs = {}
+    for md_file in Path("normalized").glob("*.md"):
+        inputs[md_file.stem] = md_file.read_text()
+    
+    prompt = f"""You are merging multiple versions of a technical document.
+
+COMPARISON ANALYSIS:
+{json.dumps(comparison, indent=2)}
+
+BASE VERSION:
+<base>
+{base_content[:15000] if base_content else "No existing base - create from inputs"}
+</base>
+
+INPUT VERSIONS:
+"""
+    for name, content in inputs.items():
+        prompt += f"\n<{name}>\n{content}\n</{name}>\n"
+    
+    prompt += """
+MERGE INSTRUCTIONS:
+1. Create a unified document incorporating the best from all versions
+2. Use Doug's domain expertise for reservoir engineering details
+3. Use Wolfram's technical architecture descriptions
+4. Maintain consistent terminology throughout
+5. Preserve all unique contributions
+6. For conflicts, prefer more specific/detailed content
+
+OUTPUT FORMAT (JSON):
+{
+  "merged_document": "... full markdown document ...",
+  "merge_log": [
+    {"from": "doug", "incorporated": "description of what was added"},
+    ...
+  ],
+  "conflicts_resolved": [
+    {"topic": "...", "resolution": "...", "rationale": "..."}
+  ]
+}"""
+
+    response = client.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=8000,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    
+    result_text = response.content[0].text
+    
+    # Parse result
+    start = result_text.find('{')
+    end = result_text.rfind('}') + 1
+    result = json.loads(result_text[start:end])
+    
+    # Write merged document
+    merged_path = Path("merged-output.md")
+    merged_path.write_text(result["merged_document"])
+    
+    # Write merge history
+    history_path = Path("merge-history.json")
+    history = []
+    if history_path.exists():
+        history = json.loads(history_path.read_text())
+    
+    history.append({
+        "timestamp": datetime.utcnow().isoformat(),
+        "commit": os.environ.get("CI_COMMIT_SHA", "unknown"),
+        "merge_log": result.get("merge_log", []),
+        "conflicts_resolved": result.get("conflicts_resolved", [])
+    })
+    history_path.write_text(json.dumps(history, indent=2))
+    
+    print("=== MERGE COMPLETE ===")
+    print(f"Merged document: {len(result['merged_document'])} characters")
+    print(f"Items incorporated: {len(result.get('merge_log', []))}")
+    print(f"Conflicts resolved: {len(result.get('conflicts_resolved', []))}")
+
+merge_documents()
+PYTHON_SCRIPT
+  artifacts:
+    paths:
+      - merged-output.md
+      - merge-history.json
+    expire_in: 1 week
+
+# ============================================================
+# Stage 5: Generate All Output Formats
+# ============================================================
+generate_outputs:
+  stage: generate
+  image: pandoc/latex:latest  # Includes PDF support
+  needs:
+    - llm_merge
+  script:
+    - |
+      mkdir -p outputs
+      
+      echo "=== Generating outputs from merged document ==="
+      
+      # PDF
+      pandoc merged-output.md -o outputs/abstract-merged.pdf \
+        --pdf-engine=xelatex \
+        -V geometry:margin=2.5cm
+      
+      # HTML (standalone)
+      pandoc merged-output.md -o outputs/abstract-merged.html \
+        --standalone \
+        --metadata title="CLARISSA - SPE Europe 2026"
+      
+      # LaTeX
+      pandoc merged-output.md -o outputs/abstract-merged.tex
+      
+      # DOCX (for Doug!)
+      pandoc merged-output.md -o outputs/abstract-merged.docx
+      
+      # Plain Markdown (canonical)
+      cp merged-output.md outputs/abstract-canonical.md
+      
+      echo "=== Generated files ==="
+      ls -la outputs/
+  artifacts:
+    paths:
+      - outputs/
+    expire_in: 1 month
+
+# ============================================================
+# Stage 6: Commit Back to Repository
+# ============================================================
+commit_merged:
+  stage: commit
+  image: alpine/git:latest
+  needs:
+    - generate_outputs
+  rules:
+    - if: $SOURCES_CHANGED == "true"
+      when: manual  # Second approval gate
+  script:
+    - |
+      # Configure git
+      git config user.email "ci@clarissa.local"
+      git config user.name "CLARISSA CI Bot"
+      
+      # Setup SSH or token auth
+      git remote set-url origin "https://oauth2:${CI_JOB_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git"
+      
+      # Copy to canonical location
+      mkdir -p ${DOC_BASE_PATH}/canonical
+      cp merged-output.md ${DOC_BASE_PATH}/canonical/abstract.md
+      cp merge-history.json ${DOC_BASE_PATH}/canonical/
+      
+      # Copy outputs
+      mkdir -p ${DOC_BASE_PATH}/outputs
+      cp outputs/* ${DOC_BASE_PATH}/outputs/
+      
+      # Commit
+      git add ${DOC_BASE_PATH}/canonical/ ${DOC_BASE_PATH}/outputs/
+      git commit -m "docs: auto-merge SPE abstract [LLM-assisted]
+
+      Merged contributions from: $(ls normalized/*.md | xargs -n1 basename | tr '\n' ', ')
+      
+      Pipeline: ${CI_PIPELINE_URL}
+      "
+      
+      git push origin HEAD:${CI_COMMIT_REF_NAME}

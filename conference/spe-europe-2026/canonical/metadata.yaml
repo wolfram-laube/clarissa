@@ -1,0 +1,28 @@
+title: "CLARISSA: A Conversational User Interface for Democratizing Reservoir Simulation"
+conference: "SPE Europe Energy Conference 2026"
+category: "05.6 ML/AI in Subsurface Operations"
+
+authors:
+  - name: Wolfram Laube
+    affiliation: Independent Researcher, Austria
+    role: Technical Architecture
+    
+  - name: Douglas Perschke
+    affiliation: TBD
+    role: Domain Expertise (Reservoir Engineering)
+    
+  - name: Mike
+    affiliation: TBD
+    role: TBD
+
+version: "1.0.0"
+last_merge: "2026-01-09"
+
+sources:
+  - path: sources/doug/SPE_Meeting_Abstract_v6_2_in_Submission_Form.docx
+    contributor: Doug Perschke
+    format: docx
+    
+  - path: sources/wolfram/abstract-merged.md
+    contributor: Wolfram Laube
+    format: markdown
