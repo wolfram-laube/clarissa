@@ -948,12 +948,26 @@ doc_merge:generate:
         exit 1
       fi
       
-      echo "=== Checking mermaid-cli ==="
-      if ! command -v mmdc &> /dev/null; then
-        echo "Installing mermaid-cli..."
-        npm install -g @mermaid-js/mermaid-cli
+      echo "=== Installing mermaid-cli ==="
+      # Check if npm is available (macOS runner)
+      if command -v npm &> /dev/null; then
+        echo "npm found, installing mermaid-cli..."
+        npm install -g @mermaid-js/mermaid-cli 2>/dev/null || npm install @mermaid-js/mermaid-cli
+        export PATH="$PATH:./node_modules/.bin"
       fi
-      mmdc --version || echo "mmdc not available"
+      
+      # Verify mmdc
+      if command -v mmdc &> /dev/null; then
+        echo "✅ mmdc available: $(mmdc --version)"
+        MMDC_AVAILABLE=true
+      elif [ -f "./node_modules/.bin/mmdc" ]; then
+        echo "✅ mmdc available (local): $(./node_modules/.bin/mmdc --version)"
+        alias mmdc="./node_modules/.bin/mmdc"
+        MMDC_AVAILABLE=true
+      else
+        echo "⚠️ mmdc not available, will use code blocks for PDF"
+        MMDC_AVAILABLE=false
+      fi
       
       echo "=== Preprocessing for HTML (Mermaid.js client-side) ==="
       python3 conference/spe-europe-2026/scripts/preprocess_mermaid.py merged-output.md doc-outputs/for-html.md
@@ -964,20 +978,24 @@ doc_merge:generate:
         --template=conference/spe-europe-2026/templates/mermaid-template.html \
         --metadata title="CLARISSA - SPE Europe 2026"
       
-      echo "=== Rendering Mermaid diagrams to SVG for PDF ==="
-      python3 conference/spe-europe-2026/scripts/render_mermaid_for_pdf.py merged-output.md doc-outputs/for-pdf.md diagrams || echo "SVG rendering failed, falling back"
-      
       echo "=== Generating PDF ==="
-      if [ -d diagrams ] && [ "$(ls -A diagrams 2>/dev/null)" ]; then
-        echo "Using rendered SVG diagrams"
-        cd doc-outputs
-        pandoc for-pdf.md -o abstract-merged.pdf \
-          --pdf-engine=xelatex \
-          -V geometry:margin=2.5cm \
-          -V fontsize=11pt || echo "PDF with SVG failed"
-        cd ..
-      else
-        echo "Using code blocks (no mmdc available)"
+      if [ "$MMDC_AVAILABLE" = true ]; then
+        echo "Rendering Mermaid diagrams to SVG..."
+        python3 conference/spe-europe-2026/scripts/render_mermaid_for_pdf.py merged-output.md doc-outputs/for-pdf.md diagrams
+        
+        if [ -d diagrams ] && [ "$(ls -A diagrams 2>/dev/null)" ]; then
+          echo "Using rendered SVG diagrams"
+          pandoc doc-outputs/for-pdf.md -o doc-outputs/abstract-merged.pdf \
+            --pdf-engine=xelatex \
+            -V geometry:margin=2.5cm \
+            -V fontsize=11pt \
+            --resource-path=.:diagrams || echo "PDF with SVG failed, falling back"
+        fi
+      fi
+      
+      # Fallback or if above failed
+      if [ ! -f doc-outputs/abstract-merged.pdf ]; then
+        echo "Generating PDF with code blocks (fallback)..."
         pandoc merged-output.md -o doc-outputs/abstract-merged.pdf \
           --pdf-engine=xelatex \
           -V geometry:margin=2.5cm \
@@ -992,7 +1010,7 @@ doc_merge:generate:
       
       echo "=== Generated files ==="
       ls -la doc-outputs/
-      ls -la diagrams/ 2>/dev/null || echo "No diagrams directory"
+      ls -la diagrams/ 2>/dev/null || echo "No diagrams rendered"
   artifacts:
     paths:
       - doc-outputs/
