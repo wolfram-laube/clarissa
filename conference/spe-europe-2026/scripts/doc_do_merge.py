@@ -6,60 +6,63 @@ from pathlib import Path
 from datetime import datetime
 
 
-def get_llm_client():
-    """Get available LLM client - tries Anthropic first, then OpenAI"""
+def call_anthropic(prompt, max_tokens=8000):
+    """Try Anthropic API"""
+    import anthropic
+    client = anthropic.Anthropic()
+    response = client.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=max_tokens,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return ("anthropic", response.content[0].text)
+
+
+def call_openai(prompt, max_tokens=8000):
+    """Try OpenAI API"""
+    import openai
+    client = openai.OpenAI()
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        max_tokens=max_tokens,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return ("openai", response.choices[0].message.content)
+
+
+def call_llm(prompt, max_tokens=8000):
+    """Call LLM - tries Anthropic first, falls back to OpenAI on ANY error"""
     
-    # Try Anthropic
+    # Try Anthropic first
     if os.environ.get("ANTHROPIC_API_KEY"):
         try:
-            import anthropic
-            client = anthropic.Anthropic()
-            return ("anthropic", client)
+            print("Trying Anthropic...")
+            llm_used, result = call_anthropic(prompt, max_tokens)
+            print("✅ Anthropic succeeded")
+            return llm_used, result
         except Exception as e:
-            print(f"⚠️ Anthropic not available: {e}")
+            print(f"⚠️ Anthropic failed: {e}")
+            print("Falling back to OpenAI...")
     
-    # Try OpenAI
+    # Fallback to OpenAI
     if os.environ.get("OPENAI_API_KEY"):
         try:
-            import openai
-            client = openai.OpenAI()
-            return ("openai", client)
+            print("Trying OpenAI...")
+            llm_used, result = call_openai(prompt, max_tokens)
+            print("✅ OpenAI succeeded")
+            return llm_used, result
         except Exception as e:
-            print(f"⚠️ OpenAI not available: {e}")
+            print(f"❌ OpenAI also failed: {e}")
+            raise
     
-    return (None, None)
-
-
-def call_llm(client_type, client, prompt, max_tokens=8000):
-    """Call LLM API"""
-    if client_type == "anthropic":
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=max_tokens,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        return response.content[0].text
-    
-    elif client_type == "openai":
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            max_tokens=max_tokens,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        return response.choices[0].message.content
-    
-    else:
-        raise RuntimeError("No LLM client available")
+    raise RuntimeError("No working LLM API available")
 
 
 def merge_documents():
-    client_type, client = get_llm_client()
-    
-    if not client:
-        print("❌ No LLM API available (ANTHROPIC_API_KEY or OPENAI_API_KEY required)")
+    # Check if any API key is available
+    if not os.environ.get("ANTHROPIC_API_KEY") and not os.environ.get("OPENAI_API_KEY"):
+        print("❌ No LLM API key set")
         exit(1)
-
-    print(f"Using LLM: {client_type}")
 
     # Read canonical
     canonical_path = Path("conference/spe-europe-2026/canonical/abstract.md")
@@ -116,12 +119,7 @@ OUTPUT JSON only (no other text):
 }"""
 
     print("Calling LLM API for merge...")
-    
-    try:
-        result_text = call_llm(client_type, client, prompt)
-    except Exception as e:
-        print(f"❌ LLM API error: {e}")
-        raise
+    llm_used, result_text = call_llm(prompt)
 
     try:
         start = result_text.find('{')
@@ -137,7 +135,7 @@ OUTPUT JSON only (no other text):
     # Write merge log
     log_entry = {
         "timestamp": datetime.utcnow().isoformat(),
-        "llm_used": client_type,
+        "llm_used": llm_used,
         "sources": list(inputs.keys()),
         "incorporation_log": result.get("incorporation_log", []),
         "conflicts_resolved": result.get("conflicts_resolved", [])
@@ -145,7 +143,7 @@ OUTPUT JSON only (no other text):
     Path("merge-log.json").write_text(json.dumps(log_entry, indent=2))
 
     print("=== MERGE COMPLETE ===")
-    print(f"LLM: {client_type}")
+    print(f"LLM: {llm_used}")
     print(f"Document: {len(merged_doc)} characters")
     print(f"Incorporated: {len(result.get('incorporation_log', []))} items")
     print(f"Conflicts resolved: {len(result.get('conflicts_resolved', []))}")
