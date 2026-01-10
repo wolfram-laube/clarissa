@@ -928,8 +928,6 @@ doc_merge:merge:
 
 doc_merge:generate:
   stage: deploy
-  tags:
-    - mac-group-shell
   needs:
     - job: doc_merge:merge
       artifacts: true
