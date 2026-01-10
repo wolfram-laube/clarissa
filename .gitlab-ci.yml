@@ -624,6 +624,9 @@ build_paper:
     - when: never
   script:
     - cd conference/ijacsa-2026
+    - echo "Copying figures to build directory..."
+    - cp figures/*.png . 2>/dev/null || echo "No figures to copy"
+    - ls -la *.png 2>/dev/null || echo "No PNG files found"
     - echo "Building CLARISSA paper..."
     - pdflatex -interaction=nonstopmode CLARISSA_Paper_IJACSA.tex || true
     - pdflatex -interaction=nonstopmode CLARISSA_Paper_IJACSA.tex  # Second pass for references
@@ -928,6 +931,7 @@ doc_merge:merge:
 
 doc_merge:generate:
   stage: deploy
+  image: pandoc/latex:latest
   needs:
     - job: doc_merge:merge
       artifacts: true
@@ -941,78 +945,41 @@ doc_merge:generate:
     - when: never
   script:
     - |
-      mkdir -p doc-outputs diagrams
+      mkdir -p doc-outputs
+      apk add --no-cache python3 2>/dev/null || true
       
       if [ ! -f merged-output.md ]; then
         echo "No merged document found"
         exit 1
       fi
       
-      echo "=== Installing mermaid-cli ==="
-      # Check if npm is available (macOS runner)
-      if command -v npm &> /dev/null; then
-        echo "npm found, installing mermaid-cli..."
-        npm install -g @mermaid-js/mermaid-cli 2>/dev/null || npm install @mermaid-js/mermaid-cli
-        export PATH="$PATH:./node_modules/.bin"
-      fi
+      echo "=== Preprocessing for HTML (Mermaid.js) ==="
+      python3 conference/spe-europe-2026/scripts/preprocess_mermaid.py merged-output.md doc-outputs/for-html.md html
       
-      # Verify mmdc
-      if command -v mmdc &> /dev/null; then
-        echo "✅ mmdc available: $(mmdc --version)"
-        MMDC_AVAILABLE=true
-      elif [ -f "./node_modules/.bin/mmdc" ]; then
-        echo "✅ mmdc available (local): $(./node_modules/.bin/mmdc --version)"
-        alias mmdc="./node_modules/.bin/mmdc"
-        MMDC_AVAILABLE=true
-      else
-        echo "⚠️ mmdc not available, will use code blocks for PDF"
-        MMDC_AVAILABLE=false
-      fi
-      
-      echo "=== Preprocessing for HTML (Mermaid.js client-side) ==="
-      python3 conference/spe-europe-2026/scripts/preprocess_mermaid.py merged-output.md doc-outputs/for-html.md
-      
-      echo "=== Generating HTML with Mermaid.js ==="
+      echo "=== Generating HTML with live diagrams ==="
       pandoc doc-outputs/for-html.md -o doc-outputs/abstract-merged.html \
         --standalone \
         --template=conference/spe-europe-2026/templates/mermaid-template.html \
         --metadata title="CLARISSA - SPE Europe 2026"
       
-      echo "=== Generating PDF ==="
-      if [ "$MMDC_AVAILABLE" = true ]; then
-        echo "Rendering Mermaid diagrams to SVG..."
-        python3 conference/spe-europe-2026/scripts/render_mermaid_for_pdf.py merged-output.md doc-outputs/for-pdf.md diagrams
-        
-        if [ -d diagrams ] && [ "$(ls -A diagrams 2>/dev/null)" ]; then
-          echo "Using rendered SVG diagrams"
-          pandoc doc-outputs/for-pdf.md -o doc-outputs/abstract-merged.pdf \
-            --pdf-engine=xelatex \
-            -V geometry:margin=2.5cm \
-            -V fontsize=11pt \
-            --resource-path=.:diagrams || echo "PDF with SVG failed, falling back"
-        fi
-      fi
+      echo "=== Preprocessing for PDF (placeholders) ==="
+      python3 conference/spe-europe-2026/scripts/preprocess_mermaid.py merged-output.md doc-outputs/for-pdf.md pdf
       
-      # Fallback or if above failed
-      if [ ! -f doc-outputs/abstract-merged.pdf ]; then
-        echo "Generating PDF with code blocks (fallback)..."
-        pandoc merged-output.md -o doc-outputs/abstract-merged.pdf \
-          --pdf-engine=xelatex \
-          -V geometry:margin=2.5cm \
-          -V fontsize=11pt || echo "PDF generation had issues"
-      fi
+      echo "=== Generating PDF ==="
+      pandoc doc-outputs/for-pdf.md -o doc-outputs/abstract-merged.pdf \
+        --pdf-engine=xelatex \
+        -V geometry:margin=2.5cm \
+        -V fontsize=11pt
       
       echo "=== Generating DOCX ==="
-      pandoc merged-output.md -o doc-outputs/abstract-merged.docx
+      pandoc doc-outputs/for-pdf.md -o doc-outputs/abstract-merged.docx
       
       echo "=== Copying canonical MD ==="
       cp merged-output.md doc-outputs/abstract-canonical.md
       
       echo "=== Generated files ==="
       ls -la doc-outputs/
-      ls -la diagrams/ 2>/dev/null || echo "No diagrams rendered"
   artifacts:
     paths:
       - doc-outputs/
-      - diagrams/
     expire_in: 4 weeks
