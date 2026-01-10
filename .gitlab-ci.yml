@@ -892,7 +892,7 @@ doc_merge:compare:
       when: on_success
     - when: never
   before_script:
-    - pip install anthropic -q
+    - pip install anthropic openai -q
   script:
     - python conference/spe-europe-2026/scripts/doc_compare.py
   artifacts:
@@ -917,7 +917,7 @@ doc_merge:merge:
       when: manual
     - when: never
   before_script:
-    - pip install anthropic -q
+    - pip install anthropic openai -q
   script:
     - python conference/spe-europe-2026/scripts/doc_do_merge.py
   artifacts:

@@ -1,19 +1,65 @@
 #!/usr/bin/env python3
-"""doc_do_merge.py - Merge document versions using LLM"""
+"""doc_do_merge.py - Merge document versions using LLM (Anthropic or OpenAI)"""
 import os
 import json
-import anthropic
 from pathlib import Path
 from datetime import datetime
 
 
+def get_llm_client():
+    """Get available LLM client - tries Anthropic first, then OpenAI"""
+    
+    # Try Anthropic
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        try:
+            import anthropic
+            client = anthropic.Anthropic()
+            return ("anthropic", client)
+        except Exception as e:
+            print(f"⚠️ Anthropic not available: {e}")
+    
+    # Try OpenAI
+    if os.environ.get("OPENAI_API_KEY"):
+        try:
+            import openai
+            client = openai.OpenAI()
+            return ("openai", client)
+        except Exception as e:
+            print(f"⚠️ OpenAI not available: {e}")
+    
+    return (None, None)
+
+
+def call_llm(client_type, client, prompt, max_tokens=8000):
+    """Call LLM API"""
+    if client_type == "anthropic":
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=max_tokens,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response.content[0].text
+    
+    elif client_type == "openai":
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            max_tokens=max_tokens,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response.choices[0].message.content
+    
+    else:
+        raise RuntimeError("No LLM client available")
+
+
 def merge_documents():
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        print("❌ ANTHROPIC_API_KEY not set")
+    client_type, client = get_llm_client()
+    
+    if not client:
+        print("❌ No LLM API available (ANTHROPIC_API_KEY or OPENAI_API_KEY required)")
         exit(1)
 
-    client = anthropic.Anthropic(api_key=api_key)
+    print(f"Using LLM: {client_type}")
 
     # Read canonical
     canonical_path = Path("conference/spe-europe-2026/canonical/abstract.md")
@@ -62,21 +108,20 @@ MERGE RULES:
 6. Maintain consistent style and terminology
 7. Use Markdown formatting
 
-OUTPUT (JSON):
+OUTPUT JSON only (no other text):
 {
   "merged_document": "... full markdown document ...",
   "incorporation_log": [{"from": "contributor", "what": "description"}],
   "conflicts_resolved": [{"topic": "...", "resolution": "...", "rationale": "..."}]
 }"""
 
-    print("Calling Claude API for merge...")
-    response = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=8000,
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    result_text = response.content[0].text
+    print("Calling LLM API for merge...")
+    
+    try:
+        result_text = call_llm(client_type, client, prompt)
+    except Exception as e:
+        print(f"❌ LLM API error: {e}")
+        raise
 
     try:
         start = result_text.find('{')
@@ -92,6 +137,7 @@ OUTPUT (JSON):
     # Write merge log
     log_entry = {
         "timestamp": datetime.utcnow().isoformat(),
+        "llm_used": client_type,
         "sources": list(inputs.keys()),
         "incorporation_log": result.get("incorporation_log", []),
         "conflicts_resolved": result.get("conflicts_resolved", [])
@@ -99,6 +145,7 @@ OUTPUT (JSON):
     Path("merge-log.json").write_text(json.dumps(log_entry, indent=2))
 
     print("=== MERGE COMPLETE ===")
+    print(f"LLM: {client_type}")
     print(f"Document: {len(merged_doc)} characters")
     print(f"Incorporated: {len(result.get('incorporation_log', []))} items")
     print(f"Conflicts resolved: {len(result.get('conflicts_resolved', []))}")
