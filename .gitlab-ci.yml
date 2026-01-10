@@ -928,7 +928,6 @@ doc_merge:merge:
 
 doc_merge:generate:
   stage: deploy
-  image: node:20-alpine
   needs:
     - job: doc_merge:merge
       artifacts: true
@@ -947,10 +946,9 @@ doc_merge:generate:
         echo "No merged document found"
         exit 1
       fi
-    - echo "=== Installing dependencies ==="
-    - apk add --no-cache python3 pandoc texlive-xetex texmf-dist chromium font-noto
-    - npm install -g @mermaid-js/mermaid-cli
-    - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    - echo "=== Checking dependencies ==="
+    - which pandoc || brew install pandoc
+    - which mmdc || npm install -g @mermaid-js/mermaid-cli
     - echo "=== Preprocessing Mermaid for HTML ==="
     - python3 conference/spe-europe-2026/scripts/preprocess_mermaid.py merged-output.md doc-outputs/for-html.md
     - echo "=== Generating HTML with Mermaid.js ==="
