@@ -949,10 +949,28 @@ doc_merge:generate:
         exit 1
       fi
       
-      echo "=== Generating outputs ==="
-      pandoc merged-output.md -o doc-outputs/abstract-merged.pdf --pdf-engine=xelatex -V geometry:margin=2.5cm || echo "PDF failed"
-      pandoc merged-output.md -o doc-outputs/abstract-merged.html --standalone --metadata title="CLARISSA - SPE Europe 2026"
+      # Install Python for preprocessing
+      apk add --no-cache python3 2>/dev/null || true
+      
+      echo "=== Preprocessing Mermaid blocks ==="
+      python3 conference/spe-europe-2026/scripts/preprocess_mermaid.py merged-output.md doc-outputs/for-html.md
+      
+      echo "=== Generating HTML with Mermaid.js ==="
+      pandoc doc-outputs/for-html.md -o doc-outputs/abstract-merged.html \
+        --standalone \
+        --template=conference/spe-europe-2026/templates/mermaid-template.html \
+        --metadata title="CLARISSA - SPE Europe 2026"
+      
+      echo "=== Generating PDF (diagrams as code blocks) ==="
+      pandoc merged-output.md -o doc-outputs/abstract-merged.pdf \
+        --pdf-engine=xelatex \
+        -V geometry:margin=2.5cm \
+        -V fontsize=11pt || echo "PDF generation had issues"
+      
+      echo "=== Generating DOCX ==="
       pandoc merged-output.md -o doc-outputs/abstract-merged.docx
+      
+      echo "=== Copying canonical MD ==="
       cp merged-output.md doc-outputs/abstract-canonical.md
       
       echo "=== Generated files ==="
