@@ -304,4 +304,4 @@ flowchart LR
 
 *Prepared for SPE Europe Energy Conference 2026*
 
-<!-- Last updated: 2026-01-09T22:05:55Z -->
+<!-- Last updated: 2026-01-10T09:08:38Z - OpenAI test -->
