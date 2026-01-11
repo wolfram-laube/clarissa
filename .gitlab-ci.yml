@@ -961,8 +961,9 @@ doc_merge:generate:
       when: on_success
     - when: never
   before_script:
-    - apt-get update -qq && apt-get install -y -qq pandoc texlive-xetex texlive-fonts-recommended python3 chromium > /dev/null 2>&1
+    - apt-get update -qq && apt-get install -y -qq pandoc texlive-xetex texlive-fonts-recommended texlive-latex-extra python3 chromium librsvg2-bin > /dev/null 2>&1
     - npm install -g @mermaid-js/mermaid-cli > /dev/null 2>&1
+    - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
   script:
     - |
       mkdir -p doc-outputs diagrams
@@ -984,10 +985,14 @@ doc_merge:generate:
         --pdf-engine=xelatex \
         -V geometry:margin=2.5cm \
         -V fontsize=11pt \
+        -V mainfont="DejaVu Serif" \
+        -V sansfont="DejaVu Sans" \
+        -V monofont="DejaVu Sans Mono" \
         --resource-path=.:../diagrams || \
       pandoc for-pdf.md -o abstract-merged.pdf \
         --pdf-engine=pdflatex \
-        -V geometry:margin=2.5cm
+        -V geometry:margin=2.5cm \
+        -V fontsize=11pt
       cd ..
       
       echo "=== Generating HTML with Mermaid.js ==="
