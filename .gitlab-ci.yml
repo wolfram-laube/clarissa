@@ -839,11 +839,13 @@ sync_infrastructure:
 # Pipeline triggers on changes to conference/spe-europe-2026/sources/
 # =============================================================================
 
+# Doc Merge Pipeline - Shell Runner Compatible
+# Works on Mac runners without Docker
+
 doc_merge:normalize:
   stage: build
-  image: pandoc/core:latest
   tags:
-    - saas-linux-small-amd64
+    - mac-group-shell
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
@@ -852,6 +854,8 @@ doc_merge:normalize:
     - if: '$CI_PIPELINE_SOURCE == "web" && $DOC_MERGE == "true"'
       when: on_success
     - when: never
+  before_script:
+    - command -v pandoc || brew install pandoc
   script:
     - |
       mkdir -p normalized
@@ -865,18 +869,17 @@ doc_merge:normalize:
         pandoc "$docx" -t markdown -o "normalized/doug-${name}.md" --wrap=none
       done
       
-      echo "=== Copying Markdown files ==="
-      for md in ${DOC_PATH}/mike/*.md ${DOC_PATH}/wolfram/*.md; do
+      echo "=== Copying MD files ==="
+      for md in ${DOC_PATH}/*/*.md; do
         [ -f "$md" ] || continue
-        [ "$(basename "$md")" = "README.md" ] && continue
-        name=$(basename "$md")
         author=$(basename $(dirname "$md"))
-        echo "Copying: $md -> normalized/${author}-${name}"
-        cp "$md" "normalized/${author}-${name}"
+        name=$(basename "$md" .md)
+        echo "Copying: $md"
+        cp "$md" "normalized/${author}-${name}.md"
       done
       
       echo "=== Normalized files ==="
-      ls -la normalized/ || echo "No files to normalize"
+      ls -la normalized/
   artifacts:
     paths:
       - normalized/
@@ -884,9 +887,8 @@ doc_merge:normalize:
 
 doc_merge:compare:
   stage: test
-  image: python:3.11-slim
   tags:
-    - saas-linux-small-amd64
+    - mac-group-shell
   needs:
     - job: doc_merge:normalize
       artifacts: true
@@ -898,10 +900,12 @@ doc_merge:compare:
     - if: '$CI_PIPELINE_SOURCE == "web" && $DOC_MERGE == "true"'
       when: on_success
     - when: never
-  before_script:
-    - pip install anthropic openai -q
   script:
-    - python conference/spe-europe-2026/scripts/doc_compare.py
+    - |
+      pip3 install --quiet anthropic openai
+      python3 conference/spe-europe-2026/scripts/doc_compare.py normalized/ comparison-report.json
+      echo "=== Comparison Report ==="
+      cat comparison-report.json
   artifacts:
     paths:
       - comparison-report.json
@@ -909,9 +913,8 @@ doc_merge:compare:
 
 doc_merge:merge:
   stage: automation
-  image: python:3.11-slim
   tags:
-    - saas-linux-small-amd64
+    - mac-group-shell
   needs:
     - job: doc_merge:normalize
       artifacts: true
@@ -925,10 +928,12 @@ doc_merge:merge:
     - if: '$CI_PIPELINE_SOURCE == "web" && $DOC_MERGE == "true"'
       when: manual
     - when: never
-  before_script:
-    - pip install anthropic openai -q
   script:
-    - python conference/spe-europe-2026/scripts/doc_do_merge.py
+    - |
+      pip3 install --quiet anthropic openai
+      python3 conference/spe-europe-2026/scripts/doc_do_merge.py normalized/ merged-output.md merge-log.json
+      echo "=== Merge Log ==="
+      cat merge-log.json
   artifacts:
     paths:
       - merged-output.md
@@ -937,9 +942,8 @@ doc_merge:merge:
 
 doc_merge:generate:
   stage: deploy
-  image: node:20-bookworm
   tags:
-    - saas-linux-small-amd64
+    - mac-group-shell
   needs:
     - job: doc_merge:merge
       artifacts: true
@@ -952,12 +956,8 @@ doc_merge:generate:
       when: on_success
     - when: never
   before_script:
-    - |
-      echo "=== Installing dependencies ==="
-      apt-get update -qq
-      apt-get install -y -qq pandoc texlive-xetex texlive-fonts-recommended python3 chromium > /dev/null 2>&1
-      npm install -g @mermaid-js/mermaid-cli > /dev/null 2>&1
-      echo "✓ Dependencies installed"
+    - command -v pandoc || brew install pandoc
+    - command -v mmdc || npm install -g @mermaid-js/mermaid-cli
   script:
     - |
       mkdir -p doc-outputs diagrams
@@ -979,10 +979,13 @@ doc_merge:generate:
         --pdf-engine=xelatex \
         -V geometry:margin=2.5cm \
         -V fontsize=11pt \
-        --resource-path=.:../diagrams
+        --resource-path=.:../diagrams || \
+      pandoc for-pdf.md -o abstract-merged.pdf \
+        --pdf-engine=pdflatex \
+        -V geometry:margin=2.5cm
       cd ..
       
-      echo "=== Generating HTML with Mermaid.js (interactive) ==="
+      echo "=== Generating HTML with Mermaid.js ==="
       python3 conference/spe-europe-2026/scripts/preprocess_mermaid.py \
         merged-output.md \
         doc-outputs/for-html.md
@@ -999,7 +1002,7 @@ doc_merge:generate:
       
       echo "=== Generated files ==="
       ls -la doc-outputs/
-      ls -la diagrams/ 2>/dev/null || true
+      ls -la diagrams/
   artifacts:
     paths:
       - doc-outputs/
