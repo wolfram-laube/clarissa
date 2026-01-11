@@ -845,7 +845,7 @@ sync_infrastructure:
 doc_merge:normalize:
   stage: build
   tags:
-    - mac-group-shell
+    - docker
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
@@ -888,7 +888,7 @@ doc_merge:normalize:
 doc_merge:compare:
   stage: test
   tags:
-    - mac-group-shell
+    - docker
   needs:
     - job: doc_merge:normalize
       artifacts: true
@@ -914,7 +914,7 @@ doc_merge:compare:
 doc_merge:merge:
   stage: automation
   tags:
-    - mac-group-shell
+    - docker
   needs:
     - job: doc_merge:normalize
       artifacts: true
@@ -943,7 +943,7 @@ doc_merge:merge:
 doc_merge:generate:
   stage: deploy
   tags:
-    - mac-group-shell
+    - docker
   needs:
     - job: doc_merge:merge
       artifacts: true
