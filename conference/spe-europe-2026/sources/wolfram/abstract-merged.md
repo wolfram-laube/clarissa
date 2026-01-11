@@ -304,4 +304,4 @@ flowchart LR
 
 *Prepared for SPE Europe Energy Conference 2026*
 
-<!-- Last updated: 2026-01-11T21:45:15Z - docker images fix -->
+<!-- Last updated: 2026-01-11T22:00:07Z - debian fix -->
