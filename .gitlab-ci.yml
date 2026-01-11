@@ -842,6 +842,8 @@ sync_infrastructure:
 doc_merge:normalize:
   stage: build
   image: pandoc/core:latest
+  tags:
+    - saas-linux-small-amd64
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
@@ -883,6 +885,8 @@ doc_merge:normalize:
 doc_merge:compare:
   stage: test
   image: python:3.11-slim
+  tags:
+    - saas-linux-small-amd64
   needs:
     - job: doc_merge:normalize
       artifacts: true
@@ -906,6 +910,8 @@ doc_merge:compare:
 doc_merge:merge:
   stage: automation
   image: python:3.11-slim
+  tags:
+    - saas-linux-small-amd64
   needs:
     - job: doc_merge:normalize
       artifacts: true
@@ -932,6 +938,8 @@ doc_merge:merge:
 doc_merge:generate:
   stage: deploy
   image: node:20-bookworm
+  tags:
+    - saas-linux-small-amd64
   needs:
     - job: doc_merge:merge
       artifacts: true
