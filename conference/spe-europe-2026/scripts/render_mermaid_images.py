@@ -1,29 +1,15 @@
 #!/usr/bin/env python3
 """
 Render Mermaid diagrams to SVG images for PDF generation.
-
-This script:
-1. Extracts mermaid code blocks from markdown
-2. Renders each to SVG using mermaid-cli (mmdc)
-3. Replaces mermaid blocks with image references
-4. Outputs modified markdown for PDF generation
+Version 2: Improved puppeteer/chromium handling for Docker.
 """
 
 import sys
 import re
 import subprocess
 import json
+import os
 from pathlib import Path
-
-
-def create_puppeteer_config():
-    """Create puppeteer config for running in Docker as root."""
-    config = {
-        "args": ["--no-sandbox", "--disable-setuid-sandbox"]
-    }
-    config_path = Path("/tmp/puppeteer-config.json")
-    config_path.write_text(json.dumps(config))
-    return config_path
 
 
 def extract_mermaid_blocks(content: str) -> list:
@@ -35,57 +21,71 @@ def extract_mermaid_blocks(content: str) -> list:
 
 def sanitize_mermaid(mermaid_code: str) -> str:
     """Sanitize mermaid code for rendering."""
-    # Remove <br/> and <br> tags that break rendering
-    code = re.sub(r'<br\s*/?>', '\\n', mermaid_code)
-    # Ensure proper line endings
+    # Remove <br/> and <br> tags - these break sequence diagrams
+    code = re.sub(r'<br\s*/?>', ' ', mermaid_code)
+    code = code.replace('&nbsp;', ' ')
     code = code.strip()
     return code
 
 
-def render_mermaid_to_svg(mermaid_code: str, output_path: Path, config_path: Path) -> bool:
+def render_mermaid_to_svg(mermaid_code: str, output_path: Path) -> bool:
     """Render mermaid code to SVG using mermaid-cli."""
-    # Write mermaid code to temp file
     mmd_file = output_path.with_suffix('.mmd')
-    mmd_file.write_text(sanitize_mermaid(mermaid_code))
-    
     svg_file = output_path.with_suffix('.svg')
     
+    # Write sanitized mermaid code
+    sanitized = sanitize_mermaid(mermaid_code)
+    mmd_file.write_text(sanitized)
+    
+    # Create puppeteer config in same directory
+    config = {"args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]}
+    config_path = output_path.parent / "puppeteer.json"
+    config_path.write_text(json.dumps(config))
+    
     try:
+        # Find chromium
+        chromium_paths = ['/usr/bin/chromium', '/usr/bin/chromium-browser', '/usr/bin/google-chrome']
+        chromium_path = None
+        for p in chromium_paths:
+            if os.path.exists(p):
+                chromium_path = p
+                break
+        
+        env = os.environ.copy()
+        if chromium_path:
+            env['PUPPETEER_EXECUTABLE_PATH'] = chromium_path
+        
         result = subprocess.run(
-            ['mmdc', '-i', str(mmd_file), '-o', str(svg_file), 
-             '-b', 'transparent', '-p', str(config_path)],
+            ['mmdc', '-i', str(mmd_file), '-o', str(svg_file), '-p', str(config_path)],
             capture_output=True,
             text=True,
-            timeout=120
+            timeout=60,
+            env=env
         )
-        if result.returncode == 0 and svg_file.exists():
+        
+        if svg_file.exists() and svg_file.stat().st_size > 100:
             return True
         else:
-            print(f"  ✗ Failed {output_path.stem}: {result.stderr[:200] if result.stderr else 'Unknown error'}")
+            print(f"  ✗ {output_path.stem}: {result.stderr[:200] if result.stderr else 'No output'}")
             return False
-    except subprocess.TimeoutExpired:
-        print(f"  ✗ Timeout rendering {output_path.stem}")
-        return False
-    except FileNotFoundError:
-        print("  ✗ mmdc not found. Install with: npm install -g @mermaid-js/mermaid-cli")
+            
+    except Exception as e:
+        print(f"  ✗ {output_path.stem}: {str(e)[:100]}")
         return False
 
 
-def replace_mermaid_with_images(content: str, diagram_dir: Path) -> str:
+def replace_mermaid_with_images(content: str, diagram_dir: Path, rendered: set) -> str:
     """Replace mermaid blocks with image references."""
     pattern = r'```mermaid\s*\n(.*?)```'
+    counter = [0]
     
-    def replace_block(match, counter=[0]):
+    def replacer(match):
         counter[0] += 1
-        svg_file = diagram_dir / f"diagram-{counter[0]}.svg"
-        if svg_file.exists():
-            # Use relative path for pandoc
-            return f'![Diagram {counter[0]}]({svg_file})'
-        else:
-            # Keep original if rendering failed
-            return match.group(0)
+        if counter[0] in rendered:
+            return f'![Diagram {counter[0]}]({diagram_dir}/diagram-{counter[0]}.svg)'
+        return match.group(0)  # Keep original if not rendered
     
-    return re.sub(pattern, replace_block, content, flags=re.DOTALL)
+    return re.sub(pattern, replacer, content, flags=re.DOTALL)
 
 
 def main():
@@ -97,40 +97,28 @@ def main():
     output_file = Path(sys.argv[2])
     diagram_dir = Path(sys.argv[3])
     
-    if not input_file.exists():
-        print(f"Error: Input file {input_file} not found")
-        sys.exit(1)
-    
     diagram_dir.mkdir(parents=True, exist_ok=True)
     
     content = input_file.read_text()
-    mermaid_blocks = extract_mermaid_blocks(content)
+    blocks = extract_mermaid_blocks(content)
     
-    print(f"Rendering mermaid diagrams from {input_file}...")
+    print(f"Found {len(blocks)} mermaid blocks")
     
-    if not mermaid_blocks:
-        print("No mermaid blocks found, copying input to output")
+    if not blocks:
         output_file.write_text(content)
         return
     
-    # Create puppeteer config for Docker/root execution
-    config_path = create_puppeteer_config()
+    rendered = set()
+    for i, block in enumerate(blocks, 1):
+        path = diagram_dir / f"diagram-{i}"
+        if render_mermaid_to_svg(block, path):
+            print(f"  ✓ diagram-{i}.svg")
+            rendered.add(i)
     
-    # Render each diagram
-    success_count = 0
-    for i, mermaid_code in enumerate(mermaid_blocks, 1):
-        svg_path = diagram_dir / f"diagram-{i}"
-        if render_mermaid_to_svg(mermaid_code, svg_path, config_path):
-            print(f"  ✓ Rendered diagram-{i}.svg")
-            success_count += 1
+    print(f"Rendered {len(rendered)}/{len(blocks)}")
     
-    print(f"Rendered {success_count}/{len(mermaid_blocks)} diagrams")
-    
-    # Replace mermaid blocks with image references
-    modified_content = replace_mermaid_with_images(content, diagram_dir)
-    output_file.write_text(modified_content)
-    
-    print(f"Output written to {output_file}")
+    modified = replace_mermaid_with_images(content, diagram_dir, rendered)
+    output_file.write_text(modified)
 
 
 if __name__ == "__main__":
