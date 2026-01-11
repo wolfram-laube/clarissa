@@ -304,4 +304,4 @@ flowchart LR
 
 *Prepared for SPE Europe Energy Conference 2026*
 
-<!-- Last updated: 2026-01-11T17:43:57Z - docker runners -->
+<!-- Last updated: 2026-01-11T21:26:44Z - docker runner test -->
