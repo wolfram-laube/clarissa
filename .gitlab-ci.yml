@@ -931,7 +931,7 @@ doc_merge:merge:
 
 doc_merge:generate:
   stage: deploy
-  image: pandoc/latex:latest
+  image: node:20-bookworm
   needs:
     - job: doc_merge:merge
       artifacts: true
@@ -943,43 +943,57 @@ doc_merge:generate:
     - if: '$CI_PIPELINE_SOURCE == "web" && $DOC_MERGE == "true"'
       when: on_success
     - when: never
+  before_script:
+    - |
+      echo "=== Installing dependencies ==="
+      apt-get update -qq
+      apt-get install -y -qq pandoc texlive-xetex texlive-fonts-recommended python3 chromium > /dev/null 2>&1
+      npm install -g @mermaid-js/mermaid-cli > /dev/null 2>&1
+      echo "✓ Dependencies installed"
   script:
     - |
-      mkdir -p doc-outputs
-      apk add --no-cache python3 2>/dev/null || true
+      mkdir -p doc-outputs diagrams
       
       if [ ! -f merged-output.md ]; then
         echo "No merged document found"
         exit 1
       fi
       
-      echo "=== Preprocessing for HTML (Mermaid.js) ==="
-      python3 conference/spe-europe-2026/scripts/preprocess_mermaid.py merged-output.md doc-outputs/for-html.md html
+      echo "=== Rendering Mermaid diagrams to SVG ==="
+      python3 conference/spe-europe-2026/scripts/render_mermaid_images.py \
+        merged-output.md \
+        doc-outputs/for-pdf.md \
+        diagrams
       
-      echo "=== Generating HTML with live diagrams ==="
+      echo "=== Generating PDF with rendered diagrams ==="
+      cd doc-outputs
+      pandoc for-pdf.md -o abstract-merged.pdf \
+        --pdf-engine=xelatex \
+        -V geometry:margin=2.5cm \
+        -V fontsize=11pt \
+        --resource-path=.:../diagrams
+      cd ..
+      
+      echo "=== Generating HTML with Mermaid.js (interactive) ==="
+      python3 conference/spe-europe-2026/scripts/preprocess_mermaid.py \
+        merged-output.md \
+        doc-outputs/for-html.md
       pandoc doc-outputs/for-html.md -o doc-outputs/abstract-merged.html \
         --standalone \
         --template=conference/spe-europe-2026/templates/mermaid-template.html \
         --metadata title="CLARISSA - SPE Europe 2026"
       
-      echo "=== Preprocessing for PDF (placeholders) ==="
-      python3 conference/spe-europe-2026/scripts/preprocess_mermaid.py merged-output.md doc-outputs/for-pdf.md pdf
-      
-      echo "=== Generating PDF ==="
-      pandoc doc-outputs/for-pdf.md -o doc-outputs/abstract-merged.pdf \
-        --pdf-engine=xelatex \
-        -V geometry:margin=2.5cm \
-        -V fontsize=11pt
-      
       echo "=== Generating DOCX ==="
-      pandoc doc-outputs/for-pdf.md -o doc-outputs/abstract-merged.docx
+      pandoc merged-output.md -o doc-outputs/abstract-merged.docx
       
       echo "=== Copying canonical MD ==="
       cp merged-output.md doc-outputs/abstract-canonical.md
       
       echo "=== Generated files ==="
       ls -la doc-outputs/
+      ls -la diagrams/ 2>/dev/null || true
   artifacts:
     paths:
       - doc-outputs/
+      - diagrams/
     expire_in: 4 weeks
