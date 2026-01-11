@@ -842,8 +842,12 @@ sync_infrastructure:
 # Doc Merge Pipeline - Shell Runner Compatible
 # Works on Mac runners without Docker
 
+# Doc Merge Pipeline - Docker Runner Compatible
+# Uses proper Docker images for each job
+
 doc_merge:normalize:
   stage: build
+  image: pandoc/core:latest
   tags:
     - docker
   rules:
@@ -854,8 +858,6 @@ doc_merge:normalize:
     - if: '$CI_PIPELINE_SOURCE == "web" && $DOC_MERGE == "true"'
       when: on_success
     - when: never
-  before_script:
-    - command -v pandoc || brew install pandoc
   script:
     - |
       mkdir -p normalized
@@ -887,6 +889,7 @@ doc_merge:normalize:
 
 doc_merge:compare:
   stage: test
+  image: python:3.11-slim
   tags:
     - docker
   needs:
@@ -901,11 +904,10 @@ doc_merge:compare:
       when: on_success
     - when: never
   script:
-    - |
-      pip3 install --quiet anthropic openai
-      python3 conference/spe-europe-2026/scripts/doc_compare.py normalized/ comparison-report.json
-      echo "=== Comparison Report ==="
-      cat comparison-report.json
+    - pip install --quiet anthropic openai
+    - python3 conference/spe-europe-2026/scripts/doc_compare.py normalized/ comparison-report.json
+    - echo "=== Comparison Report ==="
+    - cat comparison-report.json
   artifacts:
     paths:
       - comparison-report.json
@@ -913,6 +915,7 @@ doc_merge:compare:
 
 doc_merge:merge:
   stage: automation
+  image: python:3.11-slim
   tags:
     - docker
   needs:
@@ -929,11 +932,10 @@ doc_merge:merge:
       when: manual
     - when: never
   script:
-    - |
-      pip3 install --quiet anthropic openai
-      python3 conference/spe-europe-2026/scripts/doc_do_merge.py normalized/ merged-output.md merge-log.json
-      echo "=== Merge Log ==="
-      cat merge-log.json
+    - pip install --quiet anthropic openai
+    - python3 conference/spe-europe-2026/scripts/doc_do_merge.py normalized/ merged-output.md merge-log.json
+    - echo "=== Merge Log ==="
+    - cat merge-log.json
   artifacts:
     paths:
       - merged-output.md
@@ -942,6 +944,7 @@ doc_merge:merge:
 
 doc_merge:generate:
   stage: deploy
+  image: node:20-bookworm
   tags:
     - docker
   needs:
@@ -956,8 +959,8 @@ doc_merge:generate:
       when: on_success
     - when: never
   before_script:
-    - command -v pandoc || brew install pandoc
-    - command -v mmdc || npm install -g @mermaid-js/mermaid-cli
+    - apt-get update -qq && apt-get install -y -qq pandoc texlive-xetex texlive-fonts-recommended python3 chromium > /dev/null 2>&1
+    - npm install -g @mermaid-js/mermaid-cli > /dev/null 2>&1
   script:
     - |
       mkdir -p doc-outputs diagrams
