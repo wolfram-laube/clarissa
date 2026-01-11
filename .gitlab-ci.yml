@@ -847,9 +847,11 @@ sync_infrastructure:
 
 doc_merge:normalize:
   stage: build
-  image: pandoc/core:latest
+  image: debian:bookworm-slim
   tags:
     - docker
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq pandoc > /dev/null 2>&1
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
