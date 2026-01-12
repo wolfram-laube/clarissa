@@ -309,3 +309,5 @@ flowchart LR
 <!-- Build trigger: 2026-01-12T11:50:23Z -->
 
 <!-- Rebuild trigger: 2026-01-12T12:30:58Z -->
+
+<!-- PNG fix: 2026-01-12T13:43:35Z -->
