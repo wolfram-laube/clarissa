@@ -43,63 +43,18 @@ The CLARISSA architecture comprises six primary layers, each addressing distinct
 
 ```mermaid
 flowchart TB
-    subgraph USER["User Interface Layer"]
-        VOICE[Voice Input<br/>Field Operations]
-        TEXT[Text Chat<br/>Technical Discussion]
-        WEB[Web Interface<br/>Visual Feedback]
-        API[REST API<br/>Programmatic Access]
-    end
+    UI[User Interface Layer<br/>Voice / Text / Web / API]
+    TR[Translation Layer<br/>NL Parser / Confidence / Rollback]
+    CO[CLARISSA Core<br/>LLM + RL + Neuro-Symbolic]
+    VA[Validation Layer<br/>Syntax / Semantic / Physics]
+    GE[Generation Layer<br/>Deck Generator / Templates / Defaults]
+    KB[Knowledge Layer<br/>Vector Store / Corrections / Analogs]
+    SI[Simulation Layer<br/>OPM Flow / Eclipse Export / Results]
 
-    subgraph TRANSLATION["Translation Layer"]
-        NLP[NL Parser]
-        CONF[Confidence Scorer]
-        ROLL[Rollback Manager]
-    end
-
-    subgraph CORE["CLARISSA Core"]
-        LLM[LLM Layer<br/>Planning & Reasoning]
-        RL[RL Agent<br/>Action Optimization]
-        NSC[Neuro-Symbolic<br/>Constraints & Governance]
-    end
-
-    subgraph VALIDATION["Validation Layer"]
-        SYN[Syntax Validator]
-        SEM[Semantic Checker]
-        PHY[Physics Validator]
-    end
-
-    subgraph GENERATION["Generation Layer"]
-        GEN[Deck Generator]
-        TPL[Template Engine]
-        DEF[Default Suggester]
-    end
-
-    subgraph SIMULATION["Simulation Layer"]
-        OPM[OPM Flow<br/>Open Source]
-        EXP[Eclipse Export<br/>Commercial Platforms]
-        RES[Result Parser]
-    end
-
-    subgraph KNOWLEDGE["Knowledge Layer"]
-        VDB[(Vector Store<br/>Simulator KB)]
-        ADB[(Analog Database<br/>Default Values)]
-        CDB[(Corrections DB<br/>User Feedback)]
-    end
-
-    USER --> TRANSLATION
-    TRANSLATION --> CORE
-    CORE <--> VALIDATION
-    CORE --> GENERATION
-    GENERATION --> SIMULATION
-    
-    CONF -->|low confidence| USER
-    ROLL -->|failure| TRANSLATION
-    
-    OPM -->|feedback| RL
-    
-    KNOWLEDGE --> CORE
-    ADB --> DEF
-    CDB --> LLM
+    UI --> TR --> CO --> VA --> GE --> SI
+    KB -.-> CO
+    KB -.-> GE
+    SI -.->|feedback| CO
 ```
 
 **User Interface Layer:** Supports multiple interaction modalities—voice input for hands-free operation in field environments, text chat for detailed technical discussions, web interfaces for visual feedback and result exploration, and REST APIs for programmatic integration.
@@ -192,10 +147,10 @@ flowchart LR
 ```mermaid
 flowchart TB
     subgraph DIMS["Evaluation Dimensions"]
-        D1[🔤 Syntactic Validity<br/>Parser acceptance, keyword correctness]
-        D2[📐 Semantic Correctness<br/>Logical consistency, unit coherence]
-        D3[⚛️ Physical Plausibility<br/>Pressure gradients, saturations, rates]
-        D4[💬 Conversational Efficiency<br/>Turns to completion, clarification rate]
+        D1[Syntactic Validity<br/>Parser acceptance, keyword correctness]
+        D2[Semantic Correctness<br/>Logical consistency, unit coherence]
+        D3[Physical Plausibility<br/>Pressure gradients, saturations, rates]
+        D4[Conversational Efficiency<br/>Turns to completion, clarification rate]
     end
 
     subgraph TIERS["Complexity Tiers"]
@@ -217,10 +172,10 @@ flowchart TB
 
 ```mermaid
 sequenceDiagram
-    participant E as 👷 Field Engineer
-    participant C as 🤖 CLARISSA
-    participant V as ✓ Validator
-    participant S as ⚙️ OPM Flow
+    participant E as Field Engineer
+    participant C as CLARISSA
+    participant V as Validator
+    participant S as OPM Flow
 
     Note over E: Voice input from field tablet
     E->>C: "I need a waterflood model,<br/>5-spot pattern, 40 acre spacing"
