@@ -1,5 +1,5 @@
 # document-merge.gitlab-ci.yml - Document generation for SPE abstract
-# Uses Chromium for PDF (renders Mermaid correctly)
+# Works on shell runners (no Docker required)
 
 # ============================================================
 # Pre-render Mermaid diagrams to SVG with larger fonts
@@ -32,11 +32,13 @@ render_diagrams:
     expire_in: 1 week
 
 # ============================================================
-# Generate PDF from HTML via Chromium (renders Mermaid!)
+# Generate PDF - Shell runner compatible (uses npx puppeteer)
 # ============================================================
 generate_spe_pdf:
   stage: deploy
-  image: zenika/alpine-chrome:with-puppeteer
+  tags:
+    - saas-linux-small-amd64  # Force shared Linux runner
+  image: node:20-slim
   needs:
     - job: render_diagrams
       optional: true
@@ -47,10 +49,12 @@ generate_spe_pdf:
     - if: $CI_PIPELINE_SOURCE == "web"
       when: manual
       allow_failure: true
+  before_script:
+    - apt-get update && apt-get install -y chromium fonts-liberation --no-install-recommends
+    - npm install puppeteer
+    - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
   script:
     - mkdir -p doc-outputs
-    - apk add --no-cache nodejs npm
-    - npm install puppeteer
     - |
       cat > generate-pdf.js << 'JSEOF'
       const puppeteer = require('puppeteer');
@@ -58,7 +62,8 @@ generate_spe_pdf:
       (async () => {
         const browser = await puppeteer.launch({
           headless: 'new',
-          args: ['--no-sandbox', '--disable-setuid-sandbox']
+          executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
+          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
         const page = await browser.newPage();
         const html = fs.readFileSync('conference/spe-europe-2026/merged/abstract-merged.html', 'utf8');
