@@ -982,6 +982,8 @@ doc_merge:generate:
         diagrams
       
       echo "=== Generating PDF with rendered diagrams ==="
+      # Copy diagrams into doc-outputs so pandoc can find them
+      cp -r diagrams doc-outputs/
       cd doc-outputs
       pandoc for-pdf.md -o abstract-merged.pdf \
         --pdf-engine=xelatex \
@@ -989,8 +991,7 @@ doc_merge:generate:
         -V fontsize=11pt \
         -V mainfont="DejaVu Serif" \
         -V sansfont="DejaVu Sans" \
-        -V monofont="DejaVu Sans Mono" \
-        --resource-path=.:../diagrams || \
+        -V monofont="DejaVu Sans Mono" || \
       pandoc for-pdf.md -o abstract-merged.pdf \
         --pdf-engine=pdflatex \
         -V geometry:margin=2.5cm \
