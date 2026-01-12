@@ -1,18 +1,11 @@
-# document-merge.gitlab-ci.yml - Fixed Document Pipeline
-# Uses Chromium headless for PDF generation (renders Mermaid correctly)
-
-variables:
-  DOC_BASE_PATH: "conference/spe-europe-2026"
-
-stages:
-  - render_diagrams
-  - generate
+# document-merge.gitlab-ci.yml - Document generation for SPE abstract
+# Uses Chromium for PDF (renders Mermaid correctly)
 
 # ============================================================
 # Pre-render Mermaid diagrams to SVG with larger fonts
 # ============================================================
 render_diagrams:
-  stage: render_diagrams
+  stage: build
   image: minlag/mermaid-cli:latest
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
@@ -23,10 +16,9 @@ render_diagrams:
       allow_failure: true
   script:
     - mkdir -p rendered-diagrams
+    - echo '{"theme":"base","themeVariables":{"primaryColor":"#e8f0f8","primaryTextColor":"#003366","fontSize":"16px"}}' > mermaid-config.json
     - |
-      echo '{"theme":"base","themeVariables":{"primaryColor":"#e8f0f8","primaryTextColor":"#003366","fontSize":"16px"}}' > mermaid-config.json
-    - |
-      for mmd in ${DOC_BASE_PATH}/diagrams/*.mmd; do
+      for mmd in conference/spe-europe-2026/diagrams/*.mmd; do
         [ -f "$mmd" ] || continue
         name=$(basename "$mmd" .mmd)
         echo "Rendering: $name"
@@ -42,8 +34,8 @@ render_diagrams:
 # ============================================================
 # Generate PDF from HTML via Chromium (renders Mermaid!)
 # ============================================================
-generate_outputs:
-  stage: generate
+generate_spe_pdf:
+  stage: deploy
   image: zenika/alpine-chrome:with-puppeteer
   needs:
     - job: render_diagrams
@@ -83,7 +75,7 @@ generate_outputs:
       })();
       JSEOF
     - node generate-pdf.js
-    - cp ${DOC_BASE_PATH}/merged/abstract-merged.html doc-outputs/
+    - cp conference/spe-europe-2026/merged/abstract-merged.html doc-outputs/
     - ls -la doc-outputs/
   artifacts:
     paths:
