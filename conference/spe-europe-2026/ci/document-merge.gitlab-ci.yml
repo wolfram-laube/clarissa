@@ -51,13 +51,13 @@ generate_spe_pdf:
     name: "spe-abstract-${CI_COMMIT_SHORT_SHA}"
 
 # ============================================================
-# Render Mermaid diagrams (on local docker runner)
+# Render Mermaid diagrams (use node image, install mmdc)
 # ============================================================
 render_diagrams:
   stage: build
   tags:
     - docker
-  image: minlag/mermaid-cli:latest
+  image: node:20-alpine
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
       changes:
@@ -65,6 +65,10 @@ render_diagrams:
     - if: $CI_PIPELINE_SOURCE == "web"
       when: manual
       allow_failure: true
+  before_script:
+    - apk add --no-cache chromium
+    - npm install -g @mermaid-js/mermaid-cli
+    - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
   script:
     - mkdir -p rendered-diagrams
     - echo '{"theme":"base","themeVariables":{"primaryColor":"#e8f0f8","primaryTextColor":"#003366","fontSize":"16px"}}' > mermaid-config.json
