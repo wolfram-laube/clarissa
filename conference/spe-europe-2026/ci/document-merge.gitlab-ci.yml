@@ -1,47 +1,13 @@
 # document-merge.gitlab-ci.yml - Document generation for SPE abstract
-# Works on shell runners (no Docker required)
 
 # ============================================================
-# Pre-render Mermaid diagrams to SVG with larger fonts
-# ============================================================
-render_diagrams:
-  stage: build
-  image: minlag/mermaid-cli:latest
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
-      changes:
-        - "conference/spe-europe-2026/**/*"
-    - if: $CI_PIPELINE_SOURCE == "web"
-      when: manual
-      allow_failure: true
-  script:
-    - mkdir -p rendered-diagrams
-    - echo '{"theme":"base","themeVariables":{"primaryColor":"#e8f0f8","primaryTextColor":"#003366","fontSize":"16px"}}' > mermaid-config.json
-    - |
-      for mmd in conference/spe-europe-2026/diagrams/*.mmd; do
-        [ -f "$mmd" ] || continue
-        name=$(basename "$mmd" .mmd)
-        echo "Rendering: $name"
-        mmdc -i "$mmd" -o "rendered-diagrams/${name}.svg" -c mermaid-config.json -w 1200 --scale 2 || true
-        mmdc -i "$mmd" -o "rendered-diagrams/${name}.png" -c mermaid-config.json -w 1200 --scale 2 || true
-      done
-    - ls -la rendered-diagrams/
-  artifacts:
-    paths:
-      - rendered-diagrams/
-    expire_in: 1 week
-
-# ============================================================
-# Generate PDF - Shell runner compatible (uses npx puppeteer)
+# Generate PDF via Chromium (on local docker runner)
 # ============================================================
 generate_spe_pdf:
   stage: deploy
   tags:
-    - saas-linux-small-amd64  # Force shared Linux runner
-  image: node:20-slim
-  needs:
-    - job: render_diagrams
-      optional: true
+    - docker
+  image: zenika/alpine-chrome:with-puppeteer
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
       changes:
@@ -49,10 +15,6 @@ generate_spe_pdf:
     - if: $CI_PIPELINE_SOURCE == "web"
       when: manual
       allow_failure: true
-  before_script:
-    - apt-get update && apt-get install -y chromium fonts-liberation --no-install-recommends
-    - npm install puppeteer
-    - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
   script:
     - mkdir -p doc-outputs
     - |
@@ -62,7 +24,7 @@ generate_spe_pdf:
       (async () => {
         const browser = await puppeteer.launch({
           headless: 'new',
-          executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
+          executablePath: '/usr/bin/chromium-browser',
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
         const page = await browser.newPage();
@@ -87,3 +49,34 @@ generate_spe_pdf:
       - doc-outputs/
     expire_in: 1 month
     name: "spe-abstract-${CI_COMMIT_SHORT_SHA}"
+
+# ============================================================
+# Render Mermaid diagrams (on local docker runner)
+# ============================================================
+render_diagrams:
+  stage: build
+  tags:
+    - docker
+  image: minlag/mermaid-cli:latest
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - "conference/spe-europe-2026/**/*"
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: manual
+      allow_failure: true
+  script:
+    - mkdir -p rendered-diagrams
+    - echo '{"theme":"base","themeVariables":{"primaryColor":"#e8f0f8","primaryTextColor":"#003366","fontSize":"16px"}}' > mermaid-config.json
+    - |
+      for mmd in conference/spe-europe-2026/diagrams/*.mmd; do
+        [ -f "$mmd" ] || continue
+        name=$(basename "$mmd" .mmd)
+        echo "Rendering: $name"
+        mmdc -i "$mmd" -o "rendered-diagrams/${name}.svg" -c mermaid-config.json -w 1200 --scale 2 || true
+      done
+    - ls -la rendered-diagrams/
+  artifacts:
+    paths:
+      - rendered-diagrams/
+    expire_in: 1 week
