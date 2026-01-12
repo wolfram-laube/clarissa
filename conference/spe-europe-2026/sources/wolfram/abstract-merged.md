@@ -43,18 +43,57 @@ The CLARISSA architecture comprises six primary layers, each addressing distinct
 
 ```mermaid
 flowchart TB
-    UI[User Interface Layer<br/>Voice / Text / Web / API]
-    TR[Translation Layer<br/>NL Parser / Confidence / Rollback]
-    CO[CLARISSA Core<br/>LLM + RL + Neuro-Symbolic]
-    VA[Validation Layer<br/>Syntax / Semantic / Physics]
-    GE[Generation Layer<br/>Deck Generator / Templates / Defaults]
-    KB[Knowledge Layer<br/>Vector Store / Corrections / Analogs]
-    SI[Simulation Layer<br/>OPM Flow / Eclipse Export / Results]
+    subgraph USER["User Interface Layer"]
+        VOICE["Voice Input"]
+        TEXT["Text Chat"]
+        WEB["Web Interface"]
+        API["REST API"]
+    end
 
-    UI --> TR --> CO --> VA --> GE --> SI
-    KB -.-> CO
-    KB -.-> GE
-    SI -.->|feedback| CO
+    subgraph TRANSLATION["Translation Layer"]
+        NLP["NL Parser"]
+        CONF["Confidence Scorer"]
+        ROLL["Rollback Manager"]
+    end
+
+    subgraph KNOWLEDGE["Knowledge Layer"]
+        VS["Vector Store"]
+        CDB["Corrections DB"]
+        ANALOG["Analog Database"]
+    end
+
+    subgraph CORE["CLARISSA Core"]
+        LLM["LLM Layer"]
+        RL["RL Agent"]
+        NS["Neuro-Symbolic"]
+    end
+
+    subgraph VALIDATION["Validation Layer"]
+        SYN["Syntax Validator"]
+        SEM["Semantic Checker"]
+        PHYS["Physics Validator"]
+    end
+
+    subgraph GENERATION["Generation Layer"]
+        DECK["Deck Generator"]
+        TMPL["Template Engine"]
+        DEF["Default Suggester"]
+    end
+
+    subgraph SIMULATION["Simulation Layer"]
+        OPM["OPM Flow"]
+        ECL["Eclipse Export"]
+        RES["Result Parser"]
+    end
+
+    USER --> TRANSLATION
+    TRANSLATION --> CORE
+    KNOWLEDGE --> CORE
+    CORE --> VALIDATION
+    CORE --> GENERATION
+    VALIDATION --> GENERATION
+    GENERATION --> SIMULATION
+    SIMULATION -.->|feedback| CORE
 ```
 
 **User Interface Layer:** Supports multiple interaction modalities—voice input for hands-free operation in field environments, text chat for detailed technical discussions, web interfaces for visual feedback and result exploration, and REST APIs for programmatic integration.
@@ -101,12 +140,12 @@ timeline
 
 ```mermaid
 flowchart LR
-    subgraph ENVOY["Envoy (SPE-221987)"]
+    subgraph ENVOY["Envoy SPE-221987"]
         direction TB
-        E1[Query existing models]
-        E2[Retrieve documentation]
-        E3[RAG + Callbacks]
-        E4[ECHELON<br/>Proprietary]
+        E1["Query existing models"]
+        E2["Retrieve documentation"]
+        E3["RAG + Callbacks"]
+        E4["ECHELON Proprietary"]
         E1 --> E3
         E2 --> E3
         E3 --> E4
@@ -114,16 +153,16 @@ flowchart LR
 
     subgraph CLARISSA["CLARISSA"]
         direction TB
-        C1[Generate new decks]
-        C2[Physics validation]
-        C3[RL + Neuro-symbolic]
-        C4[OPM Flow<br/>Open Source]
+        C1["Generate new decks"]
+        C2["Physics validation"]
+        C3["RL + Neuro-symbolic"]
+        C4["OPM Flow Open Source"]
         C1 --> C3
         C2 --> C3
         C3 --> C4
     end
 
-    ENVOY -.->|"evolution"| CLARISSA
+    ENVOY -.->|evolution| CLARISSA
 ```
 
 | Aspect | Envoy (SPE-221987) | CLARISSA |
@@ -147,23 +186,22 @@ flowchart LR
 ```mermaid
 flowchart TB
     subgraph DIMS["Evaluation Dimensions"]
-        D1[Syntactic Validity<br/>Parser acceptance, keyword correctness]
-        D2[Semantic Correctness<br/>Logical consistency, unit coherence]
-        D3[Physical Plausibility<br/>Pressure gradients, saturations, rates]
-        D4[Conversational Efficiency<br/>Turns to completion, clarification rate]
+        D1["Syntactic Validity"]
+        D2["Semantic Correctness"]
+        D3["Physical Plausibility"]
+        D4["Conversational Efficiency"]
     end
 
     subgraph TIERS["Complexity Tiers"]
-        T1[Tier 1: Foundational<br/>Linear displacement<br/>Laboratory coreflood<br/>Single-phase flow]
-        T2[Tier 2: Intermediate<br/>Pattern flood<br/>5-spot, 40-acre spacing<br/>Multi-well black-oil]
-        T3[Tier 3: Advanced<br/>Mid-conversation pivot<br/>Black-oil → Compositional EOS<br/>Tertiary recovery evaluation]
+        T1["Tier 1: Foundational"]
+        T2["Tier 2: Intermediate"]
+        T3["Tier 3: Advanced"]
     end
 
-    D1 --> T1
-    D2 --> T1
-    D3 --> T1
-    D4 --> T1
-    
+    D1 --- TIERS
+    D2 --- TIERS
+    D3 --- TIERS
+    D4 --- TIERS
     T1 -->|progression| T2
     T2 -->|progression| T3
 ```
@@ -178,20 +216,20 @@ sequenceDiagram
     participant S as OPM Flow
 
     Note over E: Voice input from field tablet
-    E->>C: "I need a waterflood model,<br/>5-spot pattern, 40 acre spacing"
-    C->>C: Parse intent (confidence: 0.92)
-    C->>E: "What's the reservoir depth<br/>and initial pressure?"
-    E->>C: "8,500 ft TVD, about 3,800 psi"
+    E->>C: I need a waterflood model, 5-spot pattern, 40 acre spacing
+    C->>C: Parse intent (confidence 0.92)
+    C->>E: What is the reservoir depth and initial pressure?
+    E->>C: 8500 ft TVD, about 3800 psi
     C->>V: Validate pressure gradient
-    V-->>C: ✓ 0.45 psi/ft plausible
+    V-->>C: 0.45 psi/ft plausible
     C->>C: Generate ECLIPSE deck
-    C->>E: "I've assumed 200 md permeability<br/>from Permian Basin analogs.<br/>Confirm or adjust?"
-    E->>C: "Use 150 md, we have core data"
+    C->>E: Assumed 200 md permeability from Permian analogs. Confirm?
+    E->>C: Use 150 md, we have core data
     Note over C: Update deck, log assumption override
     C->>S: Execute simulation
     S-->>C: Results + convergence data
-    C->>E: "Simulation complete in 47 seconds.<br/>Water breakthrough at 18 months.<br/>Want sensitivity on well spacing?"
-    E->>C: "Yes, try 20 and 80 acres"
+    C->>E: Simulation complete in 47 seconds. Water breakthrough at 18 months.
+    E->>C: Yes, try 20 and 80 acres
     C->>C: Queue sensitivity runs
 ```
 
@@ -226,25 +264,26 @@ The binding constraint on simulation adoption has never been solver performance.
 ```mermaid
 flowchart LR
     subgraph FRONTEND["Frontend"]
-        A["Web UI<br/>(React)"]
-        B["Voice SDK<br/>(Whisper)"]
-        C["REST API<br/>(FastAPI)"]
+        A["Web UI - React"]
+        B["Voice SDK - Whisper"]
+        C["REST API - FastAPI"]
     end
     
     subgraph CORE["Core"]
-        D["LLM<br/>(Claude/GPT)"]
-        E["RL Agent<br/>(PPO)"]
-        F["Constraint Engine<br/>(Z3/Prolog)"]
+        D["LLM - Claude/GPT"]
+        E["RL Agent - PPO"]
+        F["Constraints - Z3"]
     end
     
     subgraph BACKEND["Backend"]
         G["OPM Flow"]
         H["Deck Generator"]
         I["Result Parser"]
-        J["Vector DB<br/>(pgvector)"]
+        J["Vector DB"]
     end
 
-    FRONTEND --> CORE --> BACKEND
+    FRONTEND --> CORE
+    CORE --> BACKEND
 ```
 
 ---
@@ -258,11 +297,3 @@ flowchart LR
 ---
 
 *Prepared for SPE Europe Energy Conference 2026*
-
-<!-- Last updated: 2026-01-11T23:10:32Z - mermaid quote fix -->
-
-<!-- Build trigger: 2026-01-12T11:50:23Z -->
-
-<!-- Rebuild trigger: 2026-01-12T12:30:58Z -->
-
-<!-- PNG fix: 2026-01-12T13:43:35Z -->
