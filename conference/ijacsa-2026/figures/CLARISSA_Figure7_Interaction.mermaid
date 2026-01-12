@@ -1,0 +1,20 @@
+sequenceDiagram
+    participant E as Field Engineer
+    participant C as CLARISSA
+    participant V as Validator
+    participant S as OPM Flow
+
+    Note over E: Voice input from field tablet
+    E->>C: "I need a waterflood model, 5-spot pattern, 40 acre spacing"
+    C->>C: Parse intent (confidence: 0.92)
+    C->>E: "What's the reservoir depth and initial pressure?"
+    E->>C: "8,500 ft TVD, about 3,800 psi"
+    C->>V: Validate pressure gradient
+    V-->>C: 0.45 psi/ft plausible
+    C->>C: Generate ECLIPSE deck
+    C->>E: "I've assumed 200 md permeability from Permian Basin analogs. Confirm or adjust?"
+    E->>C: "Use 150 md, we have core data"
+    Note over C: Update deck, log assumption override
+    C->>S: Execute simulation
+    S-->>C: Results + convergence data
+    C->>E: "Simulation complete. Water breakthrough at 18 months."
