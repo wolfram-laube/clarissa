@@ -196,6 +196,8 @@
         }
         
         @media print {
+            .mermaid svg { max-width: 100%; height: auto; }
+            .mermaid text { font-size: 14pt !important; }
             body { max-width: none; padding: 1cm; font-size: 10pt; }
             .diagram-container { break-inside: avoid; }
             header { background: white; }
@@ -535,7 +537,7 @@ flowchart LR
                 lineColor: '#0066cc',
                 secondaryColor: '#f0f0f0',
                 tertiaryColor: '#fff',
-                fontSize: '14px'
+                fontSize: '16px'
             },
             flowchart: {
                 useMaxWidth: true,
