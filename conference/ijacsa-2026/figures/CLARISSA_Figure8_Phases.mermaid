@@ -1,0 +1,23 @@
+flowchart LR
+    subgraph P1["Phase I: Syntactic"]
+        P1A[Deck generation from NL]
+        P1B[Syntax validation]
+        P1C[OPM Flow integration]
+        P1D[Voice input prototype]
+    end
+
+    subgraph P2["Phase II: Physics"]
+        P2A[Simulator-in-loop learning]
+        P2B[Convergence optimization]
+        P2C[Analog-based defaults]
+        P2D[Confidence scoring]
+    end
+
+    subgraph P3["Phase III: Field"]
+        P3A[Embedded operational agents]
+        P3B[Asset-specific tuning]
+        P3C[Real-time surveillance]
+        P3D[Multi-user collaboration]
+    end
+
+    P1 --> P2 --> P3
