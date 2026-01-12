@@ -981,17 +981,6 @@ doc_merge:generate:
         doc-outputs/for-pdf.md \
         diagrams
       
-      echo "=== Converting SVG to PNG for PDF compatibility ==="
-      for svg in diagrams/*.svg; do
-        if [ -f "$svg" ]; then
-          png="${svg%.svg}.png"
-          rsvg-convert -f png -o "$png" "$svg" && echo "  ✓ $(basename $png)"
-        fi
-      done
-      
-      echo "=== Updating image references to PNG ==="
-      sed -i 's/\.svg)/.png)/g' doc-outputs/for-pdf.md
-      
       echo "=== Generating PDF with rendered diagrams ==="
       cp -r diagrams doc-outputs/
       cd doc-outputs
