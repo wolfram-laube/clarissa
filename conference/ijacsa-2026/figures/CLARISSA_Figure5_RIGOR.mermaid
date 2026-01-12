@@ -1,0 +1,21 @@
+flowchart TB
+    subgraph DIMS["Evaluation Dimensions"]
+        D1["Syntactic Validity<br/>Parser acceptance, keyword correctness"]
+        D2["Semantic Correctness<br/>Logical consistency, unit coherence"]
+        D3["Physical Plausibility<br/>Pressure gradients, saturations, rates"]
+        D4["Conversational Efficiency<br/>Turns to completion, clarification rate"]
+    end
+
+    subgraph TIERS["Complexity Tiers"]
+        T1["Tier 1: Foundational<br/>Linear displacement<br/>Laboratory coreflood<br/>Single-phase flow"]
+        T2["Tier 2: Intermediate<br/>Pattern flood<br/>5-spot, 40-acre spacing<br/>Multi-well black-oil"]
+        T3["Tier 3: Advanced<br/>Mid-conversation pivot<br/>Black-oil to Compositional EOS<br/>Tertiary recovery evaluation"]
+    end
+
+    D1 --> T1
+    D2 --> T1
+    D3 --> T1
+    D4 --> T1
+    
+    T1 -->|progression| T2
+    T2 -->|progression| T3
