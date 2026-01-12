@@ -608,6 +608,8 @@ rerun_all_tests:
 build_paper:
   stage: build
   image: texlive/texlive:latest
+  tags:
+    - docker
   rules:
     # Auto-run when paper files change
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
