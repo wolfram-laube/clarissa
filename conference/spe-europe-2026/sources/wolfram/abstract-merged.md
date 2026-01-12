@@ -7,9 +7,9 @@
 ---
 
 **Authors:**  
+- Douglas Perschke, Stone Ridge Technology, USA  
+- Michal Matejka, Independent Consultant, Houston, USA  
 - Wolfram Laube, Independent Researcher, Austria  
-- Douglas Perschke, [Affiliation TBD]  
-- Mike [Surname TBD], [Affiliation TBD]
 
 ---
 
