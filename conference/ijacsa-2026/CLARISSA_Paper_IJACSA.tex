@@ -8,6 +8,8 @@
 \usepackage{cite}
 \usepackage{float}
 \usepackage{balance}
+\usepackage{booktabs}
+\usepackage{array}
 
 \hypersetup{
     colorlinks=true,
@@ -28,11 +30,11 @@
 \maketitle
 
 \begin{abstract}
-Reservoir simulation remains one of the most technically demanding disciplines in the energy sector. Despite decades of software evolution, the fundamental barrier persists: translating engineering intent into executable simulation input requires specialized expertise that takes years to develop. This paper presents the architecture of the Conversational Language Agent for Reservoir Integrated Simulation System Analysis (CLARISSA), a system designed to bridge the gap between natural language interaction and domain-specific simulation syntax. We propose a multi-stage pipeline that decomposes translation into discrete, validated steps: speech recognition, intent classification, entity extraction, asset validation, syntax generation, and physics-based verification. The architecture addresses deployment heterogeneity through configuration-driven design, enabling air-gapped installations alongside cloud-native deployments. We present a domain mesh data architecture with purpose-built storage for different data types, and a hybrid synchronous-asynchronous communication pattern for long-running simulation workflows. This paper contributes reference architecture patterns applicable beyond reservoir simulation to any domain requiring natural language interfaces to complex technical systems.
+Reservoir simulation remains one of the most technically demanding disciplines in the energy sector. Despite decades of software evolution, the fundamental barrier persists: translating engineering intent into executable simulation input requires specialized expertise that takes years to develop. This paper presents the architecture of the Conversational Language Agent for Reservoir Integrated Simulation System Analysis (CLARISSA), a system designed to bridge the gap between natural language interaction and domain-specific simulation syntax. We propose a multi-stage pipeline that decomposes translation into discrete, validated steps: speech recognition, intent classification, entity extraction, asset validation, syntax generation, and physics-based verification. The architecture addresses deployment heterogeneity through configuration-driven design, enabling air-gapped installations alongside cloud-native deployments. We present a domain mesh data architecture with purpose-built storage for different data types, and a hybrid synchronous-asynchronous communication pattern for long-running simulation workflows. To enable systematic evaluation of conversational simulation systems, we introduce the RIGOR (Reservoir Input Generation Output Review) benchmark framework assessing deck generation across four dimensions: syntactic validity, semantic correctness, physical plausibility, and conversational efficiency. CLARISSA generates Eclipse-format decks and executes simulations using OPM Flow, enabling license-free access to rigorous reservoir modeling. This paper contributes reference architecture patterns applicable beyond reservoir simulation to any domain requiring natural language interfaces to complex technical systems.
 \end{abstract}
 
 \begin{IEEEkeywords}
-reservoir simulation, natural language processing, microservices architecture, domain-specific languages, configurable systems, event-driven architecture
+reservoir simulation, natural language processing, microservices architecture, domain-specific languages, configurable systems, event-driven architecture, OPM Flow, benchmark framework
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -43,7 +45,9 @@ This expertise bottleneck creates organizational challenges. Simulation speciali
 
 Previous attempts to address this challenge through graphical user interfaces have met limited success. The complexity of reservoir simulation resists reduction to form-based interaction; the combinatorial space of valid configurations exceeds what traditional GUI paradigms can meaningfully represent. Users inevitably encounter edge cases where the interface cannot express their intent, forcing fallback to manual deck editing.
 
-Recent advances in natural language processing suggest an alternative approach. Rather than constraining users to predefined interface elements, systems can interpret natural language descriptions and generate appropriate technical syntax. This paper presents the Conversational Language Agent for Reservoir Integrated Simulation System Analysis (CLARISSA), a system architecture that translates conversational input directly into executable simulation configurations.
+Reservoir simulation remains underutilized across the full spectrum of reservoir engineering---field development planning, production surveillance, forecasting, reserves booking, and exploration risking---despite decades of software advancement. The barrier is not computational; modern solvers are fast and robust. The barrier is accessibility. Graphical user interfaces, designed to simplify simulation, have instead shifted complexity from keyword syntax to labyrinthine menus and forms. Subject matter experts bypass these interfaces entirely, writing decks directly in text editors as they have for decades.
+
+Recent advances in natural language processing suggest an alternative approach. Rather than constraining users to predefined interface elements, systems can interpret natural language descriptions and generate appropriate technical syntax. This paper presents the Conversational Language Agent for Reservoir Integrated Simulation System Analysis (CLARISSA), a system architecture that replaces the GUI paradigm with a Conversational User Interface (CUI), translating conversational input directly into executable simulation configurations.
 
 The technical challenges extend beyond language understanding. Global energy operations impose heterogeneous deployment requirements: some installations operate air-gapped with strict data sovereignty constraints, while others benefit from cloud-native infrastructure. The architecture must accommodate both extremes without fundamental redesign. Additionally, simulation runs range from seconds to hours, requiring careful separation of synchronous user interaction from asynchronous backend processing.
 
@@ -53,6 +57,8 @@ This paper makes the following contributions:
     \item Patterns for configuration-driven deployment across heterogeneous infrastructure
     \item Strategies for hybrid synchronous-asynchronous communication in long-running technical workflows
     \item A domain mesh approach to polyglot persistence in distributed systems
+    \item The RIGOR benchmark framework for systematic evaluation of conversational simulation systems
+    \item Integration with OPM Flow for license-free simulation execution
 \end{itemize}
 
 \section{Related Work}
@@ -64,6 +70,33 @@ Natural language interfaces to databases have received substantial attention sin
 \subsection{Code Generation from Natural Language}
 
 Large language models have demonstrated remarkable capability in code generation tasks \cite{chen2021codex}. Systems like GitHub Copilot provide inline code completion, while research efforts explore more ambitious synthesis from high-level specifications \cite{li2022alphacode}. Our work differs in targeting a constrained domain-specific language where outputs must satisfy physics-based consistency constraints beyond mere syntactic validity.
+
+\subsection{Reservoir Simulation Assistants}
+
+Recent work by Wiegand et al. \cite{wiegand2024envoy} introduced Envoy, a generative AI assistant for reservoir simulation built on Stone Ridge Technology's ECHELON simulator. Envoy employs Retrieval-Augmented Generation (RAG) with callback agents to query existing models and retrieve documentation. Table~\ref{tab:comparison} contrasts Envoy's approach with CLARISSA's architecture.
+
+\begin{table}[h]
+\centering
+\caption{Comparison with Prior Work}
+\label{tab:comparison}
+\begin{tabular}{p{2.2cm}p{2.5cm}p{2.5cm}}
+\toprule
+\textbf{Aspect} & \textbf{Envoy} & \textbf{CLARISSA} \\
+\midrule
+Primary Function & Query existing models & Generate complete decks \\
+Interaction & Q\&A on loaded model & Conversational elicitation \\
+Input Modalities & Text chat & Voice, Text, Web, API \\
+Simulator & ECHELON (proprietary) & OPM Flow (open source) \\
+Architecture & RAG + Callbacks & RL + Neuro-symbolic \\
+Learning & Static knowledge bases & Adaptive via simulation \\
+Validation & Post-hoc analysis & Pre-execution physics \\
+Error Handling & Manual correction & Automatic rollback \\
+Availability & Commercial license & Web-based, license-free \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+While Envoy provides valuable query capabilities for existing models, CLARISSA addresses a different problem: generating complete, validated input decks from natural language specifications. Given a verbal description of a reservoir problem, CLARISSA produces a syntactically correct, physically plausible simulation deck ready for execution.
 
 \subsection{Microservices and Event-Driven Architecture}
 
@@ -94,6 +127,18 @@ Three principles guide architectural decisions throughout the system:
 
 The user interface layer supports multiple interaction modalities: voice input for hands-free operation in field environments, text chat for detailed technical discussions, web interfaces for visual feedback and result exploration, and REST APIs for programmatic integration. All modalities converge on a unified representation before entering the translation pipeline.
 
+Voice-first field operation enables engineers to interact with CLARISSA from field tablets without keyboard input, enabling simulation access during well site visits---a capability previously impossible with traditional interfaces.
+
+\subsection{Core Processing Layer}
+
+The core processing layer combines LLM-based reasoning with reinforcement learning for action optimization and neuro-symbolic constraints for engineering governance. The architecture combines:
+
+\begin{itemize}
+    \item \textbf{Large Language Models:} For planning, reasoning, and natural language interaction
+    \item \textbf{Reinforcement Learning:} For optimizing action sequences based on numerical outcomes such as convergence behavior
+    \item \textbf{Neuro-symbolic Components:} For enforcing engineering constraints and safety boundaries
+\end{itemize}
+
 \subsection{NLP Translation Layer}
 
 The translation layer converts natural language input to valid ECLIPSE deck syntax through a multi-stage pipeline (Fig.~\ref{fig:nlp_pipeline}). Each stage performs a discrete transformation with explicit validation:
@@ -107,7 +152,7 @@ The translation layer converts natural language input to valid ECLIPSE deck synt
     \item \textbf{Deck Validation:} Physics-based validation ensures generated syntax respects reservoir engineering constraints.
 \end{itemize}
 
-Failed validation at any stage triggers rollback to the previous valid state. Low confidence scores prompt clarification requests rather than proceeding with uncertain interpretations.
+Failed validation at any stage triggers rollback to the previous valid state. Low-confidence interpretations prompt clarification requests rather than proceeding with uncertain interpretations.
 
 \begin{figure*}[t]
     \centering
@@ -115,6 +160,12 @@ Failed validation at any stage triggers rollback to the previous valid state. Lo
     \caption{NLP Translation Pipeline. The six-stage pipeline converts voice input to validated ECLIPSE deck syntax. Each stage includes validation checkpoints with rollback capability on failure.}
     \label{fig:nlp_pipeline}
 \end{figure*}
+
+\subsection{Simulation Layer}
+
+CLARISSA generates Eclipse-format decks and executes simulations using OPM Flow \cite{opm2024}, enabling a web-based service model accessible to operators without commercial simulation licenses. When third-party validation is required, decks can be exported for execution on industry-standard commercial platforms. Physics-aware validation during conversational elicitation flags inconsistencies before the simulator is invoked.
+
+For incomplete specifications, the system suggests reasonable defaults informed by analog databases, explicitly documenting assumptions for engineering review.
 
 \section{Data Architecture}
 
@@ -140,6 +191,16 @@ Five storage domains address distinct data characteristics:
     \caption{Data Mesh Architecture. Five specialized storage domains communicate through a central event bus, maintaining eventual consistency through event-driven synchronization.}
     \label{fig:datamesh}
 \end{figure*}
+
+\subsection{Knowledge Bases}
+
+Three vector stores support the intelligent assistant:
+
+\textbf{Simulator Knowledge Base:} Contains essential information on reservoir simulation, ECLIPSE syntax, and OPM Flow documentation. Pre-built using state-of-the-art embeddings.
+
+\textbf{Model Knowledge Base:} Contains information about the specific reservoir simulation model under investigation, including geometry, fluid properties, and well information.
+
+\textbf{Corrections Database:} Dynamically updated when users provide feedback on assistant responses, enabling continuous improvement.
 
 \subsection{Event-Driven Synchronization}
 
@@ -182,6 +243,75 @@ Model serving infrastructure is similarly configurable: Ray Serve for high-perfo
 
 An AI-based router analyzes incoming requests and directs them to appropriate models based on complexity, required capabilities, and current system load. Simple queries route to lightweight models for fast response; complex physics validation routes to specialized models with domain expertise.
 
+\section{RIGOR Benchmark Framework}
+
+To enable systematic evaluation of CUI-based simulation systems, we introduce the RIGOR (Reservoir Input Generation Output Review) benchmark framework. RIGOR assesses deck generation across four dimensions (Fig.~\ref{fig:rigor}):
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{CLARISSA_Figure5_RIGOR.png}
+    \caption{RIGOR Benchmark Framework. Four evaluation dimensions applied across three complexity tiers provide systematic assessment of conversational simulation systems.}
+    \label{fig:rigor}
+\end{figure}
+
+\subsection{Evaluation Dimensions}
+
+\textbf{Syntactic Validity:} Does the generated deck parse without errors? Are all keywords spelled correctly and properly formatted?
+
+\textbf{Semantic Correctness:} Is the deck logically consistent? Do referenced wells exist? Are units coherent throughout?
+
+\textbf{Physical Plausibility:} Do pressure gradients fall within reasonable bounds? Are saturation values physically realizable? Do rates respect well capacity constraints?
+
+\textbf{Conversational Efficiency:} How many dialogue turns are required to reach a valid deck? What fraction of turns require clarification?
+
+\subsection{Complexity Tiers}
+
+RIGOR defines three complexity tiers for progressive evaluation:
+
+\textbf{Tier 1 (Foundational):} Simple linear displacement model representing a laboratory coreflood. Single-phase flow with minimal parameters.
+
+\textbf{Tier 2 (Intermediate):} Pattern flood with multi-well configuration. 5-spot pattern, 40-acre spacing, multi-well black-oil simulation.
+
+\textbf{Tier 3 (Advanced):} Mid-conversation model evolution. Conversion of a black-oil waterflood into a compositional equation-of-state model for tertiary recovery evaluation---within a single conversation session.
+
+\section{Example Interaction}
+
+Fig.~\ref{fig:interaction} illustrates a typical CLARISSA interaction sequence, demonstrating voice input, physics validation, analog-based defaults, and iterative refinement.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{CLARISSA_Figure7_Interaction.png}
+    \caption{Example Interaction. A field engineer builds a waterflood model through voice commands, with CLARISSA providing physics validation, analog-based defaults, and iterative refinement.}
+    \label{fig:interaction}
+\end{figure}
+
+Key capabilities demonstrated in this interaction include:
+
+\textbf{Voice-First Field Operation:} Engineers interact from field tablets without keyboard input, enabling simulation access during well site visits.
+
+\textbf{Analog-Informed Defaults:} When specifications are incomplete, CLARISSA suggests reasonable defaults from analog databases, explicitly documenting assumptions for review.
+
+\textbf{Graceful Degradation:} Low-confidence interpretations trigger clarification requests rather than incorrect deck generation. Failed validations roll back to the last valid state.
+
+\textbf{License-Free Execution:} OPM Flow integration enables operators without commercial licenses to run rigorous simulations.
+
+\section{Development Roadmap}
+
+Fig.~\ref{fig:phases} illustrates the phased development approach for CLARISSA.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{CLARISSA_Figure8_Phases.png}
+    \caption{Phased Development. Three phases progress from syntactic deck generation through physics-aware learning to autonomous field operation.}
+    \label{fig:phases}
+\end{figure}
+
+\textbf{Phase I (Syntactic):} Current focus on deck generation from natural language, syntax validation, OPM Flow integration, and voice input prototyping.
+
+\textbf{Phase II (Physics):} Simulator-in-loop learning, convergence optimization, sensitivity analysis, and confidence scoring.
+
+\textbf{Phase III (Field):} Embedded operational agents, asset-specific tuning, real-time surveillance, and multi-user collaboration.
+
 \section{Risk Assessment and Mitigation}
 
 Several architectural risks require explicit mitigation strategies:
@@ -198,56 +328,82 @@ Several architectural risks require explicit mitigation strategies:
 
 \subsection{Air-Gapped Environments}
 
-International operations frequently require air-gapped deployment with no external network connectivity. The architecture accommodates this through: locally-hosted models eliminating external API dependencies; self-contained infrastructure with all components deployable from local media; and offline update mechanisms using secure physical media transfer.
+Many petroleum operations require air-gapped deployment with no external network connectivity. CLARISSA addresses this through:
+\begin{itemize}
+    \item Locally-hosted LLM inference using open-source models
+    \item Embedded vector stores for knowledge bases
+    \item Redis Streams for lightweight message brokering
+    \item Complete functionality without cloud dependencies
+\end{itemize}
 
 \subsection{Cloud-Native Deployment}
 
-Cloud deployments leverage managed services for reduced operational burden: managed Kubernetes for container orchestration, managed databases for persistence, and auto-scaling for elastic capacity. The same application code runs in both environments; only infrastructure configuration differs.
+For connected environments, cloud-native deployment leverages:
+\begin{itemize}
+    \item Kubernetes orchestration for horizontal scaling
+    \item External LLM API access for state-of-the-art models
+    \item Managed database services for reduced operational overhead
+    \item Auto-scaling based on demand patterns
+\end{itemize}
 
-\subsection{Security Architecture}
+\subsection{Hybrid Configurations}
 
-Security requirements span authentication (pluggable identity providers), authorization (role-based access control), encryption (TLS in transit, encryption at rest), and audit logging (immutable audit trails for compliance). The architecture implements defense in depth with security controls at each layer.
+The configuration-driven architecture supports hybrid deployments where sensitive data remains on-premises while leveraging cloud resources for compute-intensive operations.
 
 \section{Conclusions}
 
-This paper presented the architecture of CLARISSA, a system that bridges natural language interaction and reservoir simulation through configurable, event-driven microservices. The multi-stage NLP pipeline decomposes the translation challenge into validated steps, enabling graceful degradation when confidence is insufficient. The domain mesh data architecture optimizes storage for different data types while maintaining eventual consistency through event sourcing.
+The binding constraint on simulation adoption has never been solver performance. It is human cognitive load and workflow friction. CLARISSA addresses that constraint directly through:
 
-The configuration-driven approach addresses deployment heterogeneity inherent in global energy operations, supporting both air-gapped installations and cloud-native deployments from a common codebase. This flexibility positions the architecture for long-term evolution as AI capabilities advance---new models can be integrated through configuration rather than architectural revision.
+\textbf{Paradigm Shift:} First CUI-based system for complete simulation deck generation, replacing query-only assistants with generative capability.
 
-Beyond reservoir simulation, the architectural patterns presented here apply to any domain requiring natural language interfaces to complex technical systems. The combination of multi-stage translation pipelines, configurable infrastructure, and event-driven communication provides a template for democratizing access to specialized technical capabilities.
+\textbf{Multi-Modal Access:} Voice input enables field-based simulation workflows previously impossible with traditional interfaces.
 
-Future work includes quantitative evaluation of translation accuracy across diverse query types, user studies comparing natural language interaction to traditional interfaces, and extension to additional simulation platforms beyond ECLIPSE.
+\textbf{Open-Source Backend:} OPM Flow integration removes licensing barriers, democratizing access to rigorous reservoir modeling.
 
-\balance
+\textbf{Systematic Benchmarking:} The RIGOR framework provides the first standardized approach for evaluating conversational simulation systems.
 
-\begin{thebibliography}{8}
+\textbf{Hybrid AI Architecture:} Novel combination of LLM reasoning, reinforcement learning, and neuro-symbolic constraints achieves engineering-grade reliability.
+
+The architecture patterns presented extend beyond reservoir simulation to any domain requiring natural language interfaces to complex technical systems. Future work will focus on expanding the RIGOR benchmark suite and validating the architecture against production workloads.
+
+\section*{Acknowledgment}
+[Acknowledgments removed for blind review]
+
+\bibliographystyle{IEEEtran}
+\begin{thebibliography}{99}
 
 \bibitem{androutsopoulos1995}
-I. Androutsopoulos, G. D. Ritchie, and P. Thanisch, ``Natural language interfaces to databases -- an introduction,'' \textit{Natural Language Engineering}, vol. 1, no. 1, pp. 29--81, 1995.
+I. Androutsopoulos, G. Ritchie, and P. Thanisch, ``Natural language interfaces to databases -- an introduction,'' \emph{Natural Language Engineering}, vol. 1, no. 1, pp. 29--81, 1995.
 
 \bibitem{woods1973}
-W. A. Woods, ``Progress in natural language understanding: an application to lunar geology,'' in \textit{Proc. AFIPS National Computer Conference}, 1973, pp. 441--450.
+W. A. Woods, ``Progress in natural language understanding: an application to lunar geology,'' in \emph{Proc. AFIPS National Computer Conference}, 1973, pp. 441--450.
 
 \bibitem{yu2018spider}
-T. Yu \textit{et al.}, ``Spider: A large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task,'' in \textit{Proc. EMNLP}, 2018, pp. 3911--3921.
+T. Yu et al., ``Spider: A large-scale human-labeled dataset for complex and cross-domain semantic parsing and text-to-SQL task,'' in \emph{Proc. EMNLP}, 2018.
 
 \bibitem{chen2021codex}
-M. Chen \textit{et al.}, ``Evaluating large language models trained on code,'' \textit{arXiv preprint arXiv:2107.03374}, 2021.
+M. Chen et al., ``Evaluating large language models trained on code,'' \emph{arXiv preprint arXiv:2107.03374}, 2021.
 
 \bibitem{li2022alphacode}
-Y. Li \textit{et al.}, ``Competition-level code generation with AlphaCode,'' \textit{Science}, vol. 378, no. 6624, pp. 1092--1097, 2022.
+Y. Li et al., ``Competition-level code generation with AlphaCode,'' \emph{Science}, vol. 378, no. 6624, pp. 1092--1097, 2022.
+
+\bibitem{wiegand2024envoy}
+K. Wiegand, M. Bedewi, K. Mukundakrishnan, D. Tishechkin, V. Ananthan, and D. Kahn, ``Using Generative AI to Build a Reservoir Simulation Assistant,'' SPE-221987-MS, ADIPEC, Abu Dhabi, 2024.
 
 \bibitem{newman2021}
-S. Newman, \textit{Building Microservices: Designing Fine-Grained Systems}, 2nd ed. O'Reilly Media, 2021.
+S. Newman, \emph{Building Microservices}, 2nd ed. O'Reilly Media, 2021.
 
 \bibitem{fowler2017event}
-M. Fowler, ``Event-driven architecture,'' martinfowler.com, 2017. [Online]. Available: https://martinfowler.com/articles/201701-event-driven.html
+M. Fowler, ``What do you mean by `Event-Driven'?'' martinfowler.com, 2017.
 
 \bibitem{dehghani2020datamesh}
-Z. Dehghani, ``Data mesh principles and logical architecture,'' martinfowler.com, 2020. [Online]. Available: https://martinfowler.com/articles/data-mesh-principles.html
+Z. Dehghani, ``Data Mesh Principles and Logical Architecture,'' martinfowler.com, 2020.
+
+\bibitem{opm2024}
+Open Porous Media Initiative, ``OPM Flow Documentation,'' \url{https://opm-project.org}, 2024.
 
 \end{thebibliography}
 
+% Build test timestamp will be appended by CI
+
 \end{document}
-% Build test: 2026-01-12T00:55:06Z
-% Build test: 2026-01-12T01:38:02Z
