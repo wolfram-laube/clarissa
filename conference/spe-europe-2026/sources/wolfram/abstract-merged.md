@@ -305,3 +305,5 @@ flowchart LR
 *Prepared for SPE Europe Energy Conference 2026*
 
 <!-- Last updated: 2026-01-11T23:10:32Z - mermaid quote fix -->
+
+<!-- Build trigger: 2026-01-12T11:50:23Z -->
