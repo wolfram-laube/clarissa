@@ -2,140 +2,45 @@
 # Uses Chromium headless for PDF generation (renders Mermaid correctly)
 
 variables:
-  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
   DOC_BASE_PATH: "conference/spe-europe-2026"
 
 stages:
-  - detect
-  - normalize  
-  - compare
-  - merge
   - render_diagrams
   - generate
-  - commit
 
 # ============================================================
-# Stage 1: Detect changes (unchanged)
-# ============================================================
-detect_changes:
-  stage: detect
-  image: alpine:latest
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
-      changes:
-        - "conference/spe-europe-2026/sources/**/*"
-        - "conference/spe-europe-2026/merged/**/*"
-  script:
-    - apk add --no-cache git
-    - |
-      echo "Detecting changes in source documents..."
-      git diff --name-only ${CI_COMMIT_BEFORE_SHA:-HEAD~1} ${CI_COMMIT_SHA} > changed_files.txt || true
-      cat changed_files.txt
-      grep -q "sources/\|merged/" changed_files.txt && echo "SOURCES_CHANGED=true" >> build.env || echo "SOURCES_CHANGED=false" >> build.env
-      cat build.env
-  artifacts:
-    reports:
-      dotenv: build.env
-    paths:
-      - changed_files.txt
-    expire_in: 1 hour
-
-# ============================================================
-# Stage 5: Pre-render Mermaid diagrams to SVG
+# Pre-render Mermaid diagrams to SVG with larger fonts
 # ============================================================
 render_diagrams:
   stage: render_diagrams
-  image: node:20-slim
+  image: minlag/mermaid-cli:latest
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
       changes:
         - "conference/spe-europe-2026/**/*"
-    - when: manual
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: manual
       allow_failure: true
-  before_script:
-    - apt-get update && apt-get install -y chromium
-    - npm install -g @mermaid-js/mermaid-cli
   script:
+    - mkdir -p rendered-diagrams
     - |
-      mkdir -p rendered-diagrams
-      
-      echo "=== Rendering Mermaid diagrams with larger fonts ==="
-      
-      # Create mermaid config for larger fonts
-      cat > mermaid-config.json << 'MERMAIDCFG'
-      {
-        "theme": "base",
-        "themeVariables": {
-          "primaryColor": "#e8f0f8",
-          "primaryTextColor": "#003366",
-          "primaryBorderColor": "#003366",
-          "lineColor": "#0066cc",
-          "fontSize": "16px",
-          "fontFamily": "Arial, Helvetica, sans-serif"
-        },
-        "flowchart": {
-          "useMaxWidth": false,
-          "htmlLabels": true,
-          "curve": "basis"
-        },
-        "sequence": {
-          "useMaxWidth": false,
-          "fontSize": "16px"
-        },
-        "timeline": {
-          "useMaxWidth": false
-        }
-      }
-      MERMAIDCFG
-      
-      # Render each .mmd file
+      echo '{"theme":"base","themeVariables":{"primaryColor":"#e8f0f8","primaryTextColor":"#003366","fontSize":"16px"}}' > mermaid-config.json
+    - |
       for mmd in ${DOC_BASE_PATH}/diagrams/*.mmd; do
         [ -f "$mmd" ] || continue
         name=$(basename "$mmd" .mmd)
         echo "Rendering: $name"
-        mmdc -i "$mmd" -o "rendered-diagrams/${name}.svg" -c mermaid-config.json -w 1200 -H 800 --scale 2 || true
-        mmdc -i "$mmd" -o "rendered-diagrams/${name}.png" -c mermaid-config.json -w 1200 -H 800 --scale 2 || true
+        mmdc -i "$mmd" -o "rendered-diagrams/${name}.svg" -c mermaid-config.json -w 1200 --scale 2 || true
+        mmdc -i "$mmd" -o "rendered-diagrams/${name}.png" -c mermaid-config.json -w 1200 --scale 2 || true
       done
-      
-      # Also extract and render inline mermaid from the merged markdown
-      if [ -f "${DOC_BASE_PATH}/merged/abstract-merged.md" ]; then
-        echo "=== Extracting inline Mermaid from abstract-merged.md ==="
-        python3 << 'PYEXTRACT'
-import re
-from pathlib import Path
-
-md_content = Path("${DOC_BASE_PATH}/merged/abstract-merged.md".replace("${DOC_BASE_PATH}", "conference/spe-europe-2026")).read_text()
-
-# Find all mermaid blocks
-pattern = r'```mermaid\n(.*?)```'
-matches = re.findall(pattern, md_content, re.DOTALL)
-
-for i, mermaid_code in enumerate(matches, 1):
-    filename = f"rendered-diagrams/inline-diagram-{i}.mmd"
-    Path(filename).write_text(mermaid_code.strip())
-    print(f"Extracted diagram {i}: {len(mermaid_code)} chars")
-PYEXTRACT
-
-        # Render extracted diagrams
-        for mmd in rendered-diagrams/inline-diagram-*.mmd; do
-          [ -f "$mmd" ] || continue
-          name=$(basename "$mmd" .mmd)
-          echo "Rendering inline: $name"
-          mmdc -i "$mmd" -o "rendered-diagrams/${name}.svg" -c mermaid-config.json -w 1200 --scale 2 || true
-          mmdc -i "$mmd" -o "rendered-diagrams/${name}.png" -c mermaid-config.json -w 1200 --scale 2 || true
-        done
-      fi
-      
-      echo "=== Rendered diagrams ==="
-      ls -la rendered-diagrams/
+    - ls -la rendered-diagrams/
   artifacts:
     paths:
       - rendered-diagrams/
-      - mermaid-config.json
     expire_in: 1 week
 
 # ============================================================
-# Stage 6: Generate All Output Formats (FIXED)
+# Generate PDF from HTML via Chromium (renders Mermaid!)
 # ============================================================
 generate_outputs:
   stage: generate
@@ -147,133 +52,41 @@ generate_outputs:
     - if: $CI_PIPELINE_SOURCE == "push"
       changes:
         - "conference/spe-europe-2026/**/*"
-    - when: manual
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: manual
       allow_failure: true
-  before_script:
-    - apk add --no-cache nodejs npm python3
-    - npm install -g puppeteer
   script:
+    - mkdir -p doc-outputs
+    - apk add --no-cache nodejs npm
+    - npm install puppeteer
     - |
-      mkdir -p doc-outputs
-      
-      echo "=== Method 1: HTML to PDF via Puppeteer (preserves Mermaid) ==="
-      
-      if [ -f "${DOC_BASE_PATH}/merged/abstract-merged.html" ]; then
-        echo "Converting HTML to PDF with Chromium..."
-        
-        node << 'PUPPETEER_SCRIPT'
-const puppeteer = require('puppeteer');
-const fs = require('fs');
-const path = require('path');
-
-(async () => {
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
-  
-  const page = await browser.newPage();
-  
-  // Read HTML file
-  const htmlPath = 'conference/spe-europe-2026/merged/abstract-merged.html';
-  const htmlContent = fs.readFileSync(htmlPath, 'utf8');
-  
-  // Set content and wait for Mermaid to render
-  await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-  
-  // Wait extra time for Mermaid diagrams
-  await page.waitForTimeout(3000);
-  
-  // Generate PDF with proper settings
-  await page.pdf({
-    path: 'doc-outputs/abstract-merged.pdf',
-    format: 'A4',
-    margin: { top: '2cm', right: '2cm', bottom: '2cm', left: '2cm' },
-    printBackground: true,
-    preferCSSPageSize: true
-  });
-  
-  console.log('PDF generated successfully!');
-  await browser.close();
-})();
-PUPPETEER_SCRIPT
-        
-      else
-        echo "No HTML found, falling back to pandoc..."
-      fi
-      
-      echo "=== Copy HTML (already good) ==="
-      cp ${DOC_BASE_PATH}/merged/abstract-merged.html doc-outputs/ || true
-      
-      echo "=== Generate DOCX from Markdown ==="
-      # Install pandoc for DOCX
-      apk add --no-cache pandoc
-      
-      if [ -f "${DOC_BASE_PATH}/merged/abstract-merged.md" ]; then
-        # For DOCX, replace mermaid blocks with image references
-        python3 << 'PYDOCX'
-import re
-from pathlib import Path
-
-md_path = Path("conference/spe-europe-2026/merged/abstract-merged.md")
-md_content = md_path.read_text()
-
-# Replace mermaid blocks with image references
-def replace_mermaid(match):
-    global counter
-    counter = getattr(replace_mermaid, 'counter', 0) + 1
-    replace_mermaid.counter = counter
-    return f'![Diagram {counter}](rendered-diagrams/inline-diagram-{counter}.png)'
-
-md_for_docx = re.sub(r'```mermaid\n.*?```', replace_mermaid, md_content, flags=re.DOTALL)
-Path("doc-outputs/abstract-for-docx.md").write_text(md_for_docx)
-print(f"Replaced {replace_mermaid.counter} mermaid blocks")
-PYDOCX
-        
-        pandoc doc-outputs/abstract-for-docx.md -o doc-outputs/abstract-merged.docx \
-          --resource-path=.:rendered-diagrams || true
-      fi
-      
-      echo "=== Generated files ==="
-      ls -la doc-outputs/
+      cat > generate-pdf.js << 'JSEOF'
+      const puppeteer = require('puppeteer');
+      const fs = require('fs');
+      (async () => {
+        const browser = await puppeteer.launch({
+          headless: 'new',
+          args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
+        const html = fs.readFileSync('conference/spe-europe-2026/merged/abstract-merged.html', 'utf8');
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        await new Promise(r => setTimeout(r, 3000));
+        await page.pdf({
+          path: 'doc-outputs/abstract-merged.pdf',
+          format: 'A4',
+          margin: { top: '2cm', right: '2cm', bottom: '2cm', left: '2cm' },
+          printBackground: true
+        });
+        console.log('PDF generated!');
+        await browser.close();
+      })();
+      JSEOF
+    - node generate-pdf.js
+    - cp ${DOC_BASE_PATH}/merged/abstract-merged.html doc-outputs/
+    - ls -la doc-outputs/
   artifacts:
     paths:
       - doc-outputs/
     expire_in: 1 month
     name: "spe-abstract-${CI_COMMIT_SHORT_SHA}"
-
-# ============================================================
-# Stage 7: Commit Back (unchanged)
-# ============================================================
-commit_outputs:
-  stage: commit
-  image: alpine/git:latest
-  needs:
-    - generate_outputs
-    - render_diagrams
-  rules:
-    - when: manual
-  script:
-    - |
-      git config user.email "ci@clarissa.local"
-      git config user.name "CLARISSA CI Bot"
-      git remote set-url origin "https://oauth2:${CI_JOB_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git"
-      
-      # Update rendered diagrams
-      mkdir -p ${DOC_BASE_PATH}/merged/diagrams
-      cp rendered-diagrams/*.svg ${DOC_BASE_PATH}/merged/diagrams/ 2>/dev/null || true
-      cp rendered-diagrams/*.png ${DOC_BASE_PATH}/merged/diagrams/ 2>/dev/null || true
-      
-      # Update outputs
-      cp doc-outputs/* ${DOC_BASE_PATH}/merged/ 2>/dev/null || true
-      
-      git add ${DOC_BASE_PATH}/merged/
-      git commit -m "docs: regenerate SPE abstract with fixed diagrams
-
-      - Mermaid rendered to SVG/PNG with 16px fonts
-      - PDF generated via Chromium (Mermaid renders correctly)
-      - Figure captions preserved from HTML
-
-      Pipeline: ${CI_PIPELINE_URL}" || echo "No changes to commit"
-      
-      git push origin HEAD:${CI_COMMIT_REF_NAME} || echo "Push failed or no changes"
