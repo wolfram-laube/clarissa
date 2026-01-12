@@ -8,7 +8,7 @@
 
 **Authors:**  
 - Douglas Perschke, Stone Ridge Technology, USA  
-- Michal Matejka, Independent Consultant, Czech Republic  
+- Michal Matejka, Independent Consultant, Houston, USA  
 - Wolfram Laube, Independent Researcher, Austria  
 
 ---
