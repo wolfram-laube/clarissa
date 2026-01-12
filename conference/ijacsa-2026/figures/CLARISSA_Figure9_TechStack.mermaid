@@ -1,0 +1,20 @@
+flowchart TB
+    subgraph FRONTEND["Frontend Layer"]
+        A["Web UI (React)"]
+        B["Voice SDK (Whisper)"]
+        C["REST API (FastAPI)"]
+    end
+    
+    subgraph CORE["Core Processing"]
+        D["LLM (Claude/GPT)"]
+        E["RL Agent (PPO)"]
+        F["Constraint Engine (Z3)"]
+    end
+    
+    subgraph BACKEND["Backend Layer"]
+        G["OPM Flow"]
+        H["Deck Generator"]
+        I["Vector DB (pgvector)"]
+    end
+
+    FRONTEND --> CORE --> BACKEND
