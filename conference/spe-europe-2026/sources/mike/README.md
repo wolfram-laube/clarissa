@@ -1,3 +1,3 @@
-# Trigger
-2026-01-13T13:41:28.263393
-Fix: debian + pandoc
+# LLM Merge Trigger
+Triggered: 2026-01-13T14:12:35.937776
+Fix: proper markdown library
