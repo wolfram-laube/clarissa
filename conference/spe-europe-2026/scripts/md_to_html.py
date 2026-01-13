@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Robust Markdown to HTML converter for SPE abstract with Mermaid support.
-v2: Fixed numbered lists, better paragraph handling
+v3: Handle numbered lists with blank lines between items
 """
 import re
 from pathlib import Path
@@ -13,13 +13,12 @@ def convert_md_to_html(md_content: str) -> str:
     md = re.sub(r'^```markdown\s*\n', '', md_content)
     md = re.sub(r'\n```\s*$', '', md)
     
-    # Store mermaid blocks temporarily (protect from other processing)
+    # Store mermaid blocks temporarily
     mermaid_blocks = []
     def store_mermaid(match):
         idx = len(mermaid_blocks)
         mermaid_blocks.append(match.group(1))
         return f'MERMAID_PLACEHOLDER_{idx}'
-    
     md = re.sub(r'```mermaid\n(.*?)```', store_mermaid, md, flags=re.DOTALL)
     
     # Store code blocks temporarily
@@ -30,13 +29,16 @@ def convert_md_to_html(md_content: str) -> str:
         code = match.group(2)
         code_blocks.append((lang, code))
         return f'CODE_PLACEHOLDER_{idx}'
-    
     md = re.sub(r'```(\w*)\n(.*?)```', store_code, md, flags=re.DOTALL)
+    
+    # Pre-process: Consolidate numbered lists (remove blank lines between consecutive numbered items)
+    # Match pattern: "1. text\n\n2. text" -> "1. text\n2. text"
+    md = re.sub(r'(\d+\.\s+[^\n]+)\n\n+(?=\d+\.\s+)', r'\1\n', md)
     
     # Convert horizontal rules
     md = re.sub(r'^---+\s*$', '<hr>', md, flags=re.MULTILINE)
     
-    # Convert headers (must be done before other processing)
+    # Convert headers
     md = re.sub(r'^### (.+)$', r'<h3>\1</h3>', md, flags=re.MULTILINE)
     md = re.sub(r'^## (.+)$', r'<h2>\1</h2>', md, flags=re.MULTILINE)
     md = re.sub(r'^# (.+)$', r'<h1>\1</h1>', md, flags=re.MULTILINE)
@@ -45,7 +47,7 @@ def convert_md_to_html(md_content: str) -> str:
     md = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', md)
     md = re.sub(r'\*(.+?)\*', r'<em>\1</em>', md)
     
-    # Convert lists (both unordered and ordered)
+    # Convert lists
     lines = md.split('\n')
     result = []
     in_ul = False
@@ -64,7 +66,7 @@ def convert_md_to_html(md_content: str) -> str:
                 in_ul = True
             item_content = stripped[2:]
             result.append(f'  <li>{item_content}</li>')
-        # Ordered list item (1. or 1) format)
+        # Ordered list item
         elif re.match(r'^\d+[\.\)]\s+', stripped):
             if in_ul:
                 result.append('</ul>')
@@ -104,8 +106,7 @@ def convert_md_to_html(md_content: str) -> str:
         replacement = f'<div class="mermaid">\n{mermaid_code}</div>'
         md = md.replace(f'MERMAID_PLACEHOLDER_{idx}', replacement)
     
-    # Convert paragraphs (double newlines)
-    # Split by block elements and wrap text in <p>
+    # Convert paragraphs
     blocks = re.split(r'(<h[123]>.*?</h[123]>|<hr>|<ul>.*?</ul>|<ol>.*?</ol>|<div class="mermaid">.*?</div>|<pre>.*?</pre>|<table>.*?</table>)', md, flags=re.DOTALL)
     
     result_blocks = []
@@ -113,17 +114,14 @@ def convert_md_to_html(md_content: str) -> str:
         block = block.strip()
         if not block:
             continue
-        # Skip if already wrapped in block element
         if block.startswith('<h') or block.startswith('<hr') or block.startswith('<ul') or \
            block.startswith('<ol') or block.startswith('<div') or block.startswith('<pre') or block.startswith('<table'):
             result_blocks.append(block)
         else:
-            # Wrap paragraphs
             paragraphs = re.split(r'\n\n+', block)
             for p in paragraphs:
                 p = p.strip()
                 if p:
-                    # Convert single newlines to <br> within paragraph
                     p = p.replace('\n', ' ')
                     result_blocks.append(f'<p>{p}</p>')
     
@@ -140,11 +138,9 @@ def convert_tables(md: str) -> str:
     for line in lines:
         stripped = line.strip()
         
-        # Detect table row
         if '|' in stripped and stripped.startswith('|') and stripped.endswith('|'):
             cells = [c.strip() for c in stripped.split('|')[1:-1]]
             
-            # Skip separator row
             if all(set(c) <= set('-: ') for c in cells):
                 is_header = False
                 continue
@@ -173,7 +169,6 @@ def convert_tables(md: str) -> str:
 
 
 def main():
-    # HTML template with proper styling
     html_template = '''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -291,7 +286,6 @@ mermaid.initialize({{
 </body>
 </html>'''
 
-    # Read source
     md_path = Path("conference/spe-europe-2026/merged/abstract-merged.md")
     if not md_path.exists():
         print(f"❌ Source not found: {md_path}")
@@ -300,11 +294,9 @@ mermaid.initialize({{
     md_content = md_path.read_text(encoding='utf-8')
     print(f"📖 Read {len(md_content)} chars from {md_path}")
     
-    # Convert
     html_body = convert_md_to_html(md_content)
     html_full = html_template.format(content=html_body)
     
-    # Save
     out_dir = Path("doc-outputs")
     out_dir.mkdir(exist_ok=True)
     
