@@ -1,5 +1,4 @@
 # document-merge.gitlab-ci.yml - LLM-based document merge for SPE abstract
-# Uses Anthropic Claude as primary, OpenAI GPT-4 as fallback
 
 # ============================================================
 # LLM Merge - Combine Doug + Wolfram contributions
@@ -22,6 +21,7 @@ llm_merge:
   script:
     - pip install anthropic openai python-docx --quiet
     - python3 conference/spe-europe-2026/scripts/llm_merge.py
+    - echo "=== First 80 lines ==="
     - head -80 conference/spe-europe-2026/merged/abstract-merged.md
   artifacts:
     paths:
@@ -29,13 +29,13 @@ llm_merge:
     expire_in: 1 week
 
 # ============================================================
-# Convert MD to HTML with Mermaid support
+# Convert MD to HTML with Pandoc + Mermaid
 # ============================================================
 build_html:
   stage: test
   tags:
     - docker
-  image: python:3.11-slim
+  image: pandoc/latex:latest
   needs:
     - job: llm_merge
       optional: true
@@ -47,8 +47,72 @@ build_html:
       when: manual
       allow_failure: true
   script:
-    - python3 conference/spe-europe-2026/scripts/md_to_html.py
+    - mkdir -p doc-outputs
+    - |
+      # Convert MD to HTML with pandoc
+      pandoc conference/spe-europe-2026/merged/abstract-merged.md \
+        -f markdown \
+        -t html5 \
+        --standalone \
+        --metadata title="CLARISSA - SPE Europe 2026" \
+        -o doc-outputs/temp.html
+    - |
+      # Inject Mermaid JS and custom CSS
+      cat > doc-outputs/header.html << 'HEADER'
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+      <style>
+        body { 
+          font-family: 'Segoe UI', Tahoma, sans-serif; 
+          max-width: 850px; 
+          margin: 0 auto; 
+          padding: 2rem; 
+          line-height: 1.6;
+          font-size: 11pt;
+          color: #333;
+        }
+        h1 { color: #003366; border-bottom: 3px solid #003366; padding-bottom: 0.5rem; }
+        h2 { color: #003366; margin-top: 2rem; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem; }
+        h3 { color: #0066cc; }
+        p { margin: 0.8em 0; text-align: justify; }
+        pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Consolas, Monaco, monospace; font-size: 0.9em; }
+        table { border-collapse: collapse; width: 100%; margin: 1.5rem 0; }
+        th, td { border: 1px solid #ddd; padding: 0.6rem; text-align: left; }
+        th { background: #003366; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .mermaid, pre code.language-mermaid { 
+          background: #f8f9fa; 
+          padding: 1rem; 
+          margin: 1.5rem 0; 
+          border-radius: 8px;
+          display: block;
+        }
+        hr { border: none; border-top: 2px solid #003366; margin: 2rem 0; }
+        strong { color: #003366; }
+      </style>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          // Convert code blocks with mermaid class to mermaid divs
+          document.querySelectorAll('pre code.language-mermaid, pre.mermaid').forEach(function(el) {
+            var div = document.createElement('div');
+            div.className = 'mermaid';
+            div.textContent = el.textContent;
+            el.parentNode.replaceWith(div);
+          });
+          mermaid.initialize({
+            startOnLoad: true, 
+            theme: 'base',
+            themeVariables: { primaryColor: '#e8f0f8', primaryTextColor: '#003366', fontSize: '14px' }
+          });
+        });
+      </script>
+      HEADER
+    - |
+      # Inject header into HTML
+      sed -i 's|</head>|'"$(cat doc-outputs/header.html | tr '\n' ' ')"'</head>|' doc-outputs/temp.html
+      mv doc-outputs/temp.html doc-outputs/abstract-merged.html
     - ls -la doc-outputs/
+    - head -50 doc-outputs/abstract-merged.html
   artifacts:
     paths:
       - doc-outputs/
@@ -77,7 +141,6 @@ generate_pdf:
     - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
     - export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
   script:
-    - mkdir -p doc-outputs
     - |
       cat > generate-pdf.js << 'JSEOF'
       const puppeteer = require('puppeteer');
@@ -91,7 +154,8 @@ generate_pdf:
         const page = await browser.newPage();
         const html = fs.readFileSync('doc-outputs/abstract-merged.html', 'utf8');
         await page.setContent(html, { waitUntil: 'networkidle0' });
-        await new Promise(r => setTimeout(r, 3000));
+        // Wait for Mermaid to render
+        await new Promise(r => setTimeout(r, 4000));
         await page.pdf({
           path: 'doc-outputs/abstract-merged.pdf',
           format: 'A4',
