@@ -43,22 +43,56 @@ The CLARISSA architecture comprises six primary layers, each addressing distinct
 
 ```mermaid
 flowchart TB
-    UI["User Interface Layer<br/>Voice - Chat - Web - API"]
-    TRANS["Translation Layer<br/>NL Parser - Confidence - Rollback"]
-    KNOW[("Knowledge Layer<br/>Vector Store - Corrections - Analogs")]
-    CORE{{"CLARISSA Core<br/>LLM + RL Agent + Neuro-Symbolic"}}
-    VALID["Validation Layer<br/>Syntax - Semantic - Physics"]
-    GEN["Generation Layer<br/>Deck Gen - Templates - Defaults"]
-    SIM[["Simulation Layer<br/>OPM Flow - Export - Results"]]
+    subgraph UI["User Interface Layer"]
+        VOICE[Voice Input]
+        TEXT[Text Chat]
+        WEB[Web Interface]
+        API[REST API]
+    end
+
+    subgraph TRANS["Translation Layer"]
+        NLP[NL Parser]
+        CONF[Confidence Scorer]
+        ROLL[Rollback Manager]
+    end
+
+    subgraph CORE["CLARISSA Core"]
+        LLM[LLM Layer]
+        RL[RL Agent]
+        NSC[Neuro-Symbolic]
+    end
+
+    subgraph VALID["Validation Layer"]
+        SYN[Syntax Validator]
+        SEM[Semantic Checker]
+        PHY[Physics Validator]
+    end
+
+    subgraph GEN["Generation Layer"]
+        DECK[Deck Generator]
+        TMPL[Template Engine]
+        DEF[Default Suggester]
+    end
+
+    subgraph SIM["Simulation Layer"]
+        OPM[OPM Flow]
+        EXP[Eclipse Export]
+        RES[Result Parser]
+    end
+
+    subgraph KB["Knowledge Layer"]
+        VEC[(Vector Store)]
+        COR[(Corrections DB)]
+        ANA[(Analog Database)]
+    end
 
     UI --> TRANS
-    TRANS --> KNOW
-    KNOW --> CORE
+    TRANS --> CORE
     CORE --> VALID
     VALID --> GEN
     GEN --> SIM
-    SIM -.->|feedback| CORE
-    TRANS -.->|low conf| UI
+    KB -.-> CORE
+    SIM -.->|feedback| RL
 ```
 
 **User Interface Layer:** Supports multiple interaction modalities—voice input for hands-free operation in field environments, text chat for detailed technical discussions, web interfaces for visual feedback and result exploration, and REST APIs for programmatic integration.
@@ -76,41 +110,38 @@ flowchart TB
 ### 2.2 Phased Development
 
 ```mermaid
-timeline
-    title CLARISSA Development Phases
-    
-    section Phase I - Syntactic
-        Current Focus : Deck generation from NL
-                      : Syntax validation
-                      : OPM Flow integration
-                      : Basic error correction
-                      : Voice input prototype
-    
-    section Phase II - Physics  
-        Next Phase : Simulator-in-loop learning
-                   : Convergence optimization
-                   : Sensitivity analysis
-                   : Analog-based defaults
-                   : Confidence scoring
-    
-    section Phase III - Field
-        Future Vision : Embedded operational agents
-                      : Asset-specific tuning
-                      : Real-time surveillance
-                      : Autonomous workflows
-                      : Multi-user collaboration
+flowchart LR
+    subgraph P1["Phase I: Syntactic"]
+        A1[Deck generation from NL]
+        A2[Syntax validation]
+        A3[OPM Flow integration]
+    end
+
+    subgraph P2["Phase II: Physics"]
+        B1[Simulator-in-loop learning]
+        B2[Convergence optimization]
+        B3[Analog-based defaults]
+    end
+
+    subgraph P3["Phase III: Field"]
+        C1[Embedded operational agents]
+        C2[Real-time surveillance]
+        C3[Multi-user collaboration]
+    end
+
+    P1 --> P2 --> P3
 ```
 
 ### 2.3 Comparison with Prior Work
 
 ```mermaid
 flowchart LR
-    subgraph ENVOY["Envoy SPE-221987"]
+    subgraph ENVOY["Envoy (SPE-221987)"]
         direction TB
-        E1["Query existing models"]
-        E2["Retrieve documentation"]
-        E3["RAG + Callbacks"]
-        E4["ECHELON Proprietary"]
+        E1[Query existing models]
+        E2[Retrieve documentation]
+        E3[RAG + Callbacks]
+        E4[ECHELON<br/>Proprietary]
         E1 --> E3
         E2 --> E3
         E3 --> E4
@@ -118,16 +149,16 @@ flowchart LR
 
     subgraph CLARISSA["CLARISSA"]
         direction TB
-        C1["Generate new decks"]
-        C2["Physics validation"]
-        C3["RL + Neuro-symbolic"]
-        C4["OPM Flow Open Source"]
+        C1[Generate new decks]
+        C2[Physics validation]
+        C3[RL + Neuro-symbolic]
+        C4[OPM Flow<br/>Open Source]
         C1 --> C3
         C2 --> C3
         C3 --> C4
     end
 
-    ENVOY -.->|evolution| CLARISSA
+    ENVOY -.->|"evolution"| CLARISSA
 ```
 
 | Aspect | Envoy (SPE-221987) | CLARISSA |
@@ -158,44 +189,40 @@ flowchart TB
     end
 
     subgraph TIERS["Complexity Tiers"]
-        T1["Tier 1: Foundational"]
-        T2["Tier 2: Intermediate"]
-        T3["Tier 3: Advanced"]
+        T1["Tier 1: Foundational<br/>Linear displacement"]
+        T2["Tier 2: Intermediate<br/>Pattern flood, 5-spot"]
+        T3["Tier 3: Advanced<br/>Black-oil to Compositional"]
     end
 
-    D1 --- TIERS
-    D2 --- TIERS
-    D3 --- TIERS
-    D4 --- TIERS
-    T1 -->|progression| T2
-    T2 -->|progression| T3
+    DIMS --> T1
+    T1 --> T2 --> T3
 ```
 
 ### 3.2 Example Interaction
 
 ```mermaid
 sequenceDiagram
-    participant E as Engineer
-    participant C as CLARISSA  
+    participant E as Field Engineer
+    participant C as CLARISSA
     participant V as Validator
     participant S as OPM Flow
 
-    Note over E: Voice input
-    E->>C: Waterflood 5-spot 40-acre
-    C->>C: Parse intent
-    C->>E: Depth and pressure?
-    E->>C: 8500ft 3800psi
-    C->>V: Validate gradient
-    V-->>C: 0.45 psi/ft OK
-    C->>C: Generate deck
-    C->>E: 200md from analogs?
-    E->>C: Use 150md
-    Note over C: Update deck
-    C->>S: Run simulation
-    S-->>C: Results ready
-    C->>E: Done 47s
-    E->>C: Try other spacings
-    C->>C: Queue runs
+    Note over E: Voice input from field tablet
+    E->>C: I need a waterflood model, 5-spot pattern
+    C->>C: Parse intent (confidence: 0.92)
+    C->>E: What is the reservoir depth and initial pressure?
+    E->>C: 8500 ft TVD, about 3800 psi
+    C->>V: Validate pressure gradient
+    V-->>C: 0.45 psi/ft plausible
+    C->>C: Generate ECLIPSE deck
+    C->>E: Assumed 200 md permeability from analogs. Confirm?
+    E->>C: Use 150 md, we have core data
+    Note over C: Update deck, log override
+    C->>S: Execute simulation
+    S-->>C: Results + convergence data
+    C->>E: Complete in 47s. Breakthrough at 18 months.
+    E->>C: Try 20 and 80 acre spacing
+    C->>C: Queue sensitivity runs
 ```
 
 ### 3.3 Key Capabilities Demonstrated
@@ -228,27 +255,25 @@ The binding constraint on simulation adoption has never been solver performance.
 
 ```mermaid
 flowchart LR
-    subgraph FRONTEND["Frontend"]
-        A["Web UI - React"]
-        B["Voice SDK - Whisper"]
-        C["REST API - FastAPI"]
+    subgraph FE["Frontend"]
+        A[Web UI - React]
+        B[Voice - Whisper]
+        C[API - FastAPI]
     end
     
     subgraph CORE["Core"]
-        D["LLM - Claude/GPT"]
-        E["RL Agent - PPO"]
-        F["Constraints - Z3"]
+        D[LLM - Claude]
+        E[RL Agent - PPO]
+        F[Constraints - Z3]
     end
     
-    subgraph BACKEND["Backend"]
-        G["OPM Flow"]
-        H["Deck Generator"]
-        I["Result Parser"]
-        J["Vector DB"]
+    subgraph BE["Backend"]
+        G[OPM Flow]
+        H[Deck Generator]
+        I[Vector DB]
     end
 
-    FRONTEND --> CORE
-    CORE --> BACKEND
+    FE --> CORE --> BE
 ```
 
 ---
