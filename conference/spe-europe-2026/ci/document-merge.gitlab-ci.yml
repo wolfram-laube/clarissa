@@ -1,5 +1,4 @@
 # document-merge.gitlab-ci.yml - LLM-based document merge for SPE abstract
-# Uses existing stages from main CI: build, test, deploy
 
 # ============================================================
 # LLM Merge - Combine Doug + Wolfram contributions
@@ -20,68 +19,8 @@ llm_merge:
     ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
   script:
     - pip install anthropic python-docx --quiet
-    - |
-      python3 << 'PYEOF'
-      import os
-      import anthropic
-      from docx import Document
-      from pathlib import Path
-
-      def extract_docx(path):
-          doc = Document(path)
-          return "\n".join(p.text for p in doc.paragraphs if p.text.strip())
-
-      def read_file(path):
-          return Path(path).read_text(encoding='utf-8') if Path(path).exists() else ""
-
-      print("📖 Reading sources...")
-      base = Path("conference/spe-europe-2026")
-      
-      doug = extract_docx(str(base / "sources/doug/SPE_Meeting_Abstract_v6_2_in_Submission_Form.docx"))
-      wolfram = read_file(str(base / "sources/wolfram/abstract-merged.md"))
-      synthesis = read_file(str(base / "abstract-synthesis.md"))
-      
-      print(f"   Doug: {len(doug)} chars, Wolfram: {len(wolfram)} chars")
-
-      print("\n🤖 Calling Claude API...")
-      client = anthropic.Anthropic()
-      
-      prompt = f"""Merge these SPE conference paper contributions into ONE comprehensive Markdown document.
-
-## Doug's SPE Form:
-{doug}
-
-## Wolfram's Draft with Diagrams:
-{wolfram}
-
-## Current Synthesis:
-{synthesis}
-
-## Output Requirements:
-1. Pure Markdown with ```mermaid code blocks for diagrams
-2. SPE structure: Abstract, Objectives, Methods, Results, Novelty, References
-3. Include ALL Mermaid diagrams from Wolfram's version
-4. Include comparison table (Envoy vs CLARISSA)
-5. Authors: Douglas Perschke (Stone Ridge Technology), Michal Matejka (Independent Consultant), Wolfram Laube (Independent Researcher)
-6. Full paper length (~3000-4000 words)
-
-Output ONLY the Markdown, no explanations."""
-
-      msg = client.messages.create(
-          model="claude-sonnet-4-20250514",
-          max_tokens=8000,
-          messages=[{"role": "user", "content": prompt}]
-      )
-      
-      merged = msg.content[0].text
-      
-      out_dir = base / "merged"
-      out_dir.mkdir(exist_ok=True)
-      (out_dir / "abstract-merged.md").write_text(merged)
-      
-      print(f"✅ Merged: {len(merged)} chars")
-      PYEOF
-    - cat conference/spe-europe-2026/merged/abstract-merged.md | head -50
+    - python3 conference/spe-europe-2026/scripts/llm_merge.py
+    - head -50 conference/spe-europe-2026/merged/abstract-merged.md
   artifacts:
     paths:
       - conference/spe-europe-2026/merged/abstract-merged.md
@@ -94,7 +33,7 @@ build_html:
   stage: test
   tags:
     - docker
-  image: node:20-alpine
+  image: python:3.11-slim
   needs:
     - job: llm_merge
       optional: true
@@ -105,66 +44,8 @@ build_html:
     - if: $CI_PIPELINE_SOURCE == "web"
       when: manual
       allow_failure: true
-  before_script:
-    - apk add --no-cache python3
   script:
-    - mkdir -p doc-outputs
-    - |
-      cat > doc-outputs/abstract-merged.html << 'HTMLHEAD'
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-          <meta charset="UTF-8">
-          <title>CLARISSA - SPE Europe 2026</title>
-          <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-          <style>
-              body { font-family: 'Segoe UI', sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; font-size: 16px; }
-              h1 { color: #003366; border-bottom: 3px solid #003366; }
-              h2 { color: #003366; margin-top: 2rem; }
-              h3 { color: #0066cc; }
-              pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
-              code { font-family: 'Consolas', monospace; }
-              table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-              th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
-              th { background: #003366; color: white; }
-              .mermaid { background: #f8f9fa; padding: 1rem; margin: 1rem 0; }
-          </style>
-      </head>
-      <body>
-      <script>mermaid.initialize({startOnLoad:true, theme:'base', themeVariables:{primaryColor:'#e8f0f8',primaryTextColor:'#003366',fontSize:'16px'}});</script>
-      HTMLHEAD
-    - |
-      python3 << 'PYEOF'
-      import re
-      from pathlib import Path
-
-      md = Path("conference/spe-europe-2026/merged/abstract-merged.md").read_text()
-      
-      # Convert mermaid code blocks to div
-      md = re.sub(r'```mermaid\n(.*?)```', r'<div class="mermaid">\n\1</div>', md, flags=re.DOTALL)
-      
-      # Headers
-      md = re.sub(r'^### (.+)$', r'<h3>\1</h3>', md, flags=re.MULTILINE)
-      md = re.sub(r'^## (.+)$', r'<h2>\1</h2>', md, flags=re.MULTILINE)
-      md = re.sub(r'^# (.+)$', r'<h1>\1</h1>', md, flags=re.MULTILINE)
-      
-      # Bold/Italic
-      md = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', md)
-      md = re.sub(r'\*(.+?)\*', r'<em>\1</em>', md)
-      
-      # Code blocks
-      md = re.sub(r'```(\w+)?\n(.*?)```', r'<pre><code>\2</code></pre>', md, flags=re.DOTALL)
-      
-      # Paragraphs
-      md = re.sub(r'\n\n+', '\n</p>\n<p>\n', md)
-      md = '<p>\n' + md + '\n</p>'
-      
-      with open('doc-outputs/abstract-merged.html', 'a') as f:
-          f.write(md)
-          f.write('\n</body></html>')
-      
-      print("✅ HTML generated")
-      PYEOF
+    - python3 conference/spe-europe-2026/scripts/md_to_html.py
     - ls -la doc-outputs/
   artifacts:
     paths:
