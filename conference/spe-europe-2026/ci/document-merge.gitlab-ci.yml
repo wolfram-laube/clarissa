@@ -1,13 +1,50 @@
-# document-merge.gitlab-ci.yml - Document generation for SPE abstract
+# document-merge.gitlab-ci.yml - LLM-powered document merge and PDF generation
+
+stages:
+  - merge
+  - render
+  - build
 
 # ============================================================
-# Render Mermaid diagrams
+# LLM Merge - Combines all author contributions
+# ============================================================
+llm_merge:
+  stage: merge
+  tags:
+    - docker
+  image: python:3.11-slim
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - "conference/spe-europe-2026/sources/**/*"
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: manual
+      allow_failure: true
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    paths:
+      - .cache/pip
+  before_script:
+    - pip install openai python-docx --quiet
+  script:
+    - python conference/spe-europe-2026/scripts/llm_merge_abstract.py
+  artifacts:
+    paths:
+      - conference/spe-europe-2026/merged/abstract-merged.md
+    expire_in: 1 week
+
+# ============================================================
+# Render Mermaid diagrams to SVG
 # ============================================================
 render_diagrams:
-  stage: build
+  stage: render
   tags:
     - docker
   image: node:20-alpine
+  needs:
+    - job: llm_merge
+      optional: true
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
       changes:
@@ -37,16 +74,80 @@ render_diagrams:
     expire_in: 1 week
 
 # ============================================================
+# Convert Markdown to HTML with embedded diagrams
+# ============================================================
+build_html:
+  stage: build
+  tags:
+    - docker
+  image: pandoc/core:latest
+  needs:
+    - job: llm_merge
+      optional: true
+    - job: render_diagrams
+      optional: true
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - "conference/spe-europe-2026/**/*"
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: manual
+      allow_failure: true
+  script:
+    - mkdir -p doc-outputs
+    - |
+      cat > spe-template.html << 'TMPLEOF'
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>$title$</title>
+          <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+          <style>
+              :root { --spe-blue: #003366; --spe-light: #e8f0f8; }
+              body { font-family: 'Segoe UI', sans-serif; line-height: 1.7; max-width: 1000px; margin: 0 auto; padding: 2rem; font-size: 16px; }
+              h1 { color: var(--spe-blue); font-size: 1.8rem; border-bottom: 3px solid var(--spe-blue); padding-bottom: 0.5rem; }
+              h2 { color: var(--spe-blue); font-size: 1.4rem; margin-top: 2rem; }
+              h3 { color: #0066cc; font-size: 1.15rem; }
+              pre.mermaid { background: var(--spe-light); padding: 1rem; border-radius: 8px; }
+              code { background: #f5f5f5; padding: 0.2em 0.4em; border-radius: 3px; }
+              pre code { display: block; padding: 1rem; overflow-x: auto; }
+              table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+              th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
+              th { background: var(--spe-light); }
+              .mermaid { text-align: center; margin: 1.5rem 0; }
+          </style>
+      </head>
+      <body>
+      $body$
+      <script>mermaid.initialize({startOnLoad:true, theme:'base', themeVariables:{primaryColor:'#e8f0f8',primaryTextColor:'#003366'}});</script>
+      </body>
+      </html>
+      TMPLEOF
+    - |
+      pandoc conference/spe-europe-2026/merged/abstract-merged.md \
+        --standalone \
+        --template=spe-template.html \
+        --metadata title="CLARISSA: A Conversational User Interface for Democratizing Reservoir Simulation" \
+        -o doc-outputs/abstract-merged.html
+    - cp conference/spe-europe-2026/merged/abstract-merged.md doc-outputs/
+    - ls -la doc-outputs/
+  artifacts:
+    paths:
+      - doc-outputs/
+    expire_in: 1 week
+
+# ============================================================
 # Generate PDF via Chromium
 # ============================================================
-generate_spe_pdf:
-  stage: deploy
+build_pdf:
+  stage: build
   tags:
     - docker
   image: node:20-alpine
   needs:
-    - job: render_diagrams
-      optional: true
+    - job: build_html
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
       changes:
@@ -57,13 +158,14 @@ generate_spe_pdf:
   before_script:
     - apk add --no-cache chromium
     - npm install puppeteer
+    - export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
     - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
   script:
-    - mkdir -p doc-outputs
     - |
       cat > generate-pdf.js << 'JSEOF'
       const puppeteer = require('puppeteer');
       const fs = require('fs');
+      const path = require('path');
       (async () => {
         const browser = await puppeteer.launch({
           headless: 'new',
@@ -71,9 +173,9 @@ generate_spe_pdf:
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
         const page = await browser.newPage();
-        const html = fs.readFileSync('conference/spe-europe-2026/merged/abstract-merged.html', 'utf8');
-        await page.setContent(html, { waitUntil: 'networkidle0' });
-        await new Promise(r => setTimeout(r, 3000));
+        const htmlPath = path.resolve('doc-outputs/abstract-merged.html');
+        await page.goto('file://' + htmlPath, { waitUntil: 'networkidle0' });
+        await new Promise(r => setTimeout(r, 3000)); // Wait for Mermaid
         await page.pdf({
           path: 'doc-outputs/abstract-merged.pdf',
           format: 'A4',
@@ -85,7 +187,6 @@ generate_spe_pdf:
       })();
       JSEOF
     - node generate-pdf.js
-    - cp conference/spe-europe-2026/merged/abstract-merged.html doc-outputs/
     - ls -la doc-outputs/
   artifacts:
     paths:
