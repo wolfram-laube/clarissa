@@ -2,8 +2,12 @@
 """LLM-based document merge for SPE Europe 2026 with OpenAI fallback."""
 import os
 import sys
-from docx import Document
 from pathlib import Path
+
+# Install dependencies
+os.system("pip install anthropic openai python-docx --quiet")
+
+from docx import Document
 
 def extract_docx(path):
     doc = Document(path)
@@ -35,14 +39,14 @@ def call_openai(prompt):
     return response.choices[0].message.content
 
 def main():
-    print("Reading sources...")
+    print("📖 Reading sources...")
     base = Path("conference/spe-europe-2026")
 
     doug = extract_docx(str(base / "sources/doug/SPE_Meeting_Abstract_v6_2_in_Submission_Form.docx"))
     wolfram = read_file(str(base / "sources/wolfram/abstract-merged.md"))
     synthesis = read_file(str(base / "abstract-synthesis.md"))
 
-    print(f"  Doug: {len(doug)} chars, Wolfram: {len(wolfram)} chars, Synthesis: {len(synthesis)} chars")
+    print(f"   Doug: {len(doug)} chars, Wolfram: {len(wolfram)} chars, Synthesis: {len(synthesis)} chars")
 
     prompt = f"""Merge these SPE conference paper contributions into ONE comprehensive Markdown document.
 
@@ -56,13 +60,14 @@ def main():
 {synthesis}
 
 ## Output Requirements:
-1. Pure Markdown with mermaid code blocks for diagrams (use triple backticks with mermaid)
+1. Pure Markdown with mermaid code blocks for diagrams (use triple backticks with mermaid language tag)
 2. SPE structure: Abstract, Objectives, Methods, Results, Novelty, References
 3. Include ALL Mermaid diagrams from Wolfram's version (architecture, phases, RIGOR, techstack, comparison)
 4. Include comparison table (Envoy vs CLARISSA)
 5. Authors: Douglas Perschke (Stone Ridge Technology), Michal Matejka (Independent Consultant), Wolfram Laube (Independent Researcher)
 6. Full paper length (3000-4000 words)
-7. Keep the technical depth from Wolfram's version
+7. Conference: SPE Europe Energy Conference 2026
+8. Category: 05 Digital Transformation and AI / 05.6 ML and AI in Subsurface Operations
 
 Output ONLY the Markdown document, no explanations or preamble."""
 
@@ -70,24 +75,25 @@ Output ONLY the Markdown document, no explanations or preamble."""
     
     # Try Anthropic first
     if os.environ.get('ANTHROPIC_API_KEY'):
-        print("\nTrying Anthropic Claude API...")
+        print("\n🤖 Trying Anthropic Claude...")
         try:
             merged = call_anthropic(prompt)
-            print("  Success with Anthropic!")
+            print("   ✅ Anthropic succeeded")
         except Exception as e:
-            print(f"  Anthropic failed: {e}")
+            print(f"   ⚠️ Anthropic failed: {e}")
     
     # Fallback to OpenAI
     if merged is None and os.environ.get('OPENAI_API_KEY'):
-        print("\nFalling back to OpenAI GPT-4...")
+        print("\n🤖 Falling back to OpenAI GPT-4o...")
         try:
             merged = call_openai(prompt)
-            print("  Success with OpenAI!")
+            print("   ✅ OpenAI succeeded")
         except Exception as e:
-            print(f"  OpenAI failed: {e}")
+            print(f"   ❌ OpenAI failed: {e}")
+            sys.exit(1)
     
     if merged is None:
-        print("\nERROR: Both API calls failed!")
+        print("❌ No LLM API available (set ANTHROPIC_API_KEY or OPENAI_API_KEY)")
         sys.exit(1)
 
     # Save output
@@ -95,8 +101,8 @@ Output ONLY the Markdown document, no explanations or preamble."""
     out_dir.mkdir(exist_ok=True)
     (out_dir / "abstract-merged.md").write_text(merged)
 
-    print(f"\nMerged: {len(merged)} chars saved to {out_dir / 'abstract-merged.md'}")
-    return 0
+    print(f"\n✅ Merged document: {len(merged)} chars")
+    print(f"   Saved to: {out_dir / 'abstract-merged.md'}")
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

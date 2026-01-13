@@ -19,8 +19,8 @@ llm_merge:
     ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     OPENAI_API_KEY: ${OPENAI_API_KEY}
   script:
-    - pip install anthropic openai python-docx --quiet
     - python3 conference/spe-europe-2026/scripts/llm_merge.py
+    - echo "=== First 80 lines of merged document ==="
     - head -80 conference/spe-europe-2026/merged/abstract-merged.md
   artifacts:
     paths:
