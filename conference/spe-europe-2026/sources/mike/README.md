@@ -1,3 +1,3 @@
 # LLM Merge Trigger
-Triggered: 2026-01-13T12:22:49.609850
-With OpenAI fallback
+Triggered: 2026-01-13T13:09:08.731279
+Added OpenAI fallback

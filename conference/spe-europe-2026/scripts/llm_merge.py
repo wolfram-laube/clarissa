@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""LLM-based document merge for SPE Europe 2026 with Anthropic/OpenAI fallback."""
+"""LLM-based document merge for SPE Europe 2026.
+Uses Anthropic Claude as primary, OpenAI GPT-4 as fallback.
+"""
 import os
 import sys
 from docx import Document
@@ -25,8 +27,8 @@ def call_anthropic(prompt):
 
 def call_openai(prompt):
     """Fallback to OpenAI GPT-4."""
-    from openai import OpenAI
-    client = OpenAI()
+    import openai
+    client = openai.OpenAI()
     response = client.chat.completions.create(
         model="gpt-4o",
         max_tokens=8000,
@@ -37,68 +39,66 @@ def call_openai(prompt):
 def main():
     print("📖 Reading sources...")
     base = Path("conference/spe-europe-2026")
-
+    
     doug = extract_docx(str(base / "sources/doug/SPE_Meeting_Abstract_v6_2_in_Submission_Form.docx"))
     wolfram = read_file(str(base / "sources/wolfram/abstract-merged.md"))
     synthesis = read_file(str(base / "abstract-synthesis.md"))
-
-    print(f"   Doug: {len(doug)} chars, Wolfram: {len(wolfram)} chars, Synthesis: {len(synthesis)} chars")
-
+    
+    print(f"   Doug: {len(doug)} chars, Wolfram: {len(wolfram)} chars")
+    
     prompt = f"""Merge these SPE conference paper contributions into ONE comprehensive Markdown document.
 
-## Doug's SPE Submission Form:
+## Doug's SPE Form:
 {doug}
 
-## Wolfram's Draft with Architecture and Diagrams:
+## Wolfram's Draft with Diagrams:
 {wolfram}
 
-## Current Synthesis (for reference):
+## Current Synthesis:
 {synthesis}
 
 ## Output Requirements:
 1. Pure Markdown with mermaid code blocks for diagrams (use triple backticks with mermaid language tag)
-2. SPE structure: Title, Authors, Abstract, 1. Objectives/Scope, 2. Methods/Procedures, 3. Results/Conclusions, 4. Novelty, References
-3. Include ALL Mermaid diagrams from Wolfram's version (architecture, phases, RIGOR, techstack, comparison)
-4. Include the comparison table (Envoy vs CLARISSA)
-5. Authors: Douglas Perschke (Stone Ridge Technology, USA), Michal Matejka (Independent Consultant, Houston, USA), Wolfram Laube (Independent Researcher, Austria)
-6. Full paper length: 3000-4000 words total
-7. Conference: SPE Europe Energy Conference 2026
-8. Category: 05 Digital Transformation and AI / 05.6 ML and AI in Subsurface Operations
+2. SPE structure: Abstract, Objectives, Methods, Results, Novelty, References
+3. Include ALL Mermaid diagrams from Wolfram's version (system architecture, development phases, RIGOR benchmark, technical stack, comparison flowchart)
+4. Include comparison table (Envoy vs CLARISSA)
+5. Authors: Douglas Perschke (Stone Ridge Technology), Michal Matejka (Independent Consultant), Wolfram Laube (Independent Researcher)
+6. Full paper length (3000-4000 words)
 
-Output ONLY the merged Markdown document, no explanations or preamble."""
+Output ONLY the Markdown document, no explanations or preamble."""
 
     merged = None
     
     # Try Anthropic first
     if os.environ.get('ANTHROPIC_API_KEY'):
-        print("\n🤖 Trying Anthropic Claude API...")
+        print("\n🤖 Trying Anthropic Claude...")
         try:
             merged = call_anthropic(prompt)
-            print("   ✅ Anthropic succeeded!")
+            print("   ✅ Anthropic succeeded")
         except Exception as e:
             print(f"   ⚠️ Anthropic failed: {e}")
     
     # Fallback to OpenAI
     if merged is None and os.environ.get('OPENAI_API_KEY'):
-        print("\n🔄 Falling back to OpenAI GPT-4...")
+        print("\n🤖 Falling back to OpenAI GPT-4o...")
         try:
             merged = call_openai(prompt)
-            print("   ✅ OpenAI succeeded!")
+            print("   ✅ OpenAI succeeded")
         except Exception as e:
             print(f"   ❌ OpenAI failed: {e}")
             sys.exit(1)
     
     if merged is None:
-        print("❌ No API keys available or all APIs failed!")
+        print("❌ No LLM API available!")
         sys.exit(1)
-
+    
     # Save output
     out_dir = base / "merged"
     out_dir.mkdir(exist_ok=True)
     (out_dir / "abstract-merged.md").write_text(merged)
-
-    print(f"\n✅ Merged document saved: {len(merged)} chars")
-    print(f"   Location: {out_dir / 'abstract-merged.md'}")
+    
+    print(f"\n✅ Merged: {len(merged)} chars saved to {out_dir / 'abstract-merged.md'}")
+    return 0
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

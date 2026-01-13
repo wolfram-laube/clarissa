@@ -1,4 +1,5 @@
 # document-merge.gitlab-ci.yml - LLM-based document merge for SPE abstract
+# Uses Anthropic Claude as primary, OpenAI GPT-4 as fallback
 
 # ============================================================
 # LLM Merge - Combine Doug + Wolfram contributions
