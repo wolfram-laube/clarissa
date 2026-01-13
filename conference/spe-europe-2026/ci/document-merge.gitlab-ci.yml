@@ -1,15 +1,11 @@
 # document-merge.gitlab-ci.yml - LLM-powered document merge and PDF generation
-
-stages:
-  - merge
-  - render
-  - build
+# Uses existing stages from main .gitlab-ci.yml: build, test, classify, automation, deploy
 
 # ============================================================
 # LLM Merge - Combines all author contributions
 # ============================================================
 llm_merge:
-  stage: merge
+  stage: build
   tags:
     - docker
   image: python:3.11-slim
@@ -38,7 +34,7 @@ llm_merge:
 # Render Mermaid diagrams to SVG
 # ============================================================
 render_diagrams:
-  stage: render
+  stage: build
   tags:
     - docker
   image: node:20-alpine
@@ -74,13 +70,13 @@ render_diagrams:
     expire_in: 1 week
 
 # ============================================================
-# Convert Markdown to HTML with embedded diagrams
+# Generate PDF via Chromium (stage: deploy)
 # ============================================================
-build_html:
-  stage: build
+generate_spe_pdf:
+  stage: deploy
   tags:
     - docker
-  image: pandoc/core:latest
+  image: node:20-alpine
   needs:
     - job: llm_merge
       optional: true
@@ -93,8 +89,14 @@ build_html:
     - if: $CI_PIPELINE_SOURCE == "web"
       when: manual
       allow_failure: true
+  before_script:
+    - apk add --no-cache chromium pandoc
+    - npm install puppeteer
+    - export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
+    - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
   script:
     - mkdir -p doc-outputs
+    # Create HTML template
     - |
       cat > spe-template.html << 'TMPLEOF'
       <!DOCTYPE html>
@@ -125,42 +127,19 @@ build_html:
       </body>
       </html>
       TMPLEOF
+    # Convert MD to HTML
     - |
-      pandoc conference/spe-europe-2026/merged/abstract-merged.md \
-        --standalone \
-        --template=spe-template.html \
-        --metadata title="CLARISSA: A Conversational User Interface for Democratizing Reservoir Simulation" \
-        -o doc-outputs/abstract-merged.html
-    - cp conference/spe-europe-2026/merged/abstract-merged.md doc-outputs/
-    - ls -la doc-outputs/
-  artifacts:
-    paths:
-      - doc-outputs/
-    expire_in: 1 week
-
-# ============================================================
-# Generate PDF via Chromium
-# ============================================================
-build_pdf:
-  stage: build
-  tags:
-    - docker
-  image: node:20-alpine
-  needs:
-    - job: build_html
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
-      changes:
-        - "conference/spe-europe-2026/**/*"
-    - if: $CI_PIPELINE_SOURCE == "web"
-      when: manual
-      allow_failure: true
-  before_script:
-    - apk add --no-cache chromium
-    - npm install puppeteer
-    - export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
-    - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-  script:
+      if [ -f conference/spe-europe-2026/merged/abstract-merged.md ]; then
+        pandoc conference/spe-europe-2026/merged/abstract-merged.md \
+          --standalone \
+          --template=spe-template.html \
+          --metadata title="CLARISSA: A Conversational User Interface for Democratizing Reservoir Simulation" \
+          -o doc-outputs/abstract-merged.html
+      else
+        echo "Using existing HTML"
+        cp conference/spe-europe-2026/merged/abstract-merged.html doc-outputs/ 2>/dev/null || true
+      fi
+    # Generate PDF with Puppeteer
     - |
       cat > generate-pdf.js << 'JSEOF'
       const puppeteer = require('puppeteer');
@@ -175,7 +154,7 @@ build_pdf:
         const page = await browser.newPage();
         const htmlPath = path.resolve('doc-outputs/abstract-merged.html');
         await page.goto('file://' + htmlPath, { waitUntil: 'networkidle0' });
-        await new Promise(r => setTimeout(r, 3000)); // Wait for Mermaid
+        await new Promise(r => setTimeout(r, 3000));
         await page.pdf({
           path: 'doc-outputs/abstract-merged.pdf',
           format: 'A4',
@@ -187,6 +166,8 @@ build_pdf:
       })();
       JSEOF
     - node generate-pdf.js
+    - |
+      [ -f conference/spe-europe-2026/merged/abstract-merged.md ] && cp conference/spe-europe-2026/merged/abstract-merged.md doc-outputs/
     - ls -la doc-outputs/
   artifacts:
     paths:
