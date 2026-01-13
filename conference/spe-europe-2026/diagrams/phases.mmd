@@ -1,20 +1,18 @@
-timeline
-    title CLARISSA Development Phases
-    
-    section Phase I
-        Syntactic Assistance : Deck generation from NL
-                            : Syntax validation
-                            : OPM Flow integration
-                            : Basic error correction
-    
-    section Phase II  
-        Physics-Informed : Simulator-in-loop learning
-                        : Convergence optimization
-                        : Sensitivity analysis
-                        : Analog-based defaults
-    
-    section Phase III
-        Field-Specialized : Embedded operational agents
-                         : Asset-specific tuning
-                         : Real-time surveillance
-                         : Autonomous workflows
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '16px'}}}%%
+flowchart LR
+    P1["<b>PHASE I</b><br/>Syntactic<br/><i>Current</i>"]
+    P2["<b>PHASE II</b><br/>Physics<br/><i>Next</i>"]
+    P3["<b>PHASE III</b><br/>Field<br/><i>Future</i>"]
+
+    P1 ==> P2 ==> P3
+
+    P1 -..- D1["✓ Deck from NL<br/>✓ OPM Flow<br/>✓ Voice input"]
+    P2 -..- D2["○ Simulator-in-loop<br/>○ Analog defaults<br/>○ Confidence scoring"]
+    P3 -..- D3["◇ Operational agents<br/>◇ Asset tuning<br/>◇ Multi-user"]
+
+    style P1 fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    style P2 fill:#fff9c4,stroke:#f9a825,stroke-width:2px
+    style P3 fill:#e1bee7,stroke:#7b1fa2,stroke-width:1px
+    style D1 fill:#f5f5f5,stroke:#aaa
+    style D2 fill:#f5f5f5,stroke:#aaa
+    style D3 fill:#f5f5f5,stroke:#aaa

@@ -1,19 +1,30 @@
-flowchart LR
-    subgraph UI["Frontend"]
-        A["Web UI"]
-        B["REST API"]
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '16px'}}}%%
+flowchart TB
+    subgraph FE["🖥️ FRONTEND"]
+        A["Web UI<br/>React"]
+        B["Voice SDK<br/>Whisper"]
+        C["REST API<br/>FastAPI"]
     end
     
-    subgraph CORE["Core"]
-        C["LLM (Claude/GPT)"]
-        D["RL Agent"]
-        E["Constraint Engine"]
+    subgraph CO["🧠 CORE"]
+        D["LLM<br/>Claude / GPT-4"]
+        E["RL Agent<br/>PPO"]
+        F["Constraints<br/>Z3 / Prolog"]
     end
     
-    subgraph SIM["Simulation"]
-        F["OPM Flow"]
-        G["Deck Generator"]
-        H["Result Parser"]
+    subgraph BE["⚙️ BACKEND"]
+        G["OPM Flow<br/>Simulator"]
+        H["Deck<br/>Generator"]
+        I["Result<br/>Parser"]
+        J[("Vector DB<br/>pgvector")]
     end
 
-    UI --> CORE --> SIM
+    FE --> CO
+    CO --> BE
+    
+    I -->|"convergence<br/>feedback"| E
+    J -->|"context<br/>retrieval"| D
+
+    style FE fill:#e3f2fd,stroke:#1565c0
+    style CO fill:#fff3e0,stroke:#ef6c00
+    style BE fill:#e8f5e9,stroke:#2e7d32

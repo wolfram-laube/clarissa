@@ -1,41 +1,42 @@
-flowchart TB
-    subgraph USER["User Interface Layer"]
-        CUI[Conversational UI]
-        WEB[Web Interface]
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '15px'}}}%%
+flowchart LR
+    subgraph IN["INPUT"]
+        A["🎤💬🌐⚡<br/>User Interface"]
     end
 
-    subgraph CORE["CLARISSA Core"]
-        LLM[LLM Layer<br/>Planning & Reasoning]
-        RL[RL Agent<br/>Action Optimization]
-        NSC[Neuro-Symbolic<br/>Constraints & Governance]
+    subgraph TRANS["TRANSLATION"]
+        B["NL Parser<br/>+ Confidence"]
     end
 
-    subgraph SIMULATION["Simulation Layer"]
-        VAL[Physics Validator]
-        GEN[Deck Generator]
-        OPM[OPM Flow]
-        EXP[Eclipse Export]
+    subgraph CORE["CLARISSA CORE"]
+        C["LLM + RL<br/>+ Constraints"]
     end
 
-    subgraph KNOWLEDGE["Knowledge Layer"]
-        VDB[(Vector Store<br/>Simulator KB)]
-        ADB[(Analog Database)]
-        CDB[(Corrections DB)]
+    subgraph VAL["VALIDATION"]
+        D["Syntax<br/>Semantic<br/>Physics"]
     end
 
-    CUI <--> LLM
-    WEB <--> CUI
-    LLM <--> RL
-    LLM <--> NSC
-    NSC -.->|enforces| RL
+    subgraph GEN["GENERATION"]
+        E["Deck<br/>Generator"]
+    end
+
+    subgraph SIM["SIMULATION"]
+        F["OPM Flow"]
+    end
+
+    KB[("📚<br/>Knowledge<br/>Base")]
+
+    IN --> TRANS --> CORE --> VAL
+    VAL -->|"✓"| GEN --> SIM
+    VAL -->|"✗"| CORE
     
-    LLM --> VAL
-    VAL --> GEN
-    GEN --> OPM
-    GEN --> EXP
-    
-    OPM -->|feedback| RL
-    
-    VDB --> LLM
-    ADB --> VAL
-    CDB --> LLM
+    KB -.-> CORE
+    SIM -.->|"feedback"| CORE
+
+    style IN fill:#e3f2fd
+    style TRANS fill:#fff9c4
+    style CORE fill:#fff3e0
+    style VAL fill:#f3e5f5
+    style GEN fill:#c8e6c9
+    style SIM fill:#e8f5e9
+    style KB fill:#fce4ec

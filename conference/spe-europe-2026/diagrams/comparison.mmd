@@ -1,24 +1,31 @@
-flowchart LR
-    subgraph ENVOY["Envoy (SPE-221987)"]
-        direction TB
-        E1[Query existing models]
-        E2[Retrieve documentation]
-        E3[RAG + Callbacks]
-        E4[ECHELON<br/>Proprietary]
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '16px'}}}%%
+flowchart TB
+    subgraph ENVOY["📖 ENVOY — SPE-221987"]
+        E1["Query Existing<br/>Models"]
+        E2["Retrieve<br/>Documentation"]
+        E3["RAG +<br/>Callbacks"]
+        E4["ECHELON<br/>Proprietary"]
+        
         E1 --> E3
         E2 --> E3
         E3 --> E4
     end
 
-    subgraph CLARISSA["CLARISSA"]
-        direction TB
-        C1[Generate new decks]
-        C2[Physics validation]
-        C3[RL + Neuro-symbolic]
-        C4[OPM Flow<br/>Open Source]
-        C1 --> C3
+    subgraph CLARISSA["🚀 CLARISSA"]
+        C1["Natural Language<br/>Input"]
+        C2["LLM + RL +<br/>Neuro-Symbolic"]
+        C3["Generate<br/>Deck"]
+        C4["Physics<br/>Validation"]
+        C5["OPM Flow<br/>Open Source"]
+        
+        C1 --> C2
         C2 --> C3
         C3 --> C4
+        C4 -->|"✓ valid"| C5
+        C4 -->|"✗ invalid"| C2
     end
 
-    ENVOY -.->|"evolution"| CLARISSA
+    ENVOY -.->|"EVOLUTION"| CLARISSA
+
+    style ENVOY fill:#ffcdd2,stroke:#c62828
+    style CLARISSA fill:#c8e6c9,stroke:#2e7d32

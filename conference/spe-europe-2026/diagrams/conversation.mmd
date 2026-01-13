@@ -1,18 +1,38 @@
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '14px', 'actorFontSize': '16px', 'messageFontSize': '14px', 'noteFontSize': '12px'}}}%%
 sequenceDiagram
-    participant E as Engineer
-    participant C as CLARISSA
-    participant V as Validator
-    participant S as OPM Flow
+    participant E as 👷 Engineer
+    participant C as 🤖 CLARISSA
+    participant V as ✓ Validator
+    participant S as ⚙️ OPM Flow
 
-    E->>C: "I need a waterflood model,<br/>5-spot pattern, 40 acre spacing"
-    C->>C: Parse intent, identify gaps
-    C->>E: "What's the reservoir depth<br/>and initial pressure?"
-    E->>C: "8,500 ft TVD, 3,800 psi"
-    C->>V: Validate physics constraints
-    V-->>C: Pressure gradient plausible
-    C->>C: Generate ECLIPSE deck
-    C->>E: "I've assumed 200 md permeability<br/>based on analogous formations.<br/>Confirm or adjust?"
-    E->>C: "Use 150 md"
-    C->>S: Execute simulation
-    S-->>C: Results + convergence data
-    C->>E: "Simulation complete.<br/>Water breakthrough at 18 months.<br/>Want sensitivity on spacing?"
+    Note over E: Voice from tablet
+    
+    E->>C: Waterflood model, 5-spot, 40 acres
+    
+    C->>C: Parse intent
+    Note right of C: Confidence: 92%<br/>Missing: depth, pressure
+    
+    C->>E: Reservoir depth and pressure?
+    E->>C: 8,500 ft TVD, 3,800 psi
+    
+    C->>V: Check pressure gradient
+    V-->>C: ✓ 0.45 psi/ft OK
+    
+    C->>C: Generate deck
+    Note right of C: Analog defaults:<br/>Perm: 200 md<br/>Porosity: 18%
+    
+    C->>E: Assumed 200 md from analogs. OK?
+    E->>C: Use 150 md - have core data
+    
+    Note over C: Log override, update deck
+    
+    C->>V: Final validation
+    V-->>C: ✓ All checks pass
+    
+    C->>S: Run simulation
+    S-->>C: Results (47s, converged)
+    
+    C->>E: Done! Breakthrough 18 months.<br/>Run spacing sensitivity?
+    E->>C: Yes, try 20 and 80 acres
+    
+    Note right of C: Queue: 2 jobs
