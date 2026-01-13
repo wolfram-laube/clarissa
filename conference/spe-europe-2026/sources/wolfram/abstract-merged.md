@@ -43,57 +43,22 @@ The CLARISSA architecture comprises six primary layers, each addressing distinct
 
 ```mermaid
 flowchart TB
-    subgraph USER["User Interface Layer"]
-        VOICE["Voice Input"]
-        TEXT["Text Chat"]
-        WEB["Web Interface"]
-        API["REST API"]
-    end
+    UI["User Interface Layer<br/>Voice - Chat - Web - API"]
+    TRANS["Translation Layer<br/>NL Parser - Confidence - Rollback"]
+    KNOW[("Knowledge Layer<br/>Vector Store - Corrections - Analogs")]
+    CORE{{"CLARISSA Core<br/>LLM + RL Agent + Neuro-Symbolic"}}
+    VALID["Validation Layer<br/>Syntax - Semantic - Physics"]
+    GEN["Generation Layer<br/>Deck Gen - Templates - Defaults"]
+    SIM[["Simulation Layer<br/>OPM Flow - Export - Results"]]
 
-    subgraph TRANSLATION["Translation Layer"]
-        NLP["NL Parser"]
-        CONF["Confidence Scorer"]
-        ROLL["Rollback Manager"]
-    end
-
-    subgraph KNOWLEDGE["Knowledge Layer"]
-        VS["Vector Store"]
-        CDB["Corrections DB"]
-        ANALOG["Analog Database"]
-    end
-
-    subgraph CORE["CLARISSA Core"]
-        LLM["LLM Layer"]
-        RL["RL Agent"]
-        NS["Neuro-Symbolic"]
-    end
-
-    subgraph VALIDATION["Validation Layer"]
-        SYN["Syntax Validator"]
-        SEM["Semantic Checker"]
-        PHYS["Physics Validator"]
-    end
-
-    subgraph GENERATION["Generation Layer"]
-        DECK["Deck Generator"]
-        TMPL["Template Engine"]
-        DEF["Default Suggester"]
-    end
-
-    subgraph SIMULATION["Simulation Layer"]
-        OPM["OPM Flow"]
-        ECL["Eclipse Export"]
-        RES["Result Parser"]
-    end
-
-    USER --> TRANSLATION
-    TRANSLATION --> CORE
-    KNOWLEDGE --> CORE
-    CORE --> VALIDATION
-    CORE --> GENERATION
-    VALIDATION --> GENERATION
-    GENERATION --> SIMULATION
-    SIMULATION -.->|feedback| CORE
+    UI --> TRANS
+    TRANS --> KNOW
+    KNOW --> CORE
+    CORE --> VALID
+    VALID --> GEN
+    GEN --> SIM
+    SIM -.->|feedback| CORE
+    TRANS -.->|low conf| UI
 ```
 
 **User Interface Layer:** Supports multiple interaction modalities—voice input for hands-free operation in field environments, text chat for detailed technical discussions, web interfaces for visual feedback and result exploration, and REST APIs for programmatic integration.
@@ -210,27 +175,27 @@ flowchart TB
 
 ```mermaid
 sequenceDiagram
-    participant E as Field Engineer
-    participant C as CLARISSA
+    participant E as Engineer
+    participant C as CLARISSA  
     participant V as Validator
     participant S as OPM Flow
 
-    Note over E: Voice input from field tablet
-    E->>C: I need a waterflood model, 5-spot pattern, 40 acre spacing
-    C->>C: Parse intent (confidence 0.92)
-    C->>E: What is the reservoir depth and initial pressure?
-    E->>C: 8500 ft TVD, about 3800 psi
-    C->>V: Validate pressure gradient
-    V-->>C: 0.45 psi/ft plausible
-    C->>C: Generate ECLIPSE deck
-    C->>E: Assumed 200 md permeability from Permian analogs. Confirm?
-    E->>C: Use 150 md, we have core data
-    Note over C: Update deck, log assumption override
-    C->>S: Execute simulation
-    S-->>C: Results + convergence data
-    C->>E: Simulation complete in 47 seconds. Water breakthrough at 18 months.
-    E->>C: Yes, try 20 and 80 acres
-    C->>C: Queue sensitivity runs
+    Note over E: Voice input
+    E->>C: Waterflood 5-spot 40-acre
+    C->>C: Parse intent
+    C->>E: Depth and pressure?
+    E->>C: 8500ft 3800psi
+    C->>V: Validate gradient
+    V-->>C: 0.45 psi/ft OK
+    C->>C: Generate deck
+    C->>E: 200md from analogs?
+    E->>C: Use 150md
+    Note over C: Update deck
+    C->>S: Run simulation
+    S-->>C: Results ready
+    C->>E: Done 47s
+    E->>C: Try other spacings
+    C->>C: Queue runs
 ```
 
 ### 3.3 Key Capabilities Demonstrated
