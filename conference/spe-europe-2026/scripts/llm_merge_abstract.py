@@ -6,13 +6,13 @@ Uses OpenAI API to intelligently merge multiple author contributions
 
 import os
 import sys
-import json
+import re
 from pathlib import Path
 
 try:
     from openai import OpenAI
 except ImportError:
-    print("Installing openai...")
+    print("Installing openai...", file=sys.stderr)
     os.system("pip install openai --break-system-packages -q")
     from openai import OpenAI
 
@@ -31,6 +31,14 @@ def read_file(filepath):
     """Read text or markdown file"""
     return Path(filepath).read_text(encoding='utf-8')
 
+def strip_code_fences(text):
+    """Remove markdown code fences from LLM output"""
+    # Remove opening ```markdown or ``` at start
+    text = re.sub(r'^```(?:markdown)?\s*\n', '', text.strip())
+    # Remove closing ``` at end
+    text = re.sub(r'\n```\s*$', '', text)
+    return text.strip()
+
 def merge_with_llm(sources: dict, api_key: str) -> str:
     """Use LLM to merge multiple document sources"""
     
@@ -40,21 +48,21 @@ def merge_with_llm(sources: dict, api_key: str) -> str:
 
 Your task is to create a unified, coherent document that:
 1. Preserves all unique technical content from each source
-2. Follows SPE abstract structure: Abstract, Objectives, Methods, Results, Novelty/Contribution
+2. Follows SPE abstract structure: Abstract, 1. Objectives/Scope, 2. Methods, 3. Results/Observations, 4. Novelty/Contribution
 3. Maintains consistent voice and terminology
 4. Removes redundancy while keeping important details
 5. Ensures technical accuracy for reservoir simulation domain
 6. Keeps Mermaid diagram code blocks intact (```mermaid ... ```)
-7. Outputs clean Markdown format
+7. Outputs clean Markdown format - DO NOT wrap output in code fences
 
-The paper is about CLARISSA - a Conversational Language Agent for Reservoir Simulation."""
+IMPORTANT: Output raw Markdown directly, not wrapped in ```markdown``` fences."""
 
     user_prompt = f"""Please merge these contributions into a single cohesive SPE conference abstract.
 
 === SOURCE 1 (Doug - SPE Submission Form Format) ===
 {sources.get('doug', 'No content')}
 
-=== SOURCE 2 (Wolfram - Extended Technical Version) ===
+=== SOURCE 2 (Wolfram - Extended Technical Version with diagrams) ===
 {sources.get('wolfram', 'No content')}
 
 === SOURCE 3 (Mike - Additional Contributions) ===
@@ -62,12 +70,11 @@ The paper is about CLARISSA - a Conversational Language Agent for Reservoir Simu
 
 Create a merged document that:
 - Uses the SPE structure (Abstract, 1. Objectives, 2. Methods, 3. Results, 4. Novelty)
-- Incorporates the technical depth from Wolfram's version
-- Includes any unique insights from each contributor
-- Keeps all Mermaid diagrams from the sources
+- Incorporates the technical depth and Mermaid diagrams from Wolfram's version
+- Includes Doug's concise framing and any unique content
 - Is suitable for an 8-page conference paper abstract (~3000-4000 words)
 
-Output the merged document in Markdown format."""
+Output the merged document in Markdown format. Do NOT wrap output in code fences - just output the raw markdown."""
 
     print("Calling OpenAI API for merge...", file=sys.stderr)
     
@@ -81,7 +88,12 @@ Output the merged document in Markdown format."""
         temperature=0.3
     )
     
-    return response.choices[0].message.content
+    result = response.choices[0].message.content
+    
+    # Strip any code fences the model might have added anyway
+    result = strip_code_fences(result)
+    
+    return result
 
 def main():
     # Check for API key
@@ -100,29 +112,36 @@ def main():
     if doug_path.exists():
         print(f"Reading: {doug_path}", file=sys.stderr)
         sources['doug'] = read_docx(doug_path)
+        print(f"  Doug content: {len(sources['doug'])} chars", file=sys.stderr)
     
     # Read Wolfram's MD
     wolfram_path = base_path / "wolfram" / "abstract-merged.md"
     if wolfram_path.exists():
         print(f"Reading: {wolfram_path}", file=sys.stderr)
         sources['wolfram'] = read_file(wolfram_path)
+        print(f"  Wolfram content: {len(sources['wolfram'])} chars", file=sys.stderr)
     
-    # Read Mike's contributions (any .md files)
+    # Read Mike's contributions (any .md files except README)
     mike_path = base_path / "mike"
     mike_content = []
     for md_file in mike_path.glob("*.md"):
-        if md_file.name != "README.md":
+        if md_file.name.lower() != "readme.md":
             print(f"Reading: {md_file}", file=sys.stderr)
             mike_content.append(read_file(md_file))
     if mike_content:
         sources['mike'] = "\n\n---\n\n".join(mike_content)
+        print(f"  Mike content: {len(sources['mike'])} chars", file=sys.stderr)
     else:
         sources['mike'] = "(No contributions yet)"
+        print("  Mike: No contributions found", file=sys.stderr)
     
     # Perform merge
+    print("\nPerforming LLM merge...", file=sys.stderr)
     merged = merge_with_llm(sources, api_key)
     
-    # Output merged content
+    print(f"\nMerged document: {len(merged)} chars, {len(merged.split())} words", file=sys.stderr)
+    
+    # Output merged content to stdout
     print(merged)
     
     # Also save to file
