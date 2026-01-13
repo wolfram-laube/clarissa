@@ -1,15 +1,11 @@
 # document-merge.gitlab-ci.yml - LLM-based document merge for SPE abstract
-
-stages:
-  - merge
-  - build
-  - deploy
+# Uses existing stages from main CI: build, test, deploy
 
 # ============================================================
 # LLM Merge - Combine Doug + Wolfram contributions
 # ============================================================
 llm_merge:
-  stage: merge
+  stage: build
   tags:
     - docker
   image: python:3.11-slim
@@ -38,7 +34,6 @@ llm_merge:
       def read_file(path):
           return Path(path).read_text(encoding='utf-8') if Path(path).exists() else ""
 
-      # Read sources
       print("📖 Reading sources...")
       base = Path("conference/spe-europe-2026")
       
@@ -48,30 +43,29 @@ llm_merge:
       
       print(f"   Doug: {len(doug)} chars, Wolfram: {len(wolfram)} chars")
 
-      # LLM Merge
       print("\n🤖 Calling Claude API...")
       client = anthropic.Anthropic()
       
       prompt = f"""Merge these SPE conference paper contributions into ONE comprehensive Markdown document.
 
-      ## Doug's SPE Form:
-      {doug}
+## Doug's SPE Form:
+{doug}
 
-      ## Wolfram's Draft with Diagrams:
-      {wolfram}
+## Wolfram's Draft with Diagrams:
+{wolfram}
 
-      ## Current Synthesis:
-      {synthesis}
+## Current Synthesis:
+{synthesis}
 
-      ## Output Requirements:
-      1. Pure Markdown with ```mermaid code blocks for diagrams
-      2. SPE structure: Abstract, Objectives, Methods, Results, Novelty, References
-      3. Include ALL Mermaid diagrams from Wolfram's version
-      4. Include comparison table (Envoy vs CLARISSA)
-      5. Authors: Douglas Perschke (Stone Ridge Technology), Michal Matejka (Independent Consultant), Wolfram Laube (Independent Researcher)
-      6. Full paper length (~3000-4000 words)
+## Output Requirements:
+1. Pure Markdown with ```mermaid code blocks for diagrams
+2. SPE structure: Abstract, Objectives, Methods, Results, Novelty, References
+3. Include ALL Mermaid diagrams from Wolfram's version
+4. Include comparison table (Envoy vs CLARISSA)
+5. Authors: Douglas Perschke (Stone Ridge Technology), Michal Matejka (Independent Consultant), Wolfram Laube (Independent Researcher)
+6. Full paper length (~3000-4000 words)
 
-      Output ONLY the Markdown, no explanations."""
+Output ONLY the Markdown, no explanations."""
 
       msg = client.messages.create(
           model="claude-sonnet-4-20250514",
@@ -81,14 +75,13 @@ llm_merge:
       
       merged = msg.content[0].text
       
-      # Save
       out_dir = base / "merged"
       out_dir.mkdir(exist_ok=True)
       (out_dir / "abstract-merged.md").write_text(merged)
       
       print(f"✅ Merged: {len(merged)} chars")
       PYEOF
-    - cat conference/spe-europe-2026/merged/abstract-merged.md | head -100
+    - cat conference/spe-europe-2026/merged/abstract-merged.md | head -50
   artifacts:
     paths:
       - conference/spe-europe-2026/merged/abstract-merged.md
@@ -98,7 +91,7 @@ llm_merge:
 # Convert MD to HTML with Mermaid support
 # ============================================================
 build_html:
-  stage: build
+  stage: test
   tags:
     - docker
   image: node:20-alpine
@@ -113,12 +106,10 @@ build_html:
       when: manual
       allow_failure: true
   before_script:
-    - apk add --no-cache pandoc
-    - npm install -g marked
+    - apk add --no-cache python3
   script:
     - mkdir -p doc-outputs
     - |
-      # Create HTML with embedded Mermaid support
       cat > doc-outputs/abstract-merged.html << 'HTMLHEAD'
       <!DOCTYPE html>
       <html lang="en">
@@ -127,7 +118,7 @@ build_html:
           <title>CLARISSA - SPE Europe 2026</title>
           <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
           <style>
-              body { font-family: 'Segoe UI', sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; }
+              body { font-family: 'Segoe UI', sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; font-size: 16px; }
               h1 { color: #003366; border-bottom: 3px solid #003366; }
               h2 { color: #003366; margin-top: 2rem; }
               h3 { color: #0066cc; }
@@ -137,14 +128,12 @@ build_html:
               th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
               th { background: #003366; color: white; }
               .mermaid { background: #f8f9fa; padding: 1rem; margin: 1rem 0; }
-              .abstract { background: #e8f0f8; padding: 1.5rem; border-left: 4px solid #003366; margin: 1rem 0; }
           </style>
       </head>
       <body>
-      <script>mermaid.initialize({startOnLoad:true, theme:'base', themeVariables:{primaryColor:'#e8f0f8',primaryTextColor:'#003366'}});</script>
+      <script>mermaid.initialize({startOnLoad:true, theme:'base', themeVariables:{primaryColor:'#e8f0f8',primaryTextColor:'#003366',fontSize:'16px'}});</script>
       HTMLHEAD
     - |
-      # Convert MD to HTML body (handling mermaid blocks)
       python3 << 'PYEOF'
       import re
       from pathlib import Path
@@ -154,7 +143,6 @@ build_html:
       # Convert mermaid code blocks to div
       md = re.sub(r'```mermaid\n(.*?)```', r'<div class="mermaid">\n\1</div>', md, flags=re.DOTALL)
       
-      # Basic MD to HTML conversion
       # Headers
       md = re.sub(r'^### (.+)$', r'<h3>\1</h3>', md, flags=re.MULTILINE)
       md = re.sub(r'^## (.+)$', r'<h2>\1</h2>', md, flags=re.MULTILINE)
@@ -164,38 +152,15 @@ build_html:
       md = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', md)
       md = re.sub(r'\*(.+?)\*', r'<em>\1</em>', md)
       
-      # Code blocks (non-mermaid)
+      # Code blocks
       md = re.sub(r'```(\w+)?\n(.*?)```', r'<pre><code>\2</code></pre>', md, flags=re.DOTALL)
       
       # Paragraphs
       md = re.sub(r'\n\n+', '\n</p>\n<p>\n', md)
       md = '<p>\n' + md + '\n</p>'
       
-      # Tables (basic)
-      lines = md.split('\n')
-      in_table = False
-      result = []
-      for line in lines:
-          if '|' in line and not in_table:
-              in_table = True
-              result.append('<table>')
-          if in_table and '|' not in line:
-              in_table = False
-              result.append('</table>')
-          if in_table:
-              if '---' in line:
-                  continue
-              cells = [c.strip() for c in line.split('|')[1:-1]]
-              if cells:
-                  tag = 'th' if result[-1] == '<table>' else 'td'
-                  result.append('<tr>' + ''.join(f'<{tag}>{c}</{tag}>' for c in cells) + '</tr>')
-          else:
-              result.append(line)
-      
-      html_body = '\n'.join(result)
-      
       with open('doc-outputs/abstract-merged.html', 'a') as f:
-          f.write(html_body)
+          f.write(md)
           f.write('\n</body></html>')
       
       print("✅ HTML generated")
@@ -230,7 +195,6 @@ generate_pdf:
     - export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
   script:
     - mkdir -p doc-outputs
-    - cp -r doc-outputs/* . 2>/dev/null || true
     - |
       cat > generate-pdf.js << 'JSEOF'
       const puppeteer = require('puppeteer');
@@ -244,7 +208,7 @@ generate_pdf:
         const page = await browser.newPage();
         const html = fs.readFileSync('doc-outputs/abstract-merged.html', 'utf8');
         await page.setContent(html, { waitUntil: 'networkidle0' });
-        await new Promise(r => setTimeout(r, 3000)); // Wait for Mermaid
+        await new Promise(r => setTimeout(r, 3000));
         await page.pdf({
           path: 'doc-outputs/abstract-merged.pdf',
           format: 'A4',
