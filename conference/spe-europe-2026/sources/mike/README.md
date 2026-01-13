@@ -1,3 +1,3 @@
-# LLM Merge Trigger
-Triggered: 2026-01-13T13:34:17.118181
-Fix: use pandoc for proper HTML
+# Trigger
+2026-01-13T13:41:28.263393
+Fix: debian + pandoc

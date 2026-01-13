@@ -1,7 +1,7 @@
 # document-merge.gitlab-ci.yml - LLM-based document merge for SPE abstract
 
 # ============================================================
-# LLM Merge - Combine Doug + Wolfram contributions
+# LLM Merge - Combine Doug + Wolfram contributions  
 # ============================================================
 llm_merge:
   stage: build
@@ -21,7 +21,6 @@ llm_merge:
   script:
     - pip install anthropic openai python-docx --quiet
     - python3 conference/spe-europe-2026/scripts/llm_merge.py
-    - echo "=== First 80 lines ==="
     - head -80 conference/spe-europe-2026/merged/abstract-merged.md
   artifacts:
     paths:
@@ -35,7 +34,7 @@ build_html:
   stage: test
   tags:
     - docker
-  image: pandoc/latex:latest
+  image: debian:bookworm-slim
   needs:
     - job: llm_merge
       optional: true
@@ -46,10 +45,11 @@ build_html:
     - if: $CI_PIPELINE_SOURCE == "web"
       when: manual
       allow_failure: true
+  before_script:
+    - apt-get update && apt-get install -y pandoc --no-install-recommends
   script:
     - mkdir -p doc-outputs
     - |
-      # Convert MD to HTML with pandoc
       pandoc conference/spe-europe-2026/merged/abstract-merged.md \
         -f markdown \
         -t html5 \
@@ -57,19 +57,10 @@ build_html:
         --metadata title="CLARISSA - SPE Europe 2026" \
         -o doc-outputs/temp.html
     - |
-      # Inject Mermaid JS and custom CSS
-      cat > doc-outputs/header.html << 'HEADER'
+      cat > /tmp/inject.txt << 'INJECT'
       <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
       <style>
-        body { 
-          font-family: 'Segoe UI', Tahoma, sans-serif; 
-          max-width: 850px; 
-          margin: 0 auto; 
-          padding: 2rem; 
-          line-height: 1.6;
-          font-size: 11pt;
-          color: #333;
-        }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 850px; margin: 0 auto; padding: 2rem; line-height: 1.6; font-size: 11pt; color: #333; }
         h1 { color: #003366; border-bottom: 3px solid #003366; padding-bottom: 0.5rem; }
         h2 { color: #003366; margin-top: 2rem; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem; }
         h3 { color: #0066cc; }
@@ -80,39 +71,29 @@ build_html:
         th, td { border: 1px solid #ddd; padding: 0.6rem; text-align: left; }
         th { background: #003366; color: white; }
         tr:nth-child(even) { background: #f9f9f9; }
-        .mermaid, pre code.language-mermaid { 
-          background: #f8f9fa; 
-          padding: 1rem; 
-          margin: 1.5rem 0; 
-          border-radius: 8px;
-          display: block;
-        }
+        .sourceCode.mermaid, pre.mermaid, pre code.language-mermaid { background: #f8f9fa; padding: 1rem; margin: 1.5rem 0; border-radius: 8px; display: block; }
         hr { border: none; border-top: 2px solid #003366; margin: 2rem 0; }
         strong { color: #003366; }
       </style>
       <script>
         document.addEventListener('DOMContentLoaded', function() {
-          // Convert code blocks with mermaid class to mermaid divs
-          document.querySelectorAll('pre code.language-mermaid, pre.mermaid').forEach(function(el) {
+          document.querySelectorAll('pre code.language-mermaid, code.sourceCode.mermaid').forEach(function(el) {
             var div = document.createElement('div');
             div.className = 'mermaid';
             div.textContent = el.textContent;
-            el.parentNode.replaceWith(div);
+            var pre = el.closest('pre') || el.parentNode;
+            pre.replaceWith(div);
           });
-          mermaid.initialize({
-            startOnLoad: true, 
-            theme: 'base',
-            themeVariables: { primaryColor: '#e8f0f8', primaryTextColor: '#003366', fontSize: '14px' }
-          });
+          mermaid.initialize({ startOnLoad: true, theme: 'base', themeVariables: { primaryColor: '#e8f0f8', primaryTextColor: '#003366', fontSize: '14px' } });
         });
       </script>
-      HEADER
+      INJECT
     - |
-      # Inject header into HTML
-      sed -i 's|</head>|'"$(cat doc-outputs/header.html | tr '\n' ' ')"'</head>|' doc-outputs/temp.html
+      # Insert before </head>
+      sed -i '/<\/head>/r /tmp/inject.txt' doc-outputs/temp.html
       mv doc-outputs/temp.html doc-outputs/abstract-merged.html
     - ls -la doc-outputs/
-    - head -50 doc-outputs/abstract-merged.html
+    - head -60 doc-outputs/abstract-merged.html
   artifacts:
     paths:
       - doc-outputs/
@@ -154,7 +135,6 @@ generate_pdf:
         const page = await browser.newPage();
         const html = fs.readFileSync('doc-outputs/abstract-merged.html', 'utf8');
         await page.setContent(html, { waitUntil: 'networkidle0' });
-        // Wait for Mermaid to render
         await new Promise(r => setTimeout(r, 4000));
         await page.pdf({
           path: 'doc-outputs/abstract-merged.pdf',
