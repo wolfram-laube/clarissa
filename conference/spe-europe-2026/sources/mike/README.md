@@ -1,3 +1,3 @@
 # LLM Merge Trigger
-Triggered: 2026-01-13T19:51:39.233724
-Fixed: HTML formatting, Mermaid blocks, LLM output cleaning
+Triggered: 2026-01-13T21:08:01.974532
+Fix: numbered lists in Key Capabilities and References

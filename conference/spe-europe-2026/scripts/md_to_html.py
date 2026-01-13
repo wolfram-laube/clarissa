@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Robust Markdown to HTML converter for SPE abstract with Mermaid support.
+v2: Fixed numbered lists, better paragraph handling
 """
 import re
 from pathlib import Path
@@ -44,29 +45,48 @@ def convert_md_to_html(md_content: str) -> str:
     md = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', md)
     md = re.sub(r'\*(.+?)\*', r'<em>\1</em>', md)
     
-    # Convert unordered lists
+    # Convert lists (both unordered and ordered)
     lines = md.split('\n')
     result = []
-    in_list = False
+    in_ul = False
+    in_ol = False
     
     for line in lines:
         stripped = line.strip()
         
-        # List item
+        # Unordered list item
         if stripped.startswith('- ') or stripped.startswith('* '):
-            if not in_list:
+            if in_ol:
+                result.append('</ol>')
+                in_ol = False
+            if not in_ul:
                 result.append('<ul>')
-                in_list = True
+                in_ul = True
             item_content = stripped[2:]
             result.append(f'  <li>{item_content}</li>')
-        else:
-            if in_list:
+        # Ordered list item (1. or 1) format)
+        elif re.match(r'^\d+[\.\)]\s+', stripped):
+            if in_ul:
                 result.append('</ul>')
-                in_list = False
+                in_ul = False
+            if not in_ol:
+                result.append('<ol>')
+                in_ol = True
+            item_content = re.sub(r'^\d+[\.\)]\s+', '', stripped)
+            result.append(f'  <li>{item_content}</li>')
+        else:
+            if in_ul:
+                result.append('</ul>')
+                in_ul = False
+            if in_ol:
+                result.append('</ol>')
+                in_ol = False
             result.append(line)
     
-    if in_list:
+    if in_ul:
         result.append('</ul>')
+    if in_ol:
+        result.append('</ol>')
     
     md = '\n'.join(result)
     
@@ -86,7 +106,7 @@ def convert_md_to_html(md_content: str) -> str:
     
     # Convert paragraphs (double newlines)
     # Split by block elements and wrap text in <p>
-    blocks = re.split(r'(<h[123]>.*?</h[123]>|<hr>|<ul>.*?</ul>|<div class="mermaid">.*?</div>|<pre>.*?</pre>|<table>.*?</table>)', md, flags=re.DOTALL)
+    blocks = re.split(r'(<h[123]>.*?</h[123]>|<hr>|<ul>.*?</ul>|<ol>.*?</ol>|<div class="mermaid">.*?</div>|<pre>.*?</pre>|<table>.*?</table>)', md, flags=re.DOTALL)
     
     result_blocks = []
     for block in blocks:
@@ -95,7 +115,7 @@ def convert_md_to_html(md_content: str) -> str:
             continue
         # Skip if already wrapped in block element
         if block.startswith('<h') or block.startswith('<hr') or block.startswith('<ul') or \
-           block.startswith('<div') or block.startswith('<pre') or block.startswith('<table'):
+           block.startswith('<ol') or block.startswith('<div') or block.startswith('<pre') or block.startswith('<table'):
             result_blocks.append(block)
         else:
             # Wrap paragraphs
@@ -103,6 +123,8 @@ def convert_md_to_html(md_content: str) -> str:
             for p in paragraphs:
                 p = p.strip()
                 if p:
+                    # Convert single newlines to <br> within paragraph
+                    p = p.replace('\n', ' ')
                     result_blocks.append(f'<p>{p}</p>')
     
     return '\n\n'.join(result_blocks)
@@ -230,7 +252,7 @@ def main():
             border-radius: 4px;
             text-align: center;
         }}
-        ul {{
+        ul, ol {{
             margin: 1em 0;
             padding-left: 2em;
         }}
