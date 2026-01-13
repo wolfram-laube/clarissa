@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""LLM-based document merge for SPE Europe 2026 with Anthropic/OpenAI fallback."""
+"""LLM-based document merge for SPE Europe 2026 with Anthropic/OpenAI fallback.
+Version 2: Improved prompt for proper list formatting and reduced redundancy."""
 import os
 import sys
 import re
@@ -15,10 +16,8 @@ def read_file(path):
 
 def clean_llm_output(text):
     """Remove LLM artifacts like ```markdown wrappers."""
-    # Remove markdown code fence wrapper
     text = re.sub(r'^```markdown\s*\n', '', text)
     text = re.sub(r'\n```\s*$', '', text)
-    # Remove any leading/trailing whitespace
     return text.strip()
 
 def call_anthropic(prompt):
@@ -65,18 +64,55 @@ def main():
 {synthesis}
 
 ## Output Requirements:
-1. Output PURE Markdown only - no code fences around the entire document
-2. Use ```mermaid code blocks for diagrams (with triple backticks)
-3. SPE structure: Title, Authors, Abstract, 1. Objectives/Scope, 2. Methods/Procedures, 3. Results/Conclusions, 4. Novelty, References
-4. Include ALL Mermaid diagrams from Wolfram's version (architecture, phases, RIGOR, techstack, comparison)
-5. Include the comparison table (Envoy vs CLARISSA)
-6. Authors: Douglas Perschke (Stone Ridge Technology, USA), Michal Matejka (Independent Consultant, Houston, USA), Wolfram Laube (Independent Researcher, Austria)
-7. Full paper length: 3000-4000 words total
-8. Conference: SPE Europe Energy Conference 2026
-9. Category: 05 Digital Transformation and AI / 05.6 ML and AI in Subsurface Operations
-10. Use --- for section separators (horizontal rules)
 
-CRITICAL: Start directly with the markdown content (# Title), do NOT wrap in ```markdown code fence."""
+### Structure (SPE format):
+1. Title: # CLARISSA: A Conversational User Interface for Democratizing Reservoir Simulation
+2. Conference info and Authors (as bullet list)
+3. ## Abstract (comprehensive, ~400 words)
+4. ## 1. Objectives and Scope (DIFFERENT from abstract - focus on specific goals, not problem statement)
+5. ## 2. Methods, Procedures, Process
+   - ### 2.1 System Architecture (with Mermaid flowchart)
+   - ### 2.2 Phased Development (with Mermaid flowchart)
+   - ### 2.3 Comparison with Prior Work (with Mermaid + comparison table)
+6. ## 3. Results, Observations, Conclusions
+   - ### 3.1 RIGOR Benchmark Framework (with Mermaid)
+   - ### 3.2 Example Interaction (with Mermaid sequence diagram)
+   - ### 3.3 Key Capabilities Demonstrated (as NUMBERED LIST with "1. ", "2. ", etc.)
+7. ## 4. Novelty and Contribution (as bullet list)
+8. ## Technical Stack (with Mermaid flowchart)
+9. ## References (as NUMBERED LIST with "1. ", "2. ", etc.)
+
+### Formatting Rules:
+- Output PURE Markdown only - NO code fences around the entire document
+- Use ```mermaid for diagrams
+- Use "- " for unordered lists
+- Use "1. ", "2. ", "3. " for ORDERED/NUMBERED lists (Key Capabilities, References)
+- Use "---" for section separators
+- Bold with **text**
+
+### Content Requirements:
+- Include ALL 6 Mermaid diagrams from Wolfram's version
+- Include the Envoy vs CLARISSA comparison table
+- Section 1 (Objectives) should NOT repeat the Abstract - instead focus on:
+  * What CLARISSA specifically aims to achieve
+  * What RIGOR benchmark will evaluate
+  * Scope limitations (what is NOT covered)
+- References must include at minimum:
+  1. SPE-221987-MS (Wiegand et al., ADIPEC 2024)
+  2. OPM Flow Documentation
+  3. At least 2-3 more relevant references (Eclipse documentation, LLM papers, etc.)
+
+### Authors:
+- Douglas Perschke, Stone Ridge Technology, USA
+- Michal Matejka, Independent Consultant, Houston, USA
+- Wolfram Laube, Independent Researcher, Austria
+
+### Conference:
+SPE Europe Energy Conference 2026
+Category: 05 Digital Transformation and AI
+Subcategory: 05.6 ML and AI in Subsurface Operations
+
+CRITICAL: Start directly with # Title - do NOT wrap in ```markdown fence."""
 
     merged = None
     
