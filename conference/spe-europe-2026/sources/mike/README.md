@@ -1,3 +1,3 @@
 # LLM Merge Trigger
-Triggered: 2026-01-13T14:39:46.751299
-Fix: proper markdown parser
+Triggered: 2026-01-13T18:42:28.675138
+Fix: proper HTML word-wrap
