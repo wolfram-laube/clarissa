@@ -1,4 +1,4 @@
-# document-merge.gitlab-ci.yml - LLM-based document merge for SPE abstract
+# document-merge.gitlab-ci.yml - LLM-based document merge with OpenAI fallback
 
 # ============================================================
 # LLM Merge - Combine Doug + Wolfram contributions
@@ -17,10 +17,11 @@ llm_merge:
       allow_failure: true
   variables:
     ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+    OPENAI_API_KEY: ${OPENAI_API_KEY}
   script:
-    - pip install anthropic python-docx --quiet
+    - pip install anthropic openai python-docx --quiet
     - python3 conference/spe-europe-2026/scripts/llm_merge.py
-    - head -50 conference/spe-europe-2026/merged/abstract-merged.md
+    - head -80 conference/spe-europe-2026/merged/abstract-merged.md
   artifacts:
     paths:
       - conference/spe-europe-2026/merged/abstract-merged.md
