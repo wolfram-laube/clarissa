@@ -1,11 +1,15 @@
-# document-merge.gitlab-ci.yml - LLM-powered document merge and PDF generation
-# Uses existing stages from main .gitlab-ci.yml: build, test, classify, automation, deploy
+# document-merge.gitlab-ci.yml - LLM-based document merge for SPE abstract
+
+stages:
+  - merge
+  - build
+  - deploy
 
 # ============================================================
-# LLM Merge - Combines all author contributions
+# LLM Merge - Combine Doug + Wolfram contributions
 # ============================================================
 llm_merge:
-  stage: build
+  stage: merge
   tags:
     - docker
   image: python:3.11-slim
@@ -17,23 +21,83 @@ llm_merge:
       when: manual
       allow_failure: true
   variables:
-    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  cache:
-    paths:
-      - .cache/pip
-  before_script:
-    - pip install openai python-docx --quiet
+    ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
   script:
-    - python conference/spe-europe-2026/scripts/llm_merge_abstract.py
+    - pip install anthropic python-docx --quiet
+    - |
+      python3 << 'PYEOF'
+      import os
+      import anthropic
+      from docx import Document
+      from pathlib import Path
+
+      def extract_docx(path):
+          doc = Document(path)
+          return "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+
+      def read_file(path):
+          return Path(path).read_text(encoding='utf-8') if Path(path).exists() else ""
+
+      # Read sources
+      print("📖 Reading sources...")
+      base = Path("conference/spe-europe-2026")
+      
+      doug = extract_docx(str(base / "sources/doug/SPE_Meeting_Abstract_v6_2_in_Submission_Form.docx"))
+      wolfram = read_file(str(base / "sources/wolfram/abstract-merged.md"))
+      synthesis = read_file(str(base / "abstract-synthesis.md"))
+      
+      print(f"   Doug: {len(doug)} chars, Wolfram: {len(wolfram)} chars")
+
+      # LLM Merge
+      print("\n🤖 Calling Claude API...")
+      client = anthropic.Anthropic()
+      
+      prompt = f"""Merge these SPE conference paper contributions into ONE comprehensive Markdown document.
+
+      ## Doug's SPE Form:
+      {doug}
+
+      ## Wolfram's Draft with Diagrams:
+      {wolfram}
+
+      ## Current Synthesis:
+      {synthesis}
+
+      ## Output Requirements:
+      1. Pure Markdown with ```mermaid code blocks for diagrams
+      2. SPE structure: Abstract, Objectives, Methods, Results, Novelty, References
+      3. Include ALL Mermaid diagrams from Wolfram's version
+      4. Include comparison table (Envoy vs CLARISSA)
+      5. Authors: Douglas Perschke (Stone Ridge Technology), Michal Matejka (Independent Consultant), Wolfram Laube (Independent Researcher)
+      6. Full paper length (~3000-4000 words)
+
+      Output ONLY the Markdown, no explanations."""
+
+      msg = client.messages.create(
+          model="claude-sonnet-4-20250514",
+          max_tokens=8000,
+          messages=[{"role": "user", "content": prompt}]
+      )
+      
+      merged = msg.content[0].text
+      
+      # Save
+      out_dir = base / "merged"
+      out_dir.mkdir(exist_ok=True)
+      (out_dir / "abstract-merged.md").write_text(merged)
+      
+      print(f"✅ Merged: {len(merged)} chars")
+      PYEOF
+    - cat conference/spe-europe-2026/merged/abstract-merged.md | head -100
   artifacts:
     paths:
       - conference/spe-europe-2026/merged/abstract-merged.md
     expire_in: 1 week
 
 # ============================================================
-# Render Mermaid diagrams to SVG
+# Convert MD to HTML with Mermaid support
 # ============================================================
-render_diagrams:
+build_html:
   stage: build
   tags:
     - docker
@@ -49,39 +113,109 @@ render_diagrams:
       when: manual
       allow_failure: true
   before_script:
-    - apk add --no-cache chromium
-    - npm install -g @mermaid-js/mermaid-cli
-    - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    - apk add --no-cache pandoc
+    - npm install -g marked
   script:
-    - mkdir -p rendered-diagrams
+    - mkdir -p doc-outputs
     - |
-      echo '{"theme":"base","themeVariables":{"primaryColor":"#e8f0f8","primaryTextColor":"#003366","fontSize":"16px"}}' > mermaid-config.json
+      # Create HTML with embedded Mermaid support
+      cat > doc-outputs/abstract-merged.html << 'HTMLHEAD'
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <title>CLARISSA - SPE Europe 2026</title>
+          <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+          <style>
+              body { font-family: 'Segoe UI', sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; }
+              h1 { color: #003366; border-bottom: 3px solid #003366; }
+              h2 { color: #003366; margin-top: 2rem; }
+              h3 { color: #0066cc; }
+              pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
+              code { font-family: 'Consolas', monospace; }
+              table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+              th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
+              th { background: #003366; color: white; }
+              .mermaid { background: #f8f9fa; padding: 1rem; margin: 1rem 0; }
+              .abstract { background: #e8f0f8; padding: 1.5rem; border-left: 4px solid #003366; margin: 1rem 0; }
+          </style>
+      </head>
+      <body>
+      <script>mermaid.initialize({startOnLoad:true, theme:'base', themeVariables:{primaryColor:'#e8f0f8',primaryTextColor:'#003366'}});</script>
+      HTMLHEAD
     - |
-      for mmd in conference/spe-europe-2026/diagrams/*.mmd; do
-        [ -f "$mmd" ] || continue
-        name=$(basename "$mmd" .mmd)
-        echo "Rendering: $name"
-        mmdc -i "$mmd" -o "rendered-diagrams/${name}.svg" -c mermaid-config.json -w 1200 --scale 2 || true
-      done
-    - ls -la rendered-diagrams/
+      # Convert MD to HTML body (handling mermaid blocks)
+      python3 << 'PYEOF'
+      import re
+      from pathlib import Path
+
+      md = Path("conference/spe-europe-2026/merged/abstract-merged.md").read_text()
+      
+      # Convert mermaid code blocks to div
+      md = re.sub(r'```mermaid\n(.*?)```', r'<div class="mermaid">\n\1</div>', md, flags=re.DOTALL)
+      
+      # Basic MD to HTML conversion
+      # Headers
+      md = re.sub(r'^### (.+)$', r'<h3>\1</h3>', md, flags=re.MULTILINE)
+      md = re.sub(r'^## (.+)$', r'<h2>\1</h2>', md, flags=re.MULTILINE)
+      md = re.sub(r'^# (.+)$', r'<h1>\1</h1>', md, flags=re.MULTILINE)
+      
+      # Bold/Italic
+      md = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', md)
+      md = re.sub(r'\*(.+?)\*', r'<em>\1</em>', md)
+      
+      # Code blocks (non-mermaid)
+      md = re.sub(r'```(\w+)?\n(.*?)```', r'<pre><code>\2</code></pre>', md, flags=re.DOTALL)
+      
+      # Paragraphs
+      md = re.sub(r'\n\n+', '\n</p>\n<p>\n', md)
+      md = '<p>\n' + md + '\n</p>'
+      
+      # Tables (basic)
+      lines = md.split('\n')
+      in_table = False
+      result = []
+      for line in lines:
+          if '|' in line and not in_table:
+              in_table = True
+              result.append('<table>')
+          if in_table and '|' not in line:
+              in_table = False
+              result.append('</table>')
+          if in_table:
+              if '---' in line:
+                  continue
+              cells = [c.strip() for c in line.split('|')[1:-1]]
+              if cells:
+                  tag = 'th' if result[-1] == '<table>' else 'td'
+                  result.append('<tr>' + ''.join(f'<{tag}>{c}</{tag}>' for c in cells) + '</tr>')
+          else:
+              result.append(line)
+      
+      html_body = '\n'.join(result)
+      
+      with open('doc-outputs/abstract-merged.html', 'a') as f:
+          f.write(html_body)
+          f.write('\n</body></html>')
+      
+      print("✅ HTML generated")
+      PYEOF
+    - ls -la doc-outputs/
   artifacts:
     paths:
-      - rendered-diagrams/
+      - doc-outputs/
     expire_in: 1 week
 
 # ============================================================
-# Generate PDF via Chromium (stage: deploy)
+# Generate PDF via Chromium
 # ============================================================
-generate_spe_pdf:
+generate_pdf:
   stage: deploy
   tags:
     - docker
   image: node:20-alpine
   needs:
-    - job: llm_merge
-      optional: true
-    - job: render_diagrams
-      optional: true
+    - job: build_html
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
       changes:
@@ -90,61 +224,17 @@ generate_spe_pdf:
       when: manual
       allow_failure: true
   before_script:
-    - apk add --no-cache chromium pandoc
+    - apk add --no-cache chromium
     - npm install puppeteer
-    - export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
     - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    - export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
   script:
     - mkdir -p doc-outputs
-    # Create HTML template
-    - |
-      cat > spe-template.html << 'TMPLEOF'
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>$title$</title>
-          <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-          <style>
-              :root { --spe-blue: #003366; --spe-light: #e8f0f8; }
-              body { font-family: 'Segoe UI', sans-serif; line-height: 1.7; max-width: 1000px; margin: 0 auto; padding: 2rem; font-size: 16px; }
-              h1 { color: var(--spe-blue); font-size: 1.8rem; border-bottom: 3px solid var(--spe-blue); padding-bottom: 0.5rem; }
-              h2 { color: var(--spe-blue); font-size: 1.4rem; margin-top: 2rem; }
-              h3 { color: #0066cc; font-size: 1.15rem; }
-              pre.mermaid { background: var(--spe-light); padding: 1rem; border-radius: 8px; }
-              code { background: #f5f5f5; padding: 0.2em 0.4em; border-radius: 3px; }
-              pre code { display: block; padding: 1rem; overflow-x: auto; }
-              table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-              th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
-              th { background: var(--spe-light); }
-              .mermaid { text-align: center; margin: 1.5rem 0; }
-          </style>
-      </head>
-      <body>
-      $body$
-      <script>mermaid.initialize({startOnLoad:true, theme:'base', themeVariables:{primaryColor:'#e8f0f8',primaryTextColor:'#003366'}});</script>
-      </body>
-      </html>
-      TMPLEOF
-    # Convert MD to HTML
-    - |
-      if [ -f conference/spe-europe-2026/merged/abstract-merged.md ]; then
-        pandoc conference/spe-europe-2026/merged/abstract-merged.md \
-          --standalone \
-          --template=spe-template.html \
-          --metadata title="CLARISSA: A Conversational User Interface for Democratizing Reservoir Simulation" \
-          -o doc-outputs/abstract-merged.html
-      else
-        echo "Using existing HTML"
-        cp conference/spe-europe-2026/merged/abstract-merged.html doc-outputs/ 2>/dev/null || true
-      fi
-    # Generate PDF with Puppeteer
+    - cp -r doc-outputs/* . 2>/dev/null || true
     - |
       cat > generate-pdf.js << 'JSEOF'
       const puppeteer = require('puppeteer');
       const fs = require('fs');
-      const path = require('path');
       (async () => {
         const browser = await puppeteer.launch({
           headless: 'new',
@@ -152,9 +242,9 @@ generate_spe_pdf:
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
         const page = await browser.newPage();
-        const htmlPath = path.resolve('doc-outputs/abstract-merged.html');
-        await page.goto('file://' + htmlPath, { waitUntil: 'networkidle0' });
-        await new Promise(r => setTimeout(r, 3000));
+        const html = fs.readFileSync('doc-outputs/abstract-merged.html', 'utf8');
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        await new Promise(r => setTimeout(r, 3000)); // Wait for Mermaid
         await page.pdf({
           path: 'doc-outputs/abstract-merged.pdf',
           format: 'A4',
@@ -166,8 +256,6 @@ generate_spe_pdf:
       })();
       JSEOF
     - node generate-pdf.js
-    - |
-      [ -f conference/spe-europe-2026/merged/abstract-merged.md ] && cp conference/spe-europe-2026/merged/abstract-merged.md doc-outputs/
     - ls -la doc-outputs/
   artifacts:
     paths:
