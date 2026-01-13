@@ -1,3 +1,3 @@
 # LLM Merge Trigger
-Triggered: 2026-01-13T18:42:28.675138
-Fix: proper HTML word-wrap
+Triggered: 2026-01-13T18:53:36.511168
+Fix: artifacts passing between jobs

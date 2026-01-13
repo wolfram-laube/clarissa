@@ -38,6 +38,7 @@ build_html:
   needs:
     - job: llm_merge
       optional: true
+      artifacts: true
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
       changes:
@@ -46,7 +47,6 @@ build_html:
       when: manual
       allow_failure: true
   script:
-    - pip install markdown --quiet
     - python3 conference/spe-europe-2026/scripts/md_to_html.py
     - ls -la doc-outputs/
     - head -50 doc-outputs/abstract-merged.html
@@ -65,6 +65,7 @@ generate_pdf:
   image: node:20-alpine
   needs:
     - job: build_html
+      artifacts: true
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
       changes:
@@ -78,7 +79,9 @@ generate_pdf:
     - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
     - export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
   script:
-    - mkdir -p doc-outputs
+    # Verify HTML exists from previous job
+    - ls -la doc-outputs/
+    - head -20 doc-outputs/abstract-merged.html
     - |
       cat > generate-pdf.js << 'JSEOF'
       const puppeteer = require('puppeteer');
@@ -91,6 +94,7 @@ generate_pdf:
         });
         const page = await browser.newPage();
         const html = fs.readFileSync('doc-outputs/abstract-merged.html', 'utf8');
+        console.log('HTML length:', html.length);
         await page.setContent(html, { waitUntil: 'networkidle0' });
         await new Promise(r => setTimeout(r, 3000));
         await page.pdf({
