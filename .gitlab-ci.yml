@@ -506,16 +506,20 @@ pages:
     - cp docs/guides/contributing/*.html public/guides/contributing/ 2>/dev/null || true
     - echo "📄 Setting up publication PDFs..."
     - mkdir -p public/publications/ijacsa-2026 public/publications/spe-europe-2026
-    - cp conference/ijacsa-2026/CLARISSA_Paper_IJACSA.pdf public/publications/ijacsa-2026/ 2>/dev/null || echo "IJACSA PDF not found"
-    - cp doc-outputs/spe-submission/submission-form.pdf public/publications/spe-europe-2026/ 2>/dev/null || echo "Canonical PDF not in artifacts"
-    - cp doc-outputs/spe-submission/submission-form.html public/publications/spe-europe-2026/ 2>/dev/null || true
-    - cp doc-outputs/spe-submission/full-paper.pdf public/publications/spe-europe-2026/ 2>/dev/null || true
-    - cp doc-outputs/spe-submission/full-paper.html public/publications/spe-europe-2026/ 2>/dev/null || true
+    # IJACSA Paper (from build_paper artifact)
+    - cp conference/ijacsa-2026/CLARISSA_Paper_IJACSA.pdf public/publications/ijacsa-2026/ 2>/dev/null || echo "IJACSA PDF not in artifacts"
+    # SPE Canonical outputs (from build_canonical_pdf artifact)
+    - cp conference/spe-europe-2026/outputs/submission-form.pdf public/publications/spe-europe-2026/ 2>/dev/null || echo "submission-form.pdf not in artifacts"
+    - cp conference/spe-europe-2026/outputs/submission-form.html public/publications/spe-europe-2026/ 2>/dev/null || true
+    - cp conference/spe-europe-2026/outputs/full-paper.pdf public/publications/spe-europe-2026/ 2>/dev/null || true
+    - cp conference/spe-europe-2026/outputs/full-paper.html public/publications/spe-europe-2026/ 2>/dev/null || true
+    # Legacy files from repo (until fully migrated)
     - cp conference/spe-europe-2026/abstract-with-diagrams.pdf public/publications/spe-europe-2026/ 2>/dev/null || true
     - cp conference/spe-europe-2026/abstract-corrected-v2.html public/publications/spe-europe-2026/ 2>/dev/null || true
+    # Generate index
     - python3 scripts/generate_publications_index.py
     - echo "📁 Publications deployed:"
-    - find public/publications -type f -name "*.pdf" -o -name "*.html" | head -20
+    - find public/publications -type f | head -20
   artifacts:
     paths:
       - public
@@ -665,6 +669,135 @@ build_paper:
 # Trigger: Scheduled pipeline (1st of month) or manual with GENERATE_TIMESHEETS=true
 # Setup: GitLab CI/CD > Schedules > Cron: "0 6 1 * *" > Variable: BILLING_RUN=true
 # =============================================================================
+# =============================================================================
+# SPE EUROPE 2026: Canonical Document Pipeline
+# =============================================================================
+# Trigger: Changes to canonical/ or diagrams/*.mmd
+# Outputs: HTML + PDF for submission-form and full-paper
+# =============================================================================
+
+# Job 1: Render Mermaid diagrams to SVG/PNG
+render_diagrams:
+  stage: build
+  image: minlag/mermaid-cli:latest
+  tags:
+    - docker
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - "conference/spe-europe-2026/diagrams/*.mmd"
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
+    - when: never
+  script:
+    - cd conference/spe-europe-2026/diagrams
+    - |
+      echo "🎨 Rendering Mermaid diagrams..."
+      for mmd in *.mmd; do
+        name="${mmd%.mmd}"
+        echo "   Processing $mmd..."
+        mmdc -i "$mmd" -o "${name}.svg" -b transparent || echo "SVG failed for $mmd"
+        mmdc -i "$mmd" -o "${name}.png" -s 2 -b white || echo "PNG failed for $mmd"
+      done
+    - ls -la *.svg *.png 2>/dev/null || echo "No outputs"
+  artifacts:
+    paths:
+      - conference/spe-europe-2026/diagrams/*.svg
+      - conference/spe-europe-2026/diagrams/*.png
+    expire_in: 4 weeks
+
+# Job 2: Build HTML from canonical Markdown
+build_canonical_html:
+  stage: build
+  image: python:3.11-slim
+  tags:
+    - docker
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - "conference/spe-europe-2026/canonical/**/*"
+        - "conference/spe-europe-2026/scripts/build_canonical.py"
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
+    - when: never
+  script:
+    - python conference/spe-europe-2026/scripts/build_canonical.py
+    - ls -la conference/spe-europe-2026/outputs/
+  artifacts:
+    paths:
+      - conference/spe-europe-2026/outputs/*.html
+    expire_in: 4 weeks
+
+# Job 3: Generate PDFs from HTML via Puppeteer
+build_canonical_pdf:
+  stage: test
+  image: node:20-alpine
+  tags:
+    - docker
+  needs:
+    - job: build_canonical_html
+      artifacts: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - "conference/spe-europe-2026/canonical/**/*"
+        - "conference/spe-europe-2026/scripts/build_canonical.py"
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
+    - when: never
+  before_script:
+    - apk add --no-cache chromium
+    - npm install puppeteer
+    - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+  script:
+    - |
+      cat > generate-pdfs.js << 'JSEOF'
+      const puppeteer = require('puppeteer');
+      const fs = require('fs');
+      const path = require('path');
+
+      (async () => {
+        const browser = await puppeteer.launch({
+          headless: 'new',
+          executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        });
+        
+        const outputDir = 'conference/spe-europe-2026/outputs';
+        const htmlFiles = fs.readdirSync(outputDir).filter(f => f.endsWith('.html'));
+        
+        for (const htmlFile of htmlFiles) {
+          const pdfFile = htmlFile.replace('.html', '.pdf');
+          console.log(`📄 Converting ${htmlFile} → ${pdfFile}`);
+          
+          const page = await browser.newPage();
+          const html = fs.readFileSync(path.join(outputDir, htmlFile), 'utf8');
+          await page.setContent(html, { waitUntil: 'networkidle0' });
+          await page.pdf({
+            path: path.join(outputDir, pdfFile),
+            format: 'A4',
+            margin: { top: '2cm', right: '2cm', bottom: '2cm', left: '2cm' },
+            printBackground: true
+          });
+          console.log(`   ✅ ${pdfFile}`);
+        }
+        
+        await browser.close();
+        console.log('Done!');
+      })();
+      JSEOF
+    - node generate-pdfs.js
+    - ls -la conference/spe-europe-2026/outputs/
+  artifacts:
+    paths:
+      - conference/spe-europe-2026/outputs/*.pdf
+      - conference/spe-europe-2026/outputs/*.html
+    expire_in: 4 weeks
+    name: "spe-canonical-${CI_COMMIT_SHORT_SHA}"
+
 generate_timesheets:
   stage: build
   image: python:3.11-slim
