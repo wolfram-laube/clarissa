@@ -16,9 +16,6 @@
 # ============================================================
 # STAGE 1: LLM Merge (Collaborative Authoring)
 # ============================================================
-# Combines Doug + Wolfram contributions via Claude/GPT
-# Output goes to merged/ - requires manual review before canonical/
-
 llm_merge:
   stage: build
   tags:
@@ -37,7 +34,7 @@ llm_merge:
   script:
     - pip install anthropic openai python-docx --quiet
     - python3 conference/spe-europe-2026/scripts/llm_merge.py
-    - echo "✅ LLM merge complete - review merged/abstract-merged.md before copying to canonical/"
+    - echo "✅ LLM merge complete - review merged/abstract-merged.md"
     - head -50 conference/spe-europe-2026/merged/abstract-merged.md
   artifacts:
     paths:
@@ -47,8 +44,6 @@ llm_merge:
 # ============================================================
 # STAGE 2: Render Diagrams (Mermaid → SVG/PNG)
 # ============================================================
-# Renders all .mmd files to .svg and .png for embedding
-
 render_diagrams:
   stage: build
   tags:
@@ -70,19 +65,15 @@ render_diagrams:
     - |
       echo "🎨 Rendering Mermaid diagrams..."
       cd conference/spe-europe-2026/diagrams
-      
-      # Create puppeteer config
       echo '{"args":["--no-sandbox","--disable-setuid-sandbox"]}' > puppeteer-config.json
-      
       for mmd in *.mmd; do
         name="${mmd%.mmd}"
         echo "  → $name"
         mmdc -i "$mmd" -o "${name}.svg" -p puppeteer-config.json -b transparent || true
         mmdc -i "$mmd" -o "${name}.png" -p puppeteer-config.json -b white -s 2 || true
       done
-      
-      echo "📁 Generated files:"
-      ls -la *.svg *.png 2>/dev/null || echo "No output files"
+      echo "📁 Generated:"
+      ls -la *.svg *.png 2>/dev/null || echo "No files"
   artifacts:
     paths:
       - conference/spe-europe-2026/diagrams/*.svg
@@ -90,10 +81,8 @@ render_diagrams:
     expire_in: 1 week
 
 # ============================================================
-# STAGE 3a: Build Canonical HTML (with Mermaid.js)
+# STAGE 3a: Build Canonical HTML
 # ============================================================
-# Generates interactive HTML from canonical/ markdown files
-
 build_canonical_html:
   stage: test
   tags:
@@ -113,104 +102,7 @@ build_canonical_html:
       allow_failure: true
   script:
     - mkdir -p doc-outputs/spe-submission
-    - |
-      python3 << 'PYEOF'
-      import re
-      from pathlib import Path
-
-      def md_to_html(md_content, title):
-          """Convert markdown to HTML with Mermaid.js support."""
-          
-          # Basic markdown conversions
-          html = md_content
-          
-          # Headers
-          html = re.sub(r'^### (.+)$', r'<h3>\1</h3>', html, flags=re.MULTILINE)
-          html = re.sub(r'^## (.+)$', r'<h2>\1</h2>', html, flags=re.MULTILINE)
-          html = re.sub(r'^# (.+)$', r'<h1>\1</h1>', html, flags=re.MULTILINE)
-          
-          # Bold/Italic
-          html = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', html)
-          html = re.sub(r'\*(.+?)\*', r'<em>\1</em>', html)
-          
-          # Horizontal rules
-          html = re.sub(r'^---+\s*$', '<hr>', html, flags=re.MULTILINE)
-          
-          # Mermaid blocks - keep as div for Mermaid.js
-          html = re.sub(
-              r'```mermaid\n(.*?)```',
-              r'<div class="mermaid">\1</div>',
-              html, flags=re.DOTALL
-          )
-          
-          # Code blocks
-          html = re.sub(
-              r'```(\w*)\n(.*?)```',
-              r'<pre><code class="\1">\2</code></pre>',
-              html, flags=re.DOTALL
-          )
-          
-          # Paragraphs (simple)
-          lines = html.split('\n')
-          result = []
-          for line in lines:
-              stripped = line.strip()
-              if stripped and not stripped.startswith('<'):
-                  if stripped.startswith('- '):
-                      result.append(f'<li>{stripped[2:]}</li>')
-                  elif re.match(r'^\d+\.\s', stripped):
-                      result.append(f'<li>{re.sub(r"^\d+\.\s+", "", stripped)}</li>')
-                  else:
-                      result.append(f'<p>{stripped}</p>')
-              else:
-                  result.append(line)
-          html = '\n'.join(result)
-          
-          return f'''<!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <title>{title}</title>
-        <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-        <style>
-          body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-                 max-width: 900px; margin: 40px auto; padding: 20px; line-height: 1.6; }}
-          h1 {{ color: #1a365d; border-bottom: 2px solid #3182ce; padding-bottom: 10px; }}
-          h2 {{ color: #2c5282; margin-top: 30px; }}
-          h3 {{ color: #2b6cb0; }}
-          hr {{ border: none; border-top: 1px solid #e2e8f0; margin: 30px 0; }}
-          .mermaid {{ background: #f7fafc; padding: 20px; border-radius: 8px; margin: 20px 0; }}
-          table {{ border-collapse: collapse; width: 100%; margin: 20px 0; }}
-          th, td {{ border: 1px solid #e2e8f0; padding: 10px; text-align: left; }}
-          th {{ background: #edf2f7; }}
-          code {{ background: #edf2f7; padding: 2px 6px; border-radius: 4px; }}
-          pre {{ background: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 8px; overflow-x: auto; }}
-        </style>
-      </head>
-      <body>
-      {html}
-      <script>mermaid.initialize({{startOnLoad:true, theme:'neutral'}});</script>
-      </body>
-      </html>'''
-
-      # Process submission form
-      submission = Path('conference/spe-europe-2026/canonical/submission-form.md')
-      if submission.exists():
-          content = submission.read_text()
-          html = md_to_html(content, 'CLARISSA - SPE Submission Abstract')
-          Path('doc-outputs/spe-submission/submission-form.html').write_text(html)
-          print('✅ Generated submission-form.html')
-      else:
-          print('⚠️  canonical/submission-form.md not found')
-
-      # Process full paper if exists
-      fullpaper = Path('conference/spe-europe-2026/canonical/full-paper.md')
-      if fullpaper.exists():
-          content = fullpaper.read_text()
-          html = md_to_html(content, 'CLARISSA - SPE Full Paper')
-          Path('doc-outputs/spe-submission/full-paper.html').write_text(html)
-          print('✅ Generated full-paper.html')
-      PYEOF
+    - python3 conference/spe-europe-2026/scripts/build_canonical_html.py
     - ls -la doc-outputs/spe-submission/
   artifacts:
     paths:
@@ -218,10 +110,8 @@ build_canonical_html:
     expire_in: 1 week
 
 # ============================================================
-# STAGE 3b: Build Canonical PDF (with embedded SVGs)
+# STAGE 3b: Build Canonical PDF
 # ============================================================
-# Generates print-ready PDFs from canonical/ markdown
-
 build_canonical_pdf:
   stage: test
   tags:
@@ -248,35 +138,28 @@ build_canonical_pdf:
       const puppeteer = require('puppeteer');
       const fs = require('fs');
       const path = require('path');
-
-      async function generatePDF(htmlFile, pdfFile) {
+      (async () => {
         const browser = await puppeteer.launch({
           headless: 'new',
           executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
-        const page = await browser.newPage();
-        const html = fs.readFileSync(htmlFile, 'utf8');
-        await page.setContent(html, { waitUntil: 'networkidle0' });
-        await new Promise(r => setTimeout(r, 2000)); // Wait for Mermaid
-        await page.pdf({
-          path: pdfFile,
-          format: 'A4',
-          margin: { top: '2cm', right: '2cm', bottom: '2cm', left: '2cm' },
-          printBackground: true
-        });
-        await browser.close();
-        console.log(`✅ Generated ${pdfFile}`);
-      }
-
-      (async () => {
         const dir = 'doc-outputs/spe-submission';
         const files = fs.readdirSync(dir).filter(f => f.endsWith('.html'));
         for (const file of files) {
-          const htmlPath = path.join(dir, file);
-          const pdfPath = htmlPath.replace('.html', '.pdf');
-          await generatePDF(htmlPath, pdfPath);
+          const page = await browser.newPage();
+          const html = fs.readFileSync(path.join(dir, file), 'utf8');
+          await page.setContent(html, { waitUntil: 'networkidle0' });
+          await new Promise(r => setTimeout(r, 2000));
+          await page.pdf({
+            path: path.join(dir, file.replace('.html', '.pdf')),
+            format: 'A4',
+            margin: { top: '2cm', right: '2cm', bottom: '2cm', left: '2cm' },
+            printBackground: true
+          });
+          console.log('Generated:', file.replace('.html', '.pdf'));
         }
+        await browser.close();
       })();
       JSEOF
     - node generate-pdf.js
@@ -288,7 +171,7 @@ build_canonical_pdf:
     name: "spe-canonical-${CI_COMMIT_SHORT_SHA}"
 
 # ============================================================
-# LEGACY: Build merged/ HTML (for LLM output review)
+# LEGACY: Build merged/ HTML
 # ============================================================
 build_merged_html:
   stage: test
@@ -316,7 +199,7 @@ build_merged_html:
     expire_in: 1 week
 
 # ============================================================
-# LEGACY: Generate merged/ PDF (for LLM output review)
+# LEGACY: Generate merged/ PDF
 # ============================================================
 generate_merged_pdf:
   stage: deploy
@@ -338,7 +221,6 @@ generate_merged_pdf:
     - apk add --no-cache chromium
     - npm install puppeteer
     - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-    - export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
   script:
     - ls -la doc-outputs/
     - |
