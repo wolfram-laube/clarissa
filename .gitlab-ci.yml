@@ -506,18 +506,52 @@ pages:
     - cp docs/guides/contributing/*.html public/guides/contributing/ 2>/dev/null || true
     - echo "📄 Setting up publication PDFs..."
     - mkdir -p public/publications/ijacsa-2026 public/publications/spe-europe-2026
-    # IJACSA Paper (from build_paper artifact)
+    # IJACSA paper (from build_paper)
     - cp conference/ijacsa-2026/CLARISSA_Paper_IJACSA.pdf public/publications/ijacsa-2026/ 2>/dev/null || echo "IJACSA PDF not in artifacts"
-    # SPE Canonical outputs (from build_canonical_pdf artifact)
-    - cp doc-outputs/spe-submission/submission-form.pdf public/publications/spe-europe-2026/ 2>/dev/null || echo "submission-form.pdf not in artifacts"
-    - cp doc-outputs/spe-submission/submission-form.html public/publications/spe-europe-2026/ 2>/dev/null || true
-    - cp doc-outputs/spe-submission/full-paper.pdf public/publications/spe-europe-2026/ 2>/dev/null || true
-    - cp doc-outputs/spe-submission/full-paper.html public/publications/spe-europe-2026/ 2>/dev/null || true
-    # Legacy files from repo (fallback until canonical pipeline runs)
+    # SPE canonical outputs (from build_canonical_pdf)
+    - cp conference/spe-europe-2026/outputs/*.pdf public/publications/spe-europe-2026/ 2>/dev/null || echo "No canonical PDFs"
+    - cp conference/spe-europe-2026/outputs/*.html public/publications/spe-europe-2026/ 2>/dev/null || echo "No canonical HTMLs"
+    # Fallback to committed files if CI didn't run
     - cp conference/spe-europe-2026/abstract-with-diagrams.pdf public/publications/spe-europe-2026/ 2>/dev/null || true
     - cp conference/spe-europe-2026/abstract-corrected-v2.html public/publications/spe-europe-2026/ 2>/dev/null || true
-    # Generate index
-    - python3 scripts/generate_publications_index.py
+    # Create publications index
+    - |
+      cat > public/publications/index.html << 'PUBHTML'
+      <!DOCTYPE html>
+      <html><head><title>CLARISSA Publications</title>
+      <style>
+      body{font-family:sans-serif;max-width:900px;margin:50px auto;padding:20px}
+      h1{color:#1a365d}
+      .conf{background:#f7fafc;padding:20px;margin:20px 0;border-radius:8px;border-left:4px solid #3182ce}
+      .conf h2{margin-top:0;color:#2c5282}
+      a{color:#3182ce}
+      .docs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-top:15px}
+      .doc{background:white;padding:15px;border-radius:4px;border:1px solid #e2e8f0}
+      .doc a{font-weight:bold}
+      </style></head><body>
+      <h1>📚 CLARISSA Publications</h1>
+      <p>Review copies for internal distribution.</p>
+      
+      <div class="conf"><h2>IJACSA 2026</h2>
+      <p>International Journal of Advanced Computer Science and Applications</p>
+      <div class="docs">
+        <div class="doc"><a href="ijacsa-2026/CLARISSA_Paper_IJACSA.pdf">📄 Full Paper (PDF)</a><br><small>8 pages, all figures</small></div>
+      </div></div>
+      
+      <div class="conf"><h2>SPE Europe Energy Conference 2026</h2>
+      <p>Category: Digital Transformation and AI</p>
+      <div class="docs">
+        <div class="doc"><a href="spe-europe-2026/full-paper.pdf">📄 Full Paper</a><br><small>Technical paper with diagrams</small></div>
+        <div class="doc"><a href="spe-europe-2026/submission-form.pdf">📄 Submission Form</a><br><small>Short abstract (~500 words)</small></div>
+        <div class="doc"><a href="spe-europe-2026/full-paper.html">🌐 Full Paper HTML</a><br><small>Interactive with Mermaid</small></div>
+        <div class="doc"><a href="spe-europe-2026/submission-form.html">🌐 Submission Form HTML</a><br><small>Preview version</small></div>
+      </div></div>
+      
+      <p style="margin-top:40px;color:#718096;font-size:0.9em">
+      Groundtruth: <code>conference/spe-europe-2026/canonical/</code>
+      </p>
+      </body></html>
+      PUBHTML
     - echo "📁 Publications deployed:"
     - find public/publications -type f
   artifacts:
