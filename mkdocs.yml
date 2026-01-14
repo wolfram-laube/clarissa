@@ -1,5 +1,5 @@
 site_name: CLARISSA Documentation
-site_url: https://wolfram_laube.gitlab.io/blauweiss_llc/irena/
+site_url: https://irena-40cc50.gitlab.io/
 repo_url: https://gitlab.com/wolfram_laube/blauweiss_llc/irena
 repo_name: GitLab
 
@@ -30,6 +30,11 @@ markdown_extensions:
   - admonition
   - toc:
       permalink: true
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 nav:
   - Home: index.md
