@@ -12,17 +12,17 @@ It is **explicitly documented and versioned**.
 
 ## 📚 Documentation
 
-**[→ Full Documentation (GitLab Pages)](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/)**
+**[→ Full Documentation (GitLab Pages)](https://irena-40cc50.gitlab.io/)**
 
 | Quick Links | |
 |-------------|---|
-| [Contributing Guide](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/contributing/) | How to contribute |
-| [Workflow Slides](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/guides/contributing/) | Interactive 5-min intro |
-| [Project Management](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/guides/project-management/) | Issues, Labels, Boards |
-| [CI Guide](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/ci/) | How to read CI results |
-| [ADRs](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/architecture/adr/) | Architecture decisions |
-| [Publications](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/publications/) | Research papers (IJACSA 2026) |
-| [Billing](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/guides/billing/) | Time tracking & invoicing |
+| [Contributing Guide](https://irena-40cc50.gitlab.io/contributing/) | How to contribute |
+| [Workflow Slides](https://irena-40cc50.gitlab.io/guides/contributing/) | Interactive 5-min intro |
+| [Project Management](https://irena-40cc50.gitlab.io/guides/project-management/) | Issues, Labels, Boards |
+| [CI Guide](https://irena-40cc50.gitlab.io/ci/) | How to read CI results |
+| [ADRs](https://irena-40cc50.gitlab.io/architecture/adr/) | Architecture decisions |
+| [Publications](https://irena-40cc50.gitlab.io/publications/) | Research papers (IJACSA 2026) |
+| [Billing](https://irena-40cc50.gitlab.io/guides/billing/) | Time tracking & invoicing |
 
 ---
 
