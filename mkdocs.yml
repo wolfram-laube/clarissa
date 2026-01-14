@@ -92,7 +92,8 @@ nav:
       - Tiếng Việt: publications/paper-editing-vi.md
       - العربية: publications/paper-editing-ar.md
       - Íslenska: publications/paper-editing-is.md
-    - "Paper Workflow (technisch)": publications/paper-workflow.md
+    - "Paper Workflow (Legacy)": publications/paper-workflow.md
+    - "CI/CD Pipeline": publications/ci-workflow.md
 
   - Billing:
     - Time Tracking & Invoicing: guides/billing.md
