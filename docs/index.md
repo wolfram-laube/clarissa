@@ -46,6 +46,7 @@ CLARISSA is a phased AI agent architecture designed to augment reservoir simulat
 |----------|-------------|
 | [Architecture Overview](architecture/README.md) | System design and component interaction |
 | [ADR Index](architecture/adr/index.md) | All Architecture Decision Records |
+| [Publications](publications/index.md) | Research papers, PDFs, editing guides |
 | [CI/CD Guide](ci/README.md) | Understanding pipeline results |
 | [Simulator Adapters](simulators/adapter_matrix.md) | Supported simulators and status |
 
