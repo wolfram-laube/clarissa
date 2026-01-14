@@ -76,3 +76,5 @@ Reservoir simulation remains underutilized despite decades of software advanceme
 *Submitted to SPE Europe Energy Conference 2026*
 
 <!-- Last build: 2026-01-14 15:03 UTC -->
+
+<!-- Last CI validation: 2026-01-14T21:18:39Z -->
