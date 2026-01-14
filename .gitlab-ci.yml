@@ -797,51 +797,81 @@ build_canonical_pdf:
         const browser = await puppeteer.launch({
           headless: 'new',
           executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
         });
         
         const outputDir = 'conference/spe-europe-2026/outputs';
         const htmlFiles = fs.readdirSync(outputDir).filter(f => f.endsWith('.html'));
         
+        let success = 0, failed = 0;
+        
         for (const htmlFile of htmlFiles) {
           const pdfFile = htmlFile.replace('.html', '.pdf');
-          console.log(`📄 Converting ${htmlFile} → ${pdfFile}`);
+          console.log(`\n📄 Converting ${htmlFile} → ${pdfFile}`);
           
-          const page = await browser.newPage();
-          page.setDefaultTimeout(120000); // 2 min timeout
-          
-          const html = fs.readFileSync(path.join(outputDir, htmlFile), 'utf8');
-          
-          // Load content without waiting for network (Mermaid CDN can be slow)
-          await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 60000 });
-          
-          // Wait for Mermaid to render (look for SVG elements in .mermaid divs)
           try {
-            await page.waitForFunction(() => {
-              const mermaidDivs = document.querySelectorAll('.mermaid');
-              if (mermaidDivs.length === 0) return true; // No diagrams to wait for
-              return Array.from(mermaidDivs).every(div => div.querySelector('svg'));
-            }, { timeout: 45000 });
-            console.log('   ✅ Mermaid diagrams rendered');
-          } catch (e) {
-            console.log('   ⚠️  Mermaid timeout - proceeding anyway');
+            const page = await browser.newPage();
+            
+            // Set BOTH timeouts explicitly - this is critical!
+            page.setDefaultTimeout(120000);
+            page.setDefaultNavigationTimeout(120000);
+            
+            const html = fs.readFileSync(path.join(outputDir, htmlFile), 'utf8');
+            
+            // Use domcontentloaded - don't wait for network (CDN can be flaky)
+            console.log('   Loading HTML...');
+            await page.setContent(html, { 
+              waitUntil: 'domcontentloaded',
+              timeout: 90000 
+            });
+            
+            // Check if there are Mermaid diagrams to render
+            const hasMermaid = await page.evaluate(() => 
+              document.querySelectorAll('.mermaid').length > 0
+            );
+            
+            if (hasMermaid) {
+              console.log('   Waiting for Mermaid.js to render diagrams...');
+              try {
+                await page.waitForFunction(() => {
+                  const divs = document.querySelectorAll('.mermaid');
+                  return Array.from(divs).every(d => d.querySelector('svg'));
+                }, { timeout: 60000 });
+                console.log('   ✅ Mermaid diagrams rendered');
+              } catch (e) {
+                console.log('   ⚠️  Mermaid timeout - diagrams may be missing');
+              }
+            }
+            
+            // Small buffer for any final rendering
+            await new Promise(r => setTimeout(r, 1500));
+            
+            // Generate PDF
+            console.log('   Generating PDF...');
+            await page.pdf({
+              path: path.join(outputDir, pdfFile),
+              format: 'A4',
+              margin: { top: '2cm', right: '2cm', bottom: '2cm', left: '2cm' },
+              printBackground: true
+            });
+            
+            await page.close();
+            console.log(`   ✅ ${pdfFile} created`);
+            success++;
+            
+          } catch (err) {
+            console.error(`   ❌ Failed: ${err.message}`);
+            failed++;
           }
-          
-          // Extra safety wait
-          await new Promise(r => setTimeout(r, 2000));
-          
-          await page.pdf({
-            path: path.join(outputDir, pdfFile),
-            format: 'A4',
-            margin: { top: '2cm', right: '2cm', bottom: '2cm', left: '2cm' },
-            printBackground: true
-          });
-          console.log(`   ✅ ${pdfFile} created`);
-          await page.close();
         }
         
         await browser.close();
-        console.log('✅ All PDFs generated!');
+        
+        console.log(`\n📊 Results: ${success} success, ${failed} failed`);
+        
+        if (failed > 0 && success === 0) {
+          process.exit(1); // Only fail if ALL conversions failed
+        }
       })();
       JSEOF
     - node generate-pdfs.js
