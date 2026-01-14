@@ -490,6 +490,9 @@ pages:
     - job: build_paper
       optional: true
       artifacts: true
+    - job: build_canonical_pdf
+      optional: true
+      artifacts: true
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
@@ -503,12 +506,16 @@ pages:
     - cp docs/guides/contributing/*.html public/guides/contributing/ 2>/dev/null || true
     - echo "📄 Setting up publication PDFs..."
     - mkdir -p public/publications/ijacsa-2026 public/publications/spe-europe-2026
-    - cp conference/ijacsa-2026/CLARISSA_Paper_IJACSA.pdf public/publications/ijacsa-2026/ 2>/dev/null || echo "IJACSA PDF not in artifacts"
+    - cp conference/ijacsa-2026/CLARISSA_Paper_IJACSA.pdf public/publications/ijacsa-2026/ 2>/dev/null || echo "IJACSA PDF not found"
+    - cp doc-outputs/spe-submission/submission-form.pdf public/publications/spe-europe-2026/ 2>/dev/null || echo "Canonical PDF not in artifacts"
+    - cp doc-outputs/spe-submission/submission-form.html public/publications/spe-europe-2026/ 2>/dev/null || true
+    - cp doc-outputs/spe-submission/full-paper.pdf public/publications/spe-europe-2026/ 2>/dev/null || true
+    - cp doc-outputs/spe-submission/full-paper.html public/publications/spe-europe-2026/ 2>/dev/null || true
     - cp conference/spe-europe-2026/abstract-with-diagrams.pdf public/publications/spe-europe-2026/ 2>/dev/null || true
     - cp conference/spe-europe-2026/abstract-corrected-v2.html public/publications/spe-europe-2026/ 2>/dev/null || true
-    - cp conference/spe-europe-2026/abstract.pdf public/publications/spe-europe-2026/ 2>/dev/null || true
-    - python3 -c "html='''<!DOCTYPE html><html><head><title>CLARISSA Publications</title><style>body{font-family:sans-serif;max-width:800px;margin:50px auto;padding:20px}h1{color:#333}.p{background:#f5f5f5;padding:20px;margin:20px 0;border-radius:8px}.p h2{margin-top:0;color:#1a73e8}a{color:#1a73e8}</style></head><body><h1>CLARISSA Publications</h1><p>Review copies for internal distribution.</p><div class=\"p\"><h2>IJACSA 2026</h2><p>CLARISSA - Conversational Language Agent for Reservoir Simulation</p><a href=\"ijacsa-2026/CLARISSA_Paper_IJACSA.pdf\">Full Paper PDF</a></div><div class=\"p\"><h2>SPE Europe 2026</h2><p>CLARISSA - Conversational UI for Reservoir Simulation</p><a href=\"spe-europe-2026/abstract-with-diagrams.pdf\">Abstract PDF</a> | <a href=\"spe-europe-2026/abstract-corrected-v2.html\">Interactive HTML</a></div></body></html>''';open('public/publications/index.html','w').write(html)"
-    - find public/publications -type f
+    - python3 scripts/generate_publications_index.py
+    - echo "📁 Publications deployed:"
+    - find public/publications -type f -name "*.pdf" -o -name "*.html" | head -20
   artifacts:
     paths:
       - public
