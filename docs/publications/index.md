@@ -2,17 +2,36 @@
 
 Research publications related to the CLARISSA project.
 
+!!! success "Direct Download Links"
+    These PDFs are hosted directly on GitLab Pages - no login required for team members!
+
 ---
 
-## IJACSA 2026
+## 🏆 SPE Europe Energy Conference 2026
+
+**CLARISSA: A Conversational User Interface for Democratizing Reservoir Simulation**
+
+*Category: Digital Transformation and Artificial Intelligence*
+
+| Resource | Link |
+|----------|------|
+| **📥 Abstract (PDF)** | [Download](spe-europe-2026/CLARISSA_SPE_Abstract.pdf) |
+| **📄 Abstract (HTML)** | [View Online](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/conference/spe-europe-2026/abstract-corrected-v2.html) |
+| **📊 Diagrams** | [Mermaid Sources](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/tree/main/conference/spe-europe-2026/diagrams) |
+
+**Authors:** Douglas Perschke (Stone Ridge Technology), Michal Matejka (Independent Consultant), Wolfram Laube (Independent Researcher)
+
+---
+
+## 📰 IJACSA 2026
 
 **CLARISSA: A Physics-Centric AI Agent Architecture for Reservoir Simulation**
 
 | Resource | Link |
 |----------|------|
-| **Abstract** | [Read Abstract](ijacsa-2026/abstract.md) |
-| **Paper (PDF)** | [Download PDF](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/raw/main/conference/ijacsa-2026/CLARISSA_Paper_IJACSA.pdf) |
-| **Paper (LaTeX)** | [View Source](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/conference/ijacsa-2026/CLARISSA_Paper_IJACSA.tex) |
+| **📥 Paper (PDF)** | [Download](ijacsa-2026/CLARISSA_Paper_IJACSA.pdf) |
+| **📝 Abstract** | [Read Abstract](ijacsa-2026/abstract.md) |
+| **📄 Paper (LaTeX)** | [View Source](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/conference/ijacsa-2026/CLARISSA_Paper_IJACSA.tex) |
 
 ### Figures
 
@@ -30,22 +49,7 @@ Research publications related to the CLARISSA project.
 
 ---
 
-## Source Files
-
-All publication source files are in the [`conference/`](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/tree/main/conference) directory:
-
-```
-conference/
-├── abstract.md                    # Main abstract
-└── ijacsa-2026/
-    ├── CLARISSA_Paper_IJACSA.tex  # LaTeX source
-    ├── CLARISSA_Paper_IJACSA.pdf  # Compiled PDF
-    ├── CLARISSA_Paper_IJACSA.docx # Word version
-    ├── figures/                   # Mermaid sources + PNGs
-    └── supplementary/             # Additional materials
-```
-
-## ✏️ Paper bearbeiten
+## ✏️ Paper bearbeiten / Edit Paper
 
 | Guide | Language |
 |-------|----------|
@@ -57,10 +61,8 @@ conference/
 
 **[Paper Workflow (technical)](paper-workflow.md)** - For developers (LaTeX, Git, CI)
 
-### Kurzversion / Quick Start
+---
 
-**Ohne technische Kenntnisse / Without technical knowledge:**
-1. [LaTeX-Datei öffnen / Open LaTeX file](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/conference/ijacsa-2026/CLARISSA_Paper_IJACSA.tex)
-2. "Edit" klicken / Click "Edit"
-3. Text ändern, "Commit" / Change text, "Commit"
-4. CI baut das PDF automatisch! / CI builds PDF automatically!
+## 📁 Source Files
+
+All publication source files are in the [`conference/`](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/tree/main/conference) directory.
