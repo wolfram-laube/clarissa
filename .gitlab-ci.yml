@@ -808,19 +808,40 @@ build_canonical_pdf:
           console.log(`📄 Converting ${htmlFile} → ${pdfFile}`);
           
           const page = await browser.newPage();
+          page.setDefaultTimeout(120000); // 2 min timeout
+          
           const html = fs.readFileSync(path.join(outputDir, htmlFile), 'utf8');
-          await page.setContent(html, { waitUntil: 'networkidle0' });
+          
+          // Load content without waiting for network (Mermaid CDN can be slow)
+          await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 60000 });
+          
+          // Wait for Mermaid to render (look for SVG elements in .mermaid divs)
+          try {
+            await page.waitForFunction(() => {
+              const mermaidDivs = document.querySelectorAll('.mermaid');
+              if (mermaidDivs.length === 0) return true; // No diagrams to wait for
+              return Array.from(mermaidDivs).every(div => div.querySelector('svg'));
+            }, { timeout: 45000 });
+            console.log('   ✅ Mermaid diagrams rendered');
+          } catch (e) {
+            console.log('   ⚠️  Mermaid timeout - proceeding anyway');
+          }
+          
+          // Extra safety wait
+          await new Promise(r => setTimeout(r, 2000));
+          
           await page.pdf({
             path: path.join(outputDir, pdfFile),
             format: 'A4',
             margin: { top: '2cm', right: '2cm', bottom: '2cm', left: '2cm' },
             printBackground: true
           });
-          console.log(`   ✅ ${pdfFile}`);
+          console.log(`   ✅ ${pdfFile} created`);
+          await page.close();
         }
         
         await browser.close();
-        console.log('Done!');
+        console.log('✅ All PDFs generated!');
       })();
       JSEOF
     - node generate-pdfs.js
