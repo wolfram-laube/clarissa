@@ -9,34 +9,35 @@ authors:
     
   - name: Michal Matejka
     affiliation: Independent Consultant, Houston, USA
-    role: Co-Author
+    role: Technical Review
     
   - name: Wolfram Laube
     affiliation: Independent Researcher, Austria
     role: Technical Architecture
 
-# Document hierarchy
+version: "1.1.0"
+last_updated: "2026-01-14"
+
+# Document structure
 documents:
-  # Short abstract for initial submission (4 sections, ~500 words)
-  submission-form:
-    source: canonical/submission-form.md
+  full_paper:
+    source: "full-paper.md"
+    description: "Complete technical paper with all sections and diagrams"
     outputs:
-      - outputs/submission-form.html
-      - outputs/submission-form.pdf
-    description: "SPE Meeting Abstract Submission Form (4 sections)"
-    
-  # Full paper with diagrams
-  full-paper:
-    source: canonical/abstract.md
+      - "full-paper.html"
+      - "full-paper.pdf"
+      
+  submission_form:
+    source: "submission-form.md"
+    description: "SPE abstract submission form (4 sections, ~500 words)"
     outputs:
-      - outputs/full-paper.html
-      - outputs/full-paper.pdf
-    description: "Complete technical paper with architecture diagrams"
+      - "submission-form.html"
+      - "submission-form.pdf"
 
 # Diagram sources (rendered by CI)
 diagrams:
-  source_dir: diagrams/
-  output_formats: [svg, png]
+  source_dir: "../diagrams"
+  output_formats: ["svg", "png"]
   files:
     - architecture.mmd
     - phases.mmd
@@ -45,15 +46,9 @@ diagrams:
     - conversation.mmd
     - techstack.mmd
 
-# Collaborative authoring sources (LLM merge input)
-sources:
-  - path: sources/doug/SPE_Meeting_Abstract_v6_2_in_Submission_Form.docx
-    contributor: Doug Perschke
-    format: docx
-    
-  - path: sources/wolfram/abstract-merged.md
-    contributor: Wolfram Laube
-    format: markdown
-
-version: "2.0.0"
-last_updated: "2026-01-14"
+# CI Pipeline triggers
+triggers:
+  llm_merge: "sources/**/*"
+  artifact_generation: 
+    - "canonical/**/*"
+    - "diagrams/*.mmd"

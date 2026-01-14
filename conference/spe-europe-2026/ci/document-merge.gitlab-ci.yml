@@ -1,21 +1,15 @@
-# document-merge.gitlab-ci.yml - SPE Europe 2026 Document Pipeline
-# 
-# WORKFLOW:
-# =========
-# 1. Collaborative Mode: sources/** → llm_merge → merged/ (needs review)
-# 2. Canonical Mode:     canonical/** or diagrams/** → render → html/pdf → pages
-#
-# Trigger Matrix:
-# ---------------
-# | Change in...        | Jobs triggered                              |
-# |---------------------|---------------------------------------------|
-# | sources/**          | llm_merge only (review before canonical)    |
-# | canonical/**        | render_diagrams → build_canonical → deploy  |
-# | diagrams/*.mmd      | render_diagrams → build_canonical → deploy  |
+# =============================================================================
+# SPE Europe 2026 Document Pipeline
+# =============================================================================
+# Trigger logic:
+#   sources/** changed     → llm_merge (collaborative authoring)
+#   canonical/** changed   → build_canonical_html → build_canonical_pdf → deploy
+#   diagrams/*.mmd changed → render_diagrams → build_canonical_html → build_canonical_pdf → deploy
+# =============================================================================
 
-# ============================================================
-# STAGE 1: LLM Merge (Collaborative Authoring)
-# ============================================================
+# -----------------------------------------------------------------------------
+# PHASE 1: Collaborative Authoring (LLM-assisted merge)
+# -----------------------------------------------------------------------------
 llm_merge:
   stage: build
   tags:
@@ -34,16 +28,15 @@ llm_merge:
   script:
     - pip install anthropic openai python-docx --quiet
     - python3 conference/spe-europe-2026/scripts/llm_merge.py
-    - echo "✅ LLM merge complete - review merged/abstract-merged.md"
-    - head -50 conference/spe-europe-2026/merged/abstract-merged.md
+    - echo "📝 LLM merge complete. Review merged/abstract-merged.md and copy to canonical/ if approved."
   artifacts:
     paths:
       - conference/spe-europe-2026/merged/abstract-merged.md
     expire_in: 1 week
 
-# ============================================================
-# STAGE 2: Render Diagrams (Mermaid → SVG/PNG)
-# ============================================================
+# -----------------------------------------------------------------------------
+# PHASE 2: Diagram Rendering
+# -----------------------------------------------------------------------------
 render_diagrams:
   stage: build
   tags:
@@ -58,31 +51,21 @@ render_diagrams:
       when: manual
       allow_failure: true
   before_script:
-    - apk add --no-cache chromium
+    - apk add --no-cache chromium python3
     - npm install -g @mermaid-js/mermaid-cli
     - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    - export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
   script:
-    - |
-      echo "🎨 Rendering Mermaid diagrams..."
-      cd conference/spe-europe-2026/diagrams
-      echo '{"args":["--no-sandbox","--disable-setuid-sandbox"]}' > puppeteer-config.json
-      for mmd in *.mmd; do
-        name="${mmd%.mmd}"
-        echo "  → $name"
-        mmdc -i "$mmd" -o "${name}.svg" -p puppeteer-config.json -b transparent || true
-        mmdc -i "$mmd" -o "${name}.png" -p puppeteer-config.json -b white -s 2 || true
-      done
-      echo "📁 Generated:"
-      ls -la *.svg *.png 2>/dev/null || echo "No files"
+    - python3 conference/spe-europe-2026/scripts/render_diagrams.py
   artifacts:
     paths:
       - conference/spe-europe-2026/diagrams/*.svg
       - conference/spe-europe-2026/diagrams/*.png
-    expire_in: 1 week
+    expire_in: 4 weeks
 
-# ============================================================
-# STAGE 3a: Build Canonical HTML
-# ============================================================
+# -----------------------------------------------------------------------------
+# PHASE 3: Build HTML from canonical sources
+# -----------------------------------------------------------------------------
 build_canonical_html:
   stage: test
   tags:
@@ -101,19 +84,18 @@ build_canonical_html:
       when: manual
       allow_failure: true
   script:
-    - mkdir -p doc-outputs/spe-submission
-    - python3 conference/spe-europe-2026/scripts/build_canonical_html.py
-    - ls -la doc-outputs/spe-submission/
+    - python3 conference/spe-europe-2026/scripts/build_canonical.py
+    - ls -la conference/spe-europe-2026/outputs/
   artifacts:
     paths:
-      - doc-outputs/spe-submission/
-    expire_in: 1 week
+      - conference/spe-europe-2026/outputs/*.html
+    expire_in: 4 weeks
 
-# ============================================================
-# STAGE 3b: Build Canonical PDF
-# ============================================================
+# -----------------------------------------------------------------------------
+# PHASE 4: Generate PDFs via Puppeteer/Chromium
+# -----------------------------------------------------------------------------
 build_canonical_pdf:
-  stage: test
+  stage: deploy
   tags:
     - docker
   image: node:20-alpine
@@ -132,124 +114,55 @@ build_canonical_pdf:
     - apk add --no-cache chromium
     - npm install puppeteer
     - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    - export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
   script:
     - |
-      cat > generate-pdf.js << 'JSEOF'
+      cat > generate-pdfs.js << 'JSEOF'
       const puppeteer = require('puppeteer');
       const fs = require('fs');
       const path = require('path');
+      
       (async () => {
         const browser = await puppeteer.launch({
           headless: 'new',
           executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
-        const dir = 'doc-outputs/spe-submission';
-        const files = fs.readdirSync(dir).filter(f => f.endsWith('.html'));
-        for (const file of files) {
+        
+        const outputDir = 'conference/spe-europe-2026/outputs';
+        const htmlFiles = fs.readdirSync(outputDir).filter(f => f.endsWith('.html'));
+        
+        for (const htmlFile of htmlFiles) {
+          const htmlPath = path.join(outputDir, htmlFile);
+          const pdfPath = htmlPath.replace('.html', '.pdf');
+          
+          console.log(`📄 Converting ${htmlFile} → ${path.basename(pdfPath)}`);
+          
           const page = await browser.newPage();
-          const html = fs.readFileSync(path.join(dir, file), 'utf8');
+          const html = fs.readFileSync(htmlPath, 'utf8');
           await page.setContent(html, { waitUntil: 'networkidle0' });
-          await new Promise(r => setTimeout(r, 2000));
+          
+          // Wait for Mermaid diagrams to render
+          await new Promise(r => setTimeout(r, 3000));
+          
           await page.pdf({
-            path: path.join(dir, file.replace('.html', '.pdf')),
+            path: pdfPath,
             format: 'A4',
             margin: { top: '2cm', right: '2cm', bottom: '2cm', left: '2cm' },
             printBackground: true
           });
-          console.log('Generated:', file.replace('.html', '.pdf'));
+          
+          console.log(`   ✅ ${path.basename(pdfPath)}`);
         }
+        
         await browser.close();
+        console.log('🎉 All PDFs generated!');
       })();
       JSEOF
-    - node generate-pdf.js
-    - ls -la doc-outputs/spe-submission/
+    - node generate-pdfs.js
+    - ls -la conference/spe-europe-2026/outputs/
   artifacts:
     paths:
-      - doc-outputs/spe-submission/
-    expire_in: 1 month
+      - conference/spe-europe-2026/outputs/
+    expire_in: 4 weeks
     name: "spe-canonical-${CI_COMMIT_SHORT_SHA}"
-
-# ============================================================
-# LEGACY: Build merged/ HTML
-# ============================================================
-build_merged_html:
-  stage: test
-  tags:
-    - docker
-  image: python:3.11-slim
-  needs:
-    - job: llm_merge
-      optional: true
-      artifacts: true
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
-      changes:
-        - "conference/spe-europe-2026/sources/**/*"
-        - "conference/spe-europe-2026/merged/**/*"
-    - if: $CI_PIPELINE_SOURCE == "web"
-      when: manual
-      allow_failure: true
-  script:
-    - python3 conference/spe-europe-2026/scripts/md_to_html.py
-    - ls -la doc-outputs/
-  artifacts:
-    paths:
-      - doc-outputs/
-    expire_in: 1 week
-
-# ============================================================
-# LEGACY: Generate merged/ PDF
-# ============================================================
-generate_merged_pdf:
-  stage: deploy
-  tags:
-    - docker
-  image: node:20-alpine
-  needs:
-    - job: build_merged_html
-      artifacts: true
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
-      changes:
-        - "conference/spe-europe-2026/sources/**/*"
-        - "conference/spe-europe-2026/merged/**/*"
-    - if: $CI_PIPELINE_SOURCE == "web"
-      when: manual
-      allow_failure: true
-  before_script:
-    - apk add --no-cache chromium
-    - npm install puppeteer
-    - export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-  script:
-    - ls -la doc-outputs/
-    - |
-      cat > generate-pdf.js << 'JSEOF'
-      const puppeteer = require('puppeteer');
-      const fs = require('fs');
-      (async () => {
-        const browser = await puppeteer.launch({
-          headless: 'new',
-          executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-        });
-        const page = await browser.newPage();
-        const html = fs.readFileSync('doc-outputs/abstract-merged.html', 'utf8');
-        await page.setContent(html, { waitUntil: 'networkidle0' });
-        await new Promise(r => setTimeout(r, 3000));
-        await page.pdf({
-          path: 'doc-outputs/abstract-merged.pdf',
-          format: 'A4',
-          margin: { top: '2cm', right: '2cm', bottom: '2cm', left: '2cm' },
-          printBackground: true
-        });
-        await browser.close();
-      })();
-      JSEOF
-    - node generate-pdf.js
-    - ls -la doc-outputs/
-  artifacts:
-    paths:
-      - doc-outputs/
-    expire_in: 1 month
-    name: "spe-merged-${CI_COMMIT_SHORT_SHA}"
