@@ -509,17 +509,17 @@ pages:
     # IJACSA Paper (from build_paper artifact)
     - cp conference/ijacsa-2026/CLARISSA_Paper_IJACSA.pdf public/publications/ijacsa-2026/ 2>/dev/null || echo "IJACSA PDF not in artifacts"
     # SPE Canonical outputs (from build_canonical_pdf artifact)
-    - cp conference/spe-europe-2026/outputs/submission-form.pdf public/publications/spe-europe-2026/ 2>/dev/null || echo "submission-form.pdf not in artifacts"
-    - cp conference/spe-europe-2026/outputs/submission-form.html public/publications/spe-europe-2026/ 2>/dev/null || true
-    - cp conference/spe-europe-2026/outputs/full-paper.pdf public/publications/spe-europe-2026/ 2>/dev/null || true
-    - cp conference/spe-europe-2026/outputs/full-paper.html public/publications/spe-europe-2026/ 2>/dev/null || true
-    # Legacy files from repo (until fully migrated)
+    - cp doc-outputs/spe-submission/submission-form.pdf public/publications/spe-europe-2026/ 2>/dev/null || echo "submission-form.pdf not in artifacts"
+    - cp doc-outputs/spe-submission/submission-form.html public/publications/spe-europe-2026/ 2>/dev/null || true
+    - cp doc-outputs/spe-submission/full-paper.pdf public/publications/spe-europe-2026/ 2>/dev/null || true
+    - cp doc-outputs/spe-submission/full-paper.html public/publications/spe-europe-2026/ 2>/dev/null || true
+    # Legacy files from repo (fallback until canonical pipeline runs)
     - cp conference/spe-europe-2026/abstract-with-diagrams.pdf public/publications/spe-europe-2026/ 2>/dev/null || true
     - cp conference/spe-europe-2026/abstract-corrected-v2.html public/publications/spe-europe-2026/ 2>/dev/null || true
     # Generate index
     - python3 scripts/generate_publications_index.py
     - echo "📁 Publications deployed:"
-    - find public/publications -type f | head -20
+    - find public/publications -type f
   artifacts:
     paths:
       - public
