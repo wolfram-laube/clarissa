@@ -1,7 +1,10 @@
 # ADR-014: LLM-Powered Multi-Format Document Merge Pipeline
 
 ## Status
-Proposed
+**Accepted** (Implemented January 2026)
+
+!!! success "Implementation Complete"
+    This ADR has been implemented. See [CI/CD Publication Workflow](../publications/ci-workflow.md) for operational documentation.
 
 ## Context
 

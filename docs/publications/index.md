@@ -59,7 +59,9 @@ Research publications related to the CLARISSA project.
 | **[تحرير الورقة (العربية)](paper-editing-ar.md)** | 🇸🇦 العربية |
 | **[Breyta grein (Íslenska)](paper-editing-is.md)** | 🇮🇸 Íslenska |
 
-**[Paper Workflow (technical)](paper-workflow.md)** - For developers (LaTeX, Git, CI)
+**[CI/CD Publication Workflow](ci-workflow.md)** - Current pipeline documentation (LLM merge, Mermaid, PDF generation)
+
+**[Paper Workflow (Legacy)](paper-workflow.md)** - Old LaTeX-only workflow (IJACSA only)
 
 ---
 

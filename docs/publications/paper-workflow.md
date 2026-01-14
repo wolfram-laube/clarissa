@@ -1,6 +1,23 @@
-# 📝 Paper Workflow Guide
+# 📝 Paper Workflow Guide (Legacy)
+
+!!! warning "Deprecated Documentation"
+    **This document describes the legacy LaTeX-only workflow for IJACSA 2026.**
+    
+    For the current CI/CD pipeline documentation covering:
+    
+    - LLM-powered multi-author merge
+    - Mermaid diagram rendering
+    - Automated PDF generation
+    - GitLab Pages deployment
+    
+    **→ See [CI/CD Publication Workflow](ci-workflow.md)**
+
+---
 
 How to edit, review, and publish CLARISSA research papers.
+
+!!! note "Scope"
+    This guide applies only to the **IJACSA 2026 LaTeX paper**. For SPE Europe 2026, see [CI/CD Workflow](ci-workflow.md).
 
 ---
 
