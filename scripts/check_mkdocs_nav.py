@@ -23,7 +23,8 @@ def main():
         sys.exit(1)
 
     with open(mkdocs_path) as f:
-        config = yaml.safe_load(f)
+        # Use FullLoader to handle !!python/name: tags from MkDocs Material
+        config = yaml.load(f, Loader=yaml.FullLoader)
 
     # Extract all file references from nav
     nav_files = set()
