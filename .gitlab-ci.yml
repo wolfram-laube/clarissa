@@ -541,10 +541,9 @@ pages:
       <div class="conf"><h2>SPE Europe Energy Conference 2026</h2>
       <p>Category: Digital Transformation and AI</p>
       <div class="docs">
-        <div class="doc"><a href="spe-europe-2026/full-paper.pdf">📄 Full Paper</a><br><small>Technical paper with diagrams</small></div>
-        <div class="doc"><a href="spe-europe-2026/submission-form.pdf">📄 Submission Form</a><br><small>Short abstract (~500 words)</small></div>
-        <div class="doc"><a href="spe-europe-2026/full-paper.html">🌐 Full Paper HTML</a><br><small>Interactive with Mermaid</small></div>
-        <div class="doc"><a href="spe-europe-2026/submission-form.html">🌐 Submission Form HTML</a><br><small>Preview version</small></div>
+        <div class="doc"><a href="spe-europe-2026/CLARISSA_SPE_Abstract.pdf">📄 Abstract (PDF)</a><br><small>Conference submission</small></div>
+        <div class="doc"><a href="spe-europe-2026/abstract-with-diagrams.pdf">📄 Full Paper (PDF)</a><br><small>With Mermaid diagrams</small></div>
+        <div class="doc"><a href="spe-europe-2026/abstract-corrected-v2.html">🌐 Full Paper (HTML)</a><br><small>Interactive version</small></div>
       </div></div>
       
       <p style="margin-top:40px;color:#718096;font-size:0.9em">
