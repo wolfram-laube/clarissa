@@ -1,6 +1,7 @@
 # Include additional CI configurations
 include:
   - local: '.gitlab/benchmark.yml'
+  - local: '.gitlab/gcp-vm-control.yml'
   - local: 'conference/spe-europe-2026/ci/document-merge.gitlab-ci.yml'
     rules:
       - changes:
