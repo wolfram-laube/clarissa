@@ -156,6 +156,33 @@ git checkout -b 12-extend-gitignore</code></pre>
         </section>
     </div></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
-    <script>Reveal.initialize({ hash: true, slideNumber: 'c/t', transition: 'slide', controls: true, controlsTutorial: true, progress: true{% if meta.direction == 'rtl' %}, rtl: true{% endif %} });</script>
+    <script>
+        Reveal.initialize({ 
+            hash: true, 
+            slideNumber: 'c/t', 
+            transition: 'slide', 
+            controls: true, 
+            controlsTutorial: true, 
+            progress: true, 
+            mouseWheel: true, 
+            touch: true{% if meta.direction == 'rtl' %}, 
+            rtl: true{% endif %} 
+        });
+        
+        // Click anywhere to navigate: right 70% = next, left 30% = prev
+        document.querySelector('.reveal').addEventListener('click', function(e) {
+            if (e.target.closest('a, button, pre, code, .controls, .lang-switch')) return;
+            var clickX = e.clientX;
+            var width = window.innerWidth;
+            if (clickX > width * 0.3) {
+                Reveal.next();
+            } else {
+                Reveal.prev();
+            }
+        });
+        
+        // Add cursor style
+        document.querySelector('.reveal').style.cursor = 'pointer';
+    </script>
 </body>
 </html>

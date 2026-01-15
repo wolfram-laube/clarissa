@@ -20,7 +20,7 @@ slides:
   subtitle: "Hướng dẫn cho người đóng góp"
   
   navigation:
-    press_to_continue: "Nhấn → hoặc Space để tiếp tục"
+    press_to_continue: "Nhấp chuột hoặc nhấn → để tiếp tục"
     press_for_overview: "Esc để xem tổng quan"
   
   why_workflow:

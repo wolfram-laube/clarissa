@@ -20,7 +20,7 @@ slides:
   subtitle: "دليل للمساهمين"
   
   navigation:
-    press_to_continue: "اضغط ← أو Space للمتابعة"
+    press_to_continue: "انقر أو اضغط ← للمتابعة"
     press_for_overview: "Esc لعرض النظرة العامة"
   
   why_workflow:

@@ -20,7 +20,7 @@ slides:
   subtitle: "Leiðbeiningar fyrir þátttakendur"
   
   navigation:
-    press_to_continue: "Ýttu á → eða Space til að halda áfram"
+    press_to_continue: "Smelltu eða ýttu á → til að halda áfram"
     press_for_overview: "Esc fyrir yfirlit"
   
   why_workflow:

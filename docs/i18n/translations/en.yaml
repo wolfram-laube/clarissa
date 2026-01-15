@@ -24,7 +24,7 @@ slides:
   subtitle: "Guide for Contributors"
   
   navigation:
-    press_to_continue: "Press → or Space to continue"
+    press_to_continue: "Click or press → to continue"
     press_for_overview: "Esc for overview"
   
   labels:

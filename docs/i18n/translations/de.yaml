@@ -20,7 +20,7 @@ slides:
   subtitle: "Leitfaden für Mitwirkende"
   
   navigation:
-    press_to_continue: "Drücke → oder Space zum Fortfahren"
+    press_to_continue: "Klicken oder → drücken zum Fortfahren"
     press_for_overview: "Esc für Übersicht"
   
   why_workflow:
