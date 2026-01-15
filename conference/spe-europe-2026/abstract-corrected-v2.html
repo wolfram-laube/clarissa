@@ -110,6 +110,20 @@
             page-break-inside: avoid;
         }
         
+        
+        /* === FIX: Ensure Mermaid SVG text visibility === */
+        .mermaid svg text,
+        .mermaid svg .label,
+        .mermaid svg .nodeLabel,
+        .mermaid svg .cluster-label text,
+        .mermaid svg span {
+            fill: #333 !important;
+            color: #333 !important;
+        }
+        .mermaid svg .cluster rect {
+            stroke: #888 !important;
+            stroke-width: 1px !important;
+        }
         .mermaid {
             background: #fff;
             padding: 0.5em;
@@ -592,7 +606,18 @@ sequenceDiagram
         theme: 'base',
         themeVariables: {
             fontSize: '14px',
-            fontFamily: 'Segoe UI, Arial, sans-serif'
+            fontFamily: 'Segoe UI, Arial, sans-serif',
+            // Subgraph styling - prevents black boxes
+            clusterBkg: '#f8f9fa',
+            clusterBorder: '#888',
+            edgeLabelBackground: '#ffffff',
+            // Ensure text is always visible
+            primaryTextColor: '#333333',
+            secondaryTextColor: '#333333',
+            tertiaryTextColor: '#333333',
+            primaryBorderColor: '#666666',
+            lineColor: '#666666',
+            textColor: '#333333'
         },
         flowchart: { 
             useMaxWidth: true,
