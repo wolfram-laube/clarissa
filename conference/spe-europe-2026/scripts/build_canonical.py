@@ -81,11 +81,54 @@ def convert_md_to_html(md_content: str, title: str, include_mermaid_js: bool = T
             f'<div class="mermaid">\n{mermaid_code}\n</div>'
         )
     
-    # Build HTML
+    # Build HTML with FIXED Mermaid initialization for proper text visibility
     mermaid_script = '''
-    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-    <script>mermaid.initialize({startOnLoad:true, theme:'neutral'});</script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'base',
+        themeVariables: {
+            fontSize: '14px',
+            fontFamily: 'Georgia, serif',
+            // Subgraph/cluster styling - prevents black boxes
+            clusterBkg: '#f8f9fa',
+            clusterBorder: '#888888',
+            // Explicit text colors for visibility
+            primaryTextColor: '#333333',
+            secondaryTextColor: '#333333',
+            tertiaryTextColor: '#333333',
+            primaryBorderColor: '#666666',
+            lineColor: '#666666',
+            textColor: '#333333',
+            mainBkg: '#ffffff',
+            nodeBorder: '#666666',
+            edgeLabelBackground: '#ffffff'
+        },
+        flowchart: {
+            useMaxWidth: true,
+            htmlLabels: true,
+            curve: 'basis'
+        }
+    });
+    </script>
     ''' if include_mermaid_js and mermaid_blocks else ''
+    
+    # CSS with SVG text visibility fix
+    css_svg_fix = '''
+        /* Ensure Mermaid SVG text is always visible */
+        .mermaid svg text,
+        .mermaid svg .label,
+        .mermaid svg .nodeLabel,
+        .mermaid svg .cluster-label text,
+        .mermaid svg span {
+            fill: #333 !important;
+            color: #333 !important;
+        }
+        .mermaid svg .cluster rect {
+            stroke: #888 !important;
+        }
+    ''' if mermaid_blocks else ''
     
     return f'''<!DOCTYPE html>
 <html lang="en">
@@ -107,6 +150,7 @@ def convert_md_to_html(md_content: str, title: str, include_mermaid_js: bool = T
         ul, ol {{ margin: 15px 0; padding-left: 30px; }}
         li {{ margin: 5px 0; }}
         @media print {{ .mermaid {{ break-inside: avoid; }} }}
+        {css_svg_fix}
     </style>
     {mermaid_script}
 </head>
