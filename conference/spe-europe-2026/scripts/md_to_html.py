@@ -1,10 +1,31 @@
 #!/usr/bin/env python3
 """
 Robust Markdown to HTML converter for SPE abstract with Mermaid support.
-Version 2: Better list handling, numbered lists, reference formatting.
+Version 3: Fixed list continuation over empty lines, removed gray boxes.
 """
 import re
 from pathlib import Path
+
+
+def is_list_item(line: str) -> tuple[bool, bool, str]:
+    """Check if line is a list item. Returns (is_list, is_ordered, content)."""
+    stripped = line.strip()
+    if stripped.startswith('- ') or stripped.startswith('* '):
+        return True, False, stripped[2:]
+    if re.match(r'^\d+\.\s+', stripped):
+        return True, True, re.sub(r'^\d+\.\s+', '', stripped)
+    return False, False, ''
+
+
+def peek_next_list_item(lines: list[str], current_idx: int) -> tuple[bool, bool]:
+    """Look ahead to find next non-empty line and check if it's a list item."""
+    for i in range(current_idx + 1, len(lines)):
+        line = lines[i].strip()
+        if line:  # Found next non-empty line
+            is_list, is_ordered, _ = is_list_item(line)
+            return is_list, is_ordered
+    return False, False
+
 
 def convert_md_to_html(md_content: str) -> str:
     """Convert Markdown to HTML with proper Mermaid handling."""
@@ -45,36 +66,59 @@ def convert_md_to_html(md_content: str) -> str:
     md = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', md)
     md = re.sub(r'\*(.+?)\*', r'<em>\1</em>', md)
     
-    # Convert lists (both unordered and ordered)
+    # Convert lists with proper empty line handling
     lines = md.split('\n')
     result = []
     in_ul = False
     in_ol = False
+    i = 0
     
-    for line in lines:
+    while i < len(lines):
+        line = lines[i]
         stripped = line.strip()
         
-        # Unordered list item
-        if stripped.startswith('- ') or stripped.startswith('* '):
-            if in_ol:
-                result.append('</ol>')
-                in_ol = False
-            if not in_ul:
-                result.append('<ul>')
-                in_ul = True
-            item_content = stripped[2:]
-            result.append(f'  <li>{item_content}</li>')
-        # Ordered list item (1. 2. 3. etc)
-        elif re.match(r'^\d+\.\s+', stripped):
-            if in_ul:
-                result.append('</ul>')
-                in_ul = False
-            if not in_ol:
-                result.append('<ol>')
-                in_ol = True
-            item_content = re.sub(r'^\d+\.\s+', '', stripped)
-            result.append(f'  <li>{item_content}</li>')
+        is_list, is_ordered, content = is_list_item(stripped)
+        
+        if is_list:
+            if is_ordered:
+                # Ordered list item
+                if in_ul:
+                    result.append('</ul>')
+                    in_ul = False
+                if not in_ol:
+                    result.append('<ol>')
+                    in_ol = True
+                result.append(f'  <li>{content}</li>')
+            else:
+                # Unordered list item
+                if in_ol:
+                    result.append('</ol>')
+                    in_ol = False
+                if not in_ul:
+                    result.append('<ul>')
+                    in_ul = True
+                result.append(f'  <li>{content}</li>')
+        elif not stripped:
+            # Empty line - check if list continues after
+            next_is_list, next_is_ordered = peek_next_list_item(lines, i)
+            
+            if in_ol and next_is_list and next_is_ordered:
+                # List continues - don't close it
+                pass
+            elif in_ul and next_is_list and not next_is_ordered:
+                # List continues - don't close it
+                pass
+            else:
+                # List ends here
+                if in_ul:
+                    result.append('</ul>')
+                    in_ul = False
+                if in_ol:
+                    result.append('</ol>')
+                    in_ol = False
+                result.append('')
         else:
+            # Non-list content
             if in_ul:
                 result.append('</ul>')
                 in_ul = False
@@ -82,7 +126,10 @@ def convert_md_to_html(md_content: str) -> str:
                 result.append('</ol>')
                 in_ol = False
             result.append(line)
+        
+        i += 1
     
+    # Close any remaining lists
     if in_ul:
         result.append('</ul>')
     if in_ol:
@@ -122,7 +169,6 @@ def convert_md_to_html(md_content: str) -> str:
             for p in paragraphs:
                 p = p.strip()
                 if p:
-                    # Don't wrap if it's just whitespace or already a block element
                     result_blocks.append(f'<p>{p}</p>')
     
     return '\n\n'.join(result_blocks)
@@ -171,7 +217,7 @@ def convert_tables(md: str) -> str:
 
 
 def main():
-    # HTML template with proper styling
+    # HTML template with clean styling (no gray boxes)
     html_template = '''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -188,6 +234,7 @@ def main():
             line-height: 1.8;
             font-size: 11pt;
             color: #333;
+            background: white;
         }}
         h1 {{
             color: #003366;
