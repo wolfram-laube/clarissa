@@ -45,8 +45,12 @@ stages:
   before_script:
     - python -V
     - python -m pip install --upgrade pip
+    # Clean up stale editable installs that break pip
     - pip uninstall clarissa -y 2>/dev/null || true
-    - python -m pip install --force-reinstall -e ".[dev]"
+    - find $(python -c "import site; print(site.getsitepackages()[0])") -name "__editable__*" -delete 2>/dev/null || true
+    - find $(python -c "import site; print(site.getsitepackages()[0])") -name "*.pth" -exec grep -l clarissa {} \; -delete 2>/dev/null || true
+    - pip cache purge 2>/dev/null || true
+    - python -m pip install -e ".[dev]"
 
 .pytest_run: &pytest_run
   script:
