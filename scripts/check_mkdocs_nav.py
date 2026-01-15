@@ -23,8 +23,12 @@ def main():
         sys.exit(1)
 
     with open(mkdocs_path) as f:
-        # Use FullLoader to handle !!python/name: tags from MkDocs Material
-        config = yaml.load(f, Loader=yaml.FullLoader)
+        # Custom loader that ignores MkDocs Material Python tags
+        class SafeLineLoader(yaml.SafeLoader):
+            pass
+        SafeLineLoader.add_multi_constructor("!python/", lambda l, s, n: None)
+        SafeLineLoader.add_multi_constructor("tag:yaml.org,2002:python/", lambda l, s, n: None)
+        config = yaml.load(f, Loader=SafeLineLoader)
 
     # Extract all file references from nav
     nav_files = set()
