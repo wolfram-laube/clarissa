@@ -493,6 +493,9 @@ pages:
     - job: build_canonical_pdf
       optional: true
       artifacts: true
+    - job: architecture_graphs
+      optional: true
+      artifacts: true
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
@@ -500,6 +503,10 @@ pages:
   before_script:
     - pip install mkdocs mkdocs-material pymdown-extensions jinja2 pyyaml
   script:
+    # Copy architecture diagrams from artifacts BEFORE mkdocs build
+    - mkdir -p docs/architecture/rendered
+    - cp docs/architecture/rendered/*.svg docs/architecture/rendered/ 2>/dev/null || echo "No rendered architecture diagrams from CI"
+    - ls -la docs/architecture/rendered/ || true
     - python scripts/build_i18n_docs.py
     - mkdocs build --site-dir public
     - mkdir -p public/guides/contributing
@@ -514,6 +521,9 @@ pages:
     # Fallback to committed files if CI didn't run
     - cp conference/spe-europe-2026/abstract-with-diagrams.pdf public/publications/spe-europe-2026/ 2>/dev/null || true
     - cp conference/spe-europe-2026/abstract-corrected-v2.html public/publications/spe-europe-2026/ 2>/dev/null || true
+    # Architecture diagrams gallery page
+    - mkdir -p public/architecture/rendered
+    - cp docs/architecture/rendered/index.html public/architecture/rendered/ 2>/dev/null || true
     # Create publications index
     - |
       cat > public/publications/index.html << 'PUBHTML'
