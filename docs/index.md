@@ -20,7 +20,7 @@ CLARISSA bridges natural language interaction and domain-specific simulation syn
 
     Cheatsheet for branch naming, commits, and merge requests.
     
-    [EN](guides/contributing/cheatsheet-en/) | [DE](guides/contributing/cheatsheet-de/) | [VI](guides/contributing/cheatsheet-vi/)
+    [EN](guides/contributing/cheatsheet-en.md) | [DE](guides/contributing/cheatsheet-de.md) | [VI](guides/contributing/cheatsheet-vi.md)
 
 </div>
 

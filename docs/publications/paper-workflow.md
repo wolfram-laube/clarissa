@@ -36,7 +36,7 @@ How to edit, review, and publish CLARISSA research papers.
 
 ```
 conference/
-├── abstract.md                      # Standalone abstract
+├── spe-europe-2026/canonical/       # SPE Europe 2026 abstract
 └── ijacsa-2026/
     ├── CLARISSA_Paper_IJACSA.tex    # LaTeX source (PRIMARY)
     ├── CLARISSA_Paper_IJACSA.pdf    # Compiled PDF
@@ -225,4 +225,4 @@ Examples:
 | Paper (PDF) | [Download](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/raw/main/conference/ijacsa-2026/CLARISSA_Paper_IJACSA.pdf) |
 | LaTeX Source | [View](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/conference/ijacsa-2026/CLARISSA_Paper_IJACSA.tex) |
 | Figures | [Browse](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/tree/main/conference/ijacsa-2026/figures) |
-| Abstract | [Read](abstract.md) |
+| Abstract | [Read](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/conference/spe-europe-2026/canonical/full-paper.md) |
