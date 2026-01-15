@@ -1,7 +1,7 @@
 flowchart TD
-  P[Proposed Change] --> D{Touches governed params?}
-  D -->|Yes (e.g., RATE)| A[Approval required]
-  A -->|approved| E[Execute simulation]
-  A -->|denied| X[Stop / escalate]
+  P[Proposed Change] --> D{Touches governed params}
+  D -->|Yes| A[Approval required]
+  A -->|Approved| E[Execute simulation]
+  A -->|Denied| X[Stop or escalate]
   D -->|No| E
-  E --> O[Outcome + Explanation]
+  E --> O[Outcome and Explanation]
