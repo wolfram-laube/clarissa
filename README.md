@@ -10,6 +10,12 @@ It is **explicitly documented and versioned**.
 
 ---
 
+## 🚀 New Contributor?
+
+**[▶️ Start the Interactive Workflow Guide](https://irena-40cc50.gitlab.io/guides/contributing/)** — Learn our GitLab workflow in 5 minutes!
+
+---
+
 ## 📚 Documentation
 
 **[→ Full Documentation (GitLab Pages)](https://irena-40cc50.gitlab.io/)**
@@ -54,3 +60,4 @@ docs/simulators/        # Simulator adapter matrix and notes
 
 scripts/                # Operational and CI tooling
 tests/                  # Contract tests, golden CLI tests, governance checks
+```

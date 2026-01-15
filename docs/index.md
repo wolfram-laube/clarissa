@@ -6,6 +6,26 @@
 
 CLARISSA bridges natural language interaction and domain-specific simulation syntax through governed, simulator-in-the-loop learning.
 
+## 🚀 New Contributor? Start Here!
+
+<div class="grid cards" markdown>
+
+-   :material-presentation-play: **Interactive Workflow Guide**
+
+    Learn the GitLab workflow in 5 minutes with our interactive slides.
+    
+    [:fontawesome-solid-play: **Start Slides →**](guides/contributing/index.html){ .md-button .md-button--primary }
+
+-   :material-file-document-outline: **Quick Reference**
+
+    Cheatsheet for branch naming, commits, and merge requests.
+    
+    [EN](guides/contributing/cheatsheet-en/) | [DE](guides/contributing/cheatsheet-de/) | [VI](guides/contributing/cheatsheet-vi/)
+
+</div>
+
+---
+
 ## What is CLARISSA?
 
 CLARISSA is a phased AI agent architecture designed to augment reservoir simulation workflows. Rather than replacing established simulators, CLARISSA integrates multiple reservoir simulators as heterogeneous sources of numerical and physical feedback.
