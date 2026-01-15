@@ -3,78 +3,42 @@
 
 .benchmark_base:
   stage: test
+  timeout: 10 minutes
   script:
     - echo "=== Runner Benchmark ==="
-    - echo "Runner: $CI_RUNNER_DESCRIPTION"
-    - echo "Executor: $CI_RUNNER_EXECUTABLE_ARCH"
-    - echo "Start: $(date)"
-    - |
-      # CPU Benchmark - calculate primes
-      START=$(date +%s.%N)
-      python3 -c "
-      import time
-      def sieve(n):
-          primes = [True] * (n+1)
-          p = 2
-          while p * p <= n:
-              if primes[p]:
-                  for i in range(p * p, n+1, p):
-                      primes[i] = False
-              p += 1
-          return sum(primes) - 2
-      
-      start = time.time()
-      result = sieve(1000000)
-      elapsed = time.time() - start
-      print(f'Primes up to 1M: {result} in {elapsed:.2f}s')
-      "
-      END=$(date +%s.%N)
-      echo "CPU Benchmark: $(echo "$END - $START" | bc)s"
-    - |
-      # Disk I/O Benchmark
-      START=$(date +%s.%N)
-      dd if=/dev/zero of=/tmp/testfile bs=1M count=100 2>&1 | tail -1
-      rm /tmp/testfile
-      END=$(date +%s.%N)
-      echo "Disk Write 100MB: $(echo "$END - $START" | bc)s"
-    - |
-      # Pip install benchmark
-      START=$(date +%s.%N)
-      pip install requests --quiet --disable-pip-version-check 2>/dev/null || true
-      END=$(date +%s.%N)
-      echo "Pip install requests: $(echo "$END - $START" | bc)s"
-    - echo "=== Benchmark Complete ==="
-    - echo "End: $(date)"
+    - echo "Runner $CI_RUNNER_DESCRIPTION"
+    - date
+    - echo "--- CPU Benchmark (primes to 500k) ---"
+    - python3 -c "import time; s=time.time(); n=500000; sieve=[1]*n; [sieve.__setitem__(i,0) for p in range(2,int(n**.5)+1) if sieve[p] for i in range(p*p,n,p)]; print(f'{sum(sieve)-2} primes in {time.time()-s:.2f}s')"
+    - echo "--- Disk I/O (write 100MB) ---"
+    - dd if=/dev/zero of=/tmp/testfile bs=1M count=100 2>&1 || true
+    - rm -f /tmp/testfile
+    - echo "--- Pip install requests ---"
+    - pip install requests --quiet 2>/dev/null || echo "pip skip"
+    - echo "=== Done ==="
+    - date
   rules:
     - when: manual
 
 benchmark-mac-group-shell:
   extends: .benchmark_base
-  tags:
-    - mac
-    - shell
+  tags: [mac, shell]
 
 benchmark-mac-docker:
   extends: .benchmark_base
-  tags:
-    - docker
+  tags: [docker]
   image: python:3.11-slim
 
 benchmark-mac-k8s:
   extends: .benchmark_base
-  tags:
-    - mac-k8s
+  tags: [mac-k8s]
   image: python:3.11-slim
 
 benchmark-gcp-shell:
   extends: .benchmark_base
-  tags:
-    - gcp
-    - shell
+  tags: [gcp, shell]
 
 benchmark-gcp-k8s:
   extends: .benchmark_base
-  tags:
-    - gcp
-    - k8s
+  tags: [gcp, k8s]
   image: python:3.11-slim
