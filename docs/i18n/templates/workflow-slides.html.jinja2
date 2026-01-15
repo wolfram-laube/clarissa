@@ -52,7 +52,10 @@
         .command-table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
         .command-table th, .command-table td { padding: 0.8em; border: 1px solid #30363d; }
         .command-table th { background: var(--code-bg); color: var(--gitlab-orange); }
-    </style>
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        .nav-hint { cursor: pointer; }
+        .reveal .controls { color: var(--gitlab-orange) !important; }
+        </style>
 </head>
 <body>
     <div class="lang-switch">
@@ -67,6 +70,9 @@
                 <span class="label-demo label-priority-high">{{ t.slides.labels.priority_high }}</span>
                 <span class="label-demo label-workflow">{{ t.slides.labels.workflow_ready }}</span>
             </div>
+                    <p class="nav-hint" style="margin-top: 3em; font-size: 0.7em; color: #6e7681; animation: pulse 2s infinite;">
+                {{ t.slides.navigation.press_to_continue }} · {{ t.slides.navigation.press_for_overview }}
+            </p>
         </section>
         <section>
             <h2>📋 {{ t.slides.why_workflow.title }}</h2>
@@ -150,6 +156,6 @@ git checkout -b 12-extend-gitignore</code></pre>
         </section>
     </div></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
-    <script>Reveal.initialize({ hash: true, slideNumber: 'c/t', transition: 'slide'{% if meta.direction == 'rtl' %}, rtl: true{% endif %} });</script>
+    <script>Reveal.initialize({ hash: true, slideNumber: 'c/t', transition: 'slide', controls: true, controlsTutorial: true, progress: true{% if meta.direction == 'rtl' %}, rtl: true{% endif %} });</script>
 </body>
 </html>
