@@ -750,7 +750,7 @@ build_canonical_html:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       changes:
         - "conference/spe-europe-2026/canonical/**/*"
-        - "conference/spe-europe-2026/scripts/build_canonical.py"
+        - "conference/spe-europe-2026/scripts/*.py"
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: manual
       allow_failure: true
@@ -776,7 +776,7 @@ build_canonical_pdf:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       changes:
         - "conference/spe-europe-2026/canonical/**/*"
-        - "conference/spe-europe-2026/scripts/build_canonical.py"
+        - "conference/spe-europe-2026/scripts/*.py"
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: manual
       allow_failure: true
