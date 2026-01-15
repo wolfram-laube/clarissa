@@ -22,6 +22,9 @@ selector:
 slides:
   title: "CLARISSA GitLab Workflow"
   subtitle: "Guide for Contributors"
+
+  nav:
+    back_to_project: "Back to Project"
   
   navigation:
     press_to_continue: "Click or press → to continue"

@@ -18,6 +18,9 @@ selector:
 slides:
   title: "CLARISSA GitLab Workflow"
   subtitle: "دليل للمساهمين"
+
+  nav:
+    back_to_project: "العودة للمشروع"
   
   navigation:
     press_to_continue: "انقر أو اضغط ← للمتابعة"

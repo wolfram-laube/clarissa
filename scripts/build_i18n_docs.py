@@ -106,11 +106,12 @@ def build_slides(env: Environment, translations: dict, fallback: dict) -> None:
         merged = merge_with_fallback(trans, fallback)
         meta = merged.get("meta", {})
         
-        # Get all language codes for language switcher
+        # Get all language codes for language switcher with flags
         all_langs = [
             {
                 "code": lc,
-                "name": translations[lc].get("meta", {}).get("language_name", lc)[:2].upper()
+                "name": translations[lc].get("meta", {}).get("language_name", lc)[:2].upper(),
+                "flag": translations[lc].get("meta", {}).get("flag_emoji", "🌐")
             }
             for lc in sorted(translations.keys(), key=lambda x: (x != "en", x))
         ]

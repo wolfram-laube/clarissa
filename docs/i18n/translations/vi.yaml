@@ -18,6 +18,9 @@ selector:
 slides:
   title: "CLARISSA GitLab Workflow"
   subtitle: "Hướng dẫn cho người đóng góp"
+
+  nav:
+    back_to_project: "Quay lại dự án"
   
   navigation:
     press_to_continue: "Nhấp chuột hoặc nhấn → để tiếp tục"

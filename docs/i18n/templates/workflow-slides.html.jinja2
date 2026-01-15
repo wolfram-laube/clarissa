@@ -46,21 +46,85 @@
         .checklist li { padding: 0.5em 0; padding-{% if meta.direction == 'rtl' %}right{% else %}left{% endif %}: 2em; position: relative; }
         .checklist li::before { content: "☑"; position: absolute; {% if meta.direction == 'rtl' %}right{% else %}left{% endif %}: 0; color: var(--success-green); font-size: 1.2em; }
         .big-emoji { font-size: 4em; display: block; margin: 0.5em 0; }
-        .lang-switch { position: fixed; top: 1em; {% if meta.direction == 'rtl' %}left{% else %}right{% endif %}: 1em; z-index: 100; font-size: 0.5em; }
-        .lang-switch a { color: #8b949e; text-decoration: none; padding: 0.5em 1em; border: 1px solid #30363d; border-radius: 6px; margin-{% if meta.direction == 'rtl' %}right{% else %}left{% endif %}: 0.5em; }
-        .lang-switch a:hover, .lang-switch a.active { color: var(--gitlab-orange); border-color: var(--gitlab-orange); }
+        
+        /* Improved navigation bar */
+        .top-nav { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            z-index: 100; 
+            background: rgba(13, 17, 23, 0.95);
+            border-bottom: 1px solid #30363d;
+            padding: 0.6em 1em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .top-nav .home-link {
+            color: var(--gitlab-orange);
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            padding: 0.4em 0.8em;
+            border: 1px solid var(--gitlab-orange);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .top-nav .home-link:hover {
+            background: var(--gitlab-orange);
+            color: white;
+        }
+        .top-nav .lang-switch { 
+            position: static;
+            display: flex;
+            gap: 0.3em;
+        }
+        .top-nav .lang-switch a { 
+            color: #8b949e; 
+            text-decoration: none; 
+            padding: 0.4em 0.7em; 
+            border: 1px solid #30363d; 
+            border-radius: 6px; 
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+        .top-nav .lang-switch a:hover { 
+            color: var(--gitlab-orange); 
+            border-color: var(--gitlab-orange); 
+        }
+        .top-nav .lang-switch a.active { 
+            color: white;
+            background: var(--gitlab-purple); 
+            border-color: var(--gitlab-purple); 
+        }
+        
+        /* Adjust reveal.js to account for navbar */
+        .reveal { margin-top: 50px; }
+        
         .command-table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
         .command-table th, .command-table td { padding: 0.8em; border: 1px solid #30363d; }
         .command-table th { background: var(--code-bg); color: var(--gitlab-orange); }
         @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
         .nav-hint { cursor: pointer; }
         .reveal .controls { color: var(--gitlab-orange) !important; }
-        </style>
+    </style>
 </head>
 <body>
-    <div class="lang-switch">
-        {% for lang in all_langs %}<a href="workflow-slides-{{ lang.code }}.html"{% if lang.code == lang_code %} class="active"{% endif %}>{{ lang.name }}</a>{% endfor %}
-    </div>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <a href="https://gitlab.com/wlaube/irena" class="home-link" target="_blank">
+            🦊 {{ t.slides.nav.back_to_project }}
+        </a>
+        <div class="lang-switch">
+            {% for lang in all_langs %}<a href="workflow-slides-{{ lang.code }}.html"{% if lang.code == lang_code %} class="active"{% endif %}>{{ lang.flag }} {{ lang.name }}</a>{% endfor %}
+        </div>
+    </nav>
+    
     <div class="reveal"><div class="slides">
         <section>
             <h1>🦊 CLARISSA<br>{{ t.slides.title }}</h1>
@@ -171,7 +235,7 @@ git checkout -b 12-extend-gitignore</code></pre>
         
         // Click anywhere to navigate: right 70% = next, left 30% = prev
         document.querySelector('.reveal').addEventListener('click', function(e) {
-            if (e.target.closest('a, button, pre, code, .controls, .lang-switch')) return;
+            if (e.target.closest('a, button, pre, code, .controls, .top-nav')) return;
             var clickX = e.clientX;
             var width = window.innerWidth;
             if (clickX > width * 0.3) {

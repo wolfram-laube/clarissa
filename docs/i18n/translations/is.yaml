@@ -18,6 +18,9 @@ selector:
 slides:
   title: "CLARISSA GitLab Workflow"
   subtitle: "Leiðbeiningar fyrir þátttakendur"
+
+  nav:
+    back_to_project: "Til baka í verkefnið"
   
   navigation:
     press_to_continue: "Smelltu eða ýttu á → til að halda áfram"
