@@ -1,0 +1,68 @@
+# Gmail Draft Creation Pipeline
+# Triggered manually with variables
+
+gmail:create-drafts:
+  stage: .pre
+  tags:
+    - mac-group-shell
+  rules:
+    - when: manual
+  variables:
+    DRAFTS_JSON: ""  # JSON array of drafts to create
+  script:
+    - |
+      python3 << 'PYTHON'
+      import os
+      import json
+      import requests
+      import base64
+
+      CLIENT_ID = os.environ["GMAIL_CLIENT_ID"]
+      CLIENT_SECRET = os.environ["GMAIL_CLIENT_SECRET"]
+      REFRESH_TOKEN = os.environ["GMAIL_REFRESH_TOKEN"]
+      DRAFTS_JSON = os.environ.get("DRAFTS_JSON", "[]")
+
+      # Get access token
+      response = requests.post(
+          "https://oauth2.googleapis.com/token",
+          data={
+              "client_id": CLIENT_ID,
+              "client_secret": CLIENT_SECRET,
+              "refresh_token": REFRESH_TOKEN,
+              "grant_type": "refresh_token"
+          }
+      )
+      access_token = response.json()["access_token"]
+      print(f"✅ Got access token")
+
+      # Parse drafts
+      drafts = json.loads(DRAFTS_JSON) if DRAFTS_JSON else []
+      print(f"📧 Creating {len(drafts)} draft(s)...")
+
+      for i, draft in enumerate(drafts):
+          to = draft.get("to", "")
+          subject = draft.get("subject", "")
+          body = draft.get("body", "")
+          
+          email = f"""From: wolfram.laube@blauweiss-edv.at
+To: {to}
+Subject: {subject}
+Content-Type: text/plain; charset=utf-8
+
+{body}
+"""
+          raw = base64.urlsafe_b64encode(email.encode()).decode()
+          
+          response = requests.post(
+              "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
+              headers={"Authorization": f"Bearer {access_token}"},
+              json={"message": {"raw": raw}}
+          )
+          
+          if response.status_code == 200:
+              print(f"   ✅ Draft {i+1}: {subject}")
+          else:
+              print(f"   ❌ Draft {i+1}: {response.status_code}")
+
+      print("\n✅ Done!")
+      PYTHON
