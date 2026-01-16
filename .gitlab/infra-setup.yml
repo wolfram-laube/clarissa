@@ -7,8 +7,9 @@ variables:
   SSH_OPTS: "-i $INFRA_SSH_KEY -o StrictHostKeyChecking=no -o ConnectTimeout=10"
 
 .infra_base:
-  stage: deploy
+  stage: .pre
   tags: [mac-group-shell]
+  needs: []
   rules:
     - when: manual
       allow_failure: true
@@ -126,21 +127,3 @@ check-linux-status:
   extends: .infra_base
   script:
     - ssh $SSH_OPTS $LINUX_HOST "sudo gitlab-runner list && sudo gitlab-runner status"
-
-# ============ Run Command on Remote ============
-
-exec-mac2:
-  extends: .infra_base
-  script:
-    - ssh $SSH_OPTS $MAC2_HOST "$REMOTE_CMD"
-  rules:
-    - if: $REMOTE_CMD
-      when: manual
-
-exec-linux:
-  extends: .infra_base
-  script:
-    - ssh $SSH_OPTS $LINUX_HOST "$REMOTE_CMD"
-  rules:
-    - if: $REMOTE_CMD
-      when: manual
