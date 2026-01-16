@@ -1,23 +1,49 @@
 
-gcp:fix-permissions:
+gcp:fix-shell-runner:
   stage: .pre
   tags: [mac-group-shell]
   script:
-    - echo "🔧 Fixing GCP Runner permissions..."
+    - echo "🔧 Fixing GCP Shell Runner builds directory..."
     - |
       gcloud compute ssh gitlab-runner --zone=europe-west3-a --command='
-        echo "=== Creating builds directory ==="
-        sudo mkdir -p /home/gitlab-runner/builds
-        sudo chown -R gitlab-runner:gitlab-runner /home/gitlab-runner
+        echo "=== Current user ==="
+        whoami
         
-        echo "=== Updating runner config ==="
-        sudo sed -i "s|/home/wolfram_e_laube|/home/gitlab-runner|g" /etc/gitlab-runner/config.toml || true
+        echo "=== Creating proper builds dir ==="
+        sudo mkdir -p /builds
+        sudo chmod 777 /builds
         
-        echo "=== Current config ==="
+        echo "=== Checking current config ==="
+        sudo cat /etc/gitlab-runner/config.toml
+        
+        echo "=== Updating Shell Runner config ==="
+        sudo python3 << PYEOF
+import re
+
+with open("/etc/gitlab-runner/config.toml", "r") as f:
+    content = f.read()
+
+# Add builds_dir to shell runner section
+if "GCP Shell Runner" in content and "builds_dir" not in content:
+    content = content.replace(
+        "executor = "shell"",
+        "executor = "shell"
+  builds_dir = "/builds"
+  cache_dir = "/cache""
+    )
+    
+with open("/etc/gitlab-runner/config.toml", "w") as f:
+    f.write(content)
+    
+print("Config updated!")
+PYEOF
+
+        echo "=== New config ==="
         sudo cat /etc/gitlab-runner/config.toml
         
         echo "=== Restarting runner ==="
         sudo systemctl restart gitlab-runner
+        sleep 2
         sudo gitlab-runner status
       '
   rules:
