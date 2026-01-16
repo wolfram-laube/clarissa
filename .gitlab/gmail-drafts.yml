@@ -11,10 +11,11 @@ gmail:create-drafts:
     - when: manual
       allow_failure: true
   script:
-    - pip install requests --quiet 2>/dev/null || true
+    - pip3 install requests --quiet --user
     - |
       cat > /tmp/create_drafts.py << 'ENDSCRIPT'
-      import os, json, requests, base64
+      import os, json, base64
+      import requests
 
       CLIENT_ID = os.environ["GMAIL_CLIENT_ID"]
       CLIENT_SECRET = os.environ["GMAIL_CLIENT_SECRET"]  
@@ -34,12 +35,12 @@ gmail:create-drafts:
 
       for i, draft in enumerate(drafts):
           email = f"""From: wolfram.laube@blauweiss-edv.at
-      To: {draft.get('to', '')}
-      Subject: {draft.get('subject', '')}
-      Content-Type: text/plain; charset=utf-8
+To: {draft.get('to', '')}
+Subject: {draft.get('subject', '')}
+Content-Type: text/plain; charset=utf-8
 
-      {draft.get('body', '')}
-      """
+{draft.get('body', '')}
+"""
           raw = base64.urlsafe_b64encode(email.encode()).decode()
           response = requests.post(
               "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
