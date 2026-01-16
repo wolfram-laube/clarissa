@@ -1,56 +1,35 @@
 # Infrastructure Management via SSH Jump Host
 
-variables:
-  MAC2_HOST: "wolfram_e_laube@Wolframs-MacBook-Pro-2.local"
-  LINUX_HOST: "wolfram_e_laube@heimdall.local"
-
-.infra_base:
+setup-mac2-runners:
   stage: deploy
   tags: [mac-group-shell]
-  when: manual
-  allow_failure: true
-  before_script:
-    - chmod 600 "$INFRA_SSH_KEY"
-
-setup-mac2-runners:
-  extends: .infra_base
+  rules:
+    - when: manual
   script:
+    - chmod 600 "$INFRA_SSH_KEY"
     - echo "🍎 Installing GitLab Runner on Mac #2..."
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $MAC2_HOST "which gitlab-runner || brew install gitlab-runner"
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "which gitlab-runner || brew install gitlab-runner"
     - echo "=== Registering Shell Runner ==="
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $MAC2_HOST "gitlab-runner register --non-interactive --url https://gitlab.com --token glrt-8nuANkXjeD8mFyf5yJgAPW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0m0vg2o --executor shell --description 'Mac2 Shell Runner'" || true
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "gitlab-runner register --non-interactive --url https://gitlab.com --token glrt-8nuANkXjeD8mFyf5yJgAPW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0m0vg2o --executor shell --description Mac2-Shell-Runner" || true
     - echo "=== Runner List ==="
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $MAC2_HOST "gitlab-runner list"
-    - echo "✅ Mac #2 setup complete!"
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "gitlab-runner list"
 
 start-mac2-runner:
-  extends: .infra_base
+  stage: deploy
+  tags: [mac-group-shell]
+  rules:
+    - when: manual
   script:
-    - echo "▶️ Starting GitLab Runner on Mac #2..."
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $MAC2_HOST "nohup gitlab-runner run > /tmp/gitlab-runner.log 2>&1 &"
+    - chmod 600 "$INFRA_SSH_KEY"
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "nohup gitlab-runner run > /tmp/gitlab-runner.log 2>&1 &"
     - sleep 3
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $MAC2_HOST "ps aux | grep gitlab-runner | grep -v grep"
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "ps aux | grep gitlab-runner | grep -v grep"
 
 check-mac2-status:
-  extends: .infra_base
+  stage: deploy
+  tags: [mac-group-shell]
+  rules:
+    - when: manual
   script:
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $MAC2_HOST "gitlab-runner list; gitlab-runner status; ps aux | grep gitlab-runner"
-
-setup-linux-runners:
-  extends: .infra_base
-  script:
-    - echo "🐧 Installing GitLab Runner on Linux Yoga..."
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "which gitlab-runner || (curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | sudo bash && sudo apt install gitlab-runner -y)"
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "sudo gitlab-runner register --non-interactive --url https://gitlab.com --token glrt-3krYSQx5i1YSWpSK0k3RzW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1rwkzs5 --executor shell --description 'Linux Yoga Shell Runner'" || true
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "sudo gitlab-runner list"
-
-start-linux-runner:
-  extends: .infra_base
-  script:
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "sudo gitlab-runner restart"
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "sudo gitlab-runner status"
-
-check-linux-status:
-  extends: .infra_base
-  script:
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "sudo gitlab-runner list; sudo gitlab-runner status"
+    - chmod 600 "$INFRA_SSH_KEY"
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "which gitlab-runner && gitlab-runner list || echo 'GitLab Runner not installed'"
