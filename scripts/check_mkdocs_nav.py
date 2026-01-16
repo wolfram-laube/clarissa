@@ -54,8 +54,8 @@ def main():
             continue
         actual_files.add(str(rel_path))
 
-    # Files generated at CI time (not in repo but valid nav entries)
     # Files generated at CI time by build_i18n_docs.py
+    # These are not in the repo but are valid nav entries
     generated_files = {
         # Cheatsheets (markdown)
         "guides/contributing/cheatsheet-en.md",
@@ -76,6 +76,18 @@ def main():
         "publications/paper-editing-vi.md",
         "publications/paper-editing-ar.md",
         "publications/paper-editing-is.md",
+        # Getting Started guides (i18n)
+        "getting-started-en.md",
+        "getting-started-de.md",
+        "getting-started-vi.md",
+        "getting-started-ar.md",
+        "getting-started-is.md",
+        # Runner Management guides (i18n)
+        "runner-management-en.md",
+        "runner-management-de.md",
+        "runner-management-vi.md",
+        "runner-management-ar.md",
+        "runner-management-is.md",
     }
 
     # Check for missing files (in nav but not in docs/)
@@ -90,6 +102,9 @@ def main():
     excluded_patterns = {
         "i18n/",  # i18n source files
         "architecture/adr/ADR-000",  # Template, optional
+        "llm_knowledge/",  # LLM context files
+        "handover/",  # Handover docs
+        "adr/",  # ADR folder in root docs
     }
     orphaned = []
     for actual_file in actual_files:
