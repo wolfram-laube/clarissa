@@ -1,5 +1,4 @@
 # Gmail Draft Creation Pipeline
-# Trigger via API with DRAFTS_JSON variable
 
 gmail:create-drafts:
   stage: .pre
@@ -11,14 +10,13 @@ gmail:create-drafts:
     - when: manual
       allow_failure: true
   script:
-    - pip3 install requests --quiet --user
+    - pip3 install requests --quiet --user || true
     - |
-      cat > /tmp/create_drafts.py << 'ENDSCRIPT'
-      import os, json, base64
-      import requests
+      python3 - << 'PYSCRIPT'
+      import os, json, base64, requests
 
       CLIENT_ID = os.environ["GMAIL_CLIENT_ID"]
-      CLIENT_SECRET = os.environ["GMAIL_CLIENT_SECRET"]  
+      CLIENT_SECRET = os.environ["GMAIL_CLIENT_SECRET"]
       REFRESH_TOKEN = os.environ["GMAIL_REFRESH_TOKEN"]
       DRAFTS_JSON = os.environ.get("DRAFTS_JSON", "[]")
 
@@ -34,20 +32,16 @@ gmail:create-drafts:
       print(f"Creating {len(drafts)} drafts...")
 
       for i, draft in enumerate(drafts):
-          email = f"""From: wolfram.laube@blauweiss-edv.at
-To: {draft.get('to', '')}
-Subject: {draft.get('subject', '')}
-Content-Type: text/plain; charset=utf-8
-
-{draft.get('body', '')}
-"""
+          to_addr = draft.get("to", "")
+          subject = draft.get("subject", "")
+          body = draft.get("body", "")
+          email = f"From: wolfram.laube@blauweiss-edv.at\r\nTo: {to_addr}\r\nSubject: {subject}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n{body}"
           raw = base64.urlsafe_b64encode(email.encode()).decode()
-          response = requests.post(
+          resp = requests.post(
               "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
               headers={"Authorization": f"Bearer {access_token}"},
               json={"message": {"raw": raw}}
           )
-          status = "OK" if response.status_code == 200 else f"FAIL {response.status_code}"
-          print(f"  Draft {i+1}: {status} - {draft.get('subject', '')[:50]}")
-      ENDSCRIPT
-    - python3 /tmp/create_drafts.py
+          status = "OK" if resp.status_code == 200 else f"FAIL {resp.status_code}"
+          print(f"  Draft {i+1}: {status} - {subject[:50]}")
+      PYSCRIPT
