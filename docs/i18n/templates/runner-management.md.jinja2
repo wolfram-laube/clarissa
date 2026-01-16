@@ -1,0 +1,156 @@
+# {{ t.runner.title }}
+
+{{ t.runner.intro }}
+
+---
+
+## {{ t.runner.overview }}
+
+| Runner | {{ t.runner.location }} | Executor | Tags | Status | {{ t.runner.cost }} |
+|--------|----------|----------|------|--------|------|
+| mac-group-shell | Mac ({{ t.runner.local }}) | Shell | mac, shell, deploy | 🟢 {{ t.runner.online }} | $0 |
+| mac-docker | Mac ({{ t.runner.local }}) | Docker | docker | 🟢 {{ t.runner.online }} | $0 |
+| mac-k8s | Mac (Docker Desktop) | Kubernetes | mac-k8s, k8s, docker | 🟢 {{ t.runner.online }} | $0 |
+| gcp-k8s | GCP VM (K3s) | Kubernetes | gcp, k8s, docker | 🔴 {{ t.runner.offline }} | ~$0.02/{{ t.runner.hour }} |
+
+---
+
+## {{ t.runner.mac_title }}
+
+### {{ t.runner.start_stop }}
+
+```bash
+# {{ t.runner.check_status }}
+brew services list | grep gitlab-runner
+
+# {{ t.runner.start }}
+brew services start gitlab-runner
+
+# {{ t.runner.stop }}
+brew services stop gitlab-runner
+
+# {{ t.runner.restart }}
+brew services restart gitlab-runner
+```
+
+### {{ t.runner.verify_running }}
+
+```bash
+# {{ t.runner.should_show_running }}
+gitlab-runner status
+```
+
+---
+
+## {{ t.runner.gcp_title }}
+
+### {{ t.runner.via_pipeline }}
+
+| Job | {{ t.runner.description }} |
+|-----|-------------|
+| `gcp-vm-start` | {{ t.runner.start_vm }} |
+| `gcp-vm-stop` | {{ t.runner.stop_vm }} |
+| `gcp-vm-status` | {{ t.runner.check_vm }} |
+
+**{{ t.runner.how_to }}:**
+```
+GitLab → CI/CD → Pipelines → Run pipeline → {{ t.runner.select_job }} → ▶️ {{ t.runner.play }}
+```
+
+### {{ t.runner.via_cli }}
+
+```bash
+# {{ t.runner.start_vm }}
+gcloud compute instances start gitlab-runner --zone=europe-west3-a
+
+# {{ t.runner.stop_vm }}
+gcloud compute instances stop gitlab-runner --zone=europe-west3-a
+
+# {{ t.runner.check_status }}
+gcloud compute instances describe gitlab-runner --zone=europe-west3-a --format="get(status)"
+```
+
+### {{ t.runner.cost_info }}
+
+| {{ t.runner.state }} | {{ t.runner.cost }} |
+|-------|------|
+| {{ t.runner.running }} | ~$0.02/{{ t.runner.hour }} (~$13/{{ t.runner.month }} {{ t.runner.if_24_7 }}) |
+| {{ t.runner.stopped }} | $0 ({{ t.runner.only_disk }}) |
+
+💡 **{{ t.runner.tip }}:** {{ t.runner.stop_when_done }}
+
+---
+
+## {{ t.runner.job_targeting }}
+
+### {{ t.runner.use_tags }}
+
+```yaml
+# {{ t.runner.fast_shell }}
+job_name:
+  tags: [mac, shell]
+
+# {{ t.runner.docker_build }}
+build_image:
+  tags: [docker]
+
+# {{ t.runner.k8s_deploy }}
+deploy:
+  tags: [k8s, gcp]
+```
+
+### {{ t.runner.recommended_workflow }}
+
+1. **{{ t.runner.dev }}:** {{ t.runner.use }} `mac-group-shell` ({{ t.runner.fastest }})
+2. **{{ t.runner.test }}:** {{ t.runner.use }} `mac-docker` {{ t.runner.or }} `mac-k8s`
+3. **{{ t.runner.prod }}:** {{ t.runner.use }} `gcp-k8s` ({{ t.runner.start_first }})
+
+---
+
+## {{ t.runner.benchmark_title }}
+
+| Runner | {{ t.runner.time }} | {{ t.runner.notes }} |
+|--------|------|-------|
+| mac-group-shell | ~26s | ⚡ {{ t.runner.fastest }} |
+| gcp-shell | ~39s | {{ t.runner.cloud_latency }} |
+| mac-k8s | ~52s | K8s {{ t.runner.overhead }} |
+| gcp-k8s | ~72s | K8s + {{ t.runner.cloud_overhead }} |
+
+{{ t.runner.run_benchmark }}:
+```
+GitLab → CI/CD → Pipelines → Run pipeline → benchmark-* jobs
+```
+
+---
+
+## Troubleshooting
+
+### Runner {{ t.runner.not_picking_up }}
+
+```bash
+# 1. {{ t.runner.check_running }}
+gitlab-runner status
+
+# 2. {{ t.runner.check_registered }}
+gitlab-runner list
+
+# 3. {{ t.runner.check_tags }}
+# {{ t.runner.job_tags_must_match }}
+```
+
+### GCP VM {{ t.runner.ssh_fails }}
+
+```bash
+# {{ t.runner.ensure_running }}
+gcloud compute instances start gitlab-runner --zone=europe-west3-a
+
+# {{ t.runner.wait_boot }}
+sleep 30
+
+# {{ t.runner.then_ssh }}
+gcloud compute ssh gitlab-runner --zone=europe-west3-a
+```
+
+---
+
+*{{ t.runner.last_updated }}: {{ t.runner.date }}*
