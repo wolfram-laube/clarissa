@@ -6,15 +6,21 @@
 
 CLARISSA bridges natural language interaction and domain-specific simulation syntax through governed, simulator-in-the-loop learning.
 
-## 🚀 New Contributor? Start Here!
+## 🚀 Neu hier? Start Here!
 
 <div class="grid cards" markdown>
+
+-   :material-rocket-launch: **Getting Started Guide**
+
+    Installation, erster Start, Pipeline triggern, Deployment - alles in 15 Minuten.
+    
+    [:fontawesome-solid-rocket: **Los geht's →**](getting-started.md){ .md-button .md-button--primary }
 
 -   :material-presentation-play: **Interactive Workflow Guide**
 
     Learn the GitLab workflow in 5 minutes with our interactive slides.
     
-    [:fontawesome-solid-play: **Start Slides →**](guides/contributing/index.html){ .md-button .md-button--primary }
+    [:fontawesome-solid-play: **Start Slides →**](guides/contributing/index.html){ .md-button }
 
 -   :material-file-document-outline: **Quick Reference**
 
@@ -23,6 +29,19 @@ CLARISSA bridges natural language interaction and domain-specific simulation syn
     [EN](guides/contributing/cheatsheet-en.md) | [DE](guides/contributing/cheatsheet-de.md) | [VI](guides/contributing/cheatsheet-vi.md)
 
 </div>
+
+---
+
+## Was kann ich tun?
+
+| Ich will... | Anleitung |
+|-------------|-----------|
+| CLARISSA installieren & starten | [Getting Started](getting-started.md) |
+| Code beitragen | [Contributing Guide](contributing.md) |
+| CI Pipeline verstehen | [CI Guide](ci/README.md) |
+| Runner verwalten (Start/Stop) | [Runner Management](runner-management.md) |
+| Architektur verstehen | [Architecture Overview](architecture/README.md) |
+| Paper/Publikationen bearbeiten | [Publications](publications/index.md) |
 
 ---
 
@@ -68,6 +87,7 @@ CLARISSA is a phased AI agent architecture designed to augment reservoir simulat
 | [ADR Index](architecture/adr/index.md) | All Architecture Decision Records |
 | [Publications](publications/index.md) | Research papers, PDFs, editing guides |
 | [CI/CD Guide](ci/README.md) | Understanding pipeline results |
+| [Runner Management](runner-management.md) | Start/Stop Runner, GCP VM Management |
 | [Simulator Adapters](simulators/adapter_matrix.md) | Supported simulators and status |
 
 ## Project Status
