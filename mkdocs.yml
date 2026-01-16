@@ -71,6 +71,7 @@ nav:
     - Project Management: guides/project-management.md
 
   - CI:
+    - Runner Management: runner-management.md
     - How to Read CI Results: ci/README.md
 
   - Simulators:
