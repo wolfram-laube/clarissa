@@ -4,30 +4,30 @@
 
 {{ runner_management.overview_desc }}
 
-| {{ runner_management.runners_table.runner }} | {{ runner_management.runners_table.location }} | {{ runner_management.runners_table.executor }} | {{ runner_management.runners_table.tags }} | {{ runner_management.runners_table.status }} | {{ runner_management.runners_table.cost }} |
+| {{ runner_management.table.runner }} | {{ runner_management.table.location }} | {{ runner_management.table.executor }} | {{ runner_management.table.tags }} | {{ runner_management.table.status }} | {{ runner_management.table.cost }} |
 |--------|----------|----------|------|--------|------|
-| mac-group-shell | Mac | Shell | mac, shell, deploy | 🟢 {{ runner_management.runners_table.online }} | $0 |
-| mac-docker | Mac | Docker | docker | 🟢 {{ runner_management.runners_table.online }} | $0 |
-| mac-k8s | Mac (Docker Desktop) | Kubernetes | mac-k8s, k8s, docker | 🟢 {{ runner_management.runners_table.online }} | $0 |
-| gcp-k8s | GCP VM (K3s) | Kubernetes | gcp, k8s, docker | 🔴 {{ runner_management.runners_table.offline }} | ~$0.02/h |
+| mac-group-shell | Mac | Shell | mac, shell, deploy | 🟢 {{ runner_management.table.online }} | $0 |
+| mac-docker | Mac | Docker | docker | 🟢 {{ runner_management.table.online }} | $0 |
+| mac-k8s | Mac (Docker Desktop) | Kubernetes | mac-k8s, k8s, docker | 🟢 {{ runner_management.table.online }} | $0 |
+| gcp-k8s | GCP VM (K3s) | Kubernetes | gcp, k8s, docker | 🔴 {{ runner_management.table.offline }} | ~$0.02/h |
 
 ---
 
-## {{ runner_management.mac_runners.title }}
+## {{ runner_management.mac.title }}
 
-### {{ runner_management.mac_runners.start }}
+### {{ runner_management.mac.start }}
 
 ```bash
 brew services start gitlab-runner
 ```
 
-### {{ runner_management.mac_runners.stop }}
+### {{ runner_management.mac.stop }}
 
 ```bash
 brew services stop gitlab-runner
 ```
 
-### {{ runner_management.mac_runners.status }}
+### {{ runner_management.mac.status }}
 
 ```bash
 brew services list | grep gitlab
@@ -35,55 +35,55 @@ brew services list | grep gitlab
 
 ---
 
-## {{ runner_management.gcp_runners.title }}
+## {{ runner_management.gcp.title }}
 
-### {{ runner_management.gcp_runners.via_pipeline }}
+### {{ runner_management.gcp.via_pipeline }}
 
 ```
 GitLab → CI/CD → Pipelines → Run pipeline → gcp-vm-start ▶️
 ```
 
-| Job | {{ getting_started.function }} |
+| Job | {{ runner_management.table.function }} |
 |-----|----------|
-| `gcp-vm-start` | {{ runner_management.gcp_runners.start_vm }} (~30s) |
-| `gcp-vm-stop` | {{ runner_management.gcp_runners.stop_vm }} |
-| `gcp-vm-status` | {{ runner_management.gcp_runners.check_status }} |
+| `gcp-vm-start` | {{ runner_management.gcp.start_vm }} (~30s) |
+| `gcp-vm-stop` | {{ runner_management.gcp.stop_vm }} |
+| `gcp-vm-status` | {{ runner_management.gcp.check_status }} |
 
-### {{ runner_management.gcp_runners.via_cli }}
+### {{ runner_management.gcp.via_cli }}
 
 ```bash
-# {{ runner_management.gcp_runners.start_vm }}
+# {{ runner_management.gcp.start_vm }}
 gcloud compute instances start gitlab-runner --zone=europe-west3-a
 
-# {{ runner_management.gcp_runners.stop_vm }}
+# {{ runner_management.gcp.stop_vm }}
 gcloud compute instances stop gitlab-runner --zone=europe-west3-a
 
-# {{ runner_management.gcp_runners.check_status }}
+# {{ runner_management.gcp.check_status }}
 gcloud compute instances describe gitlab-runner --zone=europe-west3-a --format="get(status)"
 ```
 
 ---
 
-## {{ runner_management.job_targeting.title }}
+## {{ runner_management.targeting.title }}
 
-{{ runner_management.job_targeting.desc }}:
+{{ runner_management.targeting.desc }}:
 
 ```yaml
-# {{ runner_management.job_targeting.any_runner }}
+# {{ runner_management.targeting.any_runner }}
 job1:
   script: echo "Hello"
 
-# {{ runner_management.job_targeting.mac_only }}
+# {{ runner_management.targeting.mac_only }}
 job2:
   tags: [mac]
   script: echo "Mac only"
 
-# {{ runner_management.job_targeting.k8s_only }}
+# {{ runner_management.targeting.k8s_only }}
 job3:
   tags: [k8s]
   script: echo "Kubernetes"
 
-# {{ runner_management.job_targeting.gcp_only }}
+# {{ runner_management.targeting.gcp_only }}
 job4:
   tags: [gcp, k8s]
   script: echo "GCP K8s"
