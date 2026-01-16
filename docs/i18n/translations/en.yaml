@@ -622,3 +622,201 @@ runner:
   
   last_updated: "Last updated"
   date: "January 2026"
+
+# Getting Started Guide
+getting_started:
+  title: "Getting Started with CLARISSA"
+  goal_label: "Goal"
+  goal_text: "Get CLARISSA running locally in 15 minutes and understand how everything connects."
+  overview_title: "Overview"
+  you_are_here: "You are here"
+  step1_desc: "What you need"
+  step2_desc: "Get the code"
+  step3_desc: "Install CLARISSA"
+  step5_desc: "Understand & trigger CI/CD"
+  step6_desc: "Deploy to Kubernetes"
+  step7_desc: "Test if everything works"
+  first_run: "First Run"
+  verify: "Verify"
+  
+  # Prerequisites
+  minimum_label: "Minimum"
+  for_local_dev: "for local development"
+  recommended_label: "Recommended"
+  for_docker_k8s: "for Docker/K8s"
+  optional_label: "Optional"
+  for_gcp: "for GCP Deployment"
+  with_python: "With Python"
+  with_docker_or: "With Docker Desktop or"
+  
+  # Clone
+  clone_repo: "Clone Repository"
+  or_via_ssh: "Or via SSH (if you have an SSH key)"
+  structure: "Structure"
+  documentation: "Documentation"
+  helper_scripts: "Helper Scripts"
+  
+  # Installation
+  local_install: "Local Installation"
+  development: "Development"
+  create_venv: "Create virtual environment"
+  or: "or"
+  install_deps: "Install dependencies"
+  check_works: "Check if it works"
+  recommended: "recommended"
+  build_image: "Build image"
+  check: "Check"
+  
+  # First Run
+  test: "test"
+  show_help: "Show help"
+  simple_test: "Simple test: Syntax check of an ECLIPSE deck"
+  run_tests_locally: "Run tests locally"
+  all_tests: "All tests"
+  only_fast_tests: "Only fast tests"
+  with_coverage: "With coverage"
+  
+  # Pipeline
+  pipeline_title: "Understand & Trigger GitLab Pipeline"
+  what_is_pipeline: "What is the Pipeline?"
+  pipeline_explanation: "The pipeline automatically runs tests, builds, and deployments when you push code."
+  view_pipeline_status: "View Pipeline Status"
+  go_to: "Go to"
+  green_ok: "Green"
+  all_ok: "all OK"
+  red_fail: "Red"
+  error: "Error"
+  trigger_manually: "Trigger Pipeline Manually"
+  empty_commit: "Empty commit"
+  trigger_single_jobs: "Trigger Single Jobs"
+  some_jobs_manual: "Some jobs are `manual` and must be started explicitly"
+  select_pipeline: "Select pipeline"
+  click_job: "Click job with"
+  important_manual_jobs: "Important manual jobs"
+  function: "Function"
+  start_gcp_vm: "Start GCP Runner VM"
+  stop_gcp_vm: "Stop GCP Runner VM"
+  test_runner_perf: "Test runner performance"
+  
+  # Deployment
+  local_k8s: "Local Kubernetes"
+  prerequisite: "Prerequisite"
+  k8s_enabled_docker: "Kubernetes enabled in Docker Desktop"
+  create_namespace: "Create namespace"
+  apply_deployment: "Apply deployment"
+  check_status: "Check status"
+  view_logs: "View logs"
+  gcp_vm_running: "GCP VM is running"
+  see: "see"
+  to_vm: "to the VM"
+  on_vm: "On the VM"
+  automatic: "automatic"
+  push_to_main: "Push to main branch → Pipeline deploys automatically."
+  starts: "starts"
+  happens_auto: "happens automatically"
+  
+  # Verify
+  check_local_install: "Check Local Installation"
+  works: "works"
+  green: "green"
+  check_docker: "Check Docker"
+  running: "running"
+  check_k8s: "Check Kubernetes"
+  should_be: "should be"
+  reachable: "reachable"
+  then: "Then"
+  check_pipeline: "Check Pipeline"
+  last_pipeline_green: "Last pipeline should be green"
+  on_error: "On error"
+  click_red_job: "Click on the red job"
+  read_logs: "Read logs"
+  
+  # Troubleshooting
+  venv_activated: "Virtual environment activated"
+  or_reinstall: "Or reinstall"
+  install_start_docker: "Install and start Docker Desktop."
+  enabled: "enabled"
+  correct: "correct"
+  common_causes: "Common causes"
+  syntax_error: "Syntax error in code"
+  missing_deps: "Missing dependencies"
+  tests_fail: "Tests fail"
+  wont_start: "won't start"
+  check_permissions: "Check permissions"
+  
+  # Next Steps
+  next_steps: "Next Steps"
+  what_you_want: "What you want to do"
+  where_to_read: "Where to read"
+  contribute_code: "Contribute code"
+  understand_workflow: "Understand workflow"
+  understand_arch: "Understand architecture"
+  understand_ci: "Understand CI/CD"
+  manage_runners: "Manage runners"
+  
+  # Help
+  get_help: "Get Help"
+  questions: "Questions?"
+  create_issue: "Create an issue on GitLab"
+  bug_found: "Bug found?"
+  feature_idea: "Feature idea?"
+  issue_with_label: "Issue with label"
+  
+  last_updated: "Last updated"
+  date: "January 2026"
+
+# Runner Management
+runner_management:
+  title: "Runner Management"
+  overview: "Overview"
+  overview_desc: "CLARISSA uses GitLab Runners for CI/CD pipelines. We have runners on Mac (local) and GCP (cloud)."
+  
+  runners_table:
+    runner: "Runner"
+    location: "Location"
+    executor: "Executor"
+    tags: "Tags"
+    status: "Status"
+    cost: "Cost"
+    online: "online"
+    offline: "offline (VM stopped)"
+  
+  mac_runners:
+    title: "Mac Runners (Local)"
+    start: "Start"
+    stop: "Stop"
+    status: "Status"
+  
+  gcp_runners:
+    title: "GCP Runners (Cloud)"
+    via_pipeline: "Via GitLab Pipeline"
+    via_cli: "Via CLI"
+    start_vm: "Start VM"
+    stop_vm: "Stop VM"
+    check_status: "Check Status"
+  
+  job_targeting:
+    title: "Job Targeting with Tags"
+    desc: "Use tags in your .gitlab-ci.yml to target specific runners"
+    any_runner: "Any runner"
+    mac_only: "Mac only"
+    k8s_only: "Kubernetes only"
+    gcp_only: "GCP only"
+  
+  workflow:
+    title: "Recommended Workflow"
+    develop: "Develop"
+    develop_desc: "Local with mac-group-shell (fast)"
+    test: "Test"
+    test_desc: "K8s with mac-k8s (local K8s)"
+    production: "Production"
+    production_desc: "GCP with gcp-k8s (real cloud)"
+  
+  troubleshooting:
+    title: "Troubleshooting"
+    runner_offline: "Runner offline?"
+    check_service: "Check if service is running"
+    gcp_vm_stopped: "GCP VM stopped?"
+    start_via_pipeline: "Start via pipeline or CLI"
+    job_stuck: "Job stuck?"
+    check_tags: "Check if tags match"
