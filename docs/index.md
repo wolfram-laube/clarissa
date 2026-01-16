@@ -14,7 +14,8 @@ CLARISSA bridges natural language interaction and domain-specific simulation syn
 
     Installation, erster Start, Pipeline triggern, Deployment - alles in 15 Minuten.
     
-    [:fontawesome-solid-rocket: **Los geht's →**](getting-started.md){ .md-button .md-button--primary }
+    [:fontawesome-solid-rocket: **🇬🇧 English**](getting-started-en.md){ .md-button .md-button--primary }
+    [:fontawesome-solid-rocket: **🇩🇪 Deutsch**](getting-started-de.md){ .md-button }
 
 -   :material-presentation-play: **Interactive Workflow Guide**
 
@@ -26,22 +27,22 @@ CLARISSA bridges natural language interaction and domain-specific simulation syn
 
     Cheatsheet for branch naming, commits, and merge requests.
     
-    [EN](guides/contributing/cheatsheet-en.md) | [DE](guides/contributing/cheatsheet-de.md) | [VI](guides/contributing/cheatsheet-vi.md)
+    [🇬🇧](guides/contributing/cheatsheet-en.md) | [🇩🇪](guides/contributing/cheatsheet-de.md) | [🇻🇳](guides/contributing/cheatsheet-vi.md) | [🇸🇦](guides/contributing/cheatsheet-ar.md) | [🇮🇸](guides/contributing/cheatsheet-is.md)
 
 </div>
 
 ---
 
-## Was kann ich tun?
+## Was kann ich tun? / What can I do?
 
-| Ich will... | Anleitung |
+| I want to... / Ich will... | Guide |
 |-------------|-----------|
-| CLARISSA installieren & starten | [Getting Started](getting-started.md) |
-| Code beitragen | [Contributing Guide](contributing.md) |
-| CI Pipeline verstehen | [CI Guide](ci/README.md) |
-| Runner verwalten (Start/Stop) | [Runner Management](runner-management.md) |
-| Architektur verstehen | [Architecture Overview](architecture/README.md) |
-| Paper/Publikationen bearbeiten | [Publications](publications/index.md) |
+| Install & run CLARISSA | [🇬🇧 Getting Started](getting-started-en.md) / [🇩🇪 Erste Schritte](getting-started-de.md) |
+| Contribute code | [Contributing Guide](contributing.md) |
+| Understand CI pipeline | [CI Guide](ci/README.md) |
+| Manage runners (Start/Stop) | [🇬🇧 Runner Management](runner-management-en.md) / [🇩🇪 Runner Verwaltung](runner-management-de.md) |
+| Understand architecture | [Architecture Overview](architecture/README.md) |
+| Edit papers/publications | [Publications](publications/index.md) |
 
 ---
 
@@ -87,7 +88,7 @@ CLARISSA is a phased AI agent architecture designed to augment reservoir simulat
 | [ADR Index](architecture/adr/index.md) | All Architecture Decision Records |
 | [Publications](publications/index.md) | Research papers, PDFs, editing guides |
 | [CI/CD Guide](ci/README.md) | Understanding pipeline results |
-| [Runner Management](runner-management.md) | Start/Stop Runner, GCP VM Management |
+| [Runner Management](runner-management-en.md) | Start/Stop Runner, GCP VM Management |
 | [Simulator Adapters](simulators/adapter_matrix.md) | Supported simulators and status |
 
 ## Project Status
