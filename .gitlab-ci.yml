@@ -20,6 +20,9 @@ workflow:
     # Allow manual trigger via "Run pipeline" button
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: always
+    # Allow API triggers (for Claude automation)
+    - if: '$CI_PIPELINE_SOURCE == "api"'
+      when: always
     # Allow scheduled pipelines (billing automation)
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: always
