@@ -25,109 +25,59 @@ curl -H "PRIVATE-TOKEN: glpat-B2kbE0n56oTpioepn5ZT-W86MQp1OnN4Y3gK.01.1007svpwt"
 
 ---
 
+## GitLab Runner
+
+> 📖 Vollständige Dokumentation: [Runner Management](runner-management.md)
+
+### Aktive Runner (Januar 2026)
+
+| Runner | Location | Executor | Tags | Kosten |
+|--------|----------|----------|------|--------|
+| mac-group-shell | Mac | Shell | `mac`, `shell`, `deploy` | $0 |
+| mac-docker | Mac | Docker | `docker` | $0 |
+| mac-k8s | Mac (Docker Desktop) | Kubernetes | `mac-k8s`, `k8s` | $0 |
+| gcp-k8s | GCP VM | Kubernetes | `gcp`, `k8s` | ~$0.02/h |
+
+---
+
 ## GCP (Google Cloud Platform)
 
 | Key | Value |
 |-----|-------|
 | Project ID | `myk8sproject-207017` |
 | Service Account | `claude-assistant@myk8sproject-207017.iam.gserviceaccount.com` |
-| Region | `europe-west1` |
-| Zone | `europe-west1-b` |
+| Region | `europe-west3` |
+| Zone | `europe-west3-a` |
 
-### GitLab Runner VM
+### Runner VM
 
 | Key | Value |
 |-----|-------|
-| Instance Name | `gitlab-runner-clarissa` |
-| Machine Type | `e2-small` (~$13/mo) or `e2-micro` (~$6/mo) |
-| Status | ⏳ **Not yet created** |
-| Runner Token | `<GET FROM GITLAB: Settings → CI/CD → Runners>` |
+| Instance Name | `gitlab-runner` |
+| Machine Type | `e2-small` |
+| OS | Ubuntu 22.04 + K3s |
+| Status | ✅ **Deployed** (on-demand) |
+| Kosten | ~$13/Monat (24/7) oder ~$0.02/Stunde |
 
-**Setup:**
+### VM Steuerung
+
+**Via GitLab Pipeline (empfohlen):**
+- `gcp-vm-start` - VM starten
+- `gcp-vm-stop` - VM stoppen  
+- `gcp-vm-status` - Status prüfen
+
+**Via CLI:**
 ```bash
-# 1. Get Runner Token from GitLab
-#    Settings → CI/CD → Runners → New project runner
+# Starten
+gcloud compute instances start gitlab-runner --zone=europe-west3-a --project=myk8sproject-207017
 
-# 2. Run setup script
-./scripts/setup_gcp_runner.sh <RUNNER_TOKEN>
-```
+# Stoppen
+gcloud compute instances stop gitlab-runner --zone=europe-west3-a --project=myk8sproject-207017
 
-**Management:**
-```bash
-# SSH
-gcloud compute ssh gitlab-runner-clarissa --zone=europe-west1-b
-
-# Stop (saves money when not in use)
-gcloud compute instances stop gitlab-runner-clarissa --zone=europe-west1-b
-
-# Start
-gcloud compute instances start gitlab-runner-clarissa --zone=europe-west1-b
-```
-
----
-
-## LLM APIs
-
-### OpenAI (ChatGPT / IRENA)
-| Key | Value |
-|-----|-------|
-| API Key | `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` |
-| Model | `gpt-4o` |
-| Use Case | IRENA Consultant (relay.py) |
-
-### Anthropic (Claude-to-Claude)
-| Key | Value |
-|-----|-------|
-| API Key | `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` |
-| Model | `claude-3-5-sonnet-20241022` |
-| Use Case | IRENA Consultant (claude_relay.py) |
-| Status | ⚠️ Needs credits on account |
-
----
-
-## GitLab CI Variables
-
-Diese Werte sind auch als CI Variables gesetzt (Settings → CI/CD → Variables):
-
-| Variable | Masked | Purpose |
-|----------|--------|---------|
-| `GITLAB_TOKEN` | ❌ | CI push-back to repo |
-| `OPENAI_API_KEY` | ✅ | relay.py (ChatGPT) |
-| `ANTHROPIC_API_KEY` | ✅ | claude_relay.py (Claude) |
-| `GOOGLE_DRIVE_FOLDER_ID` | ❌ | Sync packages |
-| `GOOGLE_SERVICE_ACCOUNT_KEY` | ❌ | GDrive API |
-
----
-
-## Google Drive
-
-| Key | Value |
-|-----|-------|
-| Folder ID | `1qh0skTeyRNs4g9KwAhpd3J8Yj_XENIFs` |
-| Folder URL | https://drive.google.com/drive/folders/1qh0skTeyRNs4g9KwAhpd3J8Yj_XENIFs |
-| Purpose | LLM sync packages, backups |
-
----
-
-## Quick Reference für Claude
-
-```bash
-# Environment Setup
-export GITLAB_TOKEN="glpat-B2kbE0n56oTpioepn5ZT-W86MQp1OnN4Y3gK.01.1007svpwt"
-export GITLAB_PROJECT_ID="77260390"
-export OPENAI_API_KEY="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"
-export ANTHROPIC_API_KEY="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"
+# Status
+gcloud compute instances describe gitlab-runner --zone=europe-west3-a --format="table(name,status)"
 ```
 
 ---
 
-## Backup Location
-
-This document is automatically synced to Google Drive:
-- **Folder:** https://drive.google.com/drive/folders/1qh0skTeyRNs4g9KwAhpd3J8Yj_XENIFs
-- **Trigger:** Any change to `docs/infrastructure.md` in GitLab
-
----
-
-*Last updated: 2026-01-05*
-*Auto-sync enabled via GitLab CI*
+*Letzte Aktualisierung: Januar 2026*
