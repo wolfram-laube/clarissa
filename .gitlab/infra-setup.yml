@@ -114,3 +114,16 @@ check-linux-status:
   extends: .infra_base
   script:
     - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "sudo gitlab-runner list && sudo gitlab-runner status"
+
+
+install-docker-mac2:
+  stage: deploy
+  tags: [mac-group-shell]
+  rules:
+    - when: manual
+  before_script:
+    - chmod 600 "$INFRA_SSH_KEY"
+  script:
+    - echo "🍺 Installing Docker Desktop on Mac #2..."
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "brew install --cask docker"
+    - echo "✅ Docker Desktop installed! Bitte manuell starten für Lizenz-Akzeptanz."
