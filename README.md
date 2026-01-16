@@ -10,13 +10,13 @@ It is **explicitly documented and versioned**.
 
 ---
 
-## 🚀 Neu hier?
+## 🚀 Neu hier? / New here?
 
-| Was du willst | Wo hin |
-|---------------|--------|
-| **CLARISSA installieren & starten** | **[→ Getting Started Guide](https://irena-40cc50.gitlab.io/getting-started/)** |
-| GitLab Workflow lernen | [→ Interactive Slides](https://irena-40cc50.gitlab.io/guides/contributing/) |
-| Code beitragen | [→ Contributing Guide](https://irena-40cc50.gitlab.io/contributing/) |
+| What you want | Where to go |
+|---------------|-------------|
+| **Install & run CLARISSA** | [🇬🇧 Getting Started](https://irena-40cc50.gitlab.io/getting-started-en/) / [🇩🇪 Erste Schritte](https://irena-40cc50.gitlab.io/getting-started-de/) |
+| Learn GitLab workflow | [→ Interactive Slides](https://irena-40cc50.gitlab.io/guides/contributing/) |
+| Contribute code | [→ Contributing Guide](https://irena-40cc50.gitlab.io/contributing/) |
 
 ---
 
@@ -26,13 +26,27 @@ It is **explicitly documented and versioned**.
 
 | Quick Links | |
 |-------------|---|
-| [🚀 Getting Started](https://irena-40cc50.gitlab.io/getting-started/) | Installation, erster Start, Deployment |
+| [🚀 Getting Started 🇬🇧](https://irena-40cc50.gitlab.io/getting-started-en/) | Installation, first run, deployment |
+| [🚀 Erste Schritte 🇩🇪](https://irena-40cc50.gitlab.io/getting-started-de/) | Installation, erster Start, Deployment |
 | [Contributing Guide](https://irena-40cc50.gitlab.io/contributing/) | How to contribute |
 | [Workflow Slides](https://irena-40cc50.gitlab.io/guides/contributing/) | Interactive 5-min intro |
-| [Runner Management](https://irena-40cc50.gitlab.io/runner-management/) | Start/Stop Runner & GCP VM |
+| [Runner Management 🇬🇧](https://irena-40cc50.gitlab.io/runner-management-en/) | Start/Stop Runner & GCP VM |
+| [Runner Verwaltung 🇩🇪](https://irena-40cc50.gitlab.io/runner-management-de/) | Runner starten/stoppen |
 | [CI Guide](https://irena-40cc50.gitlab.io/ci/) | How to read CI results |
 | [ADRs](https://irena-40cc50.gitlab.io/architecture/adr/) | Architecture decisions |
 | [Publications](https://irena-40cc50.gitlab.io/publications/) | Research papers (SPE Europe 2026) |
+
+---
+
+## 🌍 Available Languages
+
+| Language | Getting Started | Runner Management | Cheatsheet |
+|----------|-----------------|-------------------|------------|
+| 🇬🇧 English | [Guide](https://irena-40cc50.gitlab.io/getting-started-en/) | [Guide](https://irena-40cc50.gitlab.io/runner-management-en/) | [Cheatsheet](https://irena-40cc50.gitlab.io/guides/contributing/cheatsheet-en/) |
+| 🇩🇪 Deutsch | [Anleitung](https://irena-40cc50.gitlab.io/getting-started-de/) | [Anleitung](https://irena-40cc50.gitlab.io/runner-management-de/) | [Cheatsheet](https://irena-40cc50.gitlab.io/guides/contributing/cheatsheet-de/) |
+| 🇻🇳 Tiếng Việt | [Hướng dẫn](https://irena-40cc50.gitlab.io/getting-started-vi/) | [Hướng dẫn](https://irena-40cc50.gitlab.io/runner-management-vi/) | [Cheatsheet](https://irena-40cc50.gitlab.io/guides/contributing/cheatsheet-vi/) |
+| 🇸🇦 العربية | [دليل](https://irena-40cc50.gitlab.io/getting-started-ar/) | [دليل](https://irena-40cc50.gitlab.io/runner-management-ar/) | [Cheatsheet](https://irena-40cc50.gitlab.io/guides/contributing/cheatsheet-ar/) |
+| 🇮🇸 Íslenska | [Leiðbeiningar](https://irena-40cc50.gitlab.io/getting-started-is/) | [Leiðbeiningar](https://irena-40cc50.gitlab.io/runner-management-is/) | [Cheatsheet](https://irena-40cc50.gitlab.io/guides/contributing/cheatsheet-is/) |
 
 ---
 
@@ -59,6 +73,7 @@ src/clarissa_kernel/    # Native simulation kernel and learning signals
 
 docs/                   # Architecture, ADRs, and technical documentation
 docs/architecture/adr/  # Architecture Decision Records (source of truth)
+docs/i18n/              # Internationalization templates and translations
 docs/ci/                # CI philosophy and automation documentation
 docs/simulators/        # Simulator adapter matrix and notes
 
@@ -86,7 +101,7 @@ pytest
 clarissa --help
 ```
 
-**[→ Detailed instructions in Getting Started Guide](https://irena-40cc50.gitlab.io/getting-started/)**
+**[→ Detailed instructions in Getting Started Guide](https://irena-40cc50.gitlab.io/getting-started-en/)**
 
 ---
 
