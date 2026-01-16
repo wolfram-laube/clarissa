@@ -1,10 +1,10 @@
 # Infrastructure Management via SSH Jump Host
 
 setup-mac2-runners:
-  stage: deploy
+  stage: test
   tags: [mac-group-shell]
-  rules:
-    - when: manual
+  when: manual
+  needs: []
   script:
     - chmod 600 "$INFRA_SSH_KEY"
     - echo "🍎 Installing GitLab Runner on Mac #2..."
@@ -13,12 +13,13 @@ setup-mac2-runners:
     - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "gitlab-runner register --non-interactive --url https://gitlab.com --token glrt-8nuANkXjeD8mFyf5yJgAPW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0m0vg2o --executor shell --description Mac2-Shell-Runner" || true
     - echo "=== Runner List ==="
     - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "gitlab-runner list"
+    - echo "✅ Done!"
 
 start-mac2-runner:
-  stage: deploy
+  stage: test
   tags: [mac-group-shell]
-  rules:
-    - when: manual
+  when: manual
+  needs: []
   script:
     - chmod 600 "$INFRA_SSH_KEY"
     - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "nohup gitlab-runner run > /tmp/gitlab-runner.log 2>&1 &"
@@ -26,10 +27,10 @@ start-mac2-runner:
     - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "ps aux | grep gitlab-runner | grep -v grep"
 
 check-mac2-status:
-  stage: deploy
+  stage: test
   tags: [mac-group-shell]
-  rules:
-    - when: manual
+  when: manual
+  needs: []
   script:
     - chmod 600 "$INFRA_SSH_KEY"
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "which gitlab-runner && gitlab-runner list || echo 'GitLab Runner not installed'"
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "which gitlab-runner && gitlab-runner list || echo NOT INSTALLED"
