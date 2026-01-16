@@ -8,7 +8,7 @@ Usage:
 This script:
 1. Loads Jinja2 templates from docs/i18n/templates/
 2. Loads translation YAML files from docs/i18n/translations/
-3. Generates localized output files in docs/guides/contributing/
+3. Generates localized output files in appropriate directories
 """
 
 import os
@@ -25,7 +25,8 @@ PROJECT_ROOT = SCRIPT_DIR.parent
 I18N_DIR = PROJECT_ROOT / "docs" / "i18n"
 TEMPLATES_DIR = I18N_DIR / "templates"
 TRANSLATIONS_DIR = I18N_DIR / "translations"
-OUTPUT_DIR = PROJECT_ROOT / "docs" / "guides" / "contributing"
+DOCS_DIR = PROJECT_ROOT / "docs"
+CONTRIBUTING_DIR = DOCS_DIR / "guides" / "contributing"
 
 
 def load_translations() -> dict:
@@ -92,9 +93,9 @@ def build_language_selector(env: Environment, translations: dict) -> None:
         all_translations=translations,
     )
     
-    output_path = OUTPUT_DIR / "index.html"
+    output_path = CONTRIBUTING_DIR / "index.html"
     output_path.write_text(output, encoding="utf-8")
-    print(f"  Generated: index.html")
+    print(f"  Generated: guides/contributing/index.html")
 
 
 def build_slides(env: Environment, translations: dict, fallback: dict) -> None:
@@ -123,9 +124,9 @@ def build_slides(env: Environment, translations: dict, fallback: dict) -> None:
             all_langs=all_langs,
         )
         
-        output_path = OUTPUT_DIR / f"workflow-slides-{lang_code}.html"
+        output_path = CONTRIBUTING_DIR / f"workflow-slides-{lang_code}.html"
         output_path.write_text(output, encoding="utf-8")
-        print(f"  Generated: workflow-slides-{lang_code}.html")
+        print(f"  Generated: guides/contributing/workflow-slides-{lang_code}.html")
 
 
 def build_cheatsheets(env: Environment, translations: dict, fallback: dict) -> None:
@@ -143,32 +144,111 @@ def build_cheatsheets(env: Environment, translations: dict, fallback: dict) -> N
             lang_code=lang_code,
         )
         
-        output_path = OUTPUT_DIR / f"cheatsheet-{lang_code}.md"
+        output_path = CONTRIBUTING_DIR / f"cheatsheet-{lang_code}.md"
         output_path.write_text(output, encoding="utf-8")
-        print(f"  Generated: cheatsheet-{lang_code}.md")
+        print(f"  Generated: guides/contributing/cheatsheet-{lang_code}.md")
 
 
 def build_paper_editing(env: Environment, translations: dict, fallback: dict) -> None:
     """Build paper editing guide markdown files for all languages."""
     template = env.get_template("paper-editing.md.jinja2")
     
-    # Paper editing goes to publications/, not guides/contributing/
-    publications_dir = Path(__file__).parent.parent / "docs" / "publications"
+    publications_dir = DOCS_DIR / "publications"
     publications_dir.mkdir(parents=True, exist_ok=True)
     
     for lang_code, trans in translations.items():
         # Merge with English fallback
         merged = merge_with_fallback(trans, fallback)
-        paper_editing = merged.get("paper_editing", {})
         
         output = template.render(
-            paper_editing=paper_editing,
+            t=merged,
+            paper_editing=merged.get("paper_editing", {}),
             lang_code=lang_code,
         )
         
         output_path = publications_dir / f"paper-editing-{lang_code}.md"
         output_path.write_text(output, encoding="utf-8")
-        print(f"  Generated: paper-editing-{lang_code}.md")
+        print(f"  Generated: publications/paper-editing-{lang_code}.md")
+
+
+def build_getting_started(env: Environment, translations: dict, fallback: dict) -> None:
+    """Build getting started guide for all languages."""
+    try:
+        template = env.get_template("getting-started.md.jinja2")
+    except Exception as e:
+        print(f"  ⚠ Template not found: getting-started.md.jinja2 - skipping")
+        return
+    
+    for lang_code, trans in translations.items():
+        # Merge with English fallback
+        merged = merge_with_fallback(trans, fallback)
+        
+        # Check if getting_started section exists
+        if "getting_started" not in merged:
+            print(f"  ⚠ No getting_started section for {lang_code} - skipping")
+            continue
+        
+        output = template.render(
+            t=merged,
+            lang_code=lang_code,
+        )
+        
+        output_path = DOCS_DIR / f"getting-started-{lang_code}.md"
+        output_path.write_text(output, encoding="utf-8")
+        print(f"  Generated: getting-started-{lang_code}.md")
+
+
+def build_runner_management(env: Environment, translations: dict, fallback: dict) -> None:
+    """Build runner management guide for all languages."""
+    try:
+        template = env.get_template("runner-management.md.jinja2")
+    except Exception as e:
+        print(f"  ⚠ Template not found: runner-management.md.jinja2 - skipping")
+        return
+    
+    for lang_code, trans in translations.items():
+        # Merge with English fallback
+        merged = merge_with_fallback(trans, fallback)
+        
+        # Check if runner section exists
+        if "runner" not in merged:
+            print(f"  ⚠ No runner section for {lang_code} - skipping")
+            continue
+        
+        output = template.render(
+            t=merged,
+            lang_code=lang_code,
+        )
+        
+        output_path = DOCS_DIR / f"runner-management-{lang_code}.md"
+        output_path.write_text(output, encoding="utf-8")
+        print(f"  Generated: runner-management-{lang_code}.md")
+
+
+def build_index_page(env: Environment, translations: dict, fallback: dict) -> None:
+    """Build main index page for all languages."""
+    try:
+        template = env.get_template("index.md.jinja2")
+    except Exception as e:
+        print(f"  ⚠ Template not found: index.md.jinja2 - skipping")
+        return
+    
+    for lang_code, trans in translations.items():
+        # Merge with English fallback
+        merged = merge_with_fallback(trans, fallback)
+        
+        output = template.render(
+            t=merged,
+            lang_code=lang_code,
+        )
+        
+        # English is the default index.md, others get suffix
+        if lang_code == "en":
+            output_path = DOCS_DIR / "index.md"
+        else:
+            output_path = DOCS_DIR / f"index-{lang_code}.md"
+        output_path.write_text(output, encoding="utf-8")
+        print(f"  Generated: {output_path.name}")
 
 
 def main():
@@ -176,8 +256,8 @@ def main():
     print("CLARISSA i18n Documentation Builder")
     print("=" * 60)
     
-    # Ensure output directory exists
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    # Ensure output directories exist
+    CONTRIBUTING_DIR.mkdir(parents=True, exist_ok=True)
     
     # Check directories exist
     if not TEMPLATES_DIR.exists():
@@ -206,7 +286,7 @@ def main():
     
     fallback = translations["en"]
     
-    # Build outputs
+    # Build all outputs
     print("\nBuilding language selector...")
     build_language_selector(env, translations)
     
@@ -218,6 +298,12 @@ def main():
     
     print("\nBuilding paper editing guides...")
     build_paper_editing(env, translations, fallback)
+    
+    print("\nBuilding getting started guides...")
+    build_getting_started(env, translations, fallback)
+    
+    print("\nBuilding runner management guides...")
+    build_runner_management(env, translations, fallback)
     
     # Summary
     print("\n" + "=" * 60)
