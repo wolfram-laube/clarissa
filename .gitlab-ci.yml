@@ -1,5 +1,6 @@
 # Include additional CI configurations
 include:
+  - local: '.gitlab/gcp-setup.yml'
   - local: '.gitlab/gmail-drafts.yml'
   - local: '.gitlab/benchmark.yml'
   - local: '.gitlab/gcp-vm-control.yml'
