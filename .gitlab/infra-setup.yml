@@ -1,15 +1,12 @@
 # Infrastructure Management via SSH Jump Host
-# Mac #1 connects to Mac #2 and Linux Yoga
 
 variables:
   MAC2_HOST: "wolfram_e_laube@Wolframs-MacBook-Pro-2.local"
   LINUX_HOST: "wolfram_e_laube@heimdall.local"
-  SSH_OPTS: "-i $INFRA_SSH_KEY -o StrictHostKeyChecking=no -o ConnectTimeout=10"
 
 .infra_base:
-  stage: .pre
+  stage: deploy
   tags: [mac-group-shell]
-  needs: []
   rules:
     - when: manual
       allow_failure: true
@@ -21,109 +18,64 @@ variables:
 setup-mac2-runners:
   extends: .infra_base
   script:
-    - echo "Installing GitLab Runner on Mac 2..."
-    - |
-      ssh $SSH_OPTS $MAC2_HOST << 'REMOTE'
-      set -e
-      echo "=== Checking/Installing GitLab Runner ==="
-      which gitlab-runner || brew install gitlab-runner
-      
-      echo "=== Registering Shell Runner ==="
-      gitlab-runner register \
-        --non-interactive \
-        --url https://gitlab.com \
-        --token "glrt-8nuANkXjeD8mFyf5yJgAPW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0m0vg2o" \
-        --executor shell \
-        --description "Mac2 Shell Runner" || echo "Already registered or error"
-      
-      echo "=== Registering Docker Runner ==="
-      gitlab-runner register \
-        --non-interactive \
-        --url https://gitlab.com \
-        --token "glrt-NUQ9CJtrzl272oNeWFsqkm86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1emefv0" \
-        --executor docker \
-        --docker-image python:3.11-slim \
-        --description "Mac2 Docker Runner" || echo "Already registered or error"
-      
-      echo "=== Registering K8s Runner ==="
-      gitlab-runner register \
-        --non-interactive \
-        --url https://gitlab.com \
-        --token "glrt-7lIh5nfccolXMvOb8l02DW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0th3q59" \
-        --executor kubernetes \
-        --kubernetes-namespace gitlab-runner \
-        --kubernetes-image python:3.11-slim \
-        --description "Mac2 K8s Runner" || echo "Already registered or error"
-      
-      echo "=== Setting concurrent=3 ==="
-      sed -i '' 's/concurrent = 1/concurrent = 3/' ~/.gitlab-runner/config.toml || true
-      
-      echo "=== Runner List ==="
-      gitlab-runner list
-      REMOTE
-    - echo "Mac 2 setup complete!"
+    - echo "🍎 Installing GitLab Runner on Mac #2..."
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $MAC2_HOST "which gitlab-runner || brew install gitlab-runner"
+    - echo "=== Registering Shell Runner ==="
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $MAC2_HOST "gitlab-runner register --non-interactive --url https://gitlab.com --token glrt-8nuANkXjeD8mFyf5yJgAPW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0m0vg2o --executor shell --description 'Mac2 Shell Runner'" || true
+    - echo "=== Registering Docker Runner ==="
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $MAC2_HOST "gitlab-runner register --non-interactive --url https://gitlab.com --token glrt-NUQ9CJtrzl272oNeWFsqkm86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1emefv0 --executor docker --docker-image python:3.11-slim --description 'Mac2 Docker Runner'" || true
+    - echo "=== Registering K8s Runner ==="
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $MAC2_HOST "gitlab-runner register --non-interactive --url https://gitlab.com --token glrt-7lIh5nfccolXMvOb8l02DW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0th3q59 --executor kubernetes --kubernetes-namespace gitlab-runner --kubernetes-image python:3.11-slim --description 'Mac2 K8s Runner'" || true
+    - echo "=== Setting concurrent=3 ==="
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $MAC2_HOST "sed -i '' 's/concurrent = 1/concurrent = 3/' ~/.gitlab-runner/config.toml" || true
+    - echo "=== Runner List ==="
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $MAC2_HOST "gitlab-runner list"
+    - echo "✅ Mac #2 setup complete!"
+
+start-mac2-runner:
+  extends: .infra_base
+  script:
+    - echo "▶️ Starting GitLab Runner on Mac #2..."
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $MAC2_HOST "nohup gitlab-runner run > /tmp/gitlab-runner.log 2>&1 &"
+    - sleep 3
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $MAC2_HOST "ps aux | grep gitlab-runner | grep -v grep"
+    - echo "✅ Runner started!"
 
 # ============ Linux Yoga Jobs ============
 
 setup-linux-runners:
   extends: .infra_base
   script:
-    - echo "Installing GitLab Runner on Linux Yoga..."
-    - |
-      ssh $SSH_OPTS $LINUX_HOST << 'REMOTE'
-      set -e
-      echo "=== Installing GitLab Runner ==="
-      if ! which gitlab-runner; then
-        curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh" | sudo bash
-        sudo apt install gitlab-runner -y
-      fi
-      
-      echo "=== Registering Shell Runner ==="
-      sudo gitlab-runner register \
-        --non-interactive \
-        --url https://gitlab.com \
-        --token "glrt-3krYSQx5i1YSWpSK0k3RzW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1rwkzs5" \
-        --executor shell \
-        --description "Linux Yoga Shell Runner" || echo "Already registered or error"
-      
-      echo "=== Registering Docker Runner ==="
-      sudo gitlab-runner register \
-        --non-interactive \
-        --url https://gitlab.com \
-        --token "glrt-KH-yGosoANi3GelkFC2eum86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0klj56a" \
-        --executor docker \
-        --docker-image python:3.11-slim \
-        --description "Linux Yoga Docker Runner" || echo "Already registered or error"
-      
-      echo "=== Registering K8s Runner ==="
-      sudo gitlab-runner register \
-        --non-interactive \
-        --url https://gitlab.com \
-        --token "glrt-ebeWvSYgxDJnJWdmn91WQm86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1ky2t1b" \
-        --executor kubernetes \
-        --kubernetes-namespace gitlab-runner \
-        --kubernetes-image python:3.11-slim \
-        --description "Linux Yoga K8s Runner" || echo "Already registered or error"
-      
-      echo "=== Setting concurrent=3 ==="
-      sudo sed -i 's/concurrent = 1/concurrent = 3/' /etc/gitlab-runner/config.toml || true
-      
-      echo "=== Starting Runner Service ==="
-      sudo gitlab-runner start || sudo gitlab-runner restart
-      
-      echo "=== Runner List ==="
-      sudo gitlab-runner list
-      REMOTE
-    - echo "Linux Yoga setup complete!"
+    - echo "🐧 Installing GitLab Runner on Linux Yoga..."
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "which gitlab-runner || (curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | sudo bash && sudo apt install gitlab-runner -y)"
+    - echo "=== Registering Shell Runner ==="
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "sudo gitlab-runner register --non-interactive --url https://gitlab.com --token glrt-3krYSQx5i1YSWpSK0k3RzW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1rwkzs5 --executor shell --description 'Linux Yoga Shell Runner'" || true
+    - echo "=== Registering Docker Runner ==="
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "sudo gitlab-runner register --non-interactive --url https://gitlab.com --token glrt-KH-yGosoANi3GelkFC2eum86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0klj56a --executor docker --docker-image python:3.11-slim --description 'Linux Yoga Docker Runner'" || true
+    - echo "=== Registering K8s Runner ==="
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "sudo gitlab-runner register --non-interactive --url https://gitlab.com --token glrt-ebeWvSYgxDJnJWdmn91WQm86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1ky2t1b --executor kubernetes --kubernetes-namespace gitlab-runner --kubernetes-image python:3.11-slim --description 'Linux Yoga K8s Runner'" || true
+    - echo "=== Setting concurrent=3 ==="
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "sudo sed -i 's/concurrent = 1/concurrent = 3/' /etc/gitlab-runner/config.toml" || true
+    - echo "=== Starting Runner Service ==="
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "sudo gitlab-runner start || sudo gitlab-runner restart"
+    - echo "=== Runner List ==="
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "sudo gitlab-runner list"
+    - echo "✅ Linux Yoga setup complete!"
+
+start-linux-runner:
+  extends: .infra_base
+  script:
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "sudo gitlab-runner start || sudo gitlab-runner restart"
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "sudo gitlab-runner status"
 
 # ============ Status Check Jobs ============
 
 check-mac2-status:
   extends: .infra_base
   script:
-    - ssh $SSH_OPTS $MAC2_HOST "gitlab-runner list && gitlab-runner status"
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $MAC2_HOST "gitlab-runner list && gitlab-runner status && ps aux | grep gitlab-runner"
 
 check-linux-status:
   extends: .infra_base
   script:
-    - ssh $SSH_OPTS $LINUX_HOST "sudo gitlab-runner list && sudo gitlab-runner status"
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no $LINUX_HOST "sudo gitlab-runner list && sudo gitlab-runner status"
