@@ -288,199 +288,28 @@ paper_editing:
     with_label: "với nhãn"
 
 # Getting Started Guide
+
+# Getting Started Guide - Vietnamese
 getting_started:
   title: "Bắt đầu với CLARISSA"
   goal_label: "Mục tiêu"
   goal_text: "Chạy CLARISSA trên máy tính trong 15 phút và hiểu cách mọi thứ kết nối với nhau."
-  overview_title: "Tổng quan"
+  overview: "Tổng quan"
   you_are_here: "Bạn đang ở đây"
-  step1_desc: "Những gì bạn cần"
-  step2_desc: "Lấy mã nguồn"
-  step3_desc: "Cài đặt CLARISSA"
-  step5_desc: "Hiểu & kích hoạt CI/CD"
-  step6_desc: "Triển khai lên Kubernetes"
-  step7_desc: "Kiểm tra xem mọi thứ có hoạt động không"
-  first_run: "Chạy lần đầu"
-  verify: "Xác minh"
-  
-  # Prerequisites
-  minimum_label: "Tối thiểu"
-  for_local_dev: "cho phát triển cục bộ"
-  recommended_label: "Khuyến nghị"
-  for_docker_k8s: "cho Docker/K8s"
-  optional_label: "Tùy chọn"
-  for_gcp: "cho triển khai GCP"
-  with_python: "Với Python"
-  with_docker_or: "Với Docker Desktop hoặc"
-  
-  # Clone
-  clone_repo: "Clone Repository"
-  or_via_ssh: "Hoặc qua SSH (nếu bạn có SSH key)"
-  structure: "Cấu trúc"
-  documentation: "Tài liệu"
-  helper_scripts: "Scripts hỗ trợ"
-  
-  # Installation
-  local_install: "Cài đặt cục bộ"
-  development: "Phát triển"
-  create_venv: "Tạo môi trường ảo"
-  or: "hoặc"
-  install_deps: "Cài đặt dependencies"
-  check_works: "Kiểm tra xem có hoạt động không"
-  recommended: "khuyến nghị"
-  build_image: "Build image"
-  check: "Kiểm tra"
-  
-  # First Run
-  test: "kiểm tra"
-  show_help: "Hiển thị trợ giúp"
-  simple_test: "Kiểm tra đơn giản: Kiểm tra cú pháp deck ECLIPSE"
-  run_tests_locally: "Chạy tests cục bộ"
-  all_tests: "Tất cả tests"
-  only_fast_tests: "Chỉ tests nhanh"
-  with_coverage: "Với coverage"
-  
-  # Pipeline
-  pipeline_title: "Hiểu & Kích hoạt GitLab Pipeline"
-  what_is_pipeline: "Pipeline là gì?"
-  pipeline_explanation: "Pipeline tự động chạy tests, builds và deployments khi bạn push code."
-  view_pipeline_status: "Xem trạng thái Pipeline"
-  go_to: "Đi đến"
-  green_ok: "Xanh"
-  all_ok: "tất cả OK"
-  red_fail: "Đỏ"
-  error: "Lỗi"
-  trigger_manually: "Kích hoạt Pipeline thủ công"
-  empty_commit: "Commit trống"
-  trigger_single_jobs: "Kích hoạt từng Jobs"
-  some_jobs_manual: "Một số jobs là `manual` và phải được khởi động thủ công"
-  select_pipeline: "Chọn pipeline"
-  click_job: "Nhấp vào job với"
-  important_manual_jobs: "Jobs thủ công quan trọng"
-  function: "Chức năng"
-  start_gcp_vm: "Khởi động GCP Runner VM"
-  stop_gcp_vm: "Dừng GCP Runner VM"
-  test_runner_perf: "Kiểm tra hiệu suất runner"
-  
-  # Deployment
-  local_k8s: "Kubernetes cục bộ"
-  prerequisite: "Điều kiện tiên quyết"
-  k8s_enabled_docker: "Kubernetes được bật trong Docker Desktop"
-  create_namespace: "Tạo namespace"
-  apply_deployment: "Áp dụng deployment"
-  check_status: "Kiểm tra trạng thái"
-  view_logs: "Xem logs"
-  gcp_vm_running: "GCP VM đang chạy"
-  see: "xem"
-  to_vm: "đến VM"
-  on_vm: "Trên VM"
-  automatic: "tự động"
-  push_to_main: "Push lên nhánh main → Pipeline tự động deploy."
-  starts: "bắt đầu"
-  happens_auto: "diễn ra tự động"
-  
-  # Verify
-  check_local_install: "Kiểm tra cài đặt cục bộ"
-  works: "hoạt động"
-  green: "xanh"
-  check_docker: "Kiểm tra Docker"
-  running: "đang chạy"
-  check_k8s: "Kiểm tra Kubernetes"
-  should_be: "nên là"
-  reachable: "có thể truy cập"
-  then: "Sau đó"
-  check_pipeline: "Kiểm tra Pipeline"
-  last_pipeline_green: "Pipeline cuối cùng nên xanh"
-  on_error: "Khi có lỗi"
-  click_red_job: "Nhấp vào job đỏ"
-  read_logs: "Đọc logs"
-  
-  # Troubleshooting
-  venv_activated: "Môi trường ảo đã được kích hoạt"
-  or_reinstall: "Hoặc cài đặt lại"
-  install_start_docker: "Cài đặt và khởi động Docker Desktop."
-  enabled: "đã bật"
-  correct: "đúng"
-  common_causes: "Nguyên nhân phổ biến"
-  syntax_error: "Lỗi cú pháp trong code"
-  missing_deps: "Thiếu dependencies"
-  tests_fail: "Tests thất bại"
-  wont_start: "không khởi động được"
-  check_permissions: "Kiểm tra quyền"
-  
-  # Next Steps
-  next_steps: "Bước tiếp theo"
-  what_you_want: "Bạn muốn làm gì"
-  where_to_read: "Đọc ở đâu"
-  contribute_code: "Đóng góp code"
-  understand_workflow: "Hiểu workflow"
-  understand_arch: "Hiểu kiến trúc"
-  understand_ci: "Hiểu CI/CD"
-  manage_runners: "Quản lý runners"
-  
-  # Help
-  get_help: "Nhận trợ giúp"
-  questions: "Câu hỏi?"
-  create_issue: "Tạo issue trên GitLab"
-  bug_found: "Tìm thấy bug?"
-  feature_idea: "Ý tưởng tính năng?"
-  issue_with_label: "Issue với label"
-  
-  last_updated: "Cập nhật lần cuối"
   date: "Tháng 1 năm 2026"
+  last_updated: "Cập nhật lần cuối"
+  
+  steps:
+    prereq: "Những gì bạn cần"
+    clone: "Lấy mã nguồn"
+    install: "Cài đặt CLARISSA"
+    first_run: "Chạy lần đầu"
+    pipeline: "Hiểu & kích hoạt CI/CD"
+    deploy: "Triển khai lên Kubernetes"
+    verify: "Xác minh"
+    verify_desc: "Kiểm tra xem mọi thứ có hoạt động không"
 
-# Runner Management
 runner_management:
   title: "Quản lý Runner"
   overview: "Tổng quan"
-  overview_desc: "CLARISSA sử dụng GitLab Runners cho CI/CD pipelines. Chúng tôi có runners trên Mac (cục bộ) và GCP (cloud)."
-  
-  runners_table:
-    runner: "Runner"
-    location: "Vị trí"
-    executor: "Executor"
-    tags: "Tags"
-    status: "Trạng thái"
-    cost: "Chi phí"
-    online: "trực tuyến"
-    offline: "ngoại tuyến (VM đã dừng)"
-  
-  mac_runners:
-    title: "Mac Runners (Cục bộ)"
-    start: "Khởi động"
-    stop: "Dừng"
-    status: "Trạng thái"
-  
-  gcp_runners:
-    title: "GCP Runners (Cloud)"
-    via_pipeline: "Qua GitLab Pipeline"
-    via_cli: "Qua CLI"
-    start_vm: "Khởi động VM"
-    stop_vm: "Dừng VM"
-    check_status: "Kiểm tra trạng thái"
-  
-  job_targeting:
-    title: "Nhắm mục tiêu Jobs với Tags"
-    desc: "Sử dụng tags trong .gitlab-ci.yml để nhắm mục tiêu runners cụ thể"
-    any_runner: "Bất kỳ runner nào"
-    mac_only: "Chỉ Mac"
-    k8s_only: "Chỉ Kubernetes"
-    gcp_only: "Chỉ GCP"
-  
-  workflow:
-    title: "Workflow khuyến nghị"
-    develop: "Phát triển"
-    develop_desc: "Cục bộ với mac-group-shell (nhanh)"
-    test: "Kiểm tra"
-    test_desc: "K8s với mac-k8s (K8s cục bộ)"
-    production: "Sản xuất"
-    production_desc: "GCP với gcp-k8s (cloud thực)"
-  
-  troubleshooting:
-    title: "Xử lý sự cố"
-    runner_offline: "Runner ngoại tuyến?"
-    check_service: "Kiểm tra xem service có đang chạy không"
-    gcp_vm_stopped: "GCP VM đã dừng?"
-    start_via_pipeline: "Khởi động qua pipeline hoặc CLI"
-    job_stuck: "Job bị kẹt?"
-    check_tags: "Kiểm tra xem tags có khớp không"
+  overview_desc: "CLARISSA sử dụng GitLab Runners cho CI/CD pipelines."
