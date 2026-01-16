@@ -3,19 +3,21 @@
 .benchmark_base:
   stage: test
   timeout: 10 minutes
+  when: manual
+  allow_failure: true
   script:
     - echo "=== BENCHMARK START ==="
     - echo "Runner - $CI_RUNNER_DESCRIPTION"
     - hostname
     - date
     - echo "--- CPU Test ---"
-    - python3 -c "import time; start=time.time(); sum(1 for n in range(2,500000) if all(n%i!=0 for i in range(2,int(n**0.5)+1)))[:1000]; print(f'Done in {time.time()-start:.2f}s')" || echo "Python benchmark skipped"
+    - python3 --version
+    - echo "Counting primes..."
+    - python3 -c "print(sum(1 for n in range(2,100000) if all(n%i for i in range(2,int(n**0.5)+1))))"
     - echo "--- Disk Test ---"
     - dd if=/dev/zero of=/tmp/test bs=1M count=50 2>&1 || true
     - rm -f /tmp/test
     - echo "=== BENCHMARK END ==="
-  rules:
-    - when: manual
 
 # Mac #1
 benchmark-mac-group-shell:
