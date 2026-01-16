@@ -8,11 +8,11 @@ setup-mac2-runners:
   script:
     - chmod 600 "$INFRA_SSH_KEY"
     - echo "Installing GitLab Runner on Mac 2..."
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "which gitlab-runner || brew install gitlab-runner"
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "export PATH=/opt/homebrew/bin:/usr/local/bin:$PATH && which gitlab-runner || brew install gitlab-runner"
     - echo "Registering Shell Runner..."
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "gitlab-runner register --non-interactive --url https://gitlab.com --token glrt-8nuANkXjeD8mFyf5yJgAPW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0m0vg2o --executor shell --description Mac2-Shell-Runner" || true
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "export PATH=/opt/homebrew/bin:/usr/local/bin:$PATH && gitlab-runner register --non-interactive --url https://gitlab.com --token glrt-8nuANkXjeD8mFyf5yJgAPW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0m0vg2o --executor shell --description Mac2-Shell-Runner" || true
     - echo "Runner List:"
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "gitlab-runner list"
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "export PATH=/opt/homebrew/bin:/usr/local/bin:$PATH && gitlab-runner list"
     - echo "Done!"
 
 start-mac2-runner:
@@ -23,7 +23,7 @@ start-mac2-runner:
   script:
     - chmod 600 "$INFRA_SSH_KEY"
     - echo "Starting runner on Mac 2..."
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "nohup gitlab-runner run > /tmp/gitlab-runner.log 2>&1 &"
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "export PATH=/opt/homebrew/bin:/usr/local/bin:$PATH && nohup gitlab-runner run > /tmp/gitlab-runner.log 2>&1 &"
     - sleep 3
     - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "ps aux | grep gitlab-runner | grep -v grep"
 
@@ -34,4 +34,4 @@ check-mac2-status:
   needs: []
   script:
     - chmod 600 "$INFRA_SSH_KEY"
-    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "which gitlab-runner && gitlab-runner list || echo NOT INSTALLED"
+    - ssh -i "$INFRA_SSH_KEY" -o StrictHostKeyChecking=no wolfram_e_laube@Wolframs-MacBook-Pro-2.local "export PATH=/opt/homebrew/bin:/usr/local/bin:$PATH && which gitlab-runner && gitlab-runner list || echo NOT INSTALLED"
