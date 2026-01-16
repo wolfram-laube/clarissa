@@ -4,17 +4,17 @@
 variables:
   MAC2_HOST: "wolfram_e_laube@Wolframs-MacBook-Pro-2.local"
   LINUX_HOST: "wolfram_e_laube@heimdall.local"
-  SSH_OPTS: "-i $INFRA_SSH_KEY -o StrictHostKeyChecking=no -o ConnectTimeout=30 -o BatchMode=yes"
+  SSH_OPTS: "-i $INFRA_SSH_KEY -o StrictHostKeyChecking=no -o ConnectTimeout=10"
 
 .infra_base:
-  stage: deploy
+  stage: .pre
   tags: [mac-group-shell]
+  needs: []
   rules:
     - when: manual
       allow_failure: true
   before_script:
     - chmod 600 "$INFRA_SSH_KEY"
-    - cat "$INFRA_SSH_KEY" | head -1
 
 # ============ Mac #2 Jobs ============
 
@@ -23,22 +23,40 @@ setup-mac2-runners:
   script:
     - echo "Installing GitLab Runner on Mac 2..."
     - |
-      ssh $SSH_OPTS $MAC2_HOST 'bash -s' << 'REMOTE'
+      ssh $SSH_OPTS $MAC2_HOST << 'REMOTE'
       set -e
       echo "=== Checking/Installing GitLab Runner ==="
       which gitlab-runner || brew install gitlab-runner
       
       echo "=== Registering Shell Runner ==="
-      gitlab-runner register         --non-interactive         --url https://gitlab.com         --token "glrt-8nuANkXjeD8mFyf5yJgAPW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0m0vg2o"         --executor shell         --description "Mac2 Shell Runner" || echo "Already registered or error"
+      gitlab-runner register \
+        --non-interactive \
+        --url https://gitlab.com \
+        --token "glrt-8nuANkXjeD8mFyf5yJgAPW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0m0vg2o" \
+        --executor shell \
+        --description "Mac2 Shell Runner" || echo "Already registered or error"
       
       echo "=== Registering Docker Runner ==="
-      gitlab-runner register         --non-interactive         --url https://gitlab.com         --token "glrt-NUQ9CJtrzl272oNeWFsqkm86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1emefv0"         --executor docker         --docker-image python:3.11-slim         --description "Mac2 Docker Runner" || echo "Already registered or error"
+      gitlab-runner register \
+        --non-interactive \
+        --url https://gitlab.com \
+        --token "glrt-NUQ9CJtrzl272oNeWFsqkm86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1emefv0" \
+        --executor docker \
+        --docker-image python:3.11-slim \
+        --description "Mac2 Docker Runner" || echo "Already registered or error"
       
       echo "=== Registering K8s Runner ==="
-      gitlab-runner register         --non-interactive         --url https://gitlab.com         --token "glrt-7lIh5nfccolXMvOb8l02DW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0th3q59"         --executor kubernetes         --kubernetes-namespace gitlab-runner         --kubernetes-image python:3.11-slim         --description "Mac2 K8s Runner" || echo "Already registered or error"
+      gitlab-runner register \
+        --non-interactive \
+        --url https://gitlab.com \
+        --token "glrt-7lIh5nfccolXMvOb8l02DW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0th3q59" \
+        --executor kubernetes \
+        --kubernetes-namespace gitlab-runner \
+        --kubernetes-image python:3.11-slim \
+        --description "Mac2 K8s Runner" || echo "Already registered or error"
       
       echo "=== Setting concurrent=3 ==="
-      sed -i '' 's/concurrent = 1/concurrent = 3/' ~/.gitlab-runner/config.toml 2>/dev/null || true
+      sed -i '' 's/concurrent = 1/concurrent = 3/' ~/.gitlab-runner/config.toml || true
       
       echo "=== Runner List ==="
       gitlab-runner list
@@ -52,28 +70,46 @@ setup-linux-runners:
   script:
     - echo "Installing GitLab Runner on Linux Yoga..."
     - |
-      ssh $SSH_OPTS $LINUX_HOST 'bash -s' << 'REMOTE'
+      ssh $SSH_OPTS $LINUX_HOST << 'REMOTE'
       set -e
       echo "=== Installing GitLab Runner ==="
-      if ! which gitlab-runner > /dev/null 2>&1; then
+      if ! which gitlab-runner; then
         curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh" | sudo bash
         sudo apt install gitlab-runner -y
       fi
       
       echo "=== Registering Shell Runner ==="
-      sudo gitlab-runner register         --non-interactive         --url https://gitlab.com         --token "glrt-3krYSQx5i1YSWpSK0k3RzW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1rwkzs5"         --executor shell         --description "Linux Yoga Shell Runner" || echo "Already registered or error"
+      sudo gitlab-runner register \
+        --non-interactive \
+        --url https://gitlab.com \
+        --token "glrt-3krYSQx5i1YSWpSK0k3RzW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1rwkzs5" \
+        --executor shell \
+        --description "Linux Yoga Shell Runner" || echo "Already registered or error"
       
       echo "=== Registering Docker Runner ==="
-      sudo gitlab-runner register         --non-interactive         --url https://gitlab.com         --token "glrt-KH-yGosoANi3GelkFC2eum86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0klj56a"         --executor docker         --docker-image python:3.11-slim         --description "Linux Yoga Docker Runner" || echo "Already registered or error"
+      sudo gitlab-runner register \
+        --non-interactive \
+        --url https://gitlab.com \
+        --token "glrt-KH-yGosoANi3GelkFC2eum86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0klj56a" \
+        --executor docker \
+        --docker-image python:3.11-slim \
+        --description "Linux Yoga Docker Runner" || echo "Already registered or error"
       
       echo "=== Registering K8s Runner ==="
-      sudo gitlab-runner register         --non-interactive         --url https://gitlab.com         --token "glrt-ebeWvSYgxDJnJWdmn91WQm86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1ky2t1b"         --executor kubernetes         --kubernetes-namespace gitlab-runner         --kubernetes-image python:3.11-slim         --description "Linux Yoga K8s Runner" || echo "Already registered or error"
+      sudo gitlab-runner register \
+        --non-interactive \
+        --url https://gitlab.com \
+        --token "glrt-ebeWvSYgxDJnJWdmn91WQm86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1ky2t1b" \
+        --executor kubernetes \
+        --kubernetes-namespace gitlab-runner \
+        --kubernetes-image python:3.11-slim \
+        --description "Linux Yoga K8s Runner" || echo "Already registered or error"
       
       echo "=== Setting concurrent=3 ==="
-      sudo sed -i 's/concurrent = 1/concurrent = 3/' /etc/gitlab-runner/config.toml 2>/dev/null || true
+      sudo sed -i 's/concurrent = 1/concurrent = 3/' /etc/gitlab-runner/config.toml || true
       
       echo "=== Starting Runner Service ==="
-      sudo gitlab-runner restart || sudo gitlab-runner start
+      sudo gitlab-runner start || sudo gitlab-runner restart
       
       echo "=== Runner List ==="
       sudo gitlab-runner list
