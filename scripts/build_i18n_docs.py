@@ -68,7 +68,6 @@ def build_language_selector(env: Environment, translations: dict) -> None:
     """Build the language selector index.html."""
     template = env.get_template("index.html.jinja2")
     
-    # Collect all languages
     languages = []
     for lang_code, trans in translations.items():
         meta = trans.get("meta", {})
@@ -81,10 +80,7 @@ def build_language_selector(env: Environment, translations: dict) -> None:
             "font_family": meta.get("font_family", "Space Grotesk"),
         })
     
-    # Sort: English first, then alphabetically
     languages.sort(key=lambda x: (x["code"] != "en", x["name"]))
-    
-    # Use English for selector text
     en_trans = translations.get("en", {})
     selector = en_trans.get("selector", {})
     
@@ -104,11 +100,9 @@ def build_slides(env: Environment, translations: dict, fallback: dict) -> None:
     template = env.get_template("workflow-slides.html.jinja2")
     
     for lang_code, trans in translations.items():
-        # Merge with English fallback
         merged = merge_with_fallback(trans, fallback)
         meta = merged.get("meta", {})
         
-        # Get all language codes for language switcher with flags
         all_langs = [
             {
                 "code": lc,
@@ -135,7 +129,6 @@ def build_cheatsheets(env: Environment, translations: dict, fallback: dict) -> N
     template = env.get_template("cheatsheet.md.jinja2")
     
     for lang_code, trans in translations.items():
-        # Merge with English fallback
         merged = merge_with_fallback(trans, fallback)
         meta = merged.get("meta", {})
         
@@ -156,7 +149,6 @@ def build_paper_editing(env: Environment, translations: dict, fallback: dict) ->
     PUBLICATIONS_DIR.mkdir(parents=True, exist_ok=True)
     
     for lang_code, trans in translations.items():
-        # Merge with English fallback
         merged = merge_with_fallback(trans, fallback)
         paper_editing = merged.get("paper_editing", {})
         
@@ -179,10 +171,8 @@ def build_getting_started(env: Environment, translations: dict, fallback: dict) 
         return
     
     for lang_code, trans in translations.items():
-        # Merge with English fallback
         merged = merge_with_fallback(trans, fallback)
         
-        # Check if getting_started section exists
         if "getting_started" not in merged:
             print(f"  ⚠ No getting_started section for {lang_code} - using fallback")
         
@@ -191,11 +181,8 @@ def build_getting_started(env: Environment, translations: dict, fallback: dict) 
             lang_code=lang_code,
         )
         
-        # English goes to getting-started.md, others get suffix
-        if lang_code == "en":
-            output_path = DOCS_DIR / "getting-started.md"
-        else:
-            output_path = DOCS_DIR / f"getting-started-{lang_code}.md"
+        # Always use suffix for consistency with mkdocs.yml
+        output_path = DOCS_DIR / f"getting-started-{lang_code}.md"
         output_path.write_text(output, encoding="utf-8")
         print(f"  Generated: {output_path.name}")
 
@@ -209,10 +196,8 @@ def build_runner_management(env: Environment, translations: dict, fallback: dict
         return
     
     for lang_code, trans in translations.items():
-        # Merge with English fallback
         merged = merge_with_fallback(trans, fallback)
         
-        # Check if runner_management section exists
         if "runner_management" not in merged:
             print(f"  ⚠ No runner_management section for {lang_code} - using fallback")
         
@@ -222,11 +207,8 @@ def build_runner_management(env: Environment, translations: dict, fallback: dict
             lang_code=lang_code,
         )
         
-        # English goes to runner-management.md, others get suffix
-        if lang_code == "en":
-            output_path = DOCS_DIR / "runner-management.md"
-        else:
-            output_path = DOCS_DIR / f"runner-management-{lang_code}.md"
+        # Always use suffix for consistency with mkdocs.yml
+        output_path = DOCS_DIR / f"runner-management-{lang_code}.md"
         output_path.write_text(output, encoding="utf-8")
         print(f"  Generated: {output_path.name}")
 
@@ -236,11 +218,9 @@ def main():
     print("CLARISSA i18n Documentation Builder")
     print("=" * 60)
     
-    # Ensure output directories exist
     CONTRIBUTING_DIR.mkdir(parents=True, exist_ok=True)
     PUBLICATIONS_DIR.mkdir(parents=True, exist_ok=True)
     
-    # Check directories exist
     if not TEMPLATES_DIR.exists():
         print(f"ERROR: Templates directory not found: {TEMPLATES_DIR}")
         sys.exit(1)
@@ -249,7 +229,6 @@ def main():
         print(f"ERROR: Translations directory not found: {TRANSLATIONS_DIR}")
         sys.exit(1)
     
-    # Setup Jinja2
     env = Environment(
         loader=FileSystemLoader(TEMPLATES_DIR),
         autoescape=select_autoescape(["html", "xml"]),
@@ -257,7 +236,6 @@ def main():
         lstrip_blocks=True,
     )
     
-    # Load translations
     print("\nLoading translations...")
     translations = load_translations()
     
@@ -267,7 +245,6 @@ def main():
     
     fallback = translations["en"]
     
-    # Build all outputs
     print("\nBuilding language selector...")
     build_language_selector(env, translations)
     
@@ -286,7 +263,6 @@ def main():
     print("\nBuilding runner management guides...")
     build_runner_management(env, translations, fallback)
     
-    # Summary
     print("\n" + "=" * 60)
     print(f"✅ Built documentation for {len(translations)} languages:")
     for lang_code in sorted(translations.keys()):
