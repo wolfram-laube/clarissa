@@ -5,16 +5,16 @@
   timeout: 10 minutes
   when: manual
   allow_failure: true
+  needs: []  # Run independently - don't wait for previous stages
   script:
     - echo "=== BENCHMARK START ==="
     - echo "Runner - $CI_RUNNER_DESCRIPTION"
     - hostname
     - date
-    - echo "--- CPU Test ---"
+    - echo "--- CPU Test (primes to 100k) ---"
     - python3 --version
-    - echo "Counting primes..."
     - python3 -c "print(sum(1 for n in range(2,100000) if all(n%i for i in range(2,int(n**0.5)+1))))"
-    - echo "--- Disk Test ---"
+    - echo "--- Disk Test (50MB) ---"
     - dd if=/dev/zero of=/tmp/test bs=1M count=50 2>&1 || true
     - rm -f /tmp/test
     - echo "=== BENCHMARK END ==="
