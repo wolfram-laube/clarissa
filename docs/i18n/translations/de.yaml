@@ -469,6 +469,7 @@ runner_management:
     cost: "Kosten"
     online: "online"
     offline: "offline (VM gestoppt)"
+    function: "Funktion"
   
   mac:
     title: "Mac Runner (Lokal)"
