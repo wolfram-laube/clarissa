@@ -6,20 +6,19 @@
   timeout: 10 minutes
   script:
     - echo "=== Runner Benchmark ==="
-    - echo "Runner: $CI_RUNNER_DESCRIPTION"
-    - echo "Host: $(hostname)"
+    - echo "Runner - $CI_RUNNER_DESCRIPTION"
+    - hostname
     - date
-    - echo "--- CPU Benchmark (primes to 500k) ---"
-    - python3 -c "import time; s=time.time(); n=500000; sieve=[1]*n; [sieve.__setitem__(i,0) for p in range(2,int(n**.5)+1) if sieve[p] for i in range(p*p,n,p)]; print(f'{sum(sieve)-2} primes in {time.time()-s:.2f}s')"
-    - echo "--- Disk I/O (write 100MB) ---"
+    - echo "--- CPU Benchmark ---"
+    - 'python3 -c "import time; s=time.time(); n=500000; sieve=[1]*n; exec(\"for p in range(2,int(n**.5)+1):\\n if sieve[p]:\\n  for i in range(p*p,n,p): sieve[i]=0\"); print(f\"{sum(sieve)-2} primes in {time.time()-s:.2f}s\")"'
+    - echo "--- Disk I/O ---"
     - dd if=/dev/zero of=/tmp/testfile bs=1M count=100 2>&1 || true
     - rm -f /tmp/testfile
     - echo "=== Done ==="
-    - date
   rules:
     - when: manual
 
-# ============ Mac #1 ============
+# Mac #1
 benchmark-mac1-shell:
   extends: .benchmark_base
   tags: [mac-group-shell]
@@ -34,7 +33,7 @@ benchmark-mac1-k8s:
   tags: [mac-k8s]
   image: python:3.11-slim
 
-# ============ Mac #2 ============
+# Mac #2
 benchmark-mac2-shell:
   extends: .benchmark_base
   tags: [mac2-shell]
@@ -49,7 +48,7 @@ benchmark-mac2-k8s:
   tags: [mac2-k8s]
   image: python:3.11-slim
 
-# ============ Linux Yoga ============
+# Linux Yoga
 benchmark-linux-shell:
   extends: .benchmark_base
   tags: [linux-shell]
@@ -64,7 +63,7 @@ benchmark-linux-k8s:
   tags: [linux-k8s]
   image: python:3.11-slim
 
-# ============ GCP VM ============
+# GCP VM
 benchmark-gcp-shell:
   extends: .benchmark_base
   tags: [gcp-shell]
