@@ -1,15 +1,17 @@
 # Gmail Draft Creation Pipeline
+# Trigger via API with DRAFTS_JSON variable
 
 gmail:create-drafts:
   stage: .pre
   tags:
     - mac-group-shell
   rules:
+    - if: $DRAFTS_JSON
+      when: always
     - when: manual
-  variables:
-    DRAFTS_JSON: "[]"
+      allow_failure: true
   script:
-    - pip install requests --quiet
+    - pip install requests --quiet 2>/dev/null || true
     - |
       cat > /tmp/create_drafts.py << 'ENDSCRIPT'
       import os, json, requests, base64
