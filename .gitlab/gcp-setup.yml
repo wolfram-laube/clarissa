@@ -1,0 +1,29 @@
+
+gcp:setup-runners:
+  stage: .pre
+  tags: [mac-group-shell]
+  script:
+    - echo "🔧 Setting up GitLab runners on GCP VM..."
+    - |
+      gcloud compute ssh gitlab-runner --zone=europe-west3-a --command='
+        echo "=== Checking existing runners ==="
+        sudo gitlab-runner list || true
+        
+        echo "=== Unregistering old runners ==="
+        sudo gitlab-runner unregister --all-runners || true
+        
+        echo "=== Registering GCP Shell Runner ==="
+        sudo gitlab-runner register           --non-interactive           --url https://gitlab.com           --token "glrt-KKPDAdm1l14Tv6ZpxVTghW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1gky4ih"           --executor shell           --description "GCP Shell Runner"
+        
+        echo "=== Registering GCP K8s Runner ==="
+        sudo gitlab-runner register           --non-interactive           --url https://gitlab.com           --token "glrt-67YOaPU6p2OW_h7vopfTOG86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0xxbx3v"           --executor kubernetes           --kubernetes-namespace gitlab-runner           --kubernetes-image python:3.11-slim           --description "GCP K8s Runner"
+        
+        echo "=== Restarting gitlab-runner service ==="
+        sudo systemctl restart gitlab-runner || sudo gitlab-runner restart
+        
+        echo "=== Final status ==="
+        sudo gitlab-runner list
+        sudo gitlab-runner status
+      '
+  rules:
+    - when: manual
