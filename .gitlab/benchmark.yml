@@ -14,7 +14,7 @@
     - dd if=/dev/zero of=/tmp/testfile bs=1M count=100 2>&1 || true
     - rm -f /tmp/testfile
     - echo "--- Pip install requests ---"
-    - pip install requests --quiet 2>/dev/null || echo "pip skip"
+    - pip install requests --quiet 2>/dev/null || pip3 install requests --quiet --break-system-packages 2>/dev/null || echo "pip skip"
     - echo "=== Done ==="
     - date
   rules:
@@ -22,11 +22,11 @@
 
 benchmark-mac-group-shell:
   extends: .benchmark_base
-  tags: [mac, shell]
+  tags: [mac-group-shell]
 
 benchmark-mac-docker:
   extends: .benchmark_base
-  tags: [docker]
+  tags: [mac-docker]
   image: python:3.11-slim
 
 benchmark-mac-k8s:
@@ -36,9 +36,9 @@ benchmark-mac-k8s:
 
 benchmark-gcp-shell:
   extends: .benchmark_base
-  tags: [gcp, shell]
+  tags: [gcp-shell]
 
 benchmark-gcp-k8s:
   extends: .benchmark_base
-  tags: [gcp, k8s]
+  tags: [gcp-k8s]
   image: python:3.11-slim
