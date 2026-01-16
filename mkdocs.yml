@@ -18,27 +18,34 @@ theme:
     - navigation.expand
     - toc.integrate
     - search.suggest
+    - search.highlight
 
 plugins:
   - search
 
 markdown_extensions:
-  - pymdownx.highlight
+  - attr_list
+  - md_in_html
+  - admonition
+  - pymdownx.details
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
-  - admonition
-  - toc:
-      permalink: true
-  - attr_list
-  - md_in_html
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - tables
+  - toc:
+      permalink: true
 
 nav:
   - Home: index.md
-  - "🚀 Getting Started": getting-started.md
+  - "🚀 Getting Started":
+    - "🇬🇧 English": getting-started-en.md
+    - "🇩🇪 Deutsch": getting-started-de.md
+    - "🇻🇳 Tiếng Việt": getting-started-vi.md
+    - "🇸🇦 العربية": getting-started-ar.md
+    - "🇮🇸 Íslenska": getting-started-is.md
   - Contributing: contributing.md
 
   - Architecture:
@@ -64,16 +71,22 @@ nav:
     - Overview: guides/index.md
     - Workflow:
       - Interactive Slides: guides/contributing/index.html
-      - Cheatsheet (EN): guides/contributing/cheatsheet-en.md
-      - Cheatsheet (DE): guides/contributing/cheatsheet-de.md
-      - Cheatsheet (VI): guides/contributing/cheatsheet-vi.md
-      - Cheatsheet (AR): guides/contributing/cheatsheet-ar.md
-      - Cheatsheet (IS): guides/contributing/cheatsheet-is.md
+      - "Cheatsheet 🇬🇧": guides/contributing/cheatsheet-en.md
+      - "Cheatsheet 🇩🇪": guides/contributing/cheatsheet-de.md
+      - "Cheatsheet 🇻🇳": guides/contributing/cheatsheet-vi.md
+      - "Cheatsheet 🇸🇦": guides/contributing/cheatsheet-ar.md
+      - "Cheatsheet 🇮🇸": guides/contributing/cheatsheet-is.md
     - Project Management: guides/project-management.md
 
   - CI:
-    - Runner Management: runner-management.md
+    - "Runner Management":
+      - "🇬🇧 English": runner-management-en.md
+      - "🇩🇪 Deutsch": runner-management-de.md
+      - "🇻🇳 Tiếng Việt": runner-management-vi.md
+      - "🇸🇦 العربية": runner-management-ar.md
+      - "🇮🇸 Íslenska": runner-management-is.md
     - How to Read CI Results: ci/README.md
+    - Infrastructure: infrastructure.md
 
   - Simulators:
     - Overview: simulators/index.md
@@ -87,28 +100,11 @@ nav:
     - Overview: eclipse/index.md
     - Deck Structure: eclipse/deck-structure.md
     - Keyword Reference: eclipse/keyword-reference.md
-    - Common Errors: eclipse/common-errors.md
 
   - Publications:
     - Overview: publications/index.md
-    - "IJACSA 2026":
-      - Abstract: publications/ijacsa-2026/abstract.md
-    - "Paper Editing":
-      - English: publications/paper-editing-en.md
-      - Deutsch: publications/paper-editing-de.md
-      - Tiếng Việt: publications/paper-editing-vi.md
-      - العربية: publications/paper-editing-ar.md
-      - Íslenska: publications/paper-editing-is.md
-    - "Paper Workflow (Legacy)": publications/paper-workflow.md
-    - "CI/CD Pipeline": publications/ci-workflow.md
-
-  - Billing:
-    - Time Tracking & Invoicing: guides/billing.md
-
-extra:
-  social:
-    - icon: fontawesome/brands/gitlab
-      link: https://gitlab.com/wolfram_laube/blauweiss_llc/irena
-  generator: false
-
-copyright: Copyright &copy; 2025-2026 BlauWeiss LLC
+    - CI Workflow: publications/ci-workflow.md
+    - Paper Workflow: publications/paper-workflow.md
+    - "Paper Editing 🇬🇧": publications/paper-editing-en.md
+    - "Paper Editing 🇩🇪": publications/paper-editing-de.md
+    - "Paper Editing 🇻🇳": publications/paper-editing-vi.md
