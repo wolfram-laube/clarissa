@@ -1,0 +1,349 @@
+# {{ t.getting_started.title }}
+
+> 🎯 **{{ t.getting_started.goal_label }}:** {{ t.getting_started.goal_text }}
+
+---
+
+## {{ t.getting_started.overview }}
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  {{ t.getting_started.you_are_here }}                                               │
+│       ↓                                                     │
+│  1. Prerequisites    → {{ t.getting_started.steps.prereq }}                      │
+│  2. Repository       → {{ t.getting_started.steps.clone }}                           │
+│  3. Installation     → {{ t.getting_started.steps.install }}                │
+│  4. {{ t.getting_started.steps.first_run }}     → "Hello World"                        │
+│  5. Pipeline         → {{ t.getting_started.steps.pipeline }}           │
+│  6. Deployment       → {{ t.getting_started.steps.deploy }}              │
+│  7. {{ t.getting_started.steps.verify }}     → {{ t.getting_started.steps.verify_desc }}         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 1. Prerequisites
+
+### {{ t.getting_started.prereq.minimum }} ({{ t.getting_started.prereq.for_local }})
+
+| Tool | Version | Installation | Check |
+|------|---------|--------------|-------|
+| Git | 2.30+ | [git-scm.com](https://git-scm.com) | `git --version` |
+| Python | 3.11+ | [python.org](https://python.org) | `python3 --version` |
+| pip | 21+ | {{ t.getting_started.prereq.with_python }} | `pip --version` |
+
+### {{ t.getting_started.prereq.recommended }} ({{ t.getting_started.prereq.for_docker }})
+
+| Tool | Version | Installation | Check |
+|------|---------|--------------|-------|
+| Docker Desktop | 4.0+ | [docker.com](https://docker.com/products/docker-desktop) | `docker --version` |
+| kubectl | 1.28+ | {{ t.getting_started.prereq.with_docker }} [kubernetes.io](https://kubernetes.io/docs/tasks/tools/) | `kubectl version --client` |
+| Helm | 3.12+ | `brew install helm` (Mac) | `helm version` |
+
+### {{ t.getting_started.prereq.optional }} ({{ t.getting_started.prereq.for_gcp }})
+
+| Tool | Installation | Check |
+|------|--------------|-------|
+| gcloud CLI | [cloud.google.com/sdk](https://cloud.google.com/sdk/docs/install) | `gcloud --version` |
+
+---
+
+## 2. {{ t.getting_started.clone.title }}
+
+```bash
+# Via HTTPS
+git clone https://gitlab.com/wolfram_laube/blauweiss_llc/irena.git clarissa
+cd clarissa
+
+# {{ t.getting_started.clone.or_ssh }}
+git clone git@gitlab.com:wolfram_laube/blauweiss_llc/irena.git clarissa
+cd clarissa
+```
+
+**{{ t.getting_started.clone.structure }}:**
+```
+clarissa/
+├── src/clarissa/        # Python Package
+├── docs/                # {{ t.getting_started.clone.docs }}
+├── tests/               # Tests
+├── scripts/             # {{ t.getting_started.clone.scripts }}
+└── .gitlab-ci.yml       # CI/CD Pipeline
+```
+
+---
+
+## 3. Installation
+
+### Option A: {{ t.getting_started.install.local }} ({{ t.getting_started.install.development }})
+
+```bash
+# {{ t.getting_started.install.create_venv }}
+python3 -m venv venv
+source venv/bin/activate  # Linux/Mac
+# {{ t.getting_started.common.or }}: venv\Scripts\activate  # Windows
+
+# {{ t.getting_started.install.install_deps }}
+pip install -e ".[dev]"
+
+# {{ t.getting_started.install.check_works }}
+clarissa --version
+```
+
+### Option B: Docker ({{ t.getting_started.install.recommended }})
+
+```bash
+# {{ t.getting_started.install.build_image }}
+docker build -t clarissa:local .
+
+# {{ t.getting_started.common.check }}
+docker run --rm clarissa:local --version
+```
+
+---
+
+## 4. {{ t.getting_started.first_run.title }} ("Hello World")
+
+### {{ t.getting_started.first_run.test_cli }}
+
+```bash
+# {{ t.getting_started.first_run.show_help }}
+clarissa --help
+
+# Version
+clarissa --version
+
+# {{ t.getting_started.first_run.simple_test }}
+clarissa validate examples/spe1.data
+```
+
+### {{ t.getting_started.first_run.run_tests }}
+
+```bash
+# {{ t.getting_started.first_run.all_tests }}
+pytest
+
+# {{ t.getting_started.first_run.fast_only }}
+pytest -m "not slow"
+
+# {{ t.getting_started.first_run.with_coverage }}
+pytest --cov=src/clarissa
+```
+
+---
+
+## 5. {{ t.getting_started.pipeline.title }}
+
+### {{ t.getting_started.pipeline.what_is }}
+
+{{ t.getting_started.pipeline.explanation }}
+
+```
+Push → Build → Test → Deploy
+         ↓       ↓       ↓
+      Python   pytest  GitLab
+      Package  + lint   Pages
+```
+
+### {{ t.getting_started.pipeline.view_status }}
+
+1. {{ t.getting_started.common.go_to }}: https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/pipelines
+2. {{ t.getting_started.pipeline.green }} ✅ = {{ t.getting_started.pipeline.all_ok }}, {{ t.getting_started.pipeline.red }} ❌ = {{ t.getting_started.common.error }}
+
+### {{ t.getting_started.pipeline.trigger_manual }}
+
+**Option 1: Web UI**
+```
+GitLab → CI/CD → Pipelines → "Run pipeline" Button → Run
+```
+
+**Option 2: {{ t.getting_started.pipeline.empty_commit }}**
+```bash
+git commit --allow-empty -m "ci: trigger pipeline"
+git push
+```
+
+### {{ t.getting_started.pipeline.single_jobs }}
+
+{{ t.getting_started.pipeline.some_manual }}:
+
+```
+GitLab → CI/CD → Pipelines → [{{ t.getting_started.pipeline.select }}] → {{ t.getting_started.pipeline.click_play }} ▶️
+```
+
+**{{ t.getting_started.pipeline.important_jobs }}:**
+
+| Job | {{ t.getting_started.common.function }} |
+|-----|----------|
+| `gcp-vm-start` | {{ t.getting_started.pipeline.job_start_gcp }} |
+| `gcp-vm-stop` | {{ t.getting_started.pipeline.job_stop_gcp }} |
+| `benchmark-*` | {{ t.getting_started.pipeline.job_benchmark }} |
+
+---
+
+## 6. Deployment
+
+### Option A: {{ t.getting_started.deploy.local_k8s }} (Docker Desktop)
+
+**{{ t.getting_started.common.prerequisite }}:** {{ t.getting_started.deploy.k8s_in_docker }}
+
+```bash
+# {{ t.getting_started.deploy.create_ns }}
+kubectl create namespace clarissa
+
+# {{ t.getting_started.deploy.apply }}
+kubectl apply -f k8s/deployment.yaml -n clarissa
+
+# {{ t.getting_started.deploy.check_status }}
+kubectl get pods -n clarissa
+
+# {{ t.getting_started.deploy.view_logs }}
+kubectl logs -f deployment/clarissa -n clarissa
+```
+
+### Option B: GCP Kubernetes (K3s)
+
+**{{ t.getting_started.common.prerequisite }}:** {{ t.getting_started.deploy.gcp_vm_running }} ({{ t.getting_started.common.see }} [Runner Management](runner-management-{{ lang_code }}.md))
+
+```bash
+# 1. {{ t.getting_started.deploy.start_gcp }} (via GitLab {{ t.getting_started.common.or }} CLI)
+gcloud compute instances start gitlab-runner --zone=europe-west3-a
+
+# 2. SSH {{ t.getting_started.deploy.to_vm }}
+gcloud compute ssh gitlab-runner --zone=europe-west3-a
+
+# 3. {{ t.getting_started.deploy.on_vm }}: {{ t.getting_started.deploy.apply }}
+sudo kubectl apply -f /path/to/deployment.yaml -n clarissa
+
+# 4. {{ t.getting_started.deploy.check_status }}
+sudo kubectl get pods -n clarissa
+```
+
+### Option C: Via GitLab CI/CD ({{ t.getting_started.deploy.automatic }})
+
+{{ t.getting_started.deploy.push_main }}
+
+```bash
+git checkout main
+git merge feature/my-feature
+git push origin main
+# → Pipeline {{ t.getting_started.deploy.starts }} → Deployment {{ t.getting_started.deploy.auto }}
+```
+
+---
+
+## 7. {{ t.getting_started.verify.title }}
+
+### {{ t.getting_started.verify.local }}
+
+```bash
+# CLI {{ t.getting_started.verify.works }}?
+clarissa --version
+
+# Tests {{ t.getting_started.verify.green }}?
+pytest --tb=short
+
+# Import {{ t.getting_started.verify.works }}?
+python -c "import clarissa; print('OK')"
+```
+
+### {{ t.getting_started.verify.docker }}
+
+```bash
+# Container {{ t.getting_started.verify.running }}?
+docker ps | grep clarissa
+
+# Logs OK?
+docker logs clarissa
+```
+
+### {{ t.getting_started.verify.k8s }}
+
+```bash
+# Pod {{ t.getting_started.verify.running }}?
+kubectl get pods -n clarissa
+# STATUS {{ t.getting_started.verify.should_be }} "Running"
+
+# Logs OK?
+kubectl logs -f deployment/clarissa -n clarissa
+
+# Service {{ t.getting_started.verify.reachable }}?
+kubectl port-forward svc/clarissa 8080:80 -n clarissa
+# {{ t.getting_started.verify.then }}: http://localhost:8080
+```
+
+### {{ t.getting_started.verify.pipeline }}
+
+1. {{ t.getting_started.common.go_to }}: https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/pipelines
+2. {{ t.getting_started.verify.last_green }} ✅
+3. {{ t.getting_started.verify.on_error }}: {{ t.getting_started.verify.click_red }} → {{ t.getting_started.verify.read_logs }}
+
+---
+
+## Troubleshooting
+
+### "clarissa: command not found"
+
+```bash
+# {{ t.getting_started.trouble.venv_active }}?
+source venv/bin/activate
+
+# {{ t.getting_started.trouble.or_reinstall }}
+pip install -e .
+```
+
+### "docker: command not found"
+
+{{ t.getting_started.trouble.install_docker }}
+
+### "kubectl: connection refused"
+
+```bash
+# Docker Desktop K8s {{ t.getting_started.trouble.enabled }}?
+# Settings → Kubernetes → Enable Kubernetes ✓
+
+# Context {{ t.getting_started.trouble.correct }}?
+kubectl config use-context docker-desktop
+```
+
+### Pipeline failed
+
+1. {{ t.getting_started.verify.click_red }}
+2. {{ t.getting_started.verify.read_logs }}
+3. {{ t.getting_started.trouble.common_causes }}:
+   - {{ t.getting_started.trouble.syntax_error }}
+   - {{ t.getting_started.trouble.missing_deps }}
+   - {{ t.getting_started.trouble.tests_fail }}
+
+### GCP VM {{ t.getting_started.trouble.wont_start }}
+
+```bash
+# {{ t.getting_started.trouble.check_perms }}
+gcloud auth list
+
+# VM Status
+gcloud compute instances describe gitlab-runner --zone=europe-west3-a
+```
+
+---
+
+## {{ t.getting_started.next.title }}
+
+| {{ t.getting_started.next.want }} | {{ t.getting_started.next.where }} |
+|-------------------|--------------|
+| {{ t.getting_started.next.contribute }} | [Contributing Guide](contributing-{{ lang_code }}.md) |
+| {{ t.getting_started.next.workflow }} | [Interactive Slides](guides/contributing/workflow-slides-{{ lang_code }}.html) |
+| {{ t.getting_started.next.architecture }} | [Architecture Overview](architecture/README.md) |
+| {{ t.getting_started.next.ci }} | [CI Guide](ci/README.md) |
+| {{ t.getting_started.next.runners }} | [Runner Management](runner-management-{{ lang_code }}.md) |
+
+---
+
+## {{ t.getting_started.help.title }}
+
+- **{{ t.getting_started.help.questions }}** → {{ t.getting_started.help.create_issue }}
+- **{{ t.getting_started.help.bug }}** → {{ t.getting_started.help.issue_label }} `bug`
+- **{{ t.getting_started.help.feature }}** → {{ t.getting_started.help.issue_label }} `enhancement`
+
+---
+
+*{{ t.getting_started.last_updated }}: {{ t.getting_started.date }}*
