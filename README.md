@@ -10,9 +10,13 @@ It is **explicitly documented and versioned**.
 
 ---
 
-## 🚀 New Contributor?
+## 🚀 Neu hier?
 
-**[▶️ Start the Interactive Workflow Guide](https://irena-40cc50.gitlab.io/guides/contributing/)** — Learn our GitLab workflow in 5 minutes!
+| Was du willst | Wo hin |
+|---------------|--------|
+| **CLARISSA installieren & starten** | **[→ Getting Started Guide](https://irena-40cc50.gitlab.io/getting-started/)** |
+| GitLab Workflow lernen | [→ Interactive Slides](https://irena-40cc50.gitlab.io/guides/contributing/) |
+| Code beitragen | [→ Contributing Guide](https://irena-40cc50.gitlab.io/contributing/) |
 
 ---
 
@@ -22,13 +26,13 @@ It is **explicitly documented and versioned**.
 
 | Quick Links | |
 |-------------|---|
+| [🚀 Getting Started](https://irena-40cc50.gitlab.io/getting-started/) | Installation, erster Start, Deployment |
 | [Contributing Guide](https://irena-40cc50.gitlab.io/contributing/) | How to contribute |
 | [Workflow Slides](https://irena-40cc50.gitlab.io/guides/contributing/) | Interactive 5-min intro |
-| [Project Management](https://irena-40cc50.gitlab.io/guides/project-management/) | Issues, Labels, Boards |
+| [Runner Management](https://irena-40cc50.gitlab.io/runner-management/) | Start/Stop Runner & GCP VM |
 | [CI Guide](https://irena-40cc50.gitlab.io/ci/) | How to read CI results |
 | [ADRs](https://irena-40cc50.gitlab.io/architecture/adr/) | Architecture decisions |
-| [Publications](https://irena-40cc50.gitlab.io/publications/) | Research papers (IJACSA 2026) |
-| [Billing](https://irena-40cc50.gitlab.io/guides/billing/) | Time tracking & invoicing |
+| [Publications](https://irena-40cc50.gitlab.io/publications/) | Research papers (SPE Europe 2026) |
 
 ---
 
@@ -61,3 +65,42 @@ docs/simulators/        # Simulator adapter matrix and notes
 scripts/                # Operational and CI tooling
 tests/                  # Contract tests, golden CLI tests, governance checks
 ```
+
+---
+
+## Quick Start
+
+```bash
+# Clone
+git clone https://gitlab.com/wolfram_laube/blauweiss_llc/irena.git clarissa
+cd clarissa
+
+# Install
+python3 -m venv venv && source venv/bin/activate
+pip install -e ".[dev]"
+
+# Test
+pytest
+
+# Run
+clarissa --help
+```
+
+**[→ Detailed instructions in Getting Started Guide](https://irena-40cc50.gitlab.io/getting-started/)**
+
+---
+
+## CI/CD Pipeline
+
+| Job | Description |
+|-----|-------------|
+| `tests` | Run pytest |
+| `pages` | Deploy documentation |
+| `gcp-vm-start` | Start GCP Runner (manual) |
+| `gcp-vm-stop` | Stop GCP Runner (manual) |
+
+**[→ Full CI Guide](https://irena-40cc50.gitlab.io/ci/)**
+
+---
+
+*Built by BlauWeiss LLC*
