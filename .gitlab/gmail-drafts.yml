@@ -10,7 +10,7 @@ gmail:create-drafts:
     - when: manual
       allow_failure: true
   script:
-    - pip3 install requests --quiet --user || true
+    - pip3 install requests --quiet --break-system-packages || pip3 install requests --quiet --user || true
     - |
       python3 - << 'PYSCRIPT'
       import os, json, base64, requests
