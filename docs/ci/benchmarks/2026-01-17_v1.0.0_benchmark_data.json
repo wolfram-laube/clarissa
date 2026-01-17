@@ -1,0 +1,102 @@
+{
+  "metadata": {
+    "pipeline_id": 2268913615,
+    "timestamp": "2026-01-17T15:22:03Z",
+    "version": "1.0.0",
+    "git_ref": "main",
+    "total_runners": 12,
+    "successful_runners": 11
+  },
+  "results": [
+    {
+      "machine": "Mac #1",
+      "executor": "shell",
+      "job": "benchmark-mac-group-shell",
+      "duration_s": 20.8,
+      "status": "success"
+    },
+    {
+      "machine": "Mac #1",
+      "executor": "docker",
+      "job": "benchmark-mac-docker",
+      "duration_s": 46.9,
+      "status": "success"
+    },
+    {
+      "machine": "Mac #1",
+      "executor": "k8s",
+      "job": "benchmark-mac-k8s",
+      "duration_s": 45.3,
+      "status": "success"
+    },
+    {
+      "machine": "Mac #2",
+      "executor": "shell",
+      "job": "benchmark-mac2-shell",
+      "duration_s": 7.2,
+      "status": "success"
+    },
+    {
+      "machine": "Mac #2",
+      "executor": "docker",
+      "job": "benchmark-mac2-docker",
+      "duration_s": 16.4,
+      "status": "success"
+    },
+    {
+      "machine": "Mac #2",
+      "executor": "k8s",
+      "job": "benchmark-mac2-k8s",
+      "duration_s": 18.9,
+      "status": "success"
+    },
+    {
+      "machine": "Linux Yoga",
+      "executor": "shell",
+      "job": "benchmark-linux-shell",
+      "duration_s": 5.7,
+      "status": "success"
+    },
+    {
+      "machine": "Linux Yoga",
+      "executor": "docker",
+      "job": "benchmark-linux-docker",
+      "duration_s": 8.4,
+      "status": "success"
+    },
+    {
+      "machine": "Linux Yoga",
+      "executor": "k8s",
+      "job": "benchmark-linux-k8s",
+      "duration_s": 11.4,
+      "status": "success"
+    },
+    {
+      "machine": "GCP VM",
+      "executor": "shell",
+      "job": "benchmark-gcp-shell",
+      "duration_s": 6.4,
+      "status": "success"
+    },
+    {
+      "machine": "GCP VM",
+      "executor": "docker",
+      "job": "benchmark-gcp-docker",
+      "duration_s": 27.0,
+      "status": "success"
+    },
+    {
+      "machine": "GCP VM",
+      "executor": "k8s",
+      "job": "benchmark-gcp-k8s",
+      "duration_s": 12.8,
+      "status": "failed",
+      "error": "K8s not configured on GCP VM"
+    }
+  ],
+  "test_spec": {
+    "cpu_test": "Prime count to 100,000",
+    "disk_test": "50MB sequential write",
+    "python_version": "3.11"
+  }
+}
