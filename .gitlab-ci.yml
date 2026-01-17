@@ -1299,8 +1299,18 @@ gdrive-list:
       from google.oauth2 import service_account
       from googleapiclient.discovery import build
       
-      sa_key = json.loads(os.environ.get("GOOGLE_SERVICE_ACCOUNT_KEY", "{}"))
+      # GOOGLE_SERVICE_ACCOUNT_KEY is a FILE type variable - read from file path
+      sa_key_path = os.environ.get("GOOGLE_SERVICE_ACCOUNT_KEY", "")
       folder_id = os.environ.get("GOOGLE_DRIVE_FOLDER_ID", "1qh0skTeyRNs4g9KwAhpd3J8Yj_XENIFs")
+      
+      print(f"SA Key path: {sa_key_path}")
+      print(f"Folder ID: {folder_id}")
+      
+      # Read service account key from file
+      with open(sa_key_path, 'r') as f:
+          sa_key = json.load(f)
+      
+      print(f"Loaded SA: {sa_key.get('client_email')}")
       
       credentials = service_account.Credentials.from_service_account_info(
           sa_key, scopes=["https://www.googleapis.com/auth/drive.readonly"]
@@ -1314,7 +1324,7 @@ gdrive-list:
       ).execute()
       
       files = results.get("files", [])
-      print(f"📁 Found {len(files)} files in Google Drive:")
+      print(f"\n📁 Found {len(files)} files in Google Drive:")
       print("-" * 60)
       for f in files:
           size = f.get("size", "-")
