@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **GitLab Runner Infrastructure: 12/12 Runners Operational** (2026-01-17)
+  - K3s Kubernetes cluster on GCP VM configured for GitLab Runner
+  - New `.gitlab/k3s-setup.yml` with installation and management jobs
+  - All 12 runners now functional: 4 machines × 3 executors (shell, docker, k8s)
+  - Machines: Mac #1, Mac #2, Linux Yoga, GCP VM
+
+- **Automated Benchmark Report Generation** (2026-01-17)
+  - New `benchmark-report` job in `.gitlab/benchmark.yml`
+  - Generates 4 PNG charts: by_machine, by_executor, detailed, heatmap
+  - Uses matplotlib for visualization
+  - Collects timing data from all 12 benchmark jobs via GitLab API
+
+- **LLM-Powered Email Generation** (2026-01-17)
+  - New `scripts/ci/send_benchmark_email.py` with OpenAI/Anthropic support
+  - `LLM_PROVIDER` variable: "openai" (default) or "anthropic"
+  - `EMAIL_LANGUAGE` variable: "de" (default), "en", "es", "fr"
+  - GPT-4o-mini / Claude-3.5-haiku analyze benchmark data and generate contextual summaries
+  - Fallback to static template if LLM unavailable
+
+- **Gmail Draft Automation Enhancements** (2026-01-17)
+  - PNG chart attachments in benchmark report emails
+  - Proper UTF-8 encoding for German umlauts (ü, ö, ä, ß)
+  - MIME multipart email construction with inline images
+
 ### Fixed
 - **Billing System: Time Entry Parsing**
   - Switched from REST Notes API to GraphQL API for time tracking
@@ -19,6 +44,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Workflow rules now support `schedule` pipeline source
   - Manual trigger available with `GENERATE_TIMESHEETS=true` variable
 
+- **GCP K8s Runner: Kubeconfig Permissions** (2026-01-17)
+  - K3s kubeconfig now properly configured for gitlab-runner user
+  - Explicit `--kubeconfig` path resolves permission issues
+  - Runner can now execute Kubernetes jobs on GCP VM
 
 ### Added
 - **Intent Taxonomy** (`src/clarissa/agent/intents/taxonomy.json`)
