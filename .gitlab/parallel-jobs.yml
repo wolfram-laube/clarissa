@@ -6,14 +6,14 @@
 #   - shell-any: All 4 shell runners  
 #   - docker-any: All 4 docker runners
 #   - k8s-any: All 4 k8s runners
-#   - mac-any: All 6 Mac runners (Mac #1 + Mac #2)
+#   - mac-any: All 6 Mac runners
 #   - linux-any: All 3 Linux Yoga runners
 #   - gcp-any: All 3 GCP runners
 #
 # See: ADR-016
 
 # =============================================================================
-# Job Templates (extend these in your jobs)
+# Job Templates
 # =============================================================================
 
 .parallel-shell:
@@ -28,37 +28,30 @@
   image: python:3.11-slim
 
 # =============================================================================
-# Load Balancing Test Job
+# Load Balancing Test - 12 parallel jobs
 # =============================================================================
 
 loadbalancing-test:
   stage: test
   rules:
     - if: $LOADBALANCING_TEST == "true"
-      when: always
-    - when: manual
-      allow_failure: true
   tags: [any-runner]
   parallel: 12
   script:
     - echo "============================================"
     - echo "Job $CI_NODE_INDEX of $CI_NODE_TOTAL"
     - echo "Runner - $CI_RUNNER_DESCRIPTION"
-    - echo "Tags - $CI_RUNNER_TAGS"
     - hostname
     - echo "============================================"
 
 # =============================================================================
-# Parallel Processing Examples
+# Parallel Fan-Out Tests
 # =============================================================================
 
-parallel-shell-fanout:
+parallel-shell-test:
   stage: test
   rules:
     - if: $PARALLEL_SHELL == "true"
-      when: always
-    - when: manual
-      allow_failure: true
   tags: [shell-any]
   parallel: 4
   script:
@@ -66,32 +59,24 @@ parallel-shell-fanout:
     - python3 --version
     - uname -a
 
-parallel-docker-fanout:
+parallel-docker-test:
   stage: test
   rules:
     - if: $PARALLEL_DOCKER == "true"
-      when: always
-    - when: manual
-      allow_failure: true
   tags: [docker-any]
   image: python:3.11-slim
   parallel: 4
   script:
     - echo "Docker job $CI_NODE_INDEX on $CI_RUNNER_DESCRIPTION"
     - python3 --version
-    - cat /etc/os-release | head -3
 
-parallel-k8s-fanout:
+parallel-k8s-test:
   stage: test
   rules:
     - if: $PARALLEL_K8S == "true"
-      when: always
-    - when: manual
-      allow_failure: true
   tags: [k8s-any]
   image: python:3.11-slim
   parallel: 4
   script:
     - echo "K8s job $CI_NODE_INDEX on $CI_RUNNER_DESCRIPTION"
     - python3 --version
-    - cat /etc/os-release | head -3
