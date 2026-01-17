@@ -1394,3 +1394,24 @@ deploy-gdrive-proxy:
     - sleep 3
     - curl -s http://localhost:8080/health || true
     - echo "✅ GDrive Proxy deployed! Access at http://35.198.98.28:8080"
+# Documentation preview for feature branches
+docs:preview:
+  stage: deploy
+  image: python:3.11
+  rules:
+    - if: '$CI_COMMIT_BRANCH != "main"'
+      when: manual
+    - when: never
+  before_script:
+    - pip install mkdocs mkdocs-material pymdown-extensions jinja2 pyyaml mkdocs-jupyter
+  script:
+    - echo "🔨 Building documentation preview..."
+    - python scripts/build_i18n_docs.py || echo "i18n script not critical"
+    - mkdocs build --site-dir public
+    - echo "✅ Documentation built successfully!"
+    - echo "📦 Download artifacts to preview locally"
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 week
+    name: "docs-preview-${CI_COMMIT_SHORT_SHA}"
