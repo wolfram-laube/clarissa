@@ -1,1 +1,38 @@
-Z2NwOmZpeC1zaGVsbC1ydW5uZXI6CiAgc3RhZ2U6IC5wcmUKICB0YWdzOiBbbWFjLWdyb3VwLXNoZWxsXQogIHNjcmlwdDoKICAgIC0gZWNobyAiRml4aW5nIEdDUCBTaGVsbCBSdW5uZXIuLi4iCiAgICAtIHwKICAgICAgZ2Nsb3VkIGNvbXB1dGUgc3NoIGdpdGxhYi1ydW5uZXIgLS16b25lPWV1cm9wZS13ZXN0My1hIDw8ICdSRU1PVEVfU0NSSVBUJwogICAgICAgIHN1ZG8gbWtkaXIgLXAgL2J1aWxkcyAvY2FjaGUKICAgICAgICBzdWRvIGNobW9kIDc3NyAvYnVpbGRzIC9jYWNoZQogICAgICAgIAogICAgICAgICMgU2hvdyBjdXJyZW50IGNvbmZpZwogICAgICAgIGVjaG8gIj09PSBDdXJyZW50IGNvbmZpZyA9PT0iCiAgICAgICAgc3VkbyBjYXQgL2V0Yy9naXRsYWItcnVubmVyL2NvbmZpZy50b21sCiAgICAgICAgCiAgICAgICAgIyBDcmVhdGUgZml4ZWQgY29uZmlnIHdpdGggYnVpbGRzX2RpcgogICAgICAgIHN1ZG8gdGVlIC9ldGMvZ2l0bGFiLXJ1bm5lci9jb25maWcudG9tbC5uZXcgPDwgJ0NPTkZJR0VPRicKICAgICAgY29uY3VycmVudCA9IDEKICAgICAgY2hlY2tfaW50ZXJ2YWwgPSAwCiAgICAgIHNodXRkb3duX3RpbWVvdXQgPSAwCiAgICAgIAogICAgICBbc2Vzc2lvbl9zZXJ2ZXJdCiAgICAgICAgc2Vzc2lvbl90aW1lb3V0ID0gMTgwMAogICAgICAKICAgICAgW1tydW5uZXJzXV0KICAgICAgICBuYW1lID0gIkdDUCBTaGVsbCBSdW5uZXIiCiAgICAgICAgdXJsID0gImh0dHBzOi8vZ2l0bGFiLmNvbSIKICAgICAgICB0b2tlbiA9ICJnbHJ0LUtLUERBZG0xbDE0VHY2WnB4VlRnaFc4Nk1RcHdPakU1ZW5sb2VRcDBPak1LZFRwemVHTjRGdy4wMS4xaTFna3k0aWgiCiAgICAgICAgZXhlY3V0b3IgPSAic2hlbGwiCiAgICAgICAgYnVpbGRzX2RpciA9ICIvYnVpbGRzIgogICAgICAgIGNhY2hlX2RpciA9ICIvY2FjaGUiCiAgICAgICAgW3J1bm5lcnMuY2FjaGVdCiAgICAgICAgICBNYXhVcGxvYWRlZEFyY2hpdmVTaXplID0gMAogICAgICAKICAgICAgW1tydW5uZXJzXV0KICAgICAgICBuYW1lID0gIkdDUCBLOHMgUnVubmVyIgogICAgICAgIHVybCA9ICJodHRwczovL2dpdGxhYi5jb20iCiAgICAgICAgdG9rZW4gPSAiZ2xydC02N1lPYVBVNnAyT1dfaDd2b3BmVE9HODZNUXB3T2pFNWVubG9lUXAwT2pNS2RUcHplR040RncuMDEuMWkweHhieDN2IgogICAgICAgIGV4ZWN1dG9yID0gImt1YmVybmV0ZXMiCiAgICAgICAgW3J1bm5lcnMuY2FjaGVdCiAgICAgICAgICBNYXhVcGxvYWRlZEFyY2hpdmVTaXplID0gMAogICAgICAgIFtydW5uZXJzLmt1YmVybmV0ZXNdCiAgICAgICAgICBuYW1lc3BhY2UgPSAiZ2l0bGFiLXJ1bm5lciIKICAgICAgICAgIGltYWdlID0gInB5dGhvbjozLjExLXNsaW0iCiAgICAgIENPTkZJR0VPRgogICAgICAgIAogICAgICAgIHN1ZG8gbXYgL2V0Yy9naXRsYWItcnVubmVyL2NvbmZpZy50b21sLm5ldyAvZXRjL2dpdGxhYi1ydW5uZXIvY29uZmlnLnRvbWwKICAgICAgICAKICAgICAgICBlY2hvICI9PT0gTmV3IGNvbmZpZyA9PT0iCiAgICAgICAgc3VkbyBjYXQgL2V0Yy9naXRsYWItcnVubmVyL2NvbmZpZy50b21sCiAgICAgICAgCiAgICAgICAgZWNobyAiPT09IFJlc3RhcnRpbmcgcnVubmVyID09PSIKICAgICAgICBzdWRvIHN5c3RlbWN0bCByZXN0YXJ0IGdpdGxhYi1ydW5uZXIKICAgICAgICBzbGVlcCAyCiAgICAgICAgc3VkbyBnaXRsYWItcnVubmVyIHN0YXR1cwogICAgICBSRU1PVEVfU0NSSVBUCiAgcnVsZXM6CiAgICAtIHdoZW46IG1hbnVhbAoKZ2NwOmluc3RhbGwtZG9ja2VyLXJ1bm5lcjoKICBzdGFnZTogLnByZQogIHRhZ3M6IFttYWMtZ3JvdXAtc2hlbGxdCiAgc2NyaXB0OgogICAgLSBlY2hvICJDaGVja2luZyBEb2NrZXIgUnVubmVyIG9uIEdDUCBWTS4uLiIKICAgIC0gfAogICAgICBnY2xvdWQgY29tcHV0ZSBzc2ggZ2l0bGFiLXJ1bm5lckBnaXRsYWItcnVubmVyIC0tem9uZT1ldXJvcGUtd2VzdDMtYSA8PCAnUkVNT1RFX1NDUklQVCcKICAgICAgICBzZXQgLWUKICAgICAgICAKICAgICAgICBlY2hvICI9PT0gQ2hlY2tpbmcgRG9ja2VyID09PSIKICAgICAgICBkb2NrZXIgLS12ZXJzaW9uIHx8IHsgZWNobyAiRG9ja2VyIG5vdCBpbnN0YWxsZWQhIjsgZXhpdCAxOyB9CiAgICAgICAgCiAgICAgICAgZWNobyAiPT09IEN1cnJlbnQgcnVubmVycyA9PT0iCiAgICAgICAgc3VkbyBnaXRsYWItcnVubmVyIGxpc3QKICAgICAgICAKICAgICAgICBlY2hvICI9PT0gRG9ja2VyIHNlcnZpY2Ugc3RhdHVzID09PSIKICAgICAgICBzdWRvIHN5c3RlbWN0bCBzdGF0dXMgZG9ja2VyIC0tbm8tcGFnZXIgfHwgdHJ1ZQogICAgICAgIAogICAgICAgIGVjaG8gIj09PSBDdXJyZW50IGNvbmZpZyA9PT0iCiAgICAgICAgc3VkbyBjYXQgL2V0Yy9naXRsYWItcnVubmVyL2NvbmZpZy50b21sCiAgICAgIFJFTU9URV9TQ1JJUFQKICBydWxlczoKICAgIC0gd2hlbjogbWFudWFsCg==
+gcp:fix-shell-runner:
+  stage: .pre
+  tags: [mac-group-shell]
+  script:
+    - echo "Fixing GCP Shell Runner..."
+    - |
+      gcloud compute ssh gitlab-runner --zone=europe-west3-a << 'REMOTE_SCRIPT'
+        sudo mkdir -p /builds /cache
+        sudo chmod 777 /builds /cache
+        echo "=== Current config ==="
+        sudo cat /etc/gitlab-runner/config.toml
+        echo "=== Restarting runner ==="
+        sudo systemctl restart gitlab-runner
+        sleep 2
+        sudo gitlab-runner status
+      REMOTE_SCRIPT
+  rules:
+    - when: manual
+
+gcp:install-docker-runner:
+  stage: .pre
+  tags: [mac-group-shell]
+  script:
+    - echo "Checking Docker Runner on GCP VM..."
+    - |
+      gcloud compute ssh gitlab-runner@gitlab-runner --zone=europe-west3-a << 'REMOTE_SCRIPT'
+        set -e
+        echo "=== Checking Docker ==="
+        docker --version || { echo "Docker not installed!"; exit 1; }
+        echo "=== Current runners ==="
+        sudo gitlab-runner list
+        echo "=== Docker service status ==="
+        sudo systemctl status docker --no-pager || true
+        echo "=== Current config ==="
+        sudo cat /etc/gitlab-runner/config.toml
+      REMOTE_SCRIPT
+  rules:
+    - when: manual
