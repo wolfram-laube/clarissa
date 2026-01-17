@@ -181,3 +181,33 @@ curl --request POST \
   --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
   "https://gitlab.com/api/v4/projects/77260390/jobs/$JOB_ID/play"
 ```
+
+---
+
+## 9. Benchmark Reports & LLM Email Notifications
+
+CLARISSA supports automated benchmark reporting with AI-generated email summaries.
+
+### Quick Start
+
+```bash
+# Trigger benchmarks with English email notification
+curl --request POST \
+  --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  --header "Content-Type: application/json" \
+  "https://gitlab.com/api/v4/projects/77260390/pipeline" \
+  --data '{"ref":"main","variables":[
+    {"key":"BENCHMARK","value":"true"},
+    {"key":"SEND_BENCHMARK_EMAIL","value":"true"},
+    {"key":"EMAIL_LANGUAGE","value":"en"}
+  ]}'
+```
+
+### Features
+
+- **12-Runner Matrix**: Shell, Docker, K8s across 4 machines
+- **Automated Charts**: 4 PNG visualizations generated per run
+- **LLM-Powered Emails**: OpenAI or Anthropic analyzes results
+- **Multilingual**: German, English, Spanish, French
+
+See [BENCHMARK_HOWTO.md](BENCHMARK_HOWTO.md) for full documentation.
