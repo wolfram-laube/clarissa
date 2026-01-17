@@ -1283,10 +1283,10 @@ doc_merge:generate:
     expire_in: 4 weeks
 
 # ----------------------------
-# Google Drive Proxy Jobs (API triggered)
+# Google Drive Proxy Jobs
 # ----------------------------
 gdrive-list:
-  stage: automation
+  stage: .pre
   tags: [gcp-docker]
   when: manual
   allow_failure: true
