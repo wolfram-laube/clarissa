@@ -1346,8 +1346,10 @@ deploy-gdrive-proxy:
   stage: deploy
   tags:
     - gcp-shell
+  needs: []
   rules:
     - if: $DEPLOY_GDRIVE_PROXY == "true"
+      when: always
   script:
     - echo "🚀 Deploying Google Drive Proxy to GCP VM..."
     - sudo apt-get update && sudo apt-get install -y python3-pip python3-venv
