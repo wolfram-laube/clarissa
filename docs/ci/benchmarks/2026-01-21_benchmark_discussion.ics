@@ -1,0 +1,18 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//CLARISSA//Benchmark Discussion//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+DTSTART;TZID=Europe/Vienna:20260121T210000
+DTEND;TZID=Europe/Vienna:20260121T220000
+DTSTAMP:20260117T153000Z
+UID:clarissa-benchmark-2026-01-17@blauweiss-edv.at
+SUMMARY:CLARISSA - Benchmark Results Discussion
+DESCRIPTION:Diskussion der GitLab Runner Benchmark-Ergebnisse\n\nAgenda:\n- Review der 12-Runner Matrix Performance\n- GCP K8s Konfiguration\n- Next Steps\n\nReport: https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/tree/main/docs/ci/benchmarks
+LOCATION:Remote / Online
+STATUS:CONFIRMED
+ORGANIZER;CN=Wolfram Laube:mailto:wolfram.laube@blauweiss-edv.at
+ATTENDEE;CN=Wolfram Laube;RSVP=TRUE:mailto:wolfram.laube@blauweiss-edv.at
+END:VEVENT
+END:VCALENDAR
