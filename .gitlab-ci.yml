@@ -8,6 +8,7 @@ include:
   - local: '.gitlab/gcp-vm-control.yml'
   - local: '.gitlab/gdrive-upload.yml'
   - local: '.gitlab/k3s-setup.yml'
+  - local: '.gitlab/parallel-jobs.yml'
   - local: 'conference/spe-europe-2026/ci/document-merge.gitlab-ci.yml'
     rules:
       - changes:
