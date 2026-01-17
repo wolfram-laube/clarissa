@@ -15,7 +15,7 @@ gmail:create-drafts:
   script:
     - pip3 install requests --quiet --break-system-packages || pip3 install requests --quiet --user || true
     - |
-      python3 << 'EOF'
+      python3 << 'EOFPY'
       import os, json, base64, requests, sys
 
       CLIENT_ID = os.environ["GMAIL_CLIENT_ID"]
@@ -67,7 +67,7 @@ gmail:create-drafts:
               print(f"Draft {i+1} failed: {resp.text}")
 
       print(f"Created {success}/{len(drafts)} drafts")
-      EOF
+      EOFPY
 
 gmail:benchmark-report:
   stage: .pre
@@ -85,7 +85,7 @@ gmail:benchmark-report:
   script:
     - pip3 install requests --quiet --break-system-packages || pip3 install requests --quiet --user || true
     - |
-      python3 << 'EOF'
+      cat > /tmp/send_benchmark_email.py << 'SCRIPTEOF'
       import os, json, base64, requests, glob
       from email.mime.multipart import MIMEMultipart
       from email.mime.text import MIMEText
@@ -95,7 +95,6 @@ gmail:benchmark-report:
       CLIENT_SECRET = os.environ["GMAIL_CLIENT_SECRET"]
       REFRESH_TOKEN = os.environ["GMAIL_REFRESH_TOKEN"]
 
-      # Get access token
       response = requests.post(
           "https://oauth2.googleapis.com/token",
           data={"client_id": CLIENT_ID, "client_secret": CLIENT_SECRET,
@@ -107,38 +106,39 @@ gmail:benchmark-report:
       access_token = response.json()["access_token"]
       print("Got access token")
 
-      # Build email with attachments
       msg = MIMEMultipart()
       msg["To"] = "wolfram.laube@blauweiss-edv.at"
-      msg["Subject"] = f"[CLARISSA] GitLab Runner Benchmark Report {os.environ.get('CI_PIPELINE_CREATED_AT', '')[:10]}"
+      
+      pipeline_date = os.environ.get("CI_PIPELINE_CREATED_AT", "")[:10]
+      msg["Subject"] = f"[CLARISSA] GitLab Runner Benchmark Report {pipeline_date}"
 
-      # German body with proper umlauts
       body = f"""Hallo Wolfram,
 
-die Benchmark-Ergebnisse für alle 12 GitLab Runner sind verfügbar.
+      die Benchmark-Ergebnisse für alle 12 GitLab Runner sind verfügbar.
 
-Pipeline: {os.environ.get('CI_PIPELINE_URL', 'N/A')}
-Datum: {os.environ.get('CI_PIPELINE_CREATED_AT', 'N/A')[:10]}
+      Pipeline: {os.environ.get("CI_PIPELINE_URL", "N/A")}
+      Datum: {pipeline_date}
 
-Übersicht der Runner:
-• Mac #1: Shell, Docker, Kubernetes
-• Mac #2: Shell, Docker, Kubernetes  
-• Linux Yoga: Shell, Docker, Kubernetes
-• GCP VM: Shell, Docker, Kubernetes
+      Übersicht der Runner:
+      • Mac #1: Shell, Docker, Kubernetes
+      • Mac #2: Shell, Docker, Kubernetes  
+      • Linux Yoga: Shell, Docker, Kubernetes
+      • GCP VM: Shell, Docker, Kubernetes
 
-Die Grafiken sind als Anhänge beigefügt:
-• benchmark_by_machine.png - Vergleich nach Maschine
-• benchmark_by_executor.png - Vergleich nach Executor-Typ
-• benchmark_detailed.png - Detaillierte Einzelergebnisse
-• benchmark_heatmap.png - Heatmap aller Kombinationen
+      Die Grafiken sind als Anhänge beigefügt:
+      • benchmark_by_machine.png – Vergleich nach Maschine
+      • benchmark_by_executor.png – Vergleich nach Executor-Typ
+      • benchmark_detailed.png – Detaillierte Einzelergebnisse
+      • benchmark_heatmap.png – Heatmap aller Kombinationen
 
-Grüße,
-CLARISSA CI/CD Pipeline
-"""
+      Grüße,
+      CLARISSA CI/CD Pipeline
+      """
+      # Remove leading whitespace from each line
+      body = "\n".join(line.strip() for line in body.split("\n"))
 
       msg.attach(MIMEText(body, "plain", "utf-8"))
 
-      # Find and attach PNG files
       png_files = glob.glob("benchmark_reports/*.png") + glob.glob("*.png")
       attached = 0
       for png_path in png_files:
@@ -156,7 +156,6 @@ CLARISSA CI/CD Pipeline
 
       print(f"Attached {attached} images")
 
-      # Encode and create draft
       raw_b64 = base64.urlsafe_b64encode(msg.as_bytes()).decode("utf-8")
 
       resp = requests.post(
@@ -170,4 +169,5 @@ CLARISSA CI/CD Pipeline
       else:
           print(f"Failed: {resp.text}")
           exit(1)
-      EOF
+      SCRIPTEOF
+    - python3 /tmp/send_benchmark_email.py
