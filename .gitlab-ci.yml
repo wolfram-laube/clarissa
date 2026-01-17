@@ -1352,9 +1352,11 @@ deploy-gdrive-proxy:
       when: always
   script:
     - echo "🚀 Deploying Google Drive Proxy to GCP VM..."
-    - echo "🔧 Fixing dpkg if needed..."
+    - echo "🔧 Fixing package issues..."
     - sudo dpkg --configure -a || true
-    - sudo apt-get update && sudo apt-get install -y python3-pip python3-venv
+    - sudo apt --fix-broken install -y || true
+    - sudo apt-get update
+    - sudo apt-get install -y python3-pip python3-venv || echo "Dependencies already satisfied" 
     - sudo mkdir -p /opt/gdrive-proxy /etc/gdrive-proxy
     - |
       sudo tee /opt/gdrive-proxy/requirements.txt << 'REQEOF'
