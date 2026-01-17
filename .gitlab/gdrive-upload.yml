@@ -24,6 +24,7 @@ gdrive:upload-benchmark:
       when: always
     - when: manual
       allow_failure: true
+  needs: []
   variables:
     BENCHMARK_FOLDER_NAME: "Benchmarks"
   script:
@@ -149,6 +150,7 @@ gdrive:sync-files:
       when: always
     - when: manual
       allow_failure: true
+  needs: []
   variables:
     GDRIVE_TARGET_FOLDER: ""  # Optional subfolder name
   script:
