@@ -1,18 +1,21 @@
 # Load Balancing Jobs for GitLab CI/CD
 #
 # Uses generic tags to distribute jobs across available runners.
-# Requires runners to have additional tags configured:
+# Tag hierarchy:
 #   - any-runner: All 12 runners
-#   - shell-any: All 4 shell runners
+#   - shell-any: All 4 shell runners  
 #   - docker-any: All 4 docker runners
 #   - k8s-any: All 4 k8s runners
 #   - mac-any: All 6 Mac runners (Mac #1 + Mac #2)
 #   - linux-any: All 3 Linux Yoga runners
 #   - gcp-any: All 3 GCP runners
 #
-# See: scripts/ci/add_loadbalancing_tags.py
+# See: ADR-016
 
-# Parallel build jobs - GitLab assigns to first available runner
+# =============================================================================
+# Job Templates (extend these in your jobs)
+# =============================================================================
+
 .parallel-shell:
   tags: [shell-any]
 
@@ -24,77 +27,10 @@
   tags: [k8s-any]
   image: python:3.11-slim
 
-# Example: Matrix build across all executors
-parallel-build:
-  stage: build
-  rules:
-    - if: $PARALLEL_BUILD == "true"
-      when: always
-    - when: manual
-      allow_failure: true
-  parallel:
-    matrix:
-      - EXECUTOR: shell
-        RUNNER_TAG: shell-any
-      - EXECUTOR: docker
-        RUNNER_TAG: docker-any
-      - EXECUTOR: k8s
-        RUNNER_TAG: k8s-any
-  tags: ["${RUNNER_TAG}"]
-  script:
-    - echo "Running on $CI_RUNNER_DESCRIPTION"
-    - echo "Executor: $EXECUTOR"
-    - hostname
-    - python3 --version || echo "Python not available (shell runner)"
+# =============================================================================
+# Load Balancing Test Job
+# =============================================================================
 
-# Example: Fan-out parallel processing
-# 8 parallel jobs distributed across shell runners
-parallel-processing:
-  stage: test
-  rules:
-    - if: $PARALLEL_PROCESSING == "true"
-      when: always
-    - when: manual
-      allow_failure: true
-  tags: [shell-any]
-  parallel: 8
-  script:
-    - echo "Job $CI_NODE_INDEX of $CI_NODE_TOTAL"
-    - echo "Runner: $CI_RUNNER_DESCRIPTION"
-    - |
-      python3 << 'EOF'
-      import os
-      import time
-      import random
-      
-      node = int(os.environ.get("CI_NODE_INDEX", 1))
-      total = int(os.environ.get("CI_NODE_TOTAL", 1))
-      
-      # Simulate work
-      work_time = random.uniform(5, 15)
-      print(f"Node {node}/{total}: Processing for {work_time:.1f}s...")
-      time.sleep(work_time)
-      print(f"Node {node}/{total}: Done!")
-      EOF
-
-# Example: Docker builds across all docker runners
-parallel-docker-build:
-  stage: build
-  rules:
-    - if: $PARALLEL_DOCKER_BUILD == "true"
-      when: always
-    - when: manual
-      allow_failure: true
-  tags: [docker-any]
-  image: docker:latest
-  services:
-    - docker:dind
-  parallel: 4
-  script:
-    - echo "Docker build $CI_NODE_INDEX on $CI_RUNNER_DESCRIPTION"
-    - docker version || echo "Docker not available"
-
-# Load test: measure distribution across runners
 loadbalancing-test:
   stage: test
   rules:
@@ -105,26 +41,57 @@ loadbalancing-test:
   tags: [any-runner]
   parallel: 12
   script:
-    - |
-      echo "Job $CI_NODE_INDEX of $CI_NODE_TOTAL"
-      echo "Runner: $CI_RUNNER_DESCRIPTION"
-      echo "Tags: $CI_RUNNER_TAGS"
-      
-      # Record which runner got this job
-      python3 << 'EOF' || true
-      import os
-      import json
-      
-      data = {
-          "node": os.environ.get("CI_NODE_INDEX"),
-          "total": os.environ.get("CI_NODE_TOTAL"),
-          "runner": os.environ.get("CI_RUNNER_DESCRIPTION"),
-          "tags": os.environ.get("CI_RUNNER_TAGS", "").split(","),
-          "job_id": os.environ.get("CI_JOB_ID")
-      }
-      print(json.dumps(data, indent=2))
-      EOF
-  artifacts:
-    paths:
-      - loadbalancing_result_*.json
-    expire_in: 1 day
+    - echo "============================================"
+    - echo "Job $CI_NODE_INDEX of $CI_NODE_TOTAL"
+    - echo "Runner - $CI_RUNNER_DESCRIPTION"
+    - echo "Tags - $CI_RUNNER_TAGS"
+    - hostname
+    - echo "============================================"
+
+# =============================================================================
+# Parallel Processing Examples
+# =============================================================================
+
+parallel-shell-fanout:
+  stage: test
+  rules:
+    - if: $PARALLEL_SHELL == "true"
+      when: always
+    - when: manual
+      allow_failure: true
+  tags: [shell-any]
+  parallel: 4
+  script:
+    - echo "Shell job $CI_NODE_INDEX on $CI_RUNNER_DESCRIPTION"
+    - python3 --version
+    - uname -a
+
+parallel-docker-fanout:
+  stage: test
+  rules:
+    - if: $PARALLEL_DOCKER == "true"
+      when: always
+    - when: manual
+      allow_failure: true
+  tags: [docker-any]
+  image: python:3.11-slim
+  parallel: 4
+  script:
+    - echo "Docker job $CI_NODE_INDEX on $CI_RUNNER_DESCRIPTION"
+    - python3 --version
+    - cat /etc/os-release | head -3
+
+parallel-k8s-fanout:
+  stage: test
+  rules:
+    - if: $PARALLEL_K8S == "true"
+      when: always
+    - when: manual
+      allow_failure: true
+  tags: [k8s-any]
+  image: python:3.11-slim
+  parallel: 4
+  script:
+    - echo "K8s job $CI_NODE_INDEX on $CI_RUNNER_DESCRIPTION"
+    - python3 --version
+    - cat /etc/os-release | head -3
