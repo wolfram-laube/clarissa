@@ -64,15 +64,15 @@ k3s:configure-runner:
       # Create namespace for GitLab Runner
       sudo k3s kubectl create namespace gitlab-runner --dry-run=client -o yaml | sudo k3s kubectl apply -f -
     - |
-      # Copy kubeconfig for gitlab-runner user
+      # Create kubeconfig directory for gitlab-runner user
       echo "Setting up kubeconfig for gitlab-runner..."
       sudo mkdir -p /home/gitlab-runner/.kube
-      sudo cp /etc/rancher/k3s/k3s.yaml /home/gitlab-runner/.kube/config
+    - |
+      # Export kubeconfig with correct server address
+      sudo k3s kubectl config view --raw > /tmp/k3s-config.yaml
+      sudo mv /tmp/k3s-config.yaml /home/gitlab-runner/.kube/config
       sudo chown -R gitlab-runner:gitlab-runner /home/gitlab-runner/.kube
       sudo chmod 600 /home/gitlab-runner/.kube/config
-    - |
-      # Update kubeconfig to use localhost (for runner on same machine)
-      sudo sed -i 's/127.0.0.1/localhost/g' /home/gitlab-runner/.kube/config
     - |
       # Test access as gitlab-runner
       echo "Testing kubectl access..."
@@ -81,6 +81,7 @@ k3s:configure-runner:
       echo ""
       echo "=== Runner Configuration Complete ==="
       echo "The GCP K8s Runner should now be able to use the local K3s cluster."
+
 
 k3s:status:
   stage: .pre
