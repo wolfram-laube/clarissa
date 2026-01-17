@@ -70,7 +70,7 @@ gmail:create-drafts:
       EOFPY
 
 gmail:benchmark-report:
-  stage: .pre
+  stage: deploy
   tags:
     - mac-group-shell
   needs:
