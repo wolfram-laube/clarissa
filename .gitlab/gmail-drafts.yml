@@ -1,11 +1,25 @@
 # Gmail Draft Creation Pipeline
+# 
+# Usage:
+#   1. Via Pipeline Variable: Set DRAFTS_JSON_B64 (base64 encoded JSON array)
+#   2. Via API trigger with variables
+#
+# Draft JSON format (before base64):
+#   [{"to": "email@example.com", "subject": "Subject", "body": "Body text"}]
+#
+# Example API call:
+#   DRAFTS='[{"to":"test@example.com","subject":"Test","body":"Hello"}]'
+#   DRAFTS_B64=$(echo "$DRAFTS" | base64 -w 0)
+#   curl --request POST --header "PRIVATE-TOKEN: $TOKEN" \
+#     "https://gitlab.com/api/v4/projects/$PROJECT/pipeline" \
+#     --form "ref=main" --form "variables[DRAFTS_JSON_B64]=$DRAFTS_B64"
 
 gmail:create-drafts:
   stage: .pre
   tags:
     - mac-group-shell
   rules:
-    - if: $DRAFTS_JSON
+    - if: $DRAFTS_JSON_B64
       when: always
     - when: manual
       allow_failure: true
@@ -13,35 +27,148 @@ gmail:create-drafts:
     - pip3 install requests --quiet --break-system-packages || pip3 install requests --quiet --user || true
     - |
       python3 - << 'PYSCRIPT'
-      import os, json, base64, requests
+      import os, json, base64, requests, sys
 
       CLIENT_ID = os.environ["GMAIL_CLIENT_ID"]
       CLIENT_SECRET = os.environ["GMAIL_CLIENT_SECRET"]
       REFRESH_TOKEN = os.environ["GMAIL_REFRESH_TOKEN"]
-      DRAFTS_JSON = os.environ.get("DRAFTS_JSON", "[]")
+      DRAFTS_B64 = os.environ.get("DRAFTS_JSON_B64", "")
 
+      # Decode base64 to get JSON
+      if not DRAFTS_B64:
+          print("No DRAFTS_JSON_B64 provided, exiting.")
+          sys.exit(0)
+
+      try:
+          drafts_json = base64.b64decode(DRAFTS_B64).decode('utf-8')
+          drafts = json.loads(drafts_json)
+          print(f"Decoded {len(drafts)} draft(s) from base64")
+      except Exception as e:
+          print(f"Error decoding DRAFTS_JSON_B64: {e}")
+          sys.exit(1)
+
+      # Get OAuth token
+      response = requests.post(
+          "https://oauth2.googleapis.com/token",
+          data={"client_id": CLIENT_ID, "client_secret": CLIENT_SECRET,
+                "refresh_token": REFRESH_TOKEN, "grant_type": "refresh_token"}
+      )
+      if response.status_code != 200:
+          print(f"Failed to get token: {response.text}")
+          sys.exit(1)
+      access_token = response.json()["access_token"]
+      print("✓ Got access token")
+
+      # Create drafts
+      success_count = 0
+      for i, draft in enumerate(drafts):
+          to_addr = draft.get("to", "")
+          subject = draft.get("subject", "")
+          body = draft.get("body", "")
+          cc = draft.get("cc", "")
+          
+          # Build email headers
+          headers = [
+              f"From: wolfram.laube@blauweiss-edv.at",
+              f"To: {to_addr}",
+              f"Subject: {subject}",
+              "Content-Type: text/plain; charset=utf-8",
+              "MIME-Version: 1.0"
+          ]
+          if cc:
+              headers.insert(2, f"Cc: {cc}")
+          
+          email = "\r\n".join(headers) + "\r\n\r\n" + body
+          raw = base64.urlsafe_b64encode(email.encode()).decode()
+          
+          resp = requests.post(
+              "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
+              headers={"Authorization": f"Bearer {access_token}"},
+              json={"message": {"raw": raw}}
+          )
+          
+          if resp.status_code == 200:
+              draft_id = resp.json().get("id", "unknown")
+              print(f"  ✓ Draft {i+1}: Created (ID: {draft_id}) - {subject[:50]}")
+              success_count += 1
+          else:
+              print(f"  ✗ Draft {i+1}: FAILED ({resp.status_code}) - {subject[:50]}")
+              print(f"    Error: {resp.text[:200]}")
+
+      print(f"\n{'='*40}")
+      print(f"Created {success_count}/{len(drafts)} drafts successfully")
+      if success_count < len(drafts):
+          sys.exit(1)
+      PYSCRIPT
+
+# Convenience job for benchmark report emails
+gmail:benchmark-report:
+  stage: .pre
+  tags:
+    - mac-group-shell
+  rules:
+    - if: $BENCHMARK_EMAIL == "true"
+      when: always
+    - when: manual
+      allow_failure: true
+  variables:
+    BENCHMARK_TO: "wolfram.laube@blauweiss-edv.at"
+    BENCHMARK_SUBJECT: "[CLARISSA] GitLab Runner Benchmark Report"
+  script:
+    - pip3 install requests --quiet --break-system-packages || pip3 install requests --quiet --user || true
+    - |
+      python3 - << 'PYSCRIPT'
+      import os, json, base64, requests, sys
+      from datetime import datetime
+
+      CLIENT_ID = os.environ["GMAIL_CLIENT_ID"]
+      CLIENT_SECRET = os.environ["GMAIL_CLIENT_SECRET"]
+      REFRESH_TOKEN = os.environ["GMAIL_REFRESH_TOKEN"]
+      TO = os.environ.get("BENCHMARK_TO", "wolfram.laube@blauweiss-edv.at")
+      SUBJECT = os.environ.get("BENCHMARK_SUBJECT", "[CLARISSA] Benchmark Report")
+      PIPELINE_ID = os.environ.get("CI_PIPELINE_ID", "unknown")
+      PIPELINE_URL = os.environ.get("CI_PIPELINE_URL", "")
+      
+      # Build email body
+      body = f"""Hallo,
+
+der GitLab Runner Benchmark wurde ausgeführt.
+
+Pipeline: {PIPELINE_URL}
+Zeitpunkt: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+Report im Repository:
+https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/tree/main/docs/ci/benchmarks
+
+Beste Grüße,
+CLARISSA CI/CD
+
+---
+Automatisch generiert
+"""
+
+      # Get token
       response = requests.post(
           "https://oauth2.googleapis.com/token",
           data={"client_id": CLIENT_ID, "client_secret": CLIENT_SECRET,
                 "refresh_token": REFRESH_TOKEN, "grant_type": "refresh_token"}
       )
       access_token = response.json()["access_token"]
-      print("Got access token")
+      print("✓ Got access token")
 
-      drafts = json.loads(DRAFTS_JSON) if DRAFTS_JSON else []
-      print(f"Creating {len(drafts)} drafts...")
-
-      for i, draft in enumerate(drafts):
-          to_addr = draft.get("to", "")
-          subject = draft.get("subject", "")
-          body = draft.get("body", "")
-          email = f"From: wolfram.laube@blauweiss-edv.at\r\nTo: {to_addr}\r\nSubject: {subject}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n{body}"
-          raw = base64.urlsafe_b64encode(email.encode()).decode()
-          resp = requests.post(
-              "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
-              headers={"Authorization": f"Bearer {access_token}"},
-              json={"message": {"raw": raw}}
-          )
-          status = "OK" if resp.status_code == 200 else f"FAIL {resp.status_code}"
-          print(f"  Draft {i+1}: {status} - {subject[:50]}")
+      # Create draft
+      email = f"From: wolfram.laube@blauweiss-edv.at\r\nTo: {TO}\r\nSubject: {SUBJECT}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n{body}"
+      raw = base64.urlsafe_b64encode(email.encode()).decode()
+      
+      resp = requests.post(
+          "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
+          headers={"Authorization": f"Bearer {access_token}"},
+          json={"message": {"raw": raw}}
+      )
+      
+      if resp.status_code == 200:
+          print(f"✓ Benchmark report draft created")
+      else:
+          print(f"✗ Failed: {resp.text}")
+          sys.exit(1)
       PYSCRIPT
