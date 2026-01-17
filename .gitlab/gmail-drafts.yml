@@ -139,7 +139,8 @@ gmail:benchmark-report:
 
       msg.attach(MIMEText(body, "plain", "utf-8"))
 
-      png_files = glob.glob("benchmark_reports/*.png") + glob.glob("*.png")
+      # Look in the repository's benchmark directory
+      png_files = glob.glob("docs/ci/benchmarks/*.png") + glob.glob("benchmark_reports/*.png") + glob.glob("*.png")
       attached = 0
       for png_path in png_files:
           try:
