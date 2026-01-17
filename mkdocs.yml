@@ -65,7 +65,8 @@ nav:
 
   - "📓 Tutorials":
     - Overview: tutorials/index.md
-    - Reservoir Basics: tutorials/reservoir-basics.ipynb
+    - Reservoir Basics: tutorials/reservoir-basics.md
+    - Code Examples: tutorials/reservoir-basics-code.ipynb
 
   - Architecture:
     - Overview: architecture/README.md
