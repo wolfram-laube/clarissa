@@ -66,6 +66,8 @@ nav:
       - ADR-011 OPM Flow Integration: architecture/adr/ADR-011-opm-flow-integration.md
       - ADR-012 Container Registry K8s Strategy: architecture/adr/ADR-012-container-registry-k8s-strategy.md
       - ADR-013 i18n Architecture: architecture/adr/ADR-013-i18n-architecture.md
+      - ADR-014 LLM Document Merge: architecture/adr/ADR-014-llm-document-merge.md
+      - ADR-015 LLM CI Notifications: architecture/adr/ADR-015-llm-ci-notifications.md
 
   - Guides:
     - Overview: guides/index.md
