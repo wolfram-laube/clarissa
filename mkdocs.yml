@@ -68,6 +68,7 @@ nav:
       - ADR-013 i18n Architecture: architecture/adr/ADR-013-i18n-architecture.md
       - ADR-014 LLM Document Merge: architecture/adr/ADR-014-llm-document-merge.md
       - ADR-015 LLM CI Notifications: architecture/adr/ADR-015-llm-ci-notifications.md
+      - ADR-016 Runner Load Balancing: architecture/adr/ADR-016-runner-load-balancing.md
 
   - Guides:
     - Overview: guides/index.md
