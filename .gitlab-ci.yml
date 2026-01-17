@@ -1338,3 +1338,51 @@ gdrive-list:
     paths:
       - gdrive_files.json
     expire_in: 1 day
+
+# ============================================================
+# Google Drive Proxy Deployment
+# ============================================================
+deploy-gdrive-proxy:
+  stage: deploy
+  tags:
+    - gcp-shell
+  rules:
+    - if: $DEPLOY_GDRIVE_PROXY == "true"
+  script:
+    - echo "🚀 Deploying Google Drive Proxy to GCP VM..."
+    - sudo apt-get update && sudo apt-get install -y python3-pip python3-venv
+    - sudo mkdir -p /opt/gdrive-proxy /etc/gdrive-proxy
+    - |
+      sudo tee /opt/gdrive-proxy/requirements.txt << 'REQEOF'
+      flask
+      google-api-python-client
+      google-auth
+      REQEOF
+    - sudo python3 -m venv /opt/gdrive-proxy/venv
+    - sudo /opt/gdrive-proxy/venv/bin/pip install -r /opt/gdrive-proxy/requirements.txt
+    - cat scripts/gdrive_proxy.py | sudo tee /opt/gdrive-proxy/gdrive_proxy.py
+    - sudo chmod +x /opt/gdrive-proxy/gdrive_proxy.py
+    - echo "$GOOGLE_SERVICE_ACCOUNT_KEY" | sudo tee /etc/gdrive-proxy/sa-key.json > /dev/null
+    - sudo chmod 600 /etc/gdrive-proxy/sa-key.json
+    - |
+      sudo tee /etc/systemd/system/gdrive-proxy.service << 'SVCEOF'
+      [Unit]
+      Description=Google Drive API Proxy
+      After=network.target
+      
+      [Service]
+      Type=simple
+      Environment=GOOGLE_APPLICATION_CREDENTIALS=/etc/gdrive-proxy/sa-key.json
+      ExecStart=/opt/gdrive-proxy/venv/bin/python /opt/gdrive-proxy/gdrive_proxy.py
+      Restart=always
+      RestartSec=5
+      
+      [Install]
+      WantedBy=multi-user.target
+      SVCEOF
+    - sudo systemctl daemon-reload
+    - sudo systemctl enable gdrive-proxy
+    - sudo systemctl restart gdrive-proxy
+    - sleep 3
+    - curl -s http://localhost:8080/health || true
+    - echo "✅ GDrive Proxy deployed! Access at http://35.198.98.28:8080"
