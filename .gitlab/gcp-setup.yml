@@ -1,57 +1,32 @@
-gcp:fix-shell-runner:
+gcp:install-docker-runner:
   stage: .pre
   tags: [mac-group-shell]
   script:
-    - echo "Fixing GCP Shell Runner..."
+    - echo "Installing Docker Runner on GCP VM..."
     - |
-      gcloud compute ssh gitlab-runner --zone=europe-west3-a << 'REMOTE_SCRIPT'
-        sudo mkdir -p /builds /cache
-        sudo chmod 777 /builds /cache
+      gcloud compute ssh gitlab-runner@gitlab-runner --zone=europe-west3-a << 'REMOTE_SCRIPT'
+        set -e
         
-        # Show current config
-        echo "=== Current config ==="
-        sudo cat /etc/gitlab-runner/config.toml
+        echo "=== Checking Docker ==="
+        docker --version || { echo "Docker not installed!"; exit 1; }
         
-        # Create fixed config with builds_dir
-        sudo tee /etc/gitlab-runner/config.toml.new << 'CONFIGEOF'
-      concurrent = 1
-      check_interval = 0
-      shutdown_timeout = 0
-      
-      [session_server]
-        session_timeout = 1800
-      
-      [[runners]]
-        name = "GCP Shell Runner"
-        url = "https://gitlab.com"
-        token = "glrt-KKPDAdm1l14Tv6ZpxVTghW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1gky4ih"
-        executor = "shell"
-        builds_dir = "/builds"
-        cache_dir = "/cache"
-        [runners.cache]
-          MaxUploadedArchiveSize = 0
-      
-      [[runners]]
-        name = "GCP K8s Runner"
-        url = "https://gitlab.com"
-        token = "glrt-67YOaPU6p2OW_h7vopfTOG86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0xxbx3v"
-        executor = "kubernetes"
-        [runners.cache]
-          MaxUploadedArchiveSize = 0
-        [runners.kubernetes]
-          namespace = "gitlab-runner"
-          image = "python:3.11-slim"
-      CONFIGEOF
+        echo "=== Getting registration token ==="
+        # We need to register a new runner
         
-        sudo mv /etc/gitlab-runner/config.toml.new /etc/gitlab-runner/config.toml
+        echo "=== Current runners ==="
+        sudo gitlab-runner list
         
-        echo "=== New config ==="
-        sudo cat /etc/gitlab-runner/config.toml
+        echo "=== Checking if Docker runner already exists ==="
+        if sudo gitlab-runner list 2>&1 | grep -q "Docker"; then
+          echo "Docker runner already configured"
+        else
+          echo "Docker runner not found, needs registration"
+          echo "Please run manually on GCP VM:"
+          echo "sudo gitlab-runner register --url https://gitlab.com --token <TOKEN> --executor docker --docker-image python:3.11-slim --description 'GCP Docker Runner'"
+        fi
         
-        echo "=== Restarting runner ==="
-        sudo systemctl restart gitlab-runner
-        sleep 2
-        sudo gitlab-runner status
+        echo "=== Docker status ==="
+        sudo systemctl status docker --no-pager || true
       REMOTE_SCRIPT
   rules:
     - when: manual
