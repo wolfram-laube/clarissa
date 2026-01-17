@@ -1,6 +1,6 @@
 # Google Drive Upload Pipeline for Benchmark Reports
 #
-# Uploads benchmark reports to Google Drive
+# Supports both regular folders AND Shared Drives
 # Uses Service Account: claude-assistant@myk8sproject-207017.iam.gserviceaccount.com
 
 .gdrive_base:
@@ -32,7 +32,6 @@ gdrive:upload-benchmark:
       from googleapiclient.http import MediaFileUpload
       from googleapiclient.errors import HttpError
 
-      # Config
       SA_KEY_PATH = os.environ.get("GOOGLE_SERVICE_ACCOUNT_KEY", "")
       ROOT_FOLDER_ID = os.environ.get("GOOGLE_DRIVE_FOLDER_ID", "1qh0skTeyRNs4g9KwAhpd3J8Yj_XENIFs")
       BENCHMARK_FOLDER = os.environ.get("BENCHMARK_FOLDER_NAME", "Benchmarks")
@@ -41,27 +40,50 @@ gdrive:upload-benchmark:
       print(f"Root Folder ID: {ROOT_FOLDER_ID}")
       print(f"Subfolder: {BENCHMARK_FOLDER}")
 
-      # Load service account
       with open(SA_KEY_PATH, 'r') as f:
           sa_key = json.load(f)
       print(f"Service Account: {sa_key.get('client_email')}")
 
+      # Full drive scope for Shared Drives
       credentials = service_account.Credentials.from_service_account_info(
-          sa_key, scopes=["https://www.googleapis.com/auth/drive.file"]
+          sa_key, scopes=["https://www.googleapis.com/auth/drive"]
       )
       service = build("drive", "v3", credentials=credentials)
+
+      # Check if this is a Shared Drive
+      is_shared_drive = False
+      try:
+          # Try to get the folder - use supportsAllDrives for Shared Drive support
+          folder_info = service.files().get(
+              fileId=ROOT_FOLDER_ID,
+              supportsAllDrives=True,
+              fields="id,name,driveId"
+          ).execute()
+          print(f"Folder found: {folder_info.get('name')}")
+          if folder_info.get('driveId'):
+              is_shared_drive = True
+              print(f"This is a Shared Drive (driveId: {folder_info.get('driveId')})")
+      except HttpError as e:
+          print(f"Could not get folder info: {e}")
+          sys.exit(1)
 
       def find_or_create_folder(parent_id, folder_name):
           """Find existing folder or create new one."""
           try:
               query = f"name='{folder_name}' and '{parent_id}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false"
-              results = service.files().list(q=query, spaces='drive', fields='files(id, name)').execute()
+              results = service.files().list(
+                  q=query, 
+                  spaces='drive', 
+                  fields='files(id, name)',
+                  supportsAllDrives=True,
+                  includeItemsFromAllDrives=True
+              ).execute()
               folders = results.get('files', [])
               if folders:
                   print(f"Found existing folder: {folder_name}")
                   return folders[0]['id']
           except HttpError as e:
-              print(f"Search failed ({e.resp.status}), will create new folder")
+              print(f"Search failed: {e}")
 
           # Create folder
           folder_metadata = {
@@ -70,7 +92,11 @@ gdrive:upload-benchmark:
               'parents': [parent_id]
           }
           try:
-              folder = service.files().create(body=folder_metadata, fields='id').execute()
+              folder = service.files().create(
+                  body=folder_metadata, 
+                  fields='id',
+                  supportsAllDrives=True
+              ).execute()
               print(f"Created folder: {folder_name}")
               return folder.get('id')
           except HttpError as e:
@@ -80,7 +106,6 @@ gdrive:upload-benchmark:
       # Create Benchmarks subfolder
       benchmark_folder_id = find_or_create_folder(ROOT_FOLDER_ID, BENCHMARK_FOLDER)
       if not benchmark_folder_id:
-          print("Could not access or create Benchmarks folder")
           print("Using root folder instead")
           benchmark_folder_id = ROOT_FOLDER_ID
 
@@ -90,7 +115,6 @@ gdrive:upload-benchmark:
       run_folder_id = find_or_create_folder(benchmark_folder_id, run_folder_name)
       
       if not run_folder_id:
-          print("Could not create run folder, uploading to Benchmarks folder")
           run_folder_id = benchmark_folder_id
 
       # Find benchmark files
@@ -105,7 +129,6 @@ gdrive:upload-benchmark:
           if not os.path.isfile(filepath):
               continue
 
-          # Determine mime type
           mimetypes = {'.md': 'text/markdown', '.json': 'application/json', 
                        '.png': 'image/png', '.ics': 'text/calendar'}
           ext = os.path.splitext(filename)[1]
@@ -115,18 +138,23 @@ gdrive:upload-benchmark:
           media = MediaFileUpload(filepath, mimetype=mimetype, resumable=True)
 
           try:
-              file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+              file = service.files().create(
+                  body=file_metadata, 
+                  media_body=media, 
+                  fields='id',
+                  supportsAllDrives=True
+              ).execute()
               print(f"  Uploaded: {filename}")
               uploaded += 1
           except HttpError as e:
-              print(f"  Failed: {filename} - {e.resp.status}")
+              print(f"  Failed: {filename} - {e}")
 
       print(f"\nUploaded {uploaded} files")
       print(f"Folder: https://drive.google.com/drive/folders/{run_folder_id}")
 
-      # Save summary
       summary = {"pipeline_id": PIPELINE_ID, "timestamp": timestamp, 
-                 "folder_id": run_folder_id, "files_uploaded": uploaded}
+                 "folder_id": run_folder_id, "files_uploaded": uploaded,
+                 "is_shared_drive": is_shared_drive}
       with open("gdrive_upload_summary.json", "w") as f:
           json.dump(summary, f, indent=2)
       PYEOF
@@ -135,7 +163,7 @@ gdrive:upload-benchmark:
       - gdrive_upload_summary.json
     expire_in: 1 week
 
-# List Google Drive contents
+# List Google Drive contents (with Shared Drive support)
 gdrive:list:
   extends: .gdrive_base
   stage: .pre
@@ -148,38 +176,58 @@ gdrive:list:
       import json, os
       from google.oauth2 import service_account
       from googleapiclient.discovery import build
+      from googleapiclient.errors import HttpError
 
       SA_KEY_PATH = os.environ.get("GOOGLE_SERVICE_ACCOUNT_KEY", "")
       FOLDER_ID = os.environ.get("GOOGLE_DRIVE_FOLDER_ID", "1qh0skTeyRNs4g9KwAhpd3J8Yj_XENIFs")
 
       with open(SA_KEY_PATH, 'r') as f:
           sa_key = json.load(f)
-
       print(f"Service Account: {sa_key.get('client_email')}")
+      print(f"Folder ID: {FOLDER_ID}")
 
       credentials = service_account.Credentials.from_service_account_info(
           sa_key, scopes=["https://www.googleapis.com/auth/drive.readonly"]
       )
       service = build("drive", "v3", credentials=credentials)
 
+      # First, try to get folder info
+      try:
+          folder_info = service.files().get(
+              fileId=FOLDER_ID,
+              supportsAllDrives=True,
+              fields="id,name,driveId,mimeType"
+          ).execute()
+          print(f"\nFolder: {folder_info.get('name')}")
+          print(f"Type: {folder_info.get('mimeType')}")
+          if folder_info.get('driveId'):
+              print(f"Shared Drive ID: {folder_info.get('driveId')}")
+      except HttpError as e:
+          print(f"Could not get folder info: {e}")
+
       # List files
+      files = []
       try:
           query = f"'{FOLDER_ID}' in parents and trashed=false"
           results = service.files().list(
-              q=query, spaces='drive',
+              q=query, 
+              spaces='drive',
               fields='files(id, name, mimeType, modifiedTime, size)',
-              orderBy='modifiedTime desc', pageSize=50
+              orderBy='modifiedTime desc', 
+              pageSize=50,
+              supportsAllDrives=True,
+              includeItemsFromAllDrives=True
           ).execute()
           files = results.get('files', [])
           print(f"\nFound {len(files)} items:\n")
           for f in files:
               icon = 'D' if f['mimeType'] == 'application/vnd.google-apps.folder' else 'F'
               print(f"  [{icon}] {f['name']}")
-      except Exception as e:
-          print(f"Error: {e}")
+      except HttpError as e:
+          print(f"Error listing files: {e}")
 
       with open("gdrive_listing.json", "w") as out:
-          json.dump(files if 'files' in dir() else [], out, indent=2)
+          json.dump(files, out, indent=2)
       PYEOF
   artifacts:
     paths:
