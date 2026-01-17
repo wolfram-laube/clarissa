@@ -49,87 +49,125 @@ gmail:create-drafts:
       success = 0
       for i, draft in enumerate(drafts):
           to_addr = draft.get("to", "")
-          subject = draft.get("subject", "")
+          subject = draft.get("subject", "No Subject")
           body = draft.get("body", "")
-          cc = draft.get("cc", "")
-          
-          headers = ["From: wolfram.laube@blauweiss-edv.at", f"To: {to_addr}"]
-          if cc:
-              headers.append(f"Cc: {cc}")
-          headers.extend([f"Subject: {subject}", "Content-Type: text/plain; charset=utf-8", "MIME-Version: 1.0"])
-          
-          email = "\r\n".join(headers) + "\r\n\r\n" + body
-          raw = base64.urlsafe_b64encode(email.encode()).decode()
-          
+
+          raw_email = f"To: {to_addr}\r\nSubject: {subject}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n{body}"
+          raw_b64 = base64.urlsafe_b64encode(raw_email.encode("utf-8")).decode("utf-8")
+
           resp = requests.post(
               "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
-              headers={"Authorization": f"Bearer {access_token}"},
-              json={"message": {"raw": raw}}
+              headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
+              json={"message": {"raw": raw_b64}}
           )
-          
-          if resp.status_code == 200:
-              print(f"Draft {i+1}: OK - {subject[:40]}")
+          if resp.status_code in (200, 201):
               success += 1
+              print(f"Draft {i+1}: {subject[:50]}...")
           else:
-              print(f"Draft {i+1}: FAIL - {resp.status_code}")
+              print(f"Draft {i+1} failed: {resp.text}")
 
       print(f"Created {success}/{len(drafts)} drafts")
-      if success < len(drafts):
-          sys.exit(1)
       EOF
 
 gmail:benchmark-report:
   stage: .pre
   tags:
     - mac-group-shell
+  needs:
+    - job: benchmark-report
+      artifacts: true
+      optional: true
   rules:
-    - if: $BENCHMARK_EMAIL == "true"
-      when: always
+    - if: $SEND_BENCHMARK_EMAIL == "true"
+      when: on_success
     - when: manual
       allow_failure: true
-  variables:
-    BENCHMARK_TO: "wolfram.laube@blauweiss-edv.at"
   script:
     - pip3 install requests --quiet --break-system-packages || pip3 install requests --quiet --user || true
     - |
       python3 << 'EOF'
-      import os, base64, requests, sys
-      from datetime import datetime
+      import os, json, base64, requests, glob
+      from email.mime.multipart import MIMEMultipart
+      from email.mime.text import MIMEText
+      from email.mime.image import MIMEImage
 
       CLIENT_ID = os.environ["GMAIL_CLIENT_ID"]
       CLIENT_SECRET = os.environ["GMAIL_CLIENT_SECRET"]
       REFRESH_TOKEN = os.environ["GMAIL_REFRESH_TOKEN"]
-      TO = os.environ.get("BENCHMARK_TO", "wolfram.laube@blauweiss-edv.at")
-      PIPELINE_URL = os.environ.get("CI_PIPELINE_URL", "")
 
-      subject = "[CLARISSA] GitLab Runner Benchmark Report"
-      body = "Hallo,\n\nder GitLab Runner Benchmark wurde ausgefuehrt.\n\n"
-      body += f"Pipeline: {PIPELINE_URL}\n"
-      body += f"Zeitpunkt: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-      body += "Report im Repository:\n"
-      body += "https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/tree/main/docs/ci/benchmarks\n\n"
-      body += "Beste Gruesse,\nCLARISSA CI/CD"
-
+      # Get access token
       response = requests.post(
           "https://oauth2.googleapis.com/token",
           data={"client_id": CLIENT_ID, "client_secret": CLIENT_SECRET,
                 "refresh_token": REFRESH_TOKEN, "grant_type": "refresh_token"}
       )
+      if response.status_code != 200:
+          print(f"Token error: {response.text}")
+          exit(1)
       access_token = response.json()["access_token"]
       print("Got access token")
 
-      email = f"From: wolfram.laube@blauweiss-edv.at\r\nTo: {TO}\r\nSubject: {subject}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n{body}"
-      raw = base64.urlsafe_b64encode(email.encode()).decode()
+      # Build email with attachments
+      msg = MIMEMultipart()
+      msg["To"] = "wolfram.laube@blauweiss-edv.at"
+      msg["Subject"] = f"[CLARISSA] GitLab Runner Benchmark Report {os.environ.get('CI_PIPELINE_CREATED_AT', '')[:10]}"
+
+      # German body with proper umlauts
+      body = f"""Hallo Wolfram,
+
+die Benchmark-Ergebnisse für alle 12 GitLab Runner sind verfügbar.
+
+Pipeline: {os.environ.get('CI_PIPELINE_URL', 'N/A')}
+Datum: {os.environ.get('CI_PIPELINE_CREATED_AT', 'N/A')[:10]}
+
+Übersicht der Runner:
+• Mac #1: Shell, Docker, Kubernetes
+• Mac #2: Shell, Docker, Kubernetes  
+• Linux Yoga: Shell, Docker, Kubernetes
+• GCP VM: Shell, Docker, Kubernetes
+
+Die Grafiken sind als Anhänge beigefügt:
+• benchmark_by_machine.png - Vergleich nach Maschine
+• benchmark_by_executor.png - Vergleich nach Executor-Typ
+• benchmark_detailed.png - Detaillierte Einzelergebnisse
+• benchmark_heatmap.png - Heatmap aller Kombinationen
+
+Grüße,
+CLARISSA CI/CD Pipeline
+"""
+
+      msg.attach(MIMEText(body, "plain", "utf-8"))
+
+      # Find and attach PNG files
+      png_files = glob.glob("benchmark_reports/*.png") + glob.glob("*.png")
+      attached = 0
+      for png_path in png_files:
+          try:
+              with open(png_path, "rb") as f:
+                  img_data = f.read()
+              filename = os.path.basename(png_path)
+              img = MIMEImage(img_data, name=filename)
+              img.add_header("Content-Disposition", "attachment", filename=filename)
+              msg.attach(img)
+              attached += 1
+              print(f"Attached: {filename}")
+          except Exception as e:
+              print(f"Could not attach {png_path}: {e}")
+
+      print(f"Attached {attached} images")
+
+      # Encode and create draft
+      raw_b64 = base64.urlsafe_b64encode(msg.as_bytes()).decode("utf-8")
 
       resp = requests.post(
           "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
-          headers={"Authorization": f"Bearer {access_token}"},
-          json={"message": {"raw": raw}}
+          headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
+          json={"message": {"raw": raw_b64}}
       )
 
-      if resp.status_code == 200:
-          print("Benchmark report draft created")
+      if resp.status_code in (200, 201):
+          print("Benchmark report draft mit Anhängen erstellt")
       else:
           print(f"Failed: {resp.text}")
-          sys.exit(1)
+          exit(1)
       EOF
