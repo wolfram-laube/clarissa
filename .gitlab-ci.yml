@@ -1281,3 +1281,48 @@ doc_merge:generate:
       - doc-outputs/
       - diagrams/
     expire_in: 4 weeks
+
+# ----------------------------
+# Google Drive Proxy Jobs (API triggered)
+# ----------------------------
+gdrive-list:
+  stage: automation
+  tags: [gcp-docker]
+  rules:
+    - if: $GDRIVE_OP == "list"
+  image: python:3.11-slim
+  script:
+    - pip install google-auth google-api-python-client -q
+    - |
+      python3 << PYEOF
+      import json, os
+      from google.oauth2 import service_account
+      from googleapiclient.discovery import build
+      
+      sa_key = json.loads(os.environ.get("GOOGLE_SERVICE_ACCOUNT_KEY", "{}"))
+      folder_id = os.environ.get("GDRIVE_FOLDER_ID", "1qh0skTeyRNs4g9KwAhpd3J8Yj_XENIFs")
+      
+      credentials = service_account.Credentials.from_service_account_info(
+          sa_key, scopes=["https://www.googleapis.com/auth/drive.readonly"]
+      )
+      service = build("drive", "v3", credentials=credentials)
+      
+      results = service.files().list(
+          q=f"'{folder_id}' in parents and trashed=false",
+          fields="files(id, name, mimeType, modifiedTime, size)",
+          pageSize=100
+      ).execute()
+      
+      files = results.get("files", [])
+      print(f"Found {len(files)} files:")
+      for f in files:
+          print(f"  - {f[\"name\"]}")
+      
+      with open("gdrive_files.json", "w") as out:
+          json.dump(files, out, indent=2)
+      PYEOF
+  artifacts:
+    paths:
+      - gdrive_files.json
+    expire_in: 1 day
+
