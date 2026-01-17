@@ -1393,11 +1393,11 @@ deploy-gdrive-proxy:
     - sudo systemctl restart gdrive-proxy
     - sleep 3
     - curl -s http://localhost:8080/health || true
-    - echo "✅ GDrive Proxy deployed! Access at http://35.198.98.28:8080"
-# Documentation preview for feature branches
+    - echo "✅ GDrive Proxy deployed! Access at http://35.198.98.28:8080"# Documentation preview for feature branches
 docs:preview:
   stage: deploy
   image: python:3.11
+  needs: []  # Run immediately, don't wait for other stages
   rules:
     - if: '$CI_COMMIT_BRANCH != "main"'
       when: manual
