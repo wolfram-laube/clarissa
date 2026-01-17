@@ -517,7 +517,7 @@ pages:
       when: on_success
     - when: never
   before_script:
-    - pip install mkdocs mkdocs-material pymdown-extensions jinja2 pyyaml
+    - pip install mkdocs mkdocs-material pymdown-extensions jinja2 pyyaml mkdocs-jupyter
   script:
     # Copy architecture diagrams from artifacts BEFORE mkdocs build
     - mkdir -p docs/architecture/rendered
@@ -626,7 +626,7 @@ rebuild_docs:
       when: manual
     - when: never
   before_script:
-    - pip install mkdocs mkdocs-material pymdown-extensions jinja2 pyyaml
+    - pip install mkdocs mkdocs-material pymdown-extensions jinja2 pyyaml mkdocs-jupyter
   script:
     - echo "Rebuilding documentation..."
     - python scripts/build_i18n_docs.py
