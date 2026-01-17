@@ -21,18 +21,75 @@ gcp:install-docker-runner:
   stage: .pre
   tags: [mac-group-shell]
   script:
-    - echo "Checking Docker Runner on GCP VM..."
+    - echo "Adding Docker Runner to GCP VM..."
     - |
       gcloud compute ssh gitlab-runner@gitlab-runner --zone=europe-west3-a << 'REMOTE_SCRIPT'
         set -e
-        echo "=== Checking Docker ==="
-        docker --version || { echo "Docker not installed!"; exit 1; }
-        echo "=== Current runners ==="
-        sudo gitlab-runner list
-        echo "=== Docker service status ==="
-        sudo systemctl status docker --no-pager || true
-        echo "=== Current config ==="
+        
+        echo "=== Adding Docker Runner to config ==="
+        
+        # Backup current config
+        sudo cp /etc/gitlab-runner/config.toml /etc/gitlab-runner/config.toml.bak
+        
+        # Create new config with Docker runner
+        sudo tee /etc/gitlab-runner/config.toml << 'CONFIGEOF'
+concurrent = 3
+check_interval = 0
+shutdown_timeout = 0
+
+[session_server]
+  session_timeout = 1800
+
+[[runners]]
+  name = "GCP Shell Runner"
+  url = "https://gitlab.com"
+  token = "glrt-KKPDAdm1l14Tv6ZpxVTghW86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i1gky4ih"
+  executor = "shell"
+  builds_dir = "/builds"
+  cache_dir = "/cache"
+  [runners.cache]
+    MaxUploadedArchiveSize = 0
+
+[[runners]]
+  name = "GCP Docker Runner"
+  url = "https://gitlab.com"
+  token = "glrt-yfBtSybQYTTVnQJ1SaKalG86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i12dh2vl"
+  executor = "docker"
+  [runners.cache]
+    MaxUploadedArchiveSize = 0
+  [runners.docker]
+    tls_verify = false
+    image = "python:3.11-slim"
+    privileged = false
+    disable_entrypoint_overwrite = false
+    oom_kill_disable = false
+    disable_cache = false
+    volumes = ["/cache"]
+    shm_size = 0
+    network_mtu = 0
+
+[[runners]]
+  name = "GCP K8s Runner"
+  url = "https://gitlab.com"
+  token = "glrt-67YOaPU6p2OW_h7vopfTOG86MQpwOjE5enloeQp0OjMKdTpzeGN4Fw.01.1i0xxbx3v"
+  executor = "kubernetes"
+  [runners.cache]
+    MaxUploadedArchiveSize = 0
+  [runners.kubernetes]
+    namespace = "gitlab-runner"
+    image = "python:3.11-slim"
+CONFIGEOF
+        
+        echo "=== New config ==="
         sudo cat /etc/gitlab-runner/config.toml
+        
+        echo "=== Restarting runner ==="
+        sudo systemctl restart gitlab-runner
+        sleep 3
+        
+        echo "=== Verifying runners ==="
+        sudo gitlab-runner verify
+        sudo gitlab-runner list
       REMOTE_SCRIPT
   rules:
     - when: manual
