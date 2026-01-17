@@ -83,7 +83,10 @@ gmail:benchmark-report:
     - when: manual
       allow_failure: true
   variables:
+    # LLM_PROVIDER: "openai" or "anthropic" (default: openai)
     LLM_PROVIDER: "openai"
+    # EMAIL_LANGUAGE: "de", "en", "es", "fr" (default: de)
+    EMAIL_LANGUAGE: "de"
   script:
     - pip3 install requests openai anthropic --quiet --break-system-packages || pip3 install requests openai anthropic --quiet --user || true
     - python3 scripts/ci/send_benchmark_email.py
