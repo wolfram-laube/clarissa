@@ -2,6 +2,13 @@
 """
 Gmail Benchmark Report with LLM-generated text.
 Uses OpenAI or Anthropic to generate contextual email body.
+
+Environment Variables:
+  - LLM_PROVIDER: "openai" or "anthropic" (default: openai)
+  - EMAIL_LANGUAGE: "de", "en", "es", "fr", etc. (default: de)
+  - OPENAI_API_KEY: OpenAI API key
+  - ANTHROPIC_API_KEY: Anthropic API key
+  - GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN: Gmail OAuth
 """
 import os
 import json
@@ -13,20 +20,15 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 
 
-def generate_email_with_openai(benchmark_data, pipeline_url, pipeline_date):
-    """Generate email text using OpenAI GPT-4."""
-    try:
-        import openai
-    except ImportError:
-        print("openai package not installed")
-        return None
-    
-    client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-    
-    prompt = f"""Schreibe eine kurze, professionelle E-Mail auf Deutsch für einen GitLab CI/CD Benchmark-Report.
+# Language configurations
+LANGUAGE_CONFIG = {
+    "de": {
+        "greeting": "Hallo Wolfram,",
+        "closing": "Grüße,\nCLARISSA CI/CD Pipeline",
+        "prompt": """Schreibe eine kurze, professionelle E-Mail auf Deutsch für einen GitLab CI/CD Benchmark-Report.
 
 Benchmark-Daten:
-{json.dumps(benchmark_data, indent=2)}
+{benchmark_data}
 
 Pipeline: {pipeline_url}
 Datum: {pipeline_date}
@@ -39,58 +41,8 @@ Anforderungen:
 - Ende mit "Grüße, CLARISSA CI/CD Pipeline"
 - Verwende deutsche Umlaute (ü, ö, ä, ß)
 - Keine Markdown-Formatierung, nur Plain Text
-"""
-    
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=500,
-        temperature=0.7
-    )
-    
-    return response.choices[0].message.content
-
-
-def generate_email_with_anthropic(benchmark_data, pipeline_url, pipeline_date):
-    """Generate email text using Anthropic Claude."""
-    try:
-        import anthropic
-    except ImportError:
-        print("anthropic package not installed")
-        return None
-    
-    client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-    
-    prompt = f"""Schreibe eine kurze, professionelle E-Mail auf Deutsch für einen GitLab CI/CD Benchmark-Report.
-
-Benchmark-Daten:
-{json.dumps(benchmark_data, indent=2)}
-
-Pipeline: {pipeline_url}
-Datum: {pipeline_date}
-
-Anforderungen:
-- Beginne mit "Hallo Wolfram,"
-- Fasse die wichtigsten Erkenntnisse zusammen (schnellster/langsamster Runner, Vergleich der Executors)
-- Erwähne dass 4 Grafiken als Anhänge dabei sind
-- Halte es kurz und informativ (max 150 Wörter)
-- Ende mit "Grüße, CLARISSA CI/CD Pipeline"
-- Verwende deutsche Umlaute (ü, ö, ä, ß)
-- Keine Markdown-Formatierung, nur Plain Text
-"""
-    
-    response = client.messages.create(
-        model="claude-3-5-haiku-20241022",
-        max_tokens=500,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    
-    return response.content[0].text
-
-
-def get_fallback_body(pipeline_url, pipeline_date):
-    """Fallback if LLM fails."""
-    return f"""Hallo Wolfram,
+""",
+        "fallback": """Hallo Wolfram,
 
 die Benchmark-Ergebnisse für alle 12 GitLab Runner sind verfügbar.
 
@@ -108,14 +60,193 @@ Die Grafiken sind als Anhänge beigefügt.
 Grüße,
 CLARISSA CI/CD Pipeline
 """
+    },
+    "en": {
+        "greeting": "Hi Wolfram,",
+        "closing": "Best regards,\nCLARISSA CI/CD Pipeline",
+        "prompt": """Write a short, professional email in English for a GitLab CI/CD Benchmark Report.
+
+Benchmark Data:
+{benchmark_data}
+
+Pipeline: {pipeline_url}
+Date: {pipeline_date}
+
+Requirements:
+- Start with "Hi Wolfram,"
+- Summarize the key findings (fastest/slowest runner, comparison of executors)
+- Mention that 4 charts are attached
+- Keep it short and informative (max 150 words)
+- End with "Best regards, CLARISSA CI/CD Pipeline"
+- No Markdown formatting, plain text only
+""",
+        "fallback": """Hi Wolfram,
+
+The benchmark results for all 12 GitLab Runners are now available.
+
+Pipeline: {pipeline_url}
+Date: {pipeline_date}
+
+Runner Overview:
+• Mac #1: Shell, Docker, Kubernetes
+• Mac #2: Shell, Docker, Kubernetes  
+• Linux Yoga: Shell, Docker, Kubernetes
+• GCP VM: Shell, Docker, Kubernetes
+
+The charts are attached to this email.
+
+Best regards,
+CLARISSA CI/CD Pipeline
+"""
+    },
+    "es": {
+        "greeting": "Hola Wolfram,",
+        "closing": "Saludos,\nCLARISSA CI/CD Pipeline",
+        "prompt": """Escribe un correo electrónico corto y profesional en español para un informe de Benchmark de GitLab CI/CD.
+
+Datos del Benchmark:
+{benchmark_data}
+
+Pipeline: {pipeline_url}
+Fecha: {pipeline_date}
+
+Requisitos:
+- Comienza con "Hola Wolfram,"
+- Resume los hallazgos clave (runner más rápido/lento, comparación de ejecutores)
+- Menciona que se adjuntan 4 gráficos
+- Mantenlo breve e informativo (máximo 150 palabras)
+- Termina con "Saludos, CLARISSA CI/CD Pipeline"
+- Sin formato Markdown, solo texto plano
+""",
+        "fallback": """Hola Wolfram,
+
+Los resultados del benchmark para los 12 GitLab Runners están disponibles.
+
+Pipeline: {pipeline_url}
+Fecha: {pipeline_date}
+
+Los gráficos están adjuntos a este correo.
+
+Saludos,
+CLARISSA CI/CD Pipeline
+"""
+    },
+    "fr": {
+        "greeting": "Bonjour Wolfram,",
+        "closing": "Cordialement,\nCLARISSA CI/CD Pipeline",
+        "prompt": """Écris un e-mail court et professionnel en français pour un rapport de Benchmark GitLab CI/CD.
+
+Données du Benchmark:
+{benchmark_data}
+
+Pipeline: {pipeline_url}
+Date: {pipeline_date}
+
+Exigences:
+- Commence par "Bonjour Wolfram,"
+- Résume les conclusions clés (runner le plus rapide/lent, comparaison des exécuteurs)
+- Mentionne que 4 graphiques sont joints
+- Reste bref et informatif (maximum 150 mots)
+- Termine par "Cordialement, CLARISSA CI/CD Pipeline"
+- Pas de formatage Markdown, texte brut uniquement
+""",
+        "fallback": """Bonjour Wolfram,
+
+Les résultats du benchmark pour les 12 GitLab Runners sont disponibles.
+
+Pipeline: {pipeline_url}
+Date: {pipeline_date}
+
+Les graphiques sont joints à cet e-mail.
+
+Cordialement,
+CLARISSA CI/CD Pipeline
+"""
+    }
+}
+
+
+def get_language_config(lang_code):
+    """Get language configuration, fallback to English if not found."""
+    lang_code = lang_code.lower()[:2]
+    if lang_code in LANGUAGE_CONFIG:
+        return LANGUAGE_CONFIG[lang_code]
+    print(f"Language '{lang_code}' not found, falling back to English")
+    return LANGUAGE_CONFIG["en"]
+
+
+def generate_email_with_openai(benchmark_data, pipeline_url, pipeline_date, language):
+    """Generate email text using OpenAI GPT-4."""
+    try:
+        import openai
+    except ImportError:
+        print("openai package not installed")
+        return None
+    
+    client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+    lang_config = get_language_config(language)
+    
+    prompt = lang_config["prompt"].format(
+        benchmark_data=json.dumps(benchmark_data, indent=2),
+        pipeline_url=pipeline_url,
+        pipeline_date=pipeline_date
+    )
+    
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=500,
+        temperature=0.7
+    )
+    
+    return response.choices[0].message.content
+
+
+def generate_email_with_anthropic(benchmark_data, pipeline_url, pipeline_date, language):
+    """Generate email text using Anthropic Claude."""
+    try:
+        import anthropic
+    except ImportError:
+        print("anthropic package not installed")
+        return None
+    
+    client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+    lang_config = get_language_config(language)
+    
+    prompt = lang_config["prompt"].format(
+        benchmark_data=json.dumps(benchmark_data, indent=2),
+        pipeline_url=pipeline_url,
+        pipeline_date=pipeline_date
+    )
+    
+    response = client.messages.create(
+        model="claude-3-5-haiku-20241022",
+        max_tokens=500,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    
+    return response.content[0].text
+
+
+def get_fallback_body(pipeline_url, pipeline_date, language):
+    """Fallback if LLM fails."""
+    lang_config = get_language_config(language)
+    return lang_config["fallback"].format(
+        pipeline_url=pipeline_url,
+        pipeline_date=pipeline_date
+    )
 
 
 def main():
-    # Gmail credentials
+    # Configuration
     CLIENT_ID = os.environ["GMAIL_CLIENT_ID"]
     CLIENT_SECRET = os.environ["GMAIL_CLIENT_SECRET"]
     REFRESH_TOKEN = os.environ["GMAIL_REFRESH_TOKEN"]
     LLM_PROVIDER = os.environ.get("LLM_PROVIDER", "openai").lower()
+    EMAIL_LANGUAGE = os.environ.get("EMAIL_LANGUAGE", "de").lower()
+
+    print(f"LLM Provider: {LLM_PROVIDER}")
+    print(f"Email Language: {EMAIL_LANGUAGE}")
 
     # Get Gmail access token
     response = requests.post(
@@ -155,13 +286,13 @@ def main():
     if benchmark_data:
         try:
             if LLM_PROVIDER == "anthropic" and os.environ.get("ANTHROPIC_API_KEY"):
-                print("Generating email with Anthropic Claude...")
-                body = generate_email_with_anthropic(benchmark_data, pipeline_url, pipeline_date)
+                print(f"Generating email with Anthropic Claude ({EMAIL_LANGUAGE})...")
+                body = generate_email_with_anthropic(benchmark_data, pipeline_url, pipeline_date, EMAIL_LANGUAGE)
                 if body:
                     print(f"✓ Generated with Anthropic ({len(body)} chars)")
             elif os.environ.get("OPENAI_API_KEY"):
-                print("Generating email with OpenAI GPT-4...")
-                body = generate_email_with_openai(benchmark_data, pipeline_url, pipeline_date)
+                print(f"Generating email with OpenAI GPT-4 ({EMAIL_LANGUAGE})...")
+                body = generate_email_with_openai(benchmark_data, pipeline_url, pipeline_date, EMAIL_LANGUAGE)
                 if body:
                     print(f"✓ Generated with OpenAI ({len(body)} chars)")
             else:
@@ -171,7 +302,7 @@ def main():
 
     if not body:
         print("Using fallback email body")
-        body = get_fallback_body(pipeline_url, pipeline_date)
+        body = get_fallback_body(pipeline_url, pipeline_date, EMAIL_LANGUAGE)
 
     print("\n--- Generated Email Body ---")
     print(body)
@@ -218,7 +349,7 @@ def main():
     )
 
     if resp.status_code in (200, 201):
-        print(f"\n✓ Benchmark report draft erstellt (LLM: {LLM_PROVIDER})")
+        print(f"\n✓ Benchmark report draft erstellt (LLM: {LLM_PROVIDER}, Lang: {EMAIL_LANGUAGE})")
     else:
         print(f"Failed: {resp.text}")
         exit(1)
