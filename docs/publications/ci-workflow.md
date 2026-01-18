@@ -355,7 +355,7 @@ docs(diagrams): <what changed>   # Mermaid diagram changes
 
 ## Related Documentation
 
-- [ADR-014: LLM Document Merge](../adr/ADR-014-llm-document-merge.md) - Architecture decision
+- [ADR-014: LLM Document Merge](../architecture/adr/ADR-014-llm-document-merge.md) - Architecture decision
 - [Paper Workflow (Legacy)](paper-workflow.md) - Old LaTeX-only workflow
 - [Publications Index](index.md) - Download links
 

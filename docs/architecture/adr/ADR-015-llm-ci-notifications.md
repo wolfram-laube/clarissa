@@ -4,7 +4,7 @@
 **Accepted** (Implemented 2026-01-17)
 
 !!! success "Implementation Complete"
-    This ADR has been implemented. See [BENCHMARK_HOWTO.md](../ci/BENCHMARK_HOWTO.md) for operational documentation.
+    This ADR has been implemented. See [BENCHMARK_HOWTO.md](../../ci/BENCHMARK_HOWTO.md) for operational documentation.
 
 ## Context
 

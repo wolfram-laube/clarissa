@@ -1,25 +1,63 @@
-# Architecture diagrams
+# Architecture Diagrams
 
 Mermaid sources live in `docs/architecture/diagrams/*.mmd`.
-
-CI job `architecture_graphs` renders these into SVGs under `docs/architecture/rendered/`.
 
 ## Diagrams
 
 ### Adapter Layer
-![Adapter Layer](rendered/adapter_layer.svg)
 
-### Agent Flow  
-![Agent Flow](rendered/agent_flow.svg)
+```mermaid
+flowchart LR
+  A[CLARISSA Agent] --> C[Simulator Contract]
+  C --> M[MockSimulator]
+  C --> MRST[MRST Adapter]
+  C --> OPM[OPM Flow Adapter]
+  MRST -. planned .-> MR[MATLAB Runtime]
+  OPM -. planned .-> F[flow executable / container]
+```
+
+### Agent Flow
+
+```mermaid
+flowchart LR
+  U[User] -->|proposal| A[CLARISSA]
+  A --> G{Policy}
+  G -->|needs approval| H[Human]
+  H -->|ok| S[Simulator]
+  G -->|auto| S
+  S --> R[Result]
+  R --> U
+```
 
 ### CI to MR Flow
-![CI to MR](rendered/ci_to_mr.svg)
+
+```mermaid
+sequenceDiagram
+  participant Dev as Developer
+  participant CI as GitLab CI
+  participant MR as Merge Request
+  Dev->>CI: push / update MR
+  CI->>CI: run tests, rerun last-failed
+  CI->>CI: classify flaky vs confirmed
+  CI->>CI: run snapshot_tests + contract_tests
+  CI-->>MR: unified MR note (status + summaries)
+  CI-->>MR: export reports/mr_report.md/html (artifact)
+```
 
 ### Governance Gate
-![Governance Gate](rendered/governance_gate.svg)
+
+```mermaid
+flowchart TD
+  P[Proposed Change] --> D{Touches governed params}
+  D -->|Yes| A[Approval required]
+  A -->|Approved| E[Execute simulation]
+  A -->|Denied| X[Stop or escalate]
+  D -->|No| E
+  E --> O[Outcome and Explanation]
+```
 
 ---
 
-!!! tip "Source files"
-    If diagrams don't render above, the `.mmd` sources in `diagrams/` are the canonical truth.
-    You can view them in any Mermaid-compatible editor.
+!!! info "Source files"
+    The `.mmd` sources in `diagrams/` are the canonical truth.
+    Edit those files to update diagrams.

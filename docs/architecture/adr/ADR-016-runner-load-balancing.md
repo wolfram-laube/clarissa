@@ -201,7 +201,7 @@ Expected: Jobs distributed across all 4 machines.
 - [GitLab Runner Tags](https://docs.gitlab.com/ee/ci/runners/configure_runners.html#use-tags-to-control-which-jobs-a-runner-can-run)
 - [Parallel Jobs](https://docs.gitlab.com/ee/ci/yaml/#parallel)
 - [ADR-015: LLM CI Notifications](ADR-015-llm-ci-notifications.md) - Related CI infrastructure
-- [BENCHMARK_HOWTO.md](../ci/BENCHMARK_HOWTO.md) - Runner benchmark reference
+- [BENCHMARK_HOWTO.md](../../ci/BENCHMARK_HOWTO.md) - Runner benchmark reference
 
 ---
 

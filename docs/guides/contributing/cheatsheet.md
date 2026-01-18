@@ -1,6 +1,6 @@
 # CLARISSA Workflow Cheatsheet
 
-> 📋 Quick reference for daily development. Full guide: [CONTRIBUTING.md](../../../CONTRIBUTING.md)
+> 📋 Quick reference for daily development. Full guide: [CONTRIBUTING.md](../../contributing.md)
 
 ---
 
@@ -125,4 +125,4 @@ chore: bump dependencies
 
 ---
 
-*Version 1.0 | [Full Guide](../../../CONTRIBUTING.md)*
+*Version 1.0 | [Full Guide](../../contributing.md)*

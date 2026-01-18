@@ -8,7 +8,7 @@ Praktische Anleitungen für Entwickler und Nutzer.
 
 | Guide | Beschreibung | Format |
 |-------|--------------|--------|
-| [CONTRIBUTING.md](../../CONTRIBUTING.md) | Vollständiger Workflow-Guide | Markdown |
+| [CONTRIBUTING.md](../contributing.md) | Vollständiger Workflow-Guide | Markdown |
 | [Workflow Cheatsheet](contributing/cheatsheet.md) | Quick Reference (1 Seite) | Markdown |
 
 ---
@@ -26,7 +26,7 @@ Praktische Anleitungen für Entwickler und Nutzer.
 
 | Document | Beschreibung |
 |----------|--------------|
-| [ADR-001: GitLab PM Workflow](../architecture/decisions/ADR-001_GitLab-PM-Workflow.md) | Warum dieser Workflow |
+| [ADR-018: GitLab PM Workflow](../architecture/adr/ADR-018-gitlab-pm-workflow.md) | Warum dieser Workflow |
 
 ---
 
