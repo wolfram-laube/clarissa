@@ -73,3 +73,16 @@ gdrive:list:
     paths:
       - gdrive_listing.json
     expire_in: 1 day
+# One-time job to reorganize GDrive folder structure
+gdrive:reorganize:
+  extends: .gdrive_base
+  stage: .pre
+  rules:
+    - when: manual
+      allow_failure: true
+  script:
+    - python3 scripts/gdrive_reorganize.py
+  artifacts:
+    paths:
+      - gdrive_folder_ids.json
+    expire_in: 1 week
