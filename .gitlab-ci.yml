@@ -503,16 +503,7 @@ mr_comment_on_failure:
 pages:
   stage: deploy
   image: python:3.11
-  needs:
-    - job: build_paper
-      optional: true
-      artifacts: true
-    - job: build_canonical_pdf
-      optional: true
-      artifacts: true
-    - job: architecture_graphs
-      optional: true
-      artifacts: true
+  needs: []
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
