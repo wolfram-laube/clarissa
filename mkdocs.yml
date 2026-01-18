@@ -65,8 +65,21 @@ nav:
 
   - "📓 Tutorials":
     - Overview: tutorials/index.md
-    - Reservoir Basics: tutorials/reservoir-basics.md
-    - Code Examples: tutorials/reservoir-basics-code.ipynb
+    - Quick Start: tutorials/quickstart.md
+    - "Interactive Notebooks":
+      - "01 ECLIPSE Fundamentals": tutorials/notebooks/01_ECLIPSE_Fundamentals.ipynb
+      - "02 OPM Flow Integration": tutorials/notebooks/02_OPM_Flow_Integration.ipynb
+      - "03 Knowledge Layer": tutorials/notebooks/03_Knowledge_Layer.ipynb
+      - "04 LLM Conversation": tutorials/notebooks/04_LLM_Conversation.ipynb
+      - "05 Constraint Engine": tutorials/notebooks/05_Constraint_Engine.ipynb
+      - "06 Deck Generator": tutorials/notebooks/06_Deck_Generator.ipynb
+      - "07 RL Agent": tutorials/notebooks/07_RL_Agent.ipynb
+      - "08 RIGOR Benchmark": tutorials/notebooks/08_RIGOR_Benchmark.ipynb
+      - "09 Full Pipeline Demo": tutorials/notebooks/09_Full_Pipeline_Demo.ipynb
+      - "10 API Reference": tutorials/notebooks/10_API_Reference.ipynb
+    - "Legacy":
+      - Reservoir Basics: tutorials/reservoir-basics.md
+      - Code Examples: tutorials/reservoir-basics-code.ipynb
 
   - Architecture:
     - Overview: architecture/README.md

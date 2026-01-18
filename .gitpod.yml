@@ -1,0 +1,78 @@
+# ============================================================
+# CLARISSA GitPod Configuration
+# One-click development environment for reservoir simulation
+# ============================================================
+
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  # Task 1: Start PostgreSQL + pgvector
+  - name: Database
+    init: |
+      echo "🗄️ Starting PostgreSQL with pgvector..."
+      sudo service postgresql start
+      sleep 3
+      sudo -u postgres psql -c "CREATE USER clarissa WITH PASSWORD 'clarissa';"
+      sudo -u postgres psql -c "CREATE DATABASE clarissa OWNER clarissa;"
+      sudo -u postgres psql -d clarissa -c "CREATE EXTENSION IF NOT EXISTS vector;"
+      echo "✅ Database ready"
+    command: |
+      sudo service postgresql start
+      echo "🗄️ PostgreSQL running on localhost:5432"
+      gp sync-done db-ready
+
+  # Task 2: Install Python dependencies
+  - name: Python Setup
+    init: |
+      echo "🐍 Installing Python dependencies..."
+      pip install -q -r requirements.txt
+      echo "✅ Python ready"
+    command: |
+      gp sync-await db-ready
+      echo "🐍 Python environment ready"
+      gp sync-done python-ready
+
+  # Task 3: Start Jupyter
+  - name: Jupyter
+    command: |
+      gp sync-await python-ready
+      echo "📓 Starting Jupyter Lab..."
+      jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --NotebookApp.token='' --NotebookApp.password=''
+
+  # Task 4: OPM Flow (Docker)
+  - name: OPM Flow
+    command: |
+      echo "🛢️ OPM Flow available via Docker"
+      echo "   Run: docker run --rm -v \$(pwd):/sim opmproject/opm-simulators flow /sim/your_deck.DATA"
+      docker pull opmproject/opm-simulators:latest || echo "⚠️ Docker pull failed - OPM Flow will be pulled on first use"
+
+ports:
+  - port: 8888
+    onOpen: open-preview
+    name: Jupyter Lab
+    description: Interactive notebooks
+  - port: 5432
+    onOpen: ignore
+    name: PostgreSQL
+    description: Database with pgvector
+
+vscode:
+  extensions:
+    - ms-python.python
+    - ms-toolsai.jupyter
+    - bierner.markdown-mermaid
+    - mechatroner.rainbow-csv
+    - mtxr.sqltools
+    - mtxr.sqltools-driver-pg
+
+gitpod:
+  # Prebuilds for faster startup
+  prebuilds:
+    master: true
+    branches: true
+    pullRequests: true
+    pullRequestsFromForks: false
+    addCheck: true
+    addComment: false
+    addBadge: true
