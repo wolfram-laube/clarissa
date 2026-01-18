@@ -44,6 +44,28 @@ Epic (Milestone-übergreifend)
 5. **Auto-Close** - MR-Commit enthält `Closes #{issue-id}`
 6. **Pipeline-Gate** - Merge nur nach erfolgreicher CI
 
+### Wann Epic erstellen?
+
+Da GitLab Free keine nativen Epics bietet, nutzen wir Parent-Issues mit `[EPIC]` Prefix und `type::epic` Label.
+
+| Situation | Epic? | Begründung |
+|-----------|-------|------------|
+| 3+ zusammenhängende Issues | ✅ Ja | Gruppierung sinnvoll |
+| Milestone-übergreifende Arbeit | ✅ Ja | Tracking über Milestones hinweg |
+| Isolierte Fixes (1-2 Issues) | ❌ Nein | Overhead ohne Mehrwert |
+| Zeitaufwand < 1 Tag | ❌ Nein | Zu klein für Epic |
+
+**Epic-Format:**
+```markdown
+## [EPIC] Feature Name
+
+Labels: type::epic, priority::X, workflow::in-progress
+
+### Child Issues
+- [ ] #XX - Subtask 1
+- [ ] #XX - Subtask 2
+```
+
 ### Workflow-Diagramm
 
 ```
