@@ -10,18 +10,15 @@ Praktische Anleitungen für Entwickler und Nutzer.
 |-------|--------------|--------|
 | [CONTRIBUTING.md](../../CONTRIBUTING.md) | Vollständiger Workflow-Guide | Markdown |
 | [Workflow Cheatsheet](contributing/cheatsheet.md) | Quick Reference (1 Seite) | Markdown |
-| [Project Management](project-management.md) | Labels, Board, Milestones | Markdown |
 
 ---
 
-## 📋 Quick Links
+## 📋 Project Management
 
-| Ressource | Link |
-|-----------|------|
-| Issue Board | [gitlab.com/.../boards](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/boards) |
-| Issues | [gitlab.com/.../issues](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues) |
-| Merge Requests | [gitlab.com/.../merge_requests](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/merge_requests) |
-| Pipelines | [gitlab.com/.../pipelines](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/pipelines) |
+| Guide | Beschreibung |
+|-------|--------------|
+| [Project Management](project-management.md) | Labels, Board, Milestones |
+| [Epics Guide](epics.md) | Epic-Pattern für Free Tier |
 
 ---
 
@@ -30,6 +27,17 @@ Praktische Anleitungen für Entwickler und Nutzer.
 | Document | Beschreibung |
 |----------|--------------|
 | [ADR-001: GitLab PM Workflow](../architecture/decisions/ADR-001_GitLab-PM-Workflow.md) | Warum dieser Workflow |
+
+---
+
+## 📝 Issue Templates
+
+Verfügbare Templates in `.gitlab/issue_templates/`:
+
+| Template | Verwendung |
+|----------|------------|
+| `epic.md` | [EPIC] Größere Initiativen |
+| `adr.md` | Architecture Decision Records |
 
 ---
 
@@ -51,3 +59,14 @@ Jupyter Notebooks für hands-on Lernen:
 | 10 | API Reference | REST API |
 
 ➡️ [Tutorials starten](../tutorials/index.md)
+
+---
+
+## 🔗 Quick Links
+
+| Ressource | Link |
+|-----------|------|
+| Issue Board | [gitlab.com/.../boards](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/boards) |
+| Issues | [gitlab.com/.../issues](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues) |
+| Merge Requests | [gitlab.com/.../merge_requests](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/merge_requests) |
+| Epic #39 (Beispiel) | [Tutorial System Epic](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues/39) |
