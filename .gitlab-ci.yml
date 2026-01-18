@@ -85,13 +85,13 @@ stages:
 
 .issue_bot_rules: &issue_bot_rules
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
       when: on_success
     - when: never
 
 .recovery_bot_rules: &recovery_bot_rules
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
       when: on_success
     - when: never
 
@@ -514,7 +514,7 @@ pages:
       optional: true
       artifacts: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
       when: on_success
     - when: never
   before_script:
