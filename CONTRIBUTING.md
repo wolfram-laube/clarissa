@@ -1,111 +1,228 @@
 # Contributing to CLARISSA
 
-## Quick Start
+Dieses Dokument beschreibt den Entwicklungsworkflow für CLARISSA.
 
-**New here? Start with these:**
+## Workflow-Übersicht
 
-1. **[Workflow Slides](https://wolfram_laube.gitlab.io/blauweiss_llc/irena/guides/contributing/)** - Interactive 5-minute intro
-2. **[Issue Board](/-/boards)** - Pick a task from the "Ready" column
-3. **[Project Management Guide](docs/guides/project-management.md)** - Full reference
-
-## Your First Contribution
-
-```bash
-# 1. Pick an issue from the board, e.g. #42
-#    Move it to "In Progress"
-
-# 2. Create a branch (issue number first!)
-git checkout -b 42-short-description
-
-# 3. Make changes, commit with issue reference
-git commit -m "feat: add feature X #42"
-
-# 4. Push and create MR
-git push -u origin 42-short-description
-# → Click the MR link GitLab shows you
-# → Add "Closes #42" in MR description
-
-# 5. Wait for review, then merge
-#    Issue closes automatically!
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         EPIC                                     │
+│  (Große Initiative, überspannt mehrere Milestones)              │
+│                           │                                      │
+│         ┌─────────────────┼─────────────────┐                   │
+│         ▼                 ▼                 ▼                   │
+│     ┌───────┐         ┌───────┐         ┌───────┐              │
+│     │Issue 1│         │Issue 2│         │Issue 3│              │
+│     └───┬───┘         └───┬───┘         └───┬───┘              │
+│         │                 │                 │                   │
+│         ▼                 ▼                 ▼                   │
+│    feature/1-x       feature/2-y       feature/3-z             │
+│         │                 │                 │                   │
+│         ▼                 ▼                 ▼                   │
+│       MR !1             MR !2             MR !3                 │
+│         │                 │                 │                   │
+│         └────────────────►├◄────────────────┘                   │
+│                           ▼                                      │
+│                        main                                      │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-## Workflow Cheatsheet
+## Schritt-für-Schritt Anleitung
 
-| Step | Command/Action |
-|------|----------------|
-| Find work | [Issue Board](/-/boards) → "Ready" column |
-| Start work | `git checkout -b 42-description` |
-| Commit | `git commit -m "type: message #42"` |
-| Push | `git push -u origin 42-description` |
-| Close issue | Add `Closes #42` in MR description |
+### 1. Issue erstellen
 
-**Commit types:** `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`
+Jede Arbeit beginnt mit einem Issue:
 
-## Labels We Use
+```bash
+# Via GitLab UI oder API
+Title: "feat: Implement feature X"
+Labels: component::*, type::*, priority::*, workflow::backlog
+```
 
-| Label | Meaning |
-|-------|---------|
-| `type::feature` | New functionality |
-| `type::bug` | Something broken |
-| `type::docs` | Documentation |
-| `type::task` | General work |
-| `priority::high` | Do this first |
-| `workflow::ready` | Ready to pick up |
-| `workflow::in-progress` | Someone's working on it |
+**Issue-Typen:**
+- `type::feature` - Neue Funktionalität
+- `type::bug` - Fehlerbehebung
+- `type::documentation` - Dokumentation
+- `type::chore` - Maintenance, Refactoring
 
-Full label reference: [Project Management Guide](docs/guides/project-management.md#label-system)
+**Workflow-Labels:**
+- `workflow::backlog` - Noch nicht begonnen
+- `workflow::in-progress` - In Bearbeitung
+- `workflow::review` - Im Review
+- `workflow::done` - Abgeschlossen (auto via MR-Merge)
+
+### 2. Feature-Branch erstellen
+
+```bash
+# Branch-Naming: feature/{issue-id}-{kurzbeschreibung}
+git checkout main
+git pull origin main
+git checkout -b feature/42-gitlab-pm-workflow-docs
+```
+
+**Branch-Prefixe:**
+- `feature/` - Neue Features
+- `fix/` - Bugfixes
+- `docs/` - Reine Dokumentation
+- `chore/` - Maintenance
+
+### 3. Issue-Status aktualisieren
+
+Label ändern: `workflow::backlog` → `workflow::in-progress`
+
+### 4. Entwickeln & Committen
+
+```bash
+# Conventional Commits Format
+git commit -m "feat(tutorials): add notebook 07 - RL Agent"
+git commit -m "fix(ci): correct docker image tag"
+git commit -m "docs: update README with setup instructions"
+```
+
+**Commit-Prefixe:**
+| Prefix | Verwendung |
+|--------|------------|
+| `feat:` | Neues Feature |
+| `fix:` | Bugfix |
+| `docs:` | Dokumentation |
+| `chore:` | Maintenance |
+| `refactor:` | Code-Refactoring |
+| `test:` | Tests hinzufügen/ändern |
+| `ci:` | CI/CD Änderungen |
+
+**Scope (optional):** `feat(tutorials):`, `fix(ci):`
+
+### 5. Letzter Commit mit Auto-Close
+
+```bash
+# Der letzte Commit schließt das Issue automatisch
+git commit -m "docs: add CONTRIBUTING.md
+
+Closes #42"
+```
+
+**Auto-Close Keywords:**
+- `Closes #42`
+- `Fixes #42`
+- `Resolves #42`
+
+### 6. Push & MR erstellen
+
+```bash
+git push -u origin feature/42-gitlab-pm-workflow-docs
+```
+
+MR erstellen mit:
+- **Title:** Wie Hauptcommit (z.B. "docs: Document GitLab PM Workflow")
+- **Description:** Summary + `Closes #42`
+- **Labels:** Gleiche wie Issue
+- **Remove source branch:** ✅ Aktiviert
+
+### 7. CI-Pipeline abwarten
+
+- Pipeline muss erfolgreich sein
+- Bei Fehlern: Fixen und neu pushen
+- `docs:preview` Job manuell triggern bei Dokumentations-MRs
+
+### 8. Merge
+
+Nach erfolgreicher Pipeline:
+- MR mergen (Squash optional)
+- Issue wird automatisch geschlossen
+- Source-Branch wird gelöscht
+
+## Epics
+
+Für größere Initiativen, die mehrere Issues umfassen:
+
+```markdown
+# Epic erstellen
+Title: "feat(tutorials): Interactive Jupyter Tutorial Series"
+Description: 
+  - Überblick über die Initiative
+  - Liste der Child-Issues
+  - Akzeptanzkriterien für das Gesamtziel
+
+# Child-Issues verlinken
+"Relates to #39" oder "Part of Epic #39" in Issue-Description
+```
+
+## Labels
+
+### Component Labels (`component::*`)
+- `component::core` - Kernfunktionalität
+- `component::tutorials` - Tutorial-Notebooks
+- `component::documentation` - Allgemeine Docs
+- `component::ci-cd` - Pipeline & Automation
+
+### Priority Labels (`priority::*`)
+- `priority::critical` - Sofort
+- `priority::high` - Diese Woche
+- `priority::medium` - Dieser Sprint
+- `priority::low` - Backlog
+
+## Best Practices
+
+### DO ✅
+- Kleine, fokussierte MRs (< 500 Zeilen)
+- Aussagekräftige Commit-Messages
+- Issue vor Arbeitsbeginn erstellen
+- Pipeline-Erfolg vor Merge prüfen
+- ADRs für architekturelle Entscheidungen
+
+### DON'T ❌
+- Direkt auf `main` pushen
+- Große, monolithische MRs
+- Commits ohne Kontext ("fix", "update")
+- MR mergen bei fehlgeschlagener Pipeline
+- Ungetesteten Code mergen
+
+## Beispiel: Kompletter Workflow
+
+```bash
+# 1. Issue #42 existiert bereits
+
+# 2. Branch erstellen
+git checkout -b feature/42-gitlab-pm-workflow-docs
+
+# 3. Entwickeln
+vim docs/architecture/decisions/ADR-001.md
+vim CONTRIBUTING.md
+
+# 4. Committen
+git add .
+git commit -m "docs: add ADR-001 GitLab PM Workflow"
+git commit -m "docs: add CONTRIBUTING.md
+
+Closes #42"
+
+# 5. Pushen
+git push -u origin feature/42-gitlab-pm-workflow-docs
+
+# 6. MR erstellen (via UI oder API)
+# 7. Pipeline abwarten
+# 8. Mergen → Issue #42 wird automatisch geschlossen
+```
+
+## ADR (Architecture Decision Records)
+
+Für wichtige technische Entscheidungen:
+
+```
+docs/architecture/decisions/
+├── ADR-001_GitLab-PM-Workflow.md
+├── ADR-002_OPM-Flow-Integration.md
+└── ...
+```
+
+**ADR-Format:**
+- Status (Proposed/Accepted/Deprecated)
+- Context (Warum diese Entscheidung?)
+- Decision (Was wurde entschieden?)
+- Consequences (Auswirkungen)
+
+Siehe [ADR-001](docs/architecture/decisions/ADR-001_GitLab-PM-Workflow.md) als Beispiel.
 
 ---
 
-## Development Setup
-
-```bash
-# Clone and install
-git clone git@gitlab.com:wolfram_laube/blauweiss_llc/irena.git
-cd irena
-pip install -e ".[dev]"
-
-# Run tests
-pytest -q
-
-# Run CLI
-python -m clarissa demo
-```
-
-## Pre-commit Hooks
-
-```bash
-pip install pre-commit
-pre-commit install
-```
-
-Hooks run CLI snapshot tests and fast unit tests before each commit.
-
-To refresh snapshots: `make update-snapshots`
-
----
-
-## Code Guidelines
-
-### ADR Discipline
-
-If a change alters behavior, responsibilities, authority, or safety boundaries:
-- Reference an existing ADR, or
-- Introduce a new ADR in `docs/architecture/adr/`
-
-### Boundaries
-
-- `src/clarissa/` must not import from `experiments/`
-- Experiments may import `clarissa`
-
----
-
-## CI Bots (for maintainers)
-
-| Bot | What it does |
-|-----|--------------|
-| `gitlab_issue_bot.py` | Creates issue on CI failure |
-| `gitlab_mr_bot.py` | Comments on MR when tests fail |
-| `gitlab_recovery_bot.py` | Updates issue when build recovers |
-
-Configure via CI variables: `GITLAB_TOKEN`, `CI_BOT_LABELS`, `CI_BOT_ASSIGNEE_IDS`
+*Diese Dokumentation wurde erstellt unter Einhaltung des dokumentierten Workflows (Issue #42 → MR).*
