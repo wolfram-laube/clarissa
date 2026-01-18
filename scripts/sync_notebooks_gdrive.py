@@ -1,142 +1,63 @@
 #!/usr/bin/env python3
-"""
-Sync Jupyter notebooks to Google Drive for Colab access.
-Creates/updates notebooks in a 'CLARISSA_Notebooks' subfolder and generates Colab URLs.
-"""
+"""Sync notebooks to GDrive CLARISSA/notebooks/ folder for Colab access."""
 
 import json
 import os
-import sys
+import glob
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
-from googleapiclient.errors import HttpError
 
 SA_KEY_PATH = os.environ.get("GOOGLE_SERVICE_ACCOUNT_KEY", "")
-ROOT_FOLDER_ID = os.environ.get("GOOGLE_DRIVE_FOLDER_ID", "1qh0skTeyRNs4g9KwAhpd3J8Yj_XENIFs")
-NOTEBOOKS_FOLDER = "CLARISSA_Notebooks"
+CONFIG_PATH = "config/clarissa_credentials.json"
+NOTEBOOKS_DIR = "docs/tutorials"
 
-NOTEBOOK_PATHS = [
-    "docs/tutorials/reservoir-basics-code.ipynb",
-]
+with open(CONFIG_PATH, 'r') as f:
+    config = json.load(f)
 
+# Target: CLARISSA/notebooks/ folder
+TARGET_FOLDER_ID = config['gdrive']['clarissa']['notebooks_folder_id']
 
-def find_or_create_folder(service, parent_id, folder_name):
-    """Find existing folder or create new one."""
-    try:
-        query = f"name='{folder_name}' and '{parent_id}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false"
-        results = service.files().list(
-            q=query, spaces='drive', fields='files(id, name)',
-            supportsAllDrives=True, includeItemsFromAllDrives=True
-        ).execute()
-        folders = results.get('files', [])
-        if folders:
-            print(f"Found existing folder: {folder_name}")
-            return folders[0]['id']
-    except HttpError as e:
-        print(f"Search failed: {e}")
+with open(SA_KEY_PATH, 'r') as f:
+    sa_key = json.load(f)
+print(f"Service Account: {sa_key.get('client_email')}")
+print(f"Target folder: CLARISSA/notebooks/ ({TARGET_FOLDER_ID})")
 
-    folder_metadata = {
-        'name': folder_name,
-        'mimeType': 'application/vnd.google-apps.folder',
-        'parents': [parent_id]
-    }
-    try:
-        folder = service.files().create(
-            body=folder_metadata, fields='id', supportsAllDrives=True
-        ).execute()
-        print(f"Created folder: {folder_name}")
-        return folder.get('id')
-    except HttpError as e:
-        print(f"Failed to create folder: {e}")
-        return None
+credentials = service_account.Credentials.from_service_account_info(
+    sa_key, scopes=["https://www.googleapis.com/auth/drive"]
+)
+service = build("drive", "v3", credentials=credentials)
 
+notebooks = glob.glob(f"{NOTEBOOKS_DIR}/*.ipynb")
+print(f"Found {len(notebooks)} notebooks")
 
-def upload_or_update_file(service, folder_id, filepath, filename):
-    """Upload file, updating if it already exists."""
-    try:
-        query = f"name='{filename}' and '{folder_id}' in parents and trashed=false"
-        results = service.files().list(
-            q=query, spaces='drive', fields='files(id)',
-            supportsAllDrives=True, includeItemsFromAllDrives=True
-        ).execute()
-        existing = results.get('files', [])
-    except HttpError:
-        existing = []
+colab_urls = {}
 
-    media = MediaFileUpload(filepath, mimetype='application/x-ipynb+json', resumable=True)
+for nb_path in notebooks:
+    nb_name = os.path.basename(nb_path)
+    
+    query = f"name='{nb_name}' and '{TARGET_FOLDER_ID}' in parents and trashed=false"
+    results = service.files().list(q=query, spaces='drive', fields='files(id)',
+        supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
+    existing = results.get('files', [])
+    
+    media = MediaFileUpload(nb_path, mimetype='application/x-ipynb+json', resumable=True)
+    
+    if existing:
+        file_id = existing[0]['id']
+        service.files().update(fileId=file_id, media_body=media, supportsAllDrives=True).execute()
+        print(f"  Updated: {nb_name}")
+    else:
+        file_metadata = {'name': nb_name, 'parents': [TARGET_FOLDER_ID]}
+        file = service.files().create(body=file_metadata, media_body=media, fields='id', supportsAllDrives=True).execute()
+        file_id = file.get('id')
+        print(f"  Created: {nb_name}")
+    
+    colab_urls[nb_name] = f"https://colab.research.google.com/drive/{file_id}"
 
-    try:
-        if existing:
-            file_id = existing[0]['id']
-            service.files().update(
-                fileId=file_id, media_body=media, supportsAllDrives=True
-            ).execute()
-            return file_id
-        else:
-            file_metadata = {'name': filename, 'parents': [folder_id]}
-            file = service.files().create(
-                body=file_metadata, media_body=media, fields='id', supportsAllDrives=True
-            ).execute()
-            return file.get('id')
-    except HttpError as e:
-        print(f"  ERROR uploading {filename}: {e}")
-        return None
+with open('notebook_colab_urls.json', 'w') as f:
+    json.dump(colab_urls, f, indent=2)
 
-
-def main():
-    print(f"Root Folder ID: {ROOT_FOLDER_ID}")
-    print(f"Subfolder: {NOTEBOOKS_FOLDER}")
-
-    with open(SA_KEY_PATH, 'r') as f:
-        sa_key = json.load(f)
-    print(f"Service Account: {sa_key.get('client_email')}")
-
-    credentials = service_account.Credentials.from_service_account_info(
-        sa_key, scopes=["https://www.googleapis.com/auth/drive"]
-    )
-    service = build("drive", "v3", credentials=credentials)
-
-    notebooks_folder_id = find_or_create_folder(service, ROOT_FOLDER_ID, NOTEBOOKS_FOLDER)
-    if not notebooks_folder_id:
-        print("ERROR: Could not create notebooks folder")
-        sys.exit(1)
-
-    results = {"notebooks": [], "folder_id": notebooks_folder_id}
-
-    for notebook_path in NOTEBOOK_PATHS:
-        if not os.path.exists(notebook_path):
-            print(f"  SKIP: {notebook_path} not found")
-            continue
-
-        filename = os.path.basename(notebook_path)
-        file_id = upload_or_update_file(service, notebooks_folder_id, notebook_path, filename)
-        
-        if file_id:
-            colab_url = f"https://colab.research.google.com/drive/{file_id}"
-            print(f"  OK: {filename}")
-            print(f"     Colab: {colab_url}")
-            results["notebooks"].append({
-                "path": notebook_path,
-                "filename": filename,
-                "file_id": file_id,
-                "colab_url": colab_url
-            })
-
-    with open("notebook_colab_urls.json", "w") as f:
-        json.dump(results, f, indent=2)
-
-    print("")
-    print(f"GDrive Folder: https://drive.google.com/drive/folders/{notebooks_folder_id}")
-    print(f"Synced {len(results['notebooks'])} notebooks")
-
-    if results["notebooks"]:
-        print("")
-        print("--- Copy this to your documentation ---")
-        for nb in results["notebooks"]:
-            badge_md = f"[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]({nb['colab_url']})"
-            print(badge_md)
-
-
-if __name__ == "__main__":
-    main()
+print(f"\nNotebooks synced to CLARISSA/notebooks/")
+for name, url in colab_urls.items():
+    print(f"  {name}: {url}")
