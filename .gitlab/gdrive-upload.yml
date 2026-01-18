@@ -1,4 +1,4 @@
-# Google Drive Upload Pipeline for Benchmark Reports
+# Google Drive Upload Pipeline for Benchmark Reports and Notebooks
 #
 # Supports both regular folders AND Shared Drives
 # Uses Service Account: claude-assistant@myk8sproject-207017.iam.gserviceaccount.com
@@ -44,20 +44,15 @@ gdrive:upload-benchmark:
           sa_key = json.load(f)
       print(f"Service Account: {sa_key.get('client_email')}")
 
-      # Full drive scope for Shared Drives
       credentials = service_account.Credentials.from_service_account_info(
           sa_key, scopes=["https://www.googleapis.com/auth/drive"]
       )
       service = build("drive", "v3", credentials=credentials)
 
-      # Check if this is a Shared Drive
       is_shared_drive = False
       try:
-          # Try to get the folder - use supportsAllDrives for Shared Drive support
           folder_info = service.files().get(
-              fileId=ROOT_FOLDER_ID,
-              supportsAllDrives=True,
-              fields="id,name,driveId"
+              fileId=ROOT_FOLDER_ID, supportsAllDrives=True, fields="id,name,driveId"
           ).execute()
           print(f"Folder found: {folder_info.get('name')}")
           if folder_info.get('driveId'):
@@ -68,56 +63,36 @@ gdrive:upload-benchmark:
           sys.exit(1)
 
       def find_or_create_folder(parent_id, folder_name):
-          """Find existing folder or create new one."""
           try:
               query = f"name='{folder_name}' and '{parent_id}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false"
-              results = service.files().list(
-                  q=query, 
-                  spaces='drive', 
-                  fields='files(id, name)',
-                  supportsAllDrives=True,
-                  includeItemsFromAllDrives=True
-              ).execute()
+              results = service.files().list(q=query, spaces='drive', fields='files(id, name)',
+                  supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
               folders = results.get('files', [])
               if folders:
                   print(f"Found existing folder: {folder_name}")
                   return folders[0]['id']
           except HttpError as e:
               print(f"Search failed: {e}")
-
-          # Create folder
-          folder_metadata = {
-              'name': folder_name,
-              'mimeType': 'application/vnd.google-apps.folder',
-              'parents': [parent_id]
-          }
+          folder_metadata = {'name': folder_name, 'mimeType': 'application/vnd.google-apps.folder', 'parents': [parent_id]}
           try:
-              folder = service.files().create(
-                  body=folder_metadata, 
-                  fields='id',
-                  supportsAllDrives=True
-              ).execute()
+              folder = service.files().create(body=folder_metadata, fields='id', supportsAllDrives=True).execute()
               print(f"Created folder: {folder_name}")
               return folder.get('id')
           except HttpError as e:
               print(f"Failed to create folder: {e}")
               return None
 
-      # Create Benchmarks subfolder
       benchmark_folder_id = find_or_create_folder(ROOT_FOLDER_ID, BENCHMARK_FOLDER)
       if not benchmark_folder_id:
           print("Using root folder instead")
           benchmark_folder_id = ROOT_FOLDER_ID
 
-      # Create timestamped subfolder
       timestamp = datetime.now().strftime('%Y-%m-%d_%H%M%S')
       run_folder_name = f"benchmark_{timestamp}_pipeline_{PIPELINE_ID}"
       run_folder_id = find_or_create_folder(benchmark_folder_id, run_folder_name)
-      
       if not run_folder_id:
           run_folder_id = benchmark_folder_id
 
-      # Find benchmark files
       benchmark_dir = "docs/ci/benchmarks"
       if not os.path.exists(benchmark_dir):
           print(f"Directory {benchmark_dir} not found")
@@ -128,39 +103,49 @@ gdrive:upload-benchmark:
           filepath = os.path.join(benchmark_dir, filename)
           if not os.path.isfile(filepath):
               continue
-
-          mimetypes = {'.md': 'text/markdown', '.json': 'application/json', 
-                       '.png': 'image/png', '.ics': 'text/calendar'}
+          mimetypes = {'.md': 'text/markdown', '.json': 'application/json', '.png': 'image/png', '.ics': 'text/calendar'}
           ext = os.path.splitext(filename)[1]
           mimetype = mimetypes.get(ext, 'application/octet-stream')
-
           file_metadata = {'name': filename, 'parents': [run_folder_id]}
           media = MediaFileUpload(filepath, mimetype=mimetype, resumable=True)
-
           try:
-              file = service.files().create(
-                  body=file_metadata, 
-                  media_body=media, 
-                  fields='id',
-                  supportsAllDrives=True
-              ).execute()
+              file = service.files().create(body=file_metadata, media_body=media, fields='id', supportsAllDrives=True).execute()
               print(f"  Uploaded: {filename}")
               uploaded += 1
           except HttpError as e:
               print(f"  Failed: {filename} - {e}")
 
-      print(f"\nUploaded {uploaded} files")
+      print(f"
+Uploaded {uploaded} files")
       print(f"Folder: https://drive.google.com/drive/folders/{run_folder_id}")
 
-      summary = {"pipeline_id": PIPELINE_ID, "timestamp": timestamp, 
-                 "folder_id": run_folder_id, "files_uploaded": uploaded,
-                 "is_shared_drive": is_shared_drive}
+      summary = {"pipeline_id": PIPELINE_ID, "timestamp": timestamp, "folder_id": run_folder_id, 
+                 "files_uploaded": uploaded, "is_shared_drive": is_shared_drive}
       with open("gdrive_upload_summary.json", "w") as f:
           json.dump(summary, f, indent=2)
       PYEOF
   artifacts:
     paths:
       - gdrive_upload_summary.json
+    expire_in: 1 week
+
+# Sync notebooks to GDrive for Colab access
+gdrive:sync-notebooks:
+  extends: .gdrive_base
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+        - docs/tutorials/*.ipynb
+      when: always
+    - when: manual
+      allow_failure: true
+  needs: []
+  script:
+    - python3 scripts/sync_notebooks_gdrive.py
+  artifacts:
+    paths:
+      - notebook_colab_urls.json
     expire_in: 1 week
 
 # List Google Drive contents (with Shared Drive support)
@@ -191,35 +176,30 @@ gdrive:list:
       )
       service = build("drive", "v3", credentials=credentials)
 
-      # First, try to get folder info
       try:
           folder_info = service.files().get(
-              fileId=FOLDER_ID,
-              supportsAllDrives=True,
-              fields="id,name,driveId,mimeType"
+              fileId=FOLDER_ID, supportsAllDrives=True, fields="id,name,driveId,mimeType"
           ).execute()
-          print(f"\nFolder: {folder_info.get('name')}")
+          print(f"
+Folder: {folder_info.get('name')}")
           print(f"Type: {folder_info.get('mimeType')}")
           if folder_info.get('driveId'):
               print(f"Shared Drive ID: {folder_info.get('driveId')}")
       except HttpError as e:
           print(f"Could not get folder info: {e}")
 
-      # List files
       files = []
       try:
           query = f"'{FOLDER_ID}' in parents and trashed=false"
           results = service.files().list(
-              q=query, 
-              spaces='drive',
-              fields='files(id, name, mimeType, modifiedTime, size)',
-              orderBy='modifiedTime desc', 
-              pageSize=50,
-              supportsAllDrives=True,
-              includeItemsFromAllDrives=True
+              q=query, spaces='drive', fields='files(id, name, mimeType, modifiedTime, size)',
+              orderBy='modifiedTime desc', pageSize=50,
+              supportsAllDrives=True, includeItemsFromAllDrives=True
           ).execute()
           files = results.get('files', [])
-          print(f"\nFound {len(files)} items:\n")
+          print(f"
+Found {len(files)} items:
+")
           for f in files:
               icon = 'D' if f['mimeType'] == 'application/vnd.google-apps.folder' else 'F'
               print(f"  [{icon}] {f['name']}")
