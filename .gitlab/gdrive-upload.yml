@@ -1,4 +1,5 @@
-# Google Drive Operations Pipeline
+# Google Drive Pipeline - Uploads, Sync, and Management
+#
 # Service Account: claude-assistant@myk8sproject-207017.iam.gserviceaccount.com
 
 .gdrive_base:
@@ -8,14 +9,17 @@
   before_script:
     - pip install google-auth google-api-python-client --quiet
 
-# One-time reorganization (ADR-017)
+# =============================================================================
+# MANAGEMENT JOBS
+# =============================================================================
+
+# Reorganize folder structure per ADR-017 (ONE-TIME)
 gdrive:reorganize:
   extends: .gdrive_base
-  stage: deploy
+  stage: .pre
   rules:
     - when: manual
       allow_failure: true
-  needs: []
   script:
     - python3 scripts/gdrive_reorganize.py
   artifacts:
@@ -23,24 +27,40 @@ gdrive:reorganize:
       - gdrive_folder_ids.json
     expire_in: 1 week
 
-# Upload benchmark report to Google Drive
-gdrive:upload-benchmark:
+# List folder contents (debugging)
+gdrive:list:
+  extends: .gdrive_base
+  stage: .pre
+  rules:
+    - when: manual
+      allow_failure: true
+  script:
+    - python3 scripts/gdrive_list_deep.py
+  artifacts:
+    paths:
+      - gdrive_listing.json
+    expire_in: 1 day
+
+# =============================================================================
+# SYNC JOBS (automated)
+# =============================================================================
+
+# Sync credentials to GDrive/CLARISSA/config
+gdrive:sync-credentials:
   extends: .gdrive_base
   stage: deploy
   rules:
-    - if: $UPLOAD_BENCHMARK == "true"
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+        - config/clarissa_credentials.json
       when: always
     - when: manual
       allow_failure: true
   needs: []
   script:
-    - python3 scripts/gdrive_upload_benchmark.py
-  artifacts:
-    paths:
-      - gdrive_upload_summary.json
-    expire_in: 1 week
+    - python3 scripts/sync_credentials_gdrive.py
 
-# Sync notebooks to GDrive for Colab access
+# Sync notebooks to GDrive/CLARISSA/notebooks
 gdrive:sync-notebooks:
   extends: .gdrive_base
   stage: deploy
@@ -59,31 +79,19 @@ gdrive:sync-notebooks:
       - notebook_colab_urls.json
     expire_in: 1 week
 
-# Sync credentials to GDrive for Colab/automation access
-gdrive:sync-credentials:
+# Upload benchmark report to GDrive/CLARISSA/benchmarks
+gdrive:upload-benchmark:
   extends: .gdrive_base
   stage: deploy
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      changes:
-        - config/clarissa_credentials.json
+    - if: $UPLOAD_BENCHMARK == "true"
       when: always
     - when: manual
       allow_failure: true
   needs: []
   script:
-    - python3 scripts/sync_credentials_gdrive.py
-
-# List Google Drive contents (deep)
-gdrive:list:
-  extends: .gdrive_base
-  stage: .pre
-  rules:
-    - when: manual
-      allow_failure: true
-  script:
-    - python3 scripts/gdrive_list_deep.py
+    - python3 scripts/gdrive_upload_benchmark.py
   artifacts:
     paths:
-      - gdrive_listing.json
-    expire_in: 1 day
+      - gdrive_upload_summary.json
+    expire_in: 1 week

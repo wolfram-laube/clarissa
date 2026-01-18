@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sync notebooks to GDrive CLARISSA/notebooks/ folder for Colab access."""
+"""Sync Jupyter notebooks to GDrive/CLARISSA/notebooks folder."""
 
 import json
 import os
@@ -9,36 +9,39 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
 SA_KEY_PATH = os.environ.get("GOOGLE_SERVICE_ACCOUNT_KEY", "")
+NOTEBOOKS_PATH = "docs/tutorials"
 CONFIG_PATH = "config/clarissa_credentials.json"
-NOTEBOOKS_DIR = "docs/tutorials"
 
 with open(CONFIG_PATH, 'r') as f:
     config = json.load(f)
 
-# Target: CLARISSA/notebooks/ folder
-TARGET_FOLDER_ID = config['gdrive']['clarissa']['notebooks_folder_id']
+# Use CLARISSA/notebooks folder if available, otherwise legacy folder
+TARGET_FOLDER_ID = config.get('gdrive', {}).get('notebooks_folder_id') or "1meMlElQRVGj3dDkzt2h0SGF6jJa3HDTa"
 
 with open(SA_KEY_PATH, 'r') as f:
     sa_key = json.load(f)
+
 print(f"Service Account: {sa_key.get('client_email')}")
-print(f"Target folder: CLARISSA/notebooks/ ({TARGET_FOLDER_ID})")
+print(f"Target folder: {TARGET_FOLDER_ID}")
 
 credentials = service_account.Credentials.from_service_account_info(
     sa_key, scopes=["https://www.googleapis.com/auth/drive"]
 )
 service = build("drive", "v3", credentials=credentials)
 
-notebooks = glob.glob(f"{NOTEBOOKS_DIR}/*.ipynb")
-print(f"Found {len(notebooks)} notebooks")
-
+notebooks = glob.glob(f"{NOTEBOOKS_PATH}/*.ipynb")
 colab_urls = {}
 
 for nb_path in notebooks:
-    nb_name = os.path.basename(nb_path)
+    filename = os.path.basename(nb_path)
+    print(f"\nProcessing: {filename}")
     
-    query = f"name='{nb_name}' and '{TARGET_FOLDER_ID}' in parents and trashed=false"
-    results = service.files().list(q=query, spaces='drive', fields='files(id)',
-        supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
+    # Check if exists
+    query = f"name='{filename}' and '{TARGET_FOLDER_ID}' in parents and trashed=false"
+    results = service.files().list(
+        q=query, spaces='drive', fields='files(id)',
+        supportsAllDrives=True, includeItemsFromAllDrives=True
+    ).execute()
     existing = results.get('files', [])
     
     media = MediaFileUpload(nb_path, mimetype='application/x-ipynb+json', resumable=True)
@@ -46,18 +49,21 @@ for nb_path in notebooks:
     if existing:
         file_id = existing[0]['id']
         service.files().update(fileId=file_id, media_body=media, supportsAllDrives=True).execute()
-        print(f"  Updated: {nb_name}")
+        print(f"  Updated (ID: {file_id})")
     else:
-        file_metadata = {'name': nb_name, 'parents': [TARGET_FOLDER_ID]}
-        file = service.files().create(body=file_metadata, media_body=media, fields='id', supportsAllDrives=True).execute()
+        file_metadata = {'name': filename, 'parents': [TARGET_FOLDER_ID]}
+        file = service.files().create(
+            body=file_metadata, media_body=media, fields='id', supportsAllDrives=True
+        ).execute()
         file_id = file.get('id')
-        print(f"  Created: {nb_name}")
+        print(f"  Created (ID: {file_id})")
     
-    colab_urls[nb_name] = f"https://colab.research.google.com/drive/{file_id}"
+    colab_url = f"https://colab.research.google.com/drive/{file_id}"
+    colab_urls[filename] = colab_url
+    print(f"  Colab: {colab_url}")
 
-with open('notebook_colab_urls.json', 'w') as f:
+# Save URLs
+with open("notebook_colab_urls.json", "w") as f:
     json.dump(colab_urls, f, indent=2)
 
-print(f"\nNotebooks synced to CLARISSA/notebooks/")
-for name, url in colab_urls.items():
-    print(f"  {name}: {url}")
+print(f"\nSynced {len(notebooks)} notebooks to GDrive!")
