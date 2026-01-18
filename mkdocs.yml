@@ -102,7 +102,7 @@ nav:
       - ADR-014 LLM Document Merge: architecture/adr/ADR-014-llm-document-merge.md
       - ADR-015 LLM CI Notifications: architecture/adr/ADR-015-llm-ci-notifications.md
       - ADR-016 Runner Load Balancing: architecture/adr/ADR-016-runner-load-balancing.md
-      - ADR-017 Google Drive Integration: architecture/adr/ADR-017-google-drive-integration.md
+      - ADR-017 GDrive Folder Structure: architecture/adr/ADR-017-gdrive-folder-structure.md
       - ADR-018 GitLab PM Workflow: architecture/adr/ADR-018-gitlab-pm-workflow.md
 
   - Guides:
