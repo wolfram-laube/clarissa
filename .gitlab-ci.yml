@@ -86,13 +86,13 @@ stages:
 .issue_bot_rules: &issue_bot_rules
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
-      when: on_success
+      when: always
     - when: never
 
 .recovery_bot_rules: &recovery_bot_rules
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
-      when: on_success
+      when: always
     - when: never
 
 .mr_bot_rules: &mr_bot_rules
@@ -515,7 +515,7 @@ pages:
       artifacts: true
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
-      when: on_success
+      when: always
     - when: never
   before_script:
     - pip install mkdocs mkdocs-material pymdown-extensions jinja2 pyyaml mkdocs-jupyter
