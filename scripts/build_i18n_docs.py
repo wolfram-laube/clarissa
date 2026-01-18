@@ -177,7 +177,7 @@ def build_getting_started(env: Environment, translations: dict, fallback: dict) 
             print(f"  ⚠ No getting_started section for {lang_code} - using fallback")
         
         output = template.render(
-            getting_started=merged.get("getting_started", fallback.get("getting_started", {})),
+            t=merged,
             lang_code=lang_code,
         )
         
