@@ -10,52 +10,53 @@
 
 ## Context
 
-CLARISSA benötigt einen strukturierten Entwicklungsworkflow, der:
-- Nachvollziehbare Änderungen gewährleistet
-- Code-Qualität durch Reviews sicherstellt
-- Automatisierte Tests vor dem Merge erzwingt
-- Dokumentation und Code synchron hält
-- Für ein kleines Team (1-3 Personen) praktikabel ist
+CLARISSA requires a structured development workflow that:
 
-### Betrachtete Alternativen
+- Ensures traceable changes
+- Guarantees code quality through reviews
+- Enforces automated tests before merge
+- Keeps documentation and code in sync
+- Remains practical for a small team (1-3 people)
 
-1. **GitHub Flow** - Simple branch-per-feature, PR-basiert
-2. **GitFlow** - Komplexe Branch-Struktur (develop, release, hotfix)
-3. **Trunk-Based Development** - Kurze Feature-Branches, häufige Merges
-4. **GitLab Flow** - Environment-Branches + Feature-Branches
+### Alternatives Considered
+
+1. **GitHub Flow** - Simple branch-per-feature, PR-based
+2. **GitFlow** - Complex branch structure (develop, release, hotfix)
+3. **Trunk-Based Development** - Short feature branches, frequent merges
+4. **GitLab Flow** - Environment branches + feature branches
 
 ## Decision
 
-Wir verwenden einen **GitLab-nativen Workflow** mit folgender Hierarchie:
+We use a **GitLab-native workflow** with the following hierarchy:
 
 ```
-Epic (Milestone-übergreifend)
-  └── Issue (einzelne Aufgabe)
-        └── Feature-Branch (feature/{issue-id}-{slug})
+Epic (cross-milestone)
+  └── Issue (single task)
+        └── Feature Branch (feature/{issue-id}-{slug})
               └── Merge Request (→ main)
 ```
 
-### Kernprinzipien
+### Core Principles
 
-1. **Kein direkter Push auf `main`** - Alle Änderungen via MR
-2. **Issue-First** - Jede Arbeit beginnt mit einem Issue
-3. **Branch-Naming** - `feature/{issue-id}-{kurzbeschreibung}`
+1. **No direct push to `main`** - All changes via MR
+2. **Issue-First** - Every work item starts with an issue
+3. **Branch Naming** - `feature/{issue-id}-{short-description}`
 4. **Conventional Commits** - `feat:`, `fix:`, `docs:`, `chore:`
-5. **Auto-Close** - MR-Commit enthält `Closes #{issue-id}`
-6. **Pipeline-Gate** - Merge nur nach erfolgreicher CI
+5. **Auto-Close** - MR commit contains `Closes #{issue-id}`
+6. **Pipeline Gate** - Merge only after successful CI
 
-### Wann Epic erstellen?
+### When to Create an Epic?
 
-Da GitLab Free keine nativen Epics bietet, nutzen wir Parent-Issues mit `[EPIC]` Prefix und `type::epic` Label.
+Since GitLab Free doesn't offer native Epics, we use parent issues with `[EPIC]` prefix and `type::epic` label.
 
-| Situation | Epic? | Begründung |
-|-----------|-------|------------|
-| 3+ zusammenhängende Issues | ✅ Ja | Gruppierung sinnvoll |
-| Milestone-übergreifende Arbeit | ✅ Ja | Tracking über Milestones hinweg |
-| Isolierte Fixes (1-2 Issues) | ❌ Nein | Overhead ohne Mehrwert |
-| Zeitaufwand < 1 Tag | ❌ Nein | Zu klein für Epic |
+| Situation | Epic? | Rationale |
+|-----------|-------|-----------|
+| 3+ related issues | ✅ Yes | Grouping is beneficial |
+| Cross-milestone work | ✅ Yes | Tracking across milestones |
+| Isolated fixes (1-2 issues) | ❌ No | Overhead without benefit |
+| Effort < 1 day | ❌ No | Too small for Epic |
 
-**Epic-Format:**
+**Epic Format:**
 ```markdown
 ## [EPIC] Feature Name
 
@@ -66,19 +67,19 @@ Labels: type::epic, priority::X, workflow::in-progress
 - [ ] #XX - Subtask 2
 ```
 
-### Workflow-Diagramm
+### Workflow Diagram
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Issue     │────▶│   Branch    │────▶│   Commits   │────▶│     MR      │
-│   Board     │     │   erstellen │     │   + Push    │     │   + Review  │
+│   Issue     │────▶│   Create    │────▶│   Commits   │────▶│     MR      │
+│   Board     │     │   Branch    │     │   + Push    │     │   + Review  │
 └─────────────┘     └─────────────┘     └─────────────┘     └──────┬──────┘
                                                                    │
        ┌───────────────────────────────────────────────────────────┘
        ▼
 ┌─────────────┐     ┌─────────────┐
-│  CI/CD      │────▶│   Merge     │
-│  Pipeline   │     │   + Close   │
+│   CI/CD     │────▶│   Merge     │
+│   Pipeline  │     │   + Close   │
 └─────────────┘     └─────────────┘
 ```
 
@@ -86,26 +87,26 @@ Labels: type::epic, priority::X, workflow::in-progress
 
 ### Positive
 
-- **Traceability**: Jede Codeänderung ist zu einem Issue zurückverfolgbar
-- **Automatisierung**: `Closes #X` schließt Issues automatisch
-- **Quality Gate**: CI-Pipeline verhindert kaputten Code auf main
-- **Dokumentation**: Issues und MRs bilden natürliche Projekthistorie
-- **Single Source of Truth**: Alles in GitLab, keine externen Tools nötig
+- **Traceability**: Every code change is traceable to an issue
+- **Automation**: `Closes #X` automatically closes issues
+- **Quality Gate**: CI pipeline prevents broken code on main
+- **Documentation**: Issues and MRs form natural project history
+- **Single Source of Truth**: Everything in GitLab, no external tools needed
 
 ### Negative
 
-- **Overhead für Kleinigkeiten**: Auch Typo-Fixes brauchen Issue + MR
-- **Lernkurve**: Team muss Workflow verinnerlichen
-- **CI-Abhängigkeit**: Blockiert bei CI-Problemen
+- **Overhead for small changes**: Even typo fixes require issue + MR
+- **Learning curve**: Team must internalize the workflow
+- **CI dependency**: Blocked when CI has problems
 
-### Risiken
+### Risks
 
-- **Bottleneck bei Reviews**: Mitigiert durch kleine, fokussierte MRs
-- **Stale Branches**: Mitigiert durch `remove_source_branch: true`
+- **Review bottleneck**: Mitigated by small, focused MRs
+- **Stale branches**: Mitigated by `remove_source_branch: true`
 
 ## Implementation
 
-Siehe [Contributing Guide](../../contributing.md) für den detaillierten Workflow.
+See [Contributing Guide](../../contributing.md) for the detailed workflow.
 
 ## References
 
