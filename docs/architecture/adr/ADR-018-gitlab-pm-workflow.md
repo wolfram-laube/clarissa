@@ -1,9 +1,12 @@
-# ADR-001: GitLab-Native Project Management Workflow
+# ADR-018: GitLab-Native Project Management Workflow
 
 **Status:** Accepted  
-**Date:** 2026-01-18  
+**Date:** 2026-01-03 (originally), 2026-01-18 (renumbered)  
 **Decision Makers:** Wolfram Laube  
 **Tags:** workflow, project-management, gitlab
+
+> **Note:** This ADR was originally numbered ADR-001 in a separate `decisions/` directory.
+> Renumbered to ADR-018 during consolidation (see Issue #52).
 
 ## Context
 
@@ -41,6 +44,22 @@ Epic (Milestone-übergreifend)
 5. **Auto-Close** - MR-Commit enthält `Closes #{issue-id}`
 6. **Pipeline-Gate** - Merge nur nach erfolgreicher CI
 
+### Workflow-Diagramm
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Issue     │────▶│   Branch    │────▶│   Commits   │────▶│     MR      │
+│   Board     │     │   erstellen │     │   + Push    │     │   + Review  │
+└─────────────┘     └─────────────┘     └─────────────┘     └──────┬──────┘
+                                                                   │
+       ┌───────────────────────────────────────────────────────────┘
+       ▼
+┌─────────────┐     ┌─────────────┐
+│  CI/CD      │────▶│   Merge     │
+│  Pipeline   │     │   + Close   │
+└─────────────┘     └─────────────┘
+```
+
 ## Consequences
 
 ### Positive
@@ -64,10 +83,10 @@ Epic (Milestone-übergreifend)
 
 ## Implementation
 
-Siehe [CONTRIBUTING.md](../../CONTRIBUTING.md) für den detaillierten Workflow.
+Siehe [Contributing Guide](../../contributing.md) für den detaillierten Workflow.
 
 ## References
 
 - [GitLab Flow Documentation](https://docs.gitlab.com/ee/topics/gitlab_flow.html)
 - [Conventional Commits](https://www.conventionalcommits.org/)
-- Issue #42 (diese Dokumentation selbst als Beispiel)
+- Issue #52: ADR Directory Consolidation
