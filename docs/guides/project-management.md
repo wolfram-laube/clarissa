@@ -3,7 +3,7 @@
 Dieses Dokument beschreibt das vollständige Projektmanagement-Setup für CLARISSA in GitLab.
 
 > 🏗️ **Architektur-Entscheidung:** [ADR-018](../architecture/adr/ADR-018-gitlab-pm-workflow.md)  
-> 📖 **Workflow:** [CONTRIBUTING.md](../../CONTRIBUTING.md)
+> 📖 **Workflow:** [CONTRIBUTING.md](../contributing.md)
 
 ---
 
