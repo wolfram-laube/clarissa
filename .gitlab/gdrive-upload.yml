@@ -1,6 +1,5 @@
-# Google Drive Upload Pipeline for Benchmarks, Notebooks and Credentials
-#
-# Uses Service Account: claude-assistant@myk8sproject-207017.iam.gserviceaccount.com
+# Google Drive Operations Pipeline
+# Service Account: claude-assistant@myk8sproject-207017.iam.gserviceaccount.com
 
 .gdrive_base:
   image: python:3.11-slim
@@ -8,6 +7,21 @@
     - gcp-docker
   before_script:
     - pip install google-auth google-api-python-client --quiet
+
+# One-time reorganization (ADR-017)
+gdrive:reorganize:
+  extends: .gdrive_base
+  stage: deploy
+  rules:
+    - when: manual
+      allow_failure: true
+  needs: []
+  script:
+    - python3 scripts/gdrive_reorganize.py
+  artifacts:
+    paths:
+      - gdrive_folder_ids.json
+    expire_in: 1 week
 
 # Upload benchmark report to Google Drive
 gdrive:upload-benchmark:
@@ -60,7 +74,7 @@ gdrive:sync-credentials:
   script:
     - python3 scripts/sync_credentials_gdrive.py
 
-# List Google Drive contents
+# List Google Drive contents (deep)
 gdrive:list:
   extends: .gdrive_base
   stage: .pre
@@ -68,21 +82,8 @@ gdrive:list:
     - when: manual
       allow_failure: true
   script:
-    - python3 scripts/gdrive_list.py
+    - python3 scripts/gdrive_list_deep.py
   artifacts:
     paths:
       - gdrive_listing.json
     expire_in: 1 day
-# One-time job to reorganize GDrive folder structure
-gdrive:reorganize:
-  extends: .gdrive_base
-  stage: .pre
-  rules:
-    - when: manual
-      allow_failure: true
-  script:
-    - python3 scripts/gdrive_reorganize.py
-  artifacts:
-    paths:
-      - gdrive_folder_ids.json
-    expire_in: 1 week
