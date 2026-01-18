@@ -1,6 +1,5 @@
-# Google Drive Upload Pipeline for Benchmark Reports, Notebooks and Config
+# Google Drive Upload Pipeline for Benchmarks, Notebooks and Credentials
 #
-# Supports both regular folders AND Shared Drives
 # Uses Service Account: claude-assistant@myk8sproject-207017.iam.gserviceaccount.com
 
 .gdrive_base:
@@ -20,8 +19,6 @@ gdrive:upload-benchmark:
     - when: manual
       allow_failure: true
   needs: []
-  variables:
-    BENCHMARK_FOLDER_NAME: "Benchmarks"
   script:
     - python3 scripts/gdrive_upload_benchmark.py
   artifacts:
@@ -48,26 +45,22 @@ gdrive:sync-notebooks:
       - notebook_colab_urls.json
     expire_in: 1 week
 
-# Sync Colab config (credentials) to GDrive
-gdrive:sync-config:
+# Sync credentials to GDrive for Colab/automation access
+gdrive:sync-credentials:
   extends: .gdrive_base
   stage: deploy
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
-        - config/clarissa_colab_config.json
+        - config/clarissa_credentials.json
       when: always
     - when: manual
       allow_failure: true
   needs: []
   script:
-    - python3 scripts/sync_colab_config.py
-  artifacts:
-    paths:
-      - config_sync_result.json
-    expire_in: 1 week
+    - python3 scripts/sync_credentials_gdrive.py
 
-# List Google Drive contents (with Shared Drive support)
+# List Google Drive contents
 gdrive:list:
   extends: .gdrive_base
   stage: .pre
