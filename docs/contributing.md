@@ -52,6 +52,7 @@ git push -u origin 42-short-description
 | `priority::high` | Do this first |
 | `workflow::ready` | Ready to pick up |
 | `workflow::in-progress` | Someone's working on it |
+| `workflow::done` | Completed and merged |
 
 Full label reference: [Project Management Guide](guides/project-management.md#label-system)
 

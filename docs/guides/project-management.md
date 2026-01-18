@@ -2,7 +2,7 @@
 
 Dieses Dokument beschreibt das vollständige Projektmanagement-Setup für CLARISSA in GitLab.
 
-> 🏗️ **Architektur-Entscheidung:** [ADR-001](../architecture/decisions/ADR-001_GitLab-PM-Workflow.md)  
+> 🏗️ **Architektur-Entscheidung:** [ADR-018](../architecture/adr/ADR-018-gitlab-pm-workflow.md)  
 > 📖 **Workflow:** [CONTRIBUTING.md](../../CONTRIBUTING.md)
 
 ---
@@ -264,7 +264,7 @@ GitLab → Issues → Labels → Klick auf Label → Issue-Count
 - [GitLab Issue Management](https://docs.gitlab.com/ee/user/project/issues/)
 - [GitLab Boards](https://docs.gitlab.com/ee/user/project/issue_board.html)
 - [Scoped Labels](https://docs.gitlab.com/ee/user/project/labels.html#scoped-labels)
-- [ADR-001](../architecture/decisions/ADR-001_GitLab-PM-Workflow.md)
+- [ADR-018](../architecture/adr/ADR-018-gitlab-pm-workflow.md)
 
 ---
 
