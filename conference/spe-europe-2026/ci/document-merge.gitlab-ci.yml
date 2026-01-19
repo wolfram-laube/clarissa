@@ -136,7 +136,7 @@ build_canonical_pdf:
           const htmlPath = path.join(outputDir, htmlFile);
           const pdfPath = htmlPath.replace('.html', '.pdf');
           
-          console.log(`📄 Converting ${htmlFile} → ${path.basename(pdfPath)}`);
+          console.log('📄 Converting ' + htmlFile + ' → ' + path.basename(pdfPath));
           
           const page = await browser.newPage();
           const html = fs.readFileSync(htmlPath, 'utf8');
@@ -152,7 +152,7 @@ build_canonical_pdf:
             printBackground: true
           });
           
-          console.log(`   ✅ ${path.basename(pdfPath)}`);
+          console.log('   ✅ ' + path.basename(pdfPath));
         }
         
         await browser.close();
