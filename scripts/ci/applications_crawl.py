@@ -7,65 +7,128 @@ Crawls freelancermap.de for projects
 import os
 import sys
 import json
+import re
+import time
 
 sys.path.insert(0, os.getcwd())
 
-from src.admin.applications.pipeline.crawler import FreelancermapScraper
+import requests
+from bs4 import BeautifulSoup
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+    "Accept-Language": "de-DE,de;q=0.9",
+}
+
+def crawl_freelancermap(keyword, max_pages=2):
+    """Crawlt freelancermap.de nach Projekten."""
+    projects = []
+    base_url = "https://www.freelancermap.de/projektboerse.html"
+    
+    for page in range(1, max_pages + 1):
+        print(f"  📄 Seite {page}...")
+        params = {"query": keyword, "sort": "1", "pagenr": page}
+        
+        try:
+            resp = requests.get(base_url, headers=HEADERS, params=params, timeout=30)
+            resp.raise_for_status()
+            soup = BeautifulSoup(resp.text, "html.parser")
+            
+            cards = soup.select("div.project-card")
+            if not cards:
+                break
+                
+            for card in cards:
+                project = parse_card(card)
+                if project:
+                    projects.append(project)
+            
+            time.sleep(1)  # Rate limiting
+            
+        except Exception as e:
+            print(f"  ❌ Error page {page}: {e}")
+            break
+    
+    return projects
+
+def parse_card(card):
+    """Parst eine Projekt-Karte."""
+    try:
+        # Titel & URL
+        title_elem = card.select_one("a[data-id='project-card-title'], a[href*='/projekt/']")
+        if not title_elem:
+            return None
+        
+        title = title_elem.get_text(strip=True)
+        url = "https://www.freelancermap.de" + title_elem.get("href", "")
+        
+        # Company
+        company_elem = card.select_one("div.project-info > div:first-child")
+        company = company_elem.get_text(strip=True) if company_elem else ""
+        
+        # Location
+        city_elem = card.select_one("[data-testid='city'] a, a[data-id='project-card-city']")
+        location = city_elem.get_text(strip=True).rstrip(", ") if city_elem else ""
+        
+        # Remote %
+        remote_elem = card.select_one("[data-testid='remoteInPercent']")
+        remote_percent = 0
+        if remote_elem:
+            text = remote_elem.get_text()
+            match = re.search(r"(\d+)\s*%", text)
+            if match:
+                remote_percent = int(match.group(1))
+        
+        # Duration
+        duration_elem = card.select_one("[data-testid='duration']")
+        duration = duration_elem.get_text(strip=True) if duration_elem else ""
+        
+        # Start
+        start_elem = card.select_one("[data-testid='beginningMonth']")
+        start_date = start_elem.get_text(strip=True) if start_elem else ""
+        
+        return {
+            "title": title,
+            "url": url,
+            "company": company,
+            "location": location,
+            "remote_percent": remote_percent,
+            "duration": duration,
+            "start_date": start_date,
+            "source": "freelancermap",
+        }
+        
+    except Exception as e:
+        print(f"    ⚠️ Parse error: {e}")
+        return None
 
 def main():
     keywords = os.environ.get("KEYWORDS", "DevOps,Python,AI").split(",")
-    min_remote = int(os.environ.get("MIN_REMOTE", "50"))
+    min_remote = int(os.environ.get("MIN_REMOTE", "0"))  # Default 0 = alle
     max_pages = int(os.environ.get("MAX_PAGES", "2"))
     
-    scraper = FreelancermapScraper()
     all_projects = []
     
     for kw in keywords:
         kw = kw.strip()
         print(f"🔍 Searching: {kw}")
-        try:
-            # Pass keywords as list, disable remote_only to get all projects
-            projects = scraper.search(keywords=[kw], remote_only=False, max_pages=max_pages)
-            print(f"   → {len(projects)} raw results")
-            
-            # Convert Project objects to dicts if needed
-            project_dicts = []
-            for p in projects:
-                if hasattr(p, '__dict__'):
-                    # It's a dataclass/object
-                    d = {
-                        'title': getattr(p, 'title', ''),
-                        'url': getattr(p, 'url', ''),
-                        'company': getattr(p, 'company', ''),
-                        'location': getattr(p, 'location', ''),
-                        'remote_percent': getattr(p, 'remote_percent', 0),
-                        'rate': getattr(p, 'rate', ''),
-                        'start_date': getattr(p, 'start_date', ''),
-                        'duration': getattr(p, 'duration', ''),
-                        'skills': getattr(p, 'skills', []),
-                        'description': getattr(p, 'description', ''),
-                    }
-                    project_dicts.append(d)
-                elif isinstance(p, dict):
-                    project_dicts.append(p)
-            
-            # Filter by min remote percentage
-            filtered = [p for p in project_dicts if p.get('remote_percent', 0) >= min_remote]
-            print(f"   → {len(filtered)} after remote filter (>={min_remote}%)")
-            
-            all_projects.extend(filtered)
-        except Exception as e:
-            print(f"   ❌ Error: {e}")
-            import traceback
-            traceback.print_exc()
+        
+        projects = crawl_freelancermap(kw, max_pages=max_pages)
+        print(f"   → {len(projects)} raw results")
+        
+        # Filter by remote
+        if min_remote > 0:
+            projects = [p for p in projects if p.get("remote_percent", 0) >= min_remote]
+            print(f"   → {len(projects)} after remote filter (>={min_remote}%)")
+        
+        all_projects.extend(projects)
     
-    # Deduplicate by URL
+    # Deduplicate
     seen = set()
     unique = []
     for p in all_projects:
-        url = p.get("url", "")
-        if url and url not in seen:
-            seen.add(url)
+        if p["url"] not in seen:
+            seen.add(p["url"])
             unique.append(p)
     
     os.makedirs("output", exist_ok=True)
@@ -73,6 +136,10 @@ def main():
         json.dump(unique, f, indent=2, ensure_ascii=False)
     
     print(f"\n✅ {len(unique)} unique projects saved to output/projects.json")
+    
+    # Show top 5
+    for p in unique[:5]:
+        print(f"  • {p['title'][:50]}... ({p['remote_percent']}% remote)")
 
 if __name__ == "__main__":
     main()
