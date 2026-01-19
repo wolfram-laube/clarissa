@@ -1,10 +1,12 @@
-"""Pipeline module - Automated job application workflow"""
+"""Pipeline module - Automated job application workflow
 
-from .crawler import FreelancermapScraper, ProjectCrawler
-from .matcher import ProjectMatcher
-from .profiles import PROFILES
+Submodules:
+- crawler: Scrapes freelance portals
+- matcher: Matches projects to profiles
+- profiles: Profile definitions
+"""
 
-# Alias for convenience
-FreelancerMapCrawler = FreelancermapScraper
-
-__all__ = ["PROFILES", "FreelancermapScraper", "FreelancerMapCrawler", "ProjectCrawler", "ProjectMatcher"]
+# Lazy imports - only import when needed
+# from .crawler import FreelancermapScraper, ProjectCrawler
+# from .matcher import ProjectMatcher
+# from .profiles import PROFILES
