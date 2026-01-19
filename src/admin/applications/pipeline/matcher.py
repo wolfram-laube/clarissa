@@ -23,8 +23,8 @@ from dataclasses import dataclass, asdict
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 
-from profiles import PROFILES, TEAM_COMBOS, Profile, get_best_matches
-from crawler import Project
+from .profiles import PROFILES, TEAM_COMBOS, Profile, get_best_matches
+from .crawler import Project
 
 # ══════════════════════════════════════════════════════════════════════════════
 # MATCH-ERGEBNIS
