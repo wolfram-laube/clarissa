@@ -855,9 +855,9 @@ build_canonical_pdf:
                   const divs = document.querySelectorAll('.mermaid');
                   return Array.from(divs).every(d => d.querySelector('svg'));
                 }, { timeout: 60000 });
-                console.log('   ✅ Mermaid diagrams rendered');
+                console.log('   Mermaid diagrams rendered');
               } catch (e) {
-                console.log('   ⚠️  Mermaid timeout - diagrams may be missing');
+                console.log('   Mermaid timeout - diagrams may be missing');
               }
             }
             
@@ -874,11 +874,11 @@ build_canonical_pdf:
             });
             
             await page.close();
-            console.log('   ✅ ' + pdfFile + ' created');
+            console.log('   ' + pdfFile + ' created');
             success++;
             
           } catch (err) {
-            console.error(`   ❌ Failed: ${err.message}`);
+            console.error('   Failed: ' + err.message);
             failed++;
           }
         }
