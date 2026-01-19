@@ -24,19 +24,46 @@ def main():
         kw = kw.strip()
         print(f"🔍 Searching: {kw}")
         try:
-            projects = scraper.search(kw, max_pages=max_pages)
-            # Filter by remote percentage
-            projects = [p for p in projects if p.get("remote_percent", 0) >= min_remote]
-            all_projects.extend(projects)
-            print(f"   → {len(projects)} found")
+            # Pass keywords as list, disable remote_only to get all projects
+            projects = scraper.search(keywords=[kw], remote_only=False, max_pages=max_pages)
+            print(f"   → {len(projects)} raw results")
+            
+            # Convert Project objects to dicts if needed
+            project_dicts = []
+            for p in projects:
+                if hasattr(p, '__dict__'):
+                    # It's a dataclass/object
+                    d = {
+                        'title': getattr(p, 'title', ''),
+                        'url': getattr(p, 'url', ''),
+                        'company': getattr(p, 'company', ''),
+                        'location': getattr(p, 'location', ''),
+                        'remote_percent': getattr(p, 'remote_percent', 0),
+                        'rate': getattr(p, 'rate', ''),
+                        'start_date': getattr(p, 'start_date', ''),
+                        'duration': getattr(p, 'duration', ''),
+                        'skills': getattr(p, 'skills', []),
+                        'description': getattr(p, 'description', ''),
+                    }
+                    project_dicts.append(d)
+                elif isinstance(p, dict):
+                    project_dicts.append(p)
+            
+            # Filter by min remote percentage
+            filtered = [p for p in project_dicts if p.get('remote_percent', 0) >= min_remote]
+            print(f"   → {len(filtered)} after remote filter (>={min_remote}%)")
+            
+            all_projects.extend(filtered)
         except Exception as e:
             print(f"   ❌ Error: {e}")
+            import traceback
+            traceback.print_exc()
     
     # Deduplicate by URL
     seen = set()
     unique = []
     for p in all_projects:
-        url = p.get("url") or p.get("link", "")
+        url = p.get("url", "")
         if url and url not in seen:
             seen.add(url)
             unique.append(p)
