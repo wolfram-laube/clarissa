@@ -1,66 +1,67 @@
 # Project Management Guide
 
-Dieses Dokument beschreibt das vollständige Projektmanagement-Setup für CLARISSA in GitLab.
+This document describes the complete project management setup for CLARISSA in GitLab.
 
-> 🏗️ **Architektur-Entscheidung:** [ADR-018](../architecture/adr/ADR-018-gitlab-pm-workflow.md)  
+> 🏗️ **Architecture Decision:** [ADR-018](../architecture/adr/ADR-018-gitlab-pm-workflow.md)  
 > 📖 **Workflow:** [CONTRIBUTING.md](../contributing.md)
 
 ---
 
-## Übersicht
+## Overview
 
-CLARISSA verwendet GitLab als **Single Source of Truth** für:
+CLARISSA uses GitLab as **Single Source of Truth** for:
 
-| Bereich | GitLab Feature |
-|---------|----------------|
+| Area | GitLab Feature |
+|------|----------------|
 | Issue Tracking | Issues |
-| Größere Initiativen | Epics (via Issue-Links) |
-| Sprint-Planung | Milestones |
-| Aufgaben-Visualisierung | Issue Board |
+| Larger Initiatives | Epics (via Issue Links) |
+| Sprint Planning | Milestones |
+| Task Visualization | Issue Board |
 | Code Review | Merge Requests |
-| Automatisierung | CI/CD Pipelines |
-| Dokumentation | Repository + GitLab Pages |
+| Automation | CI/CD Pipelines |
+| Documentation | Repository + GitLab Pages |
 
 ---
 
-## Label-Taxonomie
+## Label Taxonomy
 
 ### Scoped Labels
 
-GitLab **Scoped Labels** (`scope::value`) garantieren, dass nur ein Label pro Scope aktiv ist:
+GitLab **Scoped Labels** (`scope::value`) ensure only one label per scope is active:
 
 ```
-type::feature + type::bug  → Nicht möglich ✗
+type::feature + type::bug  → Not allowed ✗
 type::feature              → OK ✓
 ```
 
-### Vollständige Label-Referenz
+### Complete Label Reference
 
-#### `type::` - Art der Arbeit
+#### `type::` - Type of Work
 
-| Label | Hex-Farbe | Beschreibung |
-|-------|-----------|--------------|
-| `type::feature` | `#428BCA` | Neue Funktionalität |
-| `type::bug` | `#D73A4A` | Fehlerbehebung |
-| `type::documentation` | `#CCCCCC` | Dokumentation |
+| Label | Hex Color | Description |
+|-------|-----------|-------------|
+| `type::feature` | `#428BCA` | New functionality |
+| `type::bug` | `#D73A4A` | Bug fix |
+| `type::docs` | `#CCCCCC` | Documentation |
 | `type::chore` | `#795548` | Maintenance |
-| `type::research` | `#9C27B0` | Spikes, Untersuchungen |
+| `type::research` | `#9C27B0` | Spikes, investigations |
 | `type::adr` | `#00BCD4` | Architecture Decision Record |
-| `type::task` | `#1E88E5` | Allgemeine Aufgaben |
-| `type::fix` | `#FB8C00` | Kleine Fixes |
+| `type::task` | `#1E88E5` | General tasks |
+| `type::fix` | `#FB8C00` | Small fixes |
+| `type::epic` | `#6699CC` | Epic (parent issue) |
 
-#### `priority::` - Dringlichkeit
+#### `priority::` - Urgency
 
-| Label | Hex-Farbe | SLA |
+| Label | Hex Color | SLA |
 |-------|-----------|-----|
-| `priority::critical` | `#B71C1C` | Sofort (< 24h) |
-| `priority::high` | `#E65100` | Diese Woche |
-| `priority::medium` | `#FDD835` | Dieser Sprint (2 Wochen) |
+| `priority::critical` | `#B71C1C` | Immediate (< 24h) |
+| `priority::high` | `#E65100` | This week |
+| `priority::medium` | `#FDD835` | This sprint (2 weeks) |
 | `priority::low` | `#64B5F6` | Backlog |
 
-#### `component::` - Systembereich
+#### `component::` - System Area
 
-| Label | Architektur-Komponente |
+| Label | Architecture Component |
 |-------|------------------------|
 | `component::nlp-agent` | Conversational Interface, Intent Classification |
 | `component::simulator` | OPM Flow, ECLIPSE Adapter |
@@ -71,35 +72,35 @@ type::feature              → OK ✓
 | `component::data-mesh` | Knowledge Layer, Vector DB, RAG |
 | `component::api` | REST API, Endpoints |
 | `component::tutorials` | Jupyter Notebooks |
-| `component::paper` | Wissenschaftliche Publikationen |
+| `component::paper` | Scientific Publications |
 | `component::ci` | GitLab CI/CD Pipeline |
 
-#### `workflow::` - Arbeits-Status
+#### `workflow::` - Work Status
 
-| Label | Board-Spalte | Trigger |
+| Label | Board Column | Trigger |
 |-------|--------------|---------|
-| `workflow::backlog` | Backlog | Issue erstellt |
-| `workflow::ready` | Ready | Sprint-Planung |
-| `workflow::in-progress` | In Progress | Arbeit beginnt |
-| `workflow::review` | Review | MR erstellt |
-| `workflow::blocked` | Blocked | Abhängigkeit fehlt |
+| `workflow::backlog` | Backlog | Issue created |
+| `workflow::ready` | Ready | Sprint planning |
+| `workflow::in-progress` | In Progress | Work begins |
+| `workflow::review` | Review | MR created |
+| `workflow::blocked` | Blocked | Dependency missing |
+| `workflow::done` | Done | Merged/Closed |
 
-#### Spezielle Labels (nicht-scoped)
+#### Special Labels (non-scoped)
 
-| Label | Verwendung |
-|-------|------------|
-| `good-first-issue` | Einsteigerfreundlich, gut dokumentiert |
-| `help-wanted` | Externe Hilfe willkommen |
-| `needs-discussion` | Team-Entscheidung erforderlich |
-| `wontfix` | Bewusst nicht umgesetzt |
-| `duplicate` | Verweis auf Original-Issue |
-| `client:nemensis` | Kunde/Projekt-spezifisch |
+| Label | Usage |
+|-------|-------|
+| `good-first-issue` | Beginner-friendly, well documented |
+| `help-wanted` | External help welcome |
+| `needs-discussion` | Team decision required |
+| `wontfix` | Intentionally not implemented |
+| `duplicate` | Reference to original issue |
 
 ---
 
 ## Milestones
 
-### Release-Struktur
+### Release Structure
 
 ```
 v0.1 - Foundation
@@ -113,40 +114,40 @@ v0.1 - Foundation
   │                 └── v1.0 - Production
 ```
 
-### Milestone-Details
+### Milestone Details
 
-| Milestone | Fokus | Key Results |
+| Milestone | Focus | Key Results |
 |-----------|-------|-------------|
-| **v0.1 - Foundation** | Grundgerüst | CI/CD ✅, Architektur ✅, Runner-Matrix ✅ |
-| **v0.2 - SPE Europe Draft** | Konferenz | Paper-Draft, OPM Integration, Tutorials |
+| **v0.1 - Foundation** | Groundwork | CI/CD ✅, Architecture ✅, Runner Matrix ✅ |
+| **v0.2 - SPE Europe Draft** | Conference | Paper Draft, OPM Integration, Tutorials |
 | **v0.3 - NLP Pipeline** | Conversation | Intent Classification, Entity Extraction |
 | **v0.4 - ECLIPSE Parser** | Deck Handling | Parser, Validator, Generator |
 | **v1.0 - Production** | Release | Full Integration, Testing, Docs |
 
-### Milestone-Nutzung
+### Milestone Usage
 
-1. **Issue erstellen** → Milestone zuweisen
-2. **Burndown** automatisch in GitLab
-3. **Milestone schließen** wenn alle Issues done
+1. **Create issue** → Assign milestone
+2. **Burndown** automatically in GitLab
+3. **Close milestone** when all issues done
 
 ---
 
 ## Issue Board
 
-### Board-Konfiguration
+### Board Configuration
 
-Das [CLARISSA Board](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/boards) hat folgende Listen:
+The [CLARISSA Board](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/boards) has the following lists:
 
-| Liste | Scope | Filter |
-|-------|-------|--------|
-| **Open** | Alle | Kein `workflow::` Label |
-| **Backlog** | Geplant | `workflow::backlog` |
+| List | Scope | Filter |
+|------|-------|--------|
+| **Open** | All | No `workflow::` label |
+| **Backlog** | Planned | `workflow::backlog` |
 | **Ready** | Sprint | `workflow::ready` |
-| **In Progress** | Aktiv | `workflow::in-progress` |
-| **Review** | MR offen | `workflow::review` |
-| **Blocked** | Wartend | `workflow::blocked` |
+| **In Progress** | Active | `workflow::in-progress` |
+| **Review** | MR open | `workflow::review` |
+| **Blocked** | Waiting | `workflow::blocked` |
 
-### Board-Workflow
+### Board Workflow
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
@@ -165,21 +166,21 @@ Das [CLARISSA Board](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/boar
 
 ### Drag & Drop
 
-- Issue von **Backlog** → **Ready** = Sprint-Planung
-- Issue von **Ready** → **In Progress** = Arbeit beginnt
-- Label wird automatisch aktualisiert!
+- Issue from **Backlog** → **Ready** = Sprint planning
+- Issue from **Ready** → **In Progress** = Work begins
+- Label is automatically updated!
 
 ---
 
 ## Epics
 
-Da GitLab Free keine echten Epics hat, nutzen wir **Issues als Epics**:
+Since GitLab Free doesn't have native Epics, we use **Issues as Epics**:
 
-### Epic-Issue erstellen
+### Create an Epic Issue
 
 ```markdown
-Title: "Epic: Interactive Tutorial Series"
-Labels: type::feature, priority::high
+Title: "[EPIC] Interactive Tutorial Series"
+Labels: type::epic, priority::high
 
 Description:
 ## Objectives
@@ -196,9 +197,9 @@ Description:
 - [ ] MkDocs renders correctly
 ```
 
-### Child-Issues verlinken
+### Link Child Issues
 
-In jedem Child-Issue:
+In each child issue:
 ```markdown
 Relates to #39
 Part of Epic #39
@@ -208,58 +209,58 @@ Part of Epic #39
 
 ## Issue Templates
 
-Verfügbare Templates in `.gitlab/issue_templates/`:
+Available templates in `.gitlab/issue_templates/`:
 
-| Template | Verwendung |
-|----------|------------|
+| Template | Usage |
+|----------|-------|
 | `adr.md` | Architecture Decision Record |
 | `bug.md` | Bug Report |
 | `feature.md` | Feature Request |
 
-### Template nutzen
+### Using a Template
 
 1. New Issue → Choose a template
-2. Felder ausfüllen
-3. Labels/Milestone setzen
+2. Fill in fields
+3. Set labels/milestone
 4. Submit
 
 ---
 
-## Metriken
+## Metrics
 
 ### Velocity Tracking
 
-- **Issues closed per Milestone** = Velocity
-- **Burndown Chart** in Milestone-Ansicht
-- **Time Tracking** via `/spend 2h` Commands
+- **Issues closed per milestone** = Velocity
+- **Burndown chart** in milestone view
+- **Time tracking** via `/spend 2h` commands
 
-### Label-Statistiken
+### Label Statistics
 
 ```
-GitLab → Issues → Labels → Klick auf Label → Issue-Count
+GitLab → Issues → Labels → Click on label → Issue count
 ```
 
 ---
 
-## Integration mit CI/CD
+## CI/CD Integration
 
 ### Auto-Close via MR
 
 ```yaml
-# .gitlab-ci.yml ist bereits konfiguriert
-# MR-Merge → Issue auto-close wenn:
-# - "Closes #X" im Commit
-# - "Fixes #X" im MR-Description
+# .gitlab-ci.yml is already configured
+# MR merge → Issue auto-close when:
+# - "Closes #X" in commit
+# - "Fixes #X" in MR description
 ```
 
-### Pipeline-Status im Board
+### Pipeline Status in Board
 
-- 🟢 Pipeline grün → MR kann gemerged werden
-- 🔴 Pipeline rot → Fix erforderlich
+- 🟢 Pipeline green → MR can be merged
+- 🔴 Pipeline red → Fix required
 
 ---
 
-## Referenzen
+## References
 
 - [GitLab Issue Management](https://docs.gitlab.com/ee/user/project/issues/)
 - [GitLab Boards](https://docs.gitlab.com/ee/user/project/issue_board.html)
@@ -268,4 +269,4 @@ GitLab → Issues → Labels → Klick auf Label → Issue-Count
 
 ---
 
-*Erstellt als Teil von Issue #43*
+*Created as part of Issue #43*

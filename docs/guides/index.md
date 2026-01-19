@@ -1,72 +1,72 @@
 # 📚 CLARISSA Guides
 
-Praktische Anleitungen für Entwickler und Nutzer.
+Practical guides for developers and users.
 
 ---
 
 ## 🚀 Getting Started
 
-| Guide | Beschreibung | Format |
-|-------|--------------|--------|
-| [CONTRIBUTING.md](../contributing.md) | Vollständiger Workflow-Guide | Markdown |
-| [Workflow Cheatsheet](contributing/cheatsheet.md) | Quick Reference (1 Seite) | Markdown |
+| Guide | Description | Format |
+|-------|-------------|--------|
+| [CONTRIBUTING.md](../contributing.md) | Complete workflow guide | Markdown |
+| [Workflow Cheatsheet](contributing/cheatsheet.md) | Quick reference (1 page) | Markdown |
 
 ---
 
 ## 📋 Project Management
 
-| Guide | Beschreibung |
-|-------|--------------|
+| Guide | Description |
+|-------|-------------|
 | [Project Management](project-management.md) | Labels, Board, Milestones |
-| [Epics Guide](epics.md) | Epic-Pattern für Free Tier |
+| [Epics Guide](epics.md) | Epic pattern for Free Tier |
 
 ---
 
 ## 🏗️ Architecture
 
-| Document | Beschreibung |
-|----------|--------------|
-| [ADR-018: GitLab PM Workflow](../architecture/adr/ADR-018-gitlab-pm-workflow.md) | Warum dieser Workflow |
+| Document | Description |
+|----------|-------------|
+| [ADR-018: GitLab PM Workflow](../architecture/adr/ADR-018-gitlab-pm-workflow.md) | Why this workflow |
 
 ---
 
 ## 📝 Issue Templates
 
-Verfügbare Templates in `.gitlab/issue_templates/`:
+Available templates in `.gitlab/issue_templates/`:
 
-| Template | Verwendung |
-|----------|------------|
-| `epic.md` | [EPIC] Größere Initiativen |
+| Template | Usage |
+|----------|-------|
+| `epic.md` | [EPIC] Larger initiatives |
 | `adr.md` | Architecture Decision Records |
 
 ---
 
 ## 🎓 Tutorials
 
-Jupyter Notebooks für hands-on Lernen:
+Jupyter Notebooks for hands-on learning:
 
-| # | Notebook | Thema |
+| # | Notebook | Topic |
 |---|----------|-------|
-| 01 | ECLIPSE Fundamentals | Deck-Struktur |
-| 02 | OPM Flow Integration | Docker, Simulation |
+| 01 | ECLIPSE Fundamentals | Deck structure |
+| 02 | OPM Flow Integration | Docker, simulation |
 | 03 | Knowledge Layer | RAG, Vector DB |
-| 04 | LLM Conversation | Intent, Entities |
-| 05 | Constraint Engine | Z3, Physics |
+| 04 | LLM Conversation | Intent, entities |
+| 05 | Constraint Engine | Z3, physics |
 | 06 | Deck Generator | Templates |
-| 07 | RL Agent | PPO, Training |
+| 07 | RL Agent | PPO, training |
 | 08 | RIGOR Benchmark | Evaluation |
-| 09 | Full Pipeline | End-to-End |
+| 09 | Full Pipeline | End-to-end |
 | 10 | API Reference | REST API |
 
-➡️ [Tutorials starten](../tutorials/index.md)
+➡️ [Start tutorials](../tutorials/index.md)
 
 ---
 
 ## 🔗 Quick Links
 
-| Ressource | Link |
-|-----------|------|
+| Resource | Link |
+|----------|------|
 | Issue Board | [gitlab.com/.../boards](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/boards) |
 | Issues | [gitlab.com/.../issues](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues) |
 | Merge Requests | [gitlab.com/.../merge_requests](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/merge_requests) |
-| Epic #39 (Beispiel) | [Tutorial System Epic](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues/39) |
+| Epic #39 (Example) | [Tutorial System Epic](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues/39) |

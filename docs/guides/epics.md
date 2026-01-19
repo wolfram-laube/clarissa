@@ -1,14 +1,14 @@
 # Epics in GitLab Free Tier
 
-Da GitLab Free keine echten Epics unterstützt, nutzen wir **Issues als Epics** mit einem strukturierten Pattern.
+Since GitLab Free doesn't support native Epics, we use **Issues as Epics** with a structured pattern.
 
-> 💡 **Beispiel:** [Epic #39 - CLARISSA Tutorial System](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues/39)
+> 💡 **Example:** [Epic #39 - CLARISSA Tutorial System](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues/39)
 
 ---
 
-## Warum Epics?
+## Why Epics?
 
-Epics gruppieren zusammengehörige Issues zu einer größeren Initiative:
+Epics group related issues into a larger initiative:
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -27,33 +27,33 @@ Epics gruppieren zusammengehörige Issues zu einer größeren Initiative:
 
 ---
 
-## Epic-Issue erstellen
+## Creating an Epic Issue
 
 ### 1. Naming Convention
 
 ```
-Title: "[EPIC] Kurze Beschreibung"
+Title: "[EPIC] Short Description"
 ```
 
-Das `[EPIC]` Prefix macht Epics in Listen sofort erkennbar.
+The `[EPIC]` prefix makes Epics immediately recognizable in lists.
 
-### 2. Struktur der Description
+### 2. Description Structure
 
 ```markdown
 ## Epic Overview
 
-[2-3 Sätze Zusammenfassung]
+[2-3 sentence summary]
 
 ## Goals
 
-- Ziel 1
-- Ziel 2
-- Ziel 3
+- Goal 1
+- Goal 2
+- Goal 3
 
 ## Child Issues
 
-| Issue | Beschreibung | Status | Weight |
-|-------|--------------|--------|--------|
+| Issue | Description | Status | Weight |
+|-------|-------------|--------|--------|
 | #38 | Notebooks 01-03 | ✅ Done | 5 |
 | #40 | Notebooks 04-06 | ✅ Done | 8 |
 | #41 | Notebooks 07-10 | 🟡 In Progress | 13 |
@@ -78,20 +78,20 @@ Das `[EPIC]` Prefix macht Epics in Listen sofort erkennbar.
 - [ ] Criterion 3
 ```
 
-### 3. Labels für Epics
+### 3. Labels for Epics
 
 ```
-type::feature          (oder type::documentation)
-priority::high         (Epics sind meist wichtig)
-component::*           (Hauptkomponente)
-workflow::in-progress  (solange Child-Issues offen)
+type::epic             (dedicated epic label)
+priority::high         (Epics are usually important)
+component::*           (main component)
+workflow::in-progress  (while child issues are open)
 ```
 
 ---
 
-## Child-Issues verknüpfen
+## Linking Child Issues
 
-### In Child-Issue Description
+### In Child Issue Description
 
 ```markdown
 ## Context
@@ -101,68 +101,68 @@ Part of [EPIC] #39 - CLARISSA Tutorial System
 Relates to #39
 ```
 
-### Automatische Verlinkung
+### Automatic Linking
 
-GitLab erkennt `#39` automatisch und zeigt bidirektionale Links.
+GitLab automatically recognizes `#39` and shows bidirectional links.
 
-### Abhängigkeiten dokumentieren
+### Documenting Dependencies
 
 ```markdown
 ## Dependencies
 
-- Depends on: #38 (muss zuerst fertig sein)
-- Blocks: #41 (wartet auf dieses Issue)
+- Depends on: #38 (must be completed first)
+- Blocks: #41 (waiting on this issue)
 ```
 
 ---
 
-## Epic-Workflow
+## Epic Workflow
 
-### 1. Epic erstellen
+### 1. Create Epic
 
 ```bash
-# Via GitLab UI oder Template
+# Via GitLab UI or template
 Title: "[EPIC] Feature X Implementation"
-Labels: type::feature, priority::high, workflow::backlog
+Labels: type::epic, priority::high, workflow::backlog
 ```
 
-### 2. Child-Issues erstellen
+### 2. Create Child Issues
 
 ```bash
-# Jedes Child-Issue referenziert das Epic
+# Each child issue references the epic
 Description: "Part of Epic #39\n\nRelates to #39"
 ```
 
-### 3. Fortschritt tracken
+### 3. Track Progress
 
-Die Child-Issue Tabelle im Epic manuell aktualisieren:
+Manually update the child issue table in the epic:
 
 ```markdown
 | Issue | Status |
 |-------|--------|
-| #38 | ✅ Done |      # War: 🟡 In Progress
-| #40 | ✅ Done |      # War: 🔴 Backlog
+| #38 | ✅ Done |      # Was: 🟡 In Progress
+| #40 | ✅ Done |      # Was: 🔴 Backlog
 | #41 | 🟡 In Progress |
 ```
 
-### 4. Epic schließen
+### 4. Close Epic
 
-Wenn alle Child-Issues geschlossen und Success Criteria erfüllt:
+When all child issues are closed and success criteria met:
 
 ```bash
-# Epic-Issue schließen
+# Close epic issue
 State: Closed
 ```
 
 ---
 
-## Echtes Beispiel: Epic #39
+## Real Example: Epic #39
 
 ### [EPIC] CLARISSA Interactive Tutorial System
 
 **URL:** https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues/39
 
-**Child-Issues:**
+**Child Issues:**
 
 | Issue | Notebooks | MR | Status |
 |-------|-----------|-----|--------|
@@ -171,29 +171,29 @@ State: Closed
 | #41 | 07-10: RL, RIGOR, Pipeline, API | !36 | ✅ Merged |
 
 **Timeline:**
-- Erstellt: 2026-01-18
-- Child-Issues erstellt: 2026-01-18
-- Alle MRs gemerged: 2026-01-18
-- Epic abgeschlossen: (noch offen für weitere Arbeit)
+- Created: 2026-01-18
+- Child issues created: 2026-01-18
+- All MRs merged: 2026-01-18
+- Epic closed: (still open for further work)
 
-**Was funktioniert hat:**
-- Klare Child-Issue Struktur mit Abhängigkeiten
-- Weight-basierte Aufwandsschätzung (5 + 8 + 13 = 26 Story Points)
-- MR-Referenzen in Child-Issues
-- Automatische Verlinkung durch `#39` Referenzen
+**What worked well:**
+- Clear child issue structure with dependencies
+- Weight-based effort estimation (5 + 8 + 13 = 26 story points)
+- MR references in child issues
+- Automatic linking through `#39` references
 
 ---
 
 ## Issue Template
 
-Nutze das Template `.gitlab/issue_templates/epic.md`:
+Use the template `.gitlab/issue_templates/epic.md`:
 
 ```markdown
 <!-- .gitlab/issue_templates/epic.md -->
 
 ## Epic Overview
 
-[Beschreibe die Initiative in 2-3 Sätzen]
+[Describe the initiative in 2-3 sentences]
 
 ## Goals
 
@@ -203,8 +203,8 @@ Nutze das Template `.gitlab/issue_templates/epic.md`:
 
 ## Child Issues
 
-| Issue | Beschreibung | Status | Weight |
-|-------|--------------|--------|--------|
+| Issue | Description | Status | Weight |
+|-------|-------------|--------|--------|
 | #XX | Description | 🔴 Backlog | X |
 | #YY | Description | 🔴 Backlog | Y |
 
@@ -228,7 +228,7 @@ Nutze das Template `.gitlab/issue_templates/epic.md`:
 
 ---
 
-/label ~"type::feature" ~"priority::high" ~"workflow::backlog"
+/label ~"type::epic" ~"priority::high" ~"workflow::backlog"
 ```
 
 ---
@@ -237,37 +237,37 @@ Nutze das Template `.gitlab/issue_templates/epic.md`:
 
 ### ✅ DO
 
-- `[EPIC]` Prefix im Titel
-- Child-Issue Tabelle pflegen
-- Abhängigkeiten dokumentieren
-- Success Criteria definieren
-- Epic schließen wenn fertig
+- `[EPIC]` prefix in title
+- Maintain child issue table
+- Document dependencies
+- Define success criteria
+- Close epic when complete
 
 ### ❌ DON'T
 
-- Epics für einzelne Tasks
-- Child-Issues ohne Epic-Referenz
-- Verwaiste Epics (nie aktualisiert)
-- Zu viele Child-Issues (max ~10)
+- Epics for single tasks
+- Child issues without epic reference
+- Orphaned epics (never updated)
+- Too many child issues (max ~10)
 
 ---
 
-## Vergleich: GitLab Premium vs. Free Tier
+## Comparison: GitLab Premium vs. Free Tier
 
 | Feature | Premium Epics | Free Tier Pattern |
 |---------|---------------|-------------------|
-| Hierarchie | Automatisch | Manuell via Tabelle |
-| Roadmap | ✅ Eingebaut | ❌ Nicht verfügbar |
-| Burndown | ✅ Automatisch | ❌ Manuell |
-| Child-Links | ✅ Native | 📝 Via `#XX` Referenz |
-| Fortschritt | ✅ Berechnet | 📝 Manuell aktualisieren |
+| Hierarchy | Automatic | Manual via table |
+| Roadmap | ✅ Built-in | ❌ Not available |
+| Burndown | ✅ Automatic | ❌ Manual |
+| Child links | ✅ Native | 📝 Via `#XX` reference |
+| Progress | ✅ Calculated | 📝 Manual update |
 
-**Fazit:** Das Pattern funktioniert gut für kleine Teams. Bei >50 Issues pro Epic wird es unübersichtlich - dann lohnt sich Premium.
+**Conclusion:** The pattern works well for small teams. With >50 issues per epic, it becomes unwieldy - then Premium is worth it.
 
 ---
 
-## Referenzen
+## References
 
-- [Epic #39 (Live-Beispiel)](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues/39)
+- [Epic #39 (Live Example)](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues/39)
 - [GitLab Premium Epics](https://docs.gitlab.com/ee/user/group/epics/)
 - [project-management.md](project-management.md)
