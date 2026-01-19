@@ -1004,6 +1004,46 @@ upload_invoice:
   script:
     - pip install google-auth google-api-python-client -q
     - python billing/scripts/upload_to_drive.py billing/output/*.pdf
+
+# Create Gmail draft with billing documents
+billing_email:
+  stage: deploy
+  image: python:3.11-slim
+  needs:
+    - job: build_invoice
+      artifacts: true
+    - job: upload_invoice
+      optional: true
+  rules:
+    # Auto-run when billing output changes on main
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - billing/output/**/*.typ
+      when: on_success
+    # Manual trigger always available
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
+    - when: never
+  variables:
+    BILLING_CLIENT: "nemensis"  # Override via pipeline variable if needed
+    BILLING_PERIOD: ""          # Auto-detect from files if empty
+  before_script:
+    - pip install requests pyyaml -q
+  script:
+    - |
+      # Auto-detect period from latest invoice if not set
+      if [ -z "$BILLING_PERIOD" ]; then
+        BILLING_PERIOD=$(ls billing/output/*.sync.json 2>/dev/null | head -1 | sed 's/.*\/\([0-9]\{4\}-[0-9]\{2\}\).*/\1/' || echo "")
+        if [ -z "$BILLING_PERIOD" ]; then
+          echo "❌ Could not detect billing period"
+          exit 1
+        fi
+        echo "📅 Auto-detected period: $BILLING_PERIOD"
+      fi
+      export BILLING_PERIOD
+    - python billing/scripts/send_billing_email.py
+
 # =============================================================================
 # LLM Relay: Claude ↔ IRENA Communication
 # =============================================================================

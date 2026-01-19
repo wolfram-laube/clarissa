@@ -29,6 +29,7 @@ clients:
     template: "rechnung-de"
     currency: "EUR"
     gitlab_label: "client:nemensis"    # Label to filter issues
+    billing_email: "buchhaltung@nemensis.de"  # For invoice emails
     rates:
       remote: 105
       onsite: 120
@@ -53,6 +54,7 @@ clients:
     template: "invoice-en-us"
     currency: "USD"
     gitlab_label: "client:oxy"
+    billing_email: "ap@oxy.com"  # For invoice emails
     rates:
       remote: 150
       onsite: 175
@@ -75,6 +77,7 @@ clients:
     template: "rechnung-de"
     currency: "EUR"
     gitlab_label: "client:xxx"
+    billing_email: ""  # For invoice emails
     rates:
       remote: 100
       onsite: 120
