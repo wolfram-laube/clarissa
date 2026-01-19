@@ -1359,8 +1359,7 @@ gdrive-list:
       ).execute()
       
       files = results.get("files", [])
-      print("
-Found " + str(len(files)) + " files in Google Drive:")
+      print("Found " + str(len(files)) + " files in Google Drive:")
       print("-" * 60)
       for f in files:
           size = f.get("size", "-")
