@@ -1359,13 +1359,13 @@ gdrive-list:
       ).execute()
       
       files = results.get("files", [])
-      print(f"
-📁 Found {len(files)} files in Google Drive:")
+      print("
+Found " + str(len(files)) + " files in Google Drive:")
       print("-" * 60)
       for f in files:
           size = f.get("size", "-")
           mod = f.get("modifiedTime", "-")[:10]
-          print(f"  {f['name']:<45} {mod}")
+          print("  " + f["name"].ljust(45) + " " + mod)
       
       with open("gdrive_files.json", "w") as out:
           json.dump(files, out, indent=2)
