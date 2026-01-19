@@ -1,6 +1,7 @@
 // BLAUWEISS Invoice - AR_003_2026
 // Client: nemensis AG Deutschland
 // Period: 2026-01
+// Email draft trigger: test
 // Generated: 2026-01-03 17:21
 //
 // Hours breakdown:
