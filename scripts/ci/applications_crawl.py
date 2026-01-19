@@ -10,29 +10,35 @@ import json
 
 sys.path.insert(0, os.getcwd())
 
-from src.admin.applications.pipeline.crawler import FreelancerMapCrawler
+from src.admin.applications.pipeline.crawler import FreelancermapScraper
 
 def main():
     keywords = os.environ.get("KEYWORDS", "DevOps,Python,AI").split(",")
     min_remote = int(os.environ.get("MIN_REMOTE", "50"))
     max_pages = int(os.environ.get("MAX_PAGES", "2"))
     
-    crawler = FreelancerMapCrawler()
+    scraper = FreelancermapScraper()
     all_projects = []
     
     for kw in keywords:
         kw = kw.strip()
         print(f"🔍 Searching: {kw}")
-        projects = crawler.crawl(kw, max_pages=max_pages, min_remote=min_remote)
-        all_projects.extend(projects)
-        print(f"   → {len(projects)} found")
+        try:
+            projects = scraper.search(kw, max_pages=max_pages)
+            # Filter by remote percentage
+            projects = [p for p in projects if p.get("remote_percent", 0) >= min_remote]
+            all_projects.extend(projects)
+            print(f"   → {len(projects)} found")
+        except Exception as e:
+            print(f"   ❌ Error: {e}")
     
-    # Deduplicate
+    # Deduplicate by URL
     seen = set()
     unique = []
     for p in all_projects:
-        if p['url'] not in seen:
-            seen.add(p['url'])
+        url = p.get("url") or p.get("link", "")
+        if url and url not in seen:
+            seen.add(url)
             unique.append(p)
     
     os.makedirs("output", exist_ok=True)

@@ -1,8 +1,10 @@
 """Pipeline module - Automated job application workflow"""
 
-from .profiles import PROFILES, Profile
-from .crawler import FreelancerMapCrawler
+from .crawler import FreelancermapScraper, ProjectCrawler
 from .matcher import ProjectMatcher
-from .drafter import GmailDrafter
+from .profiles import PROFILES
 
-__all__ = ["PROFILES", "Profile", "FreelancerMapCrawler", "ProjectMatcher", "GmailDrafter"]
+# Alias for convenience
+FreelancerMapCrawler = FreelancermapScraper
+
+__all__ = ["PROFILES", "FreelancermapScraper", "FreelancerMapCrawler", "ProjectCrawler", "ProjectMatcher"]

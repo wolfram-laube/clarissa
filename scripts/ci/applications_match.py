@@ -28,16 +28,16 @@ def main():
     
     for project in projects:
         match = matcher.match(project)
-        if match and match['score'] >= min_score:
+        if match and match.get("score", 0) >= min_score:
             results.append(match)
     
     # Sort by score
-    results.sort(key=lambda x: x['score'], reverse=True)
+    results.sort(key=lambda x: x.get("score", 0), reverse=True)
     results = results[:max_results]
     
     # Summary
-    hot = sum(1 for r in results if r['recommendation'] == 'HOT')
-    good = sum(1 for r in results if r['recommendation'] == 'GOOD')
+    hot = sum(1 for r in results if r.get("recommendation") == "HOT")
+    good = sum(1 for r in results if r.get("recommendation") == "GOOD")
     
     print(f"\n📊 MATCHING RESULTS")
     print(f"   🔥 HOT:  {hot}")
@@ -45,9 +45,11 @@ def main():
     print(f"   Total:  {len(results)}")
     
     for r in results[:10]:
-        title = r['project']['title'][:50]
-        print(f"\n[{r['score']}%] {title}...")
-        print(f"   → {r['profile_name']}")
+        title = r.get("project", {}).get("title", "?")[:50]
+        score = r.get("score", 0)
+        profile = r.get("profile_name", "?")
+        print(f"\n[{score}%] {title}...")
+        print(f"   → {profile}")
     
     with open("output/matches.json", "w") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
