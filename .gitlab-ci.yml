@@ -990,6 +990,8 @@ build_invoice:
 upload_invoice:
   stage: deploy
   image: python:3.11-slim
+  tags:
+    - docker-any
   needs:
     - job: build_invoice
       artifacts: true
@@ -1010,6 +1012,8 @@ upload_invoice:
 billing_email:
   stage: deploy
   image: python:3.11-slim
+  tags:
+    - docker-any
   needs:
     - job: build_invoice
       artifacts: true
