@@ -47,6 +47,8 @@ stages:
 # ----------------------------
 .python_base: &python_base
   image: python:3.11
+  tags:
+    - docker-any
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   cache:
@@ -108,6 +110,8 @@ stages:
 build_opm_image:
   stage: build
   image: docker:24
+  tags:
+    - docker-any
   services:
     - docker:24-dind
   variables:
@@ -201,6 +205,8 @@ tests:
 integration_tests_opm:
   stage: test
   image: docker:24
+  tags:
+    - docker-any
   services:
     - docker:24-dind
   needs:
@@ -338,6 +344,8 @@ architecture_graphs:
   image:
     name: ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:latest
     entrypoint: [""]
+  tags:
+    - docker-any
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
@@ -359,6 +367,8 @@ architecture_graphs:
 mkdocs_nav_check:
   stage: test
   image: python:3.11-slim
+  tags:
+    - docker-any
   script:
     - pip install pyyaml -q
     - python scripts/check_mkdocs_nav.py
@@ -504,6 +514,8 @@ mr_comment_on_failure:
 pages:
   stage: deploy
   image: python:3.11
+  tags:
+    - docker-any
   needs: []
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
@@ -580,6 +592,8 @@ pages:
 llm_sync_package:
   stage: deploy
   image: python:3.11
+  tags:
+    - docker-any
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
@@ -614,6 +628,8 @@ llm_sync_package:
 rebuild_docs:
   stage: deploy
   image: python:3.11
+  tags:
+    - docker-any
   rules:
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: manual
@@ -638,6 +654,8 @@ rebuild_docs:
 rebuild_opm_image:
   stage: build
   image: docker:24
+  tags:
+    - docker-any
   services:
     - docker:24-dind
   rules:
@@ -904,6 +922,8 @@ build_canonical_pdf:
 generate_timesheets:
   stage: build
   image: python:3.11-slim
+  tags:
+    - docker-any
   variables:
     GITLAB_PROJECT_PATH: "wolfram_laube/blauweiss_llc/irena"
   rules:
@@ -1045,6 +1065,8 @@ billing_email:
 relay:irena:
   stage: automation
   image: python:3.11-slim
+  tags:
+    - docker-any
   rules:
     - changes:
         - handoffs/handoff_to_irena.md
@@ -1081,6 +1103,8 @@ relay:irena:
 sync_infrastructure:
   stage: deploy
   image: python:3.11-slim
+  tags:
+    - docker-any
   rules:
     - changes:
         - docs/infrastructure.md
@@ -1423,6 +1447,8 @@ deploy-gdrive-proxy:
 docs:preview:
   stage: deploy
   image: python:3.11
+  tags:
+    - docker-any
   needs: []  # Run immediately, don't wait for other stages
   rules:
     - if: '$CI_COMMIT_BRANCH != "main"'
