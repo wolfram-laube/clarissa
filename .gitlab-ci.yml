@@ -938,6 +938,8 @@ generate_timesheets:
 build_invoice:
   stage: build
   image: alpine:latest
+  tags:
+    - docker-any
   rules:
     # Auto-run when invoice templates change
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
