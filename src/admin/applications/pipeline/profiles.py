@@ -284,25 +284,62 @@ TEAM_COMBOS = {
     "wolfram_ian": {
         "name": "Wolfram + Ian (AI + MLOps + Infrastructure)",
         "profiles": [WOLFRAM, IAN],
-        "keywords": {"ai", "ml", "llm", "rag", "kubernetes", "cloud", "mlops", "platform", "deep learning", "nlp"},
+        "keywords": {
+            # AI/ML Core
+            "ai", "ki", "ml", "llm", "rag", "nlp", "genai", "gpt", "chatgpt", "openai",
+            "machine learning", "deep learning", "neural", "transformer",
+            # MLOps & Infrastructure
+            "mlops", "kubernetes", "k8s", "cloud", "aws", "azure", "gcp",
+            "platform", "infrastructure", "devops", "docker",
+            # Data & Engineering
+            "python", "data engineer", "data scientist", "data analytics",
+            "tensorflow", "pytorch", "langchain", "huggingface",
+            # Roles
+            "engineer", "entwickler", "architect", "senior",
+        },
         "description": "Doppelte AI-Expertise + Cloud Infrastructure = End-to-End AI Delivery"
     },
     "wolfram_michael": {
         "name": "Wolfram + Michael (Tech + Business)",
         "profiles": [WOLFRAM, MICHAEL],
-        "keywords": {"transformation", "architecture", "strategy", "enterprise", "consulting"},
+        "keywords": {
+            # Architecture & Tech Leadership
+            "architect", "architekt", "solution", "enterprise", "lead", "senior",
+            "infrastructure", "platform", "system",
+            # Cloud & DevOps
+            "cloud", "devops", "kubernetes", "aws", "azure",
+            # Management & Strategy
+            "transformation", "strategy", "consulting", "berater",
+            "project", "program", "management", "agile", "scrum",
+            # Business
+            "stakeholder", "budget", "delivery", "migration",
+        },
         "description": "Technical Architecture + Business Strategy"
     },
     "ian_michael": {
         "name": "Ian + Michael (AI + Business)",
         "profiles": [IAN, MICHAEL],
-        "keywords": {"ai", "strategy", "product", "transformation", "data"},
+        "keywords": {
+            # AI/ML
+            "ai", "ki", "ml", "llm", "genai", "machine learning", "data",
+            # Product & Business
+            "product", "owner", "strategy", "transformation", "analytics",
+            "business", "intelligence", "bi", "dashboard",
+            # Roles
+            "manager", "lead", "scientist", "analyst",
+        },
         "description": "AI/ML Implementation + Business/Product Strategy"
     },
     "all_three": {
         "name": "Wolfram + Ian + Michael (Full Stack Team)",
         "profiles": [WOLFRAM, IAN, MICHAEL],
-        "keywords": {"ai", "transformation", "enterprise", "platform", "product", "end-to-end"},
+        "keywords": {
+            # Kombination aller Stärken
+            "ai", "ki", "ml", "llm", "genai", "platform", "enterprise",
+            "transformation", "cloud", "devops", "product", "end-to-end",
+            "architect", "engineer", "manager", "senior", "lead",
+            "infrastructure", "data", "analytics", "strategy",
+        },
         "description": "Complete delivery team: Infra + AI + Business"
     }
 }
