@@ -941,21 +941,15 @@ build_invoice:
   tags:
     - docker-any
   rules:
-    # Auto-run when invoice templates change
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      changes:
-        - billing/templates/**/*
-        - billing/output/**/*.typ
-      when: on_success
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    # Auto-run on main when billing files change
+    - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
         - billing/templates/**/*
         - billing/output/**/*.typ
       when: on_success
     # Manual trigger always available
-    - if: '$CI_PIPELINE_SOURCE == "web"'
-      when: manual
-    - when: never
+    - when: manual
+      allow_failure: true
   before_script:
     - apk add --no-cache curl tar xz fontconfig ttf-liberation
     # Install Poppins font
@@ -998,14 +992,12 @@ upload_invoice:
     - job: build_invoice
       artifacts: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
         - billing/output/**/*.typ
       when: on_success
-    - if: '$CI_PIPELINE_SOURCE == "web"'
-      when: manual
+    - when: manual
       allow_failure: true
-    - when: never
   script:
     - pip install google-auth google-api-python-client -q
     - python billing/scripts/upload_to_drive.py billing/output/*.pdf
@@ -1022,16 +1014,12 @@ billing_email:
     - job: upload_invoice
       optional: true
   rules:
-    # Auto-run when billing output changes on main
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
         - billing/output/**/*.typ
       when: on_success
-    # Manual trigger always available
-    - if: '$CI_PIPELINE_SOURCE == "web"'
-      when: manual
+    - when: manual
       allow_failure: true
-    - when: never
   variables:
     BILLING_CLIENT: "nemensis"  # Override via pipeline variable if needed
     BILLING_PERIOD: ""          # Auto-detect from files if empty
