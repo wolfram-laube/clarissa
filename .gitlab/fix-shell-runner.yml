@@ -1,20 +1,25 @@
-# Fix GCP Shell Runner via Docker-in-Docker
+# Fix GCP Shell Runner - Simple Docker approach
 
-fix-gcp-shell-via-docker:
+fix-gcp-shell-simple:
   stage: test
   tags:
     - gcp-docker
-  image: docker:24-dind
-  services:
-    - docker:24-dind
-  variables:
-    DOCKER_TLS_CERTDIR: ""
-    DOCKER_HOST: tcp://docker:2375
+  image: alpine:latest
   when: manual
   allow_failure: true
   script:
-    - echo "=== Docker-in-Docker Fix for GCP Shell Runner ==="
-    - sleep 5
-    - docker version || echo "Waiting for DinD..."
-    - sleep 5
-    - docker run --rm --privileged -v /:/host alpine:latest sh -c "echo 'case \$- in *i*) ;; *) return;; esac' > /host/home/gitlab-runner/.bashrc && echo 'Fixed!' && cat /host/home/gitlab-runner/.bashrc"
+    - echo "=== Simple Fix Attempt ==="
+    - echo "Checking if we have host access..."
+    - ls -la / || true
+    - ls -la /home/ 2>/dev/null || echo "No /home access"
+    - |
+      if [ -d /home/gitlab-runner ]; then
+        echo "Found gitlab-runner home!"
+        echo 'case $- in *i*) ;; *) return;; esac' > /home/gitlab-runner/.bashrc
+        echo "Fixed!"
+        cat /home/gitlab-runner/.bashrc
+      else
+        echo "No direct host access - this is expected in Docker"
+        echo "The runner config needs volumes = [\"/home/gitlab-runner:/home/gitlab-runner:rw\"]"
+        exit 1
+      fi
