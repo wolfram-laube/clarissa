@@ -1,10 +1,9 @@
-# Fix GCP Shell Runner - Docker-based approach
-# This job runs on the GCP Docker runner and uses Docker-in-Docker
-# to access the host filesystem and fix the gitlab-runner .bashrc
+# Fix GCP Shell Runner via Docker-in-Docker
 
 fix-gcp-shell-via-docker:
   stage: test
-  tags: [gcp-docker]
+  tags:
+    - gcp-docker
   image: docker:24-dind
   services:
     - docker:24-dind
@@ -15,75 +14,7 @@ fix-gcp-shell-via-docker:
   allow_failure: true
   script:
     - echo "=== Docker-in-Docker Fix for GCP Shell Runner ==="
-    - docker version || echo "DinD not available, trying socket..."
-    
-    # Check if we can access docker
-    - |
-      echo "Creating fix script..."
-      cat > /tmp/fix.sh << 'FIXSCRIPT'
-      #!/bin/sh
-      echo "=== Fixing gitlab-runner shell profile ==="
-      
-      # Find the gitlab-runner home
-      if [ -d /host/home/gitlab-runner ]; then
-        TARGET=/host/home/gitlab-runner
-      elif [ -d /home/gitlab-runner ]; then
-        TARGET=/home/gitlab-runner
-      else
-        echo "Cannot find gitlab-runner home!"
-        exit 1
-      fi
-      
-      echo "Target: $TARGET"
-      
-      # Create minimal .bashrc that doesn't break non-interactive shells
-      cat > $TARGET/.bashrc << 'BASHRC'
-# Minimal bashrc for gitlab-runner
-# Exit immediately for non-interactive shells
-case $- in
-    *i*) ;;
-      *) return;;
-esac
-# Only reaches here for interactive shells
-PS1='\u@\h:\w\$ '
-BASHRC
-      
-      # Create minimal .profile
-      cat > $TARGET/.profile << 'PROFILE'
-# Minimal profile
-[ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
-PROFILE
-      
-      # Show what we created
-      echo "=== Created .bashrc ==="
-      cat $TARGET/.bashrc
-      echo ""
-      echo "=== Created .profile ==="
-      cat $TARGET/.profile
-      echo ""
-      echo "✓ Fix complete!"
-      FIXSCRIPT
-      chmod +x /tmp/fix.sh
-      
-    # Try to run with host mount (requires privileged runner)
-    - |
-      echo "Attempting privileged container with host mount..."
-      docker run --rm --privileged -v /:/host alpine:latest sh -c '
-        if [ -d /host/home/gitlab-runner ]; then
-          echo "Found gitlab-runner home on host"
-          cat > /host/home/gitlab-runner/.bashrc << "EOF"
-case $- in *i*) ;; *) return;; esac
-PS1="\u@\h:\w\$ "
-EOF
-          cat > /host/home/gitlab-runner/.profile << "EOF"
-[ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
-EOF
-          chmod 644 /host/home/gitlab-runner/.bashrc /host/home/gitlab-runner/.profile
-          echo "✓ Fixed!"
-          cat /host/home/gitlab-runner/.bashrc
-        else
-          echo "No host mount available"
-          ls -la /host/ 2>/dev/null || echo "No /host directory"
-          exit 1
-        fi
-      ' && echo "🎉 SUCCESS!" || echo "❌ Privileged approach failed"
+    - sleep 5
+    - docker version || echo "Waiting for DinD..."
+    - sleep 5
+    - docker run --rm --privileged -v /:/host alpine:latest sh -c "echo 'case \$- in *i*) ;; *) return;; esac' > /host/home/gitlab-runner/.bashrc && echo 'Fixed!' && cat /host/home/gitlab-runner/.bashrc"
