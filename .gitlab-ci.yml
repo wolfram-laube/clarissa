@@ -30,6 +30,9 @@ workflow:
     # Allow API triggers (for Claude automation)
     - if: '$CI_PIPELINE_SOURCE == "api"'
       when: always
+    # Allow pipeline trigger tokens (for Pages billing trigger)
+    - if: '$CI_PIPELINE_SOURCE == "trigger"'
+      when: always
     # Allow scheduled pipelines (billing automation)
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: always
