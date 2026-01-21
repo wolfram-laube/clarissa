@@ -361,7 +361,7 @@ def generate_timesheet(
     
     # Write output file
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    filename = f"{year}-{month:02d}_timesheet_{client_id}_{consultant_id}_{lang}.typ"
+    filename = f"{consultant_id}_{client_id}_{year}-{month:02d}_timesheet.typ"
     output_file = OUTPUT_DIR / filename
     
     with open(output_file, "w", encoding="utf-8") as f:

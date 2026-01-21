@@ -73,7 +73,7 @@ def get_next_invoice_number(year: int, sequences: dict) -> int:
 
 def find_timesheets(client_id: str, year: int, month: int) -> List[Path]:
     """Find all timesheets for a client/period."""
-    pattern = f"{year}-{month:02d}_timesheet_{client_id}_*.sync.json"
+    pattern = f"*_{client_id}_{year}-{month:02d}_timesheet.sync.json"
     sync_files = list(OUTPUT_DIR.glob(pattern))
     return sync_files
 
@@ -253,10 +253,14 @@ Workflow:
         return
     
     # Get invoice number
+    sequences = load_sequences()
     if args.invoice_number:
         invoice_number = args.invoice_number
+        # Extract seq_num from provided number if possible
+        import re
+        match = re.search(r'AR_(\d+)', invoice_number)
+        seq_num = int(match.group(1)) if match else 1
     else:
-        sequences = load_sequences()
         seq_num = get_next_invoice_number(year, sequences)
         invoice_number = f"AR_{seq_num:03d}_{year}"
         save_sequences(sequences)
@@ -272,7 +276,7 @@ Workflow:
     
     # Write output
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    filename = f"{invoice_number}_{args.client}.typ"
+    filename = f"{args.client}_{year}-{month:02d}_invoice_AR_{seq_num:03d}.typ"
     output_file = OUTPUT_DIR / filename
     
     with open(output_file, "w", encoding="utf-8") as f:
