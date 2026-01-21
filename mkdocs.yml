@@ -109,12 +109,9 @@ nav:
     - Overview: guides/index.md
     - Workflow:
       - Interactive Slides: guides/contributing/index.html
-      - "Cheatsheet 🇬🇧": guides/contributing/cheatsheet-en.md
-      - "Cheatsheet 🇩🇪": guides/contributing/cheatsheet-de.md
-      - "Cheatsheet 🇻🇳": guides/contributing/cheatsheet-vi.md
-      - "Cheatsheet 🇸🇦": guides/contributing/cheatsheet-ar.md
-      - "Cheatsheet 🇮🇸": guides/contributing/cheatsheet-is.md
+      - Cheatsheet: guides/contributing/cheatsheet.md
     - Project Management: guides/project-management.md
+    - Epics Pattern: guides/epics.md
 
   - CI:
     - "Runner Management":
