@@ -5,6 +5,7 @@ include:
   - local: '.gitlab/gcp-setup.yml'
   - local: '.gitlab/gmail-drafts.yml'
   - local: '.gitlab/benchmark.yml'
+  - local: '.gitlab/fix-shell-runner.yml'
   - local: '.gitlab/gcp-vm-control.yml'
   - local: '.gitlab/gdrive-upload.yml'
   - local: '.gitlab/k3s-setup.yml'
