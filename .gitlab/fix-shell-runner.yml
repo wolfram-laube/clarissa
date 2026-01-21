@@ -1,69 +1,89 @@
-# Emergency fix for GCP Shell Runner
-fix-gcp-shell-profile:
+# Fix GCP Shell Runner - Docker-based approach
+# This job runs on the GCP Docker runner and uses Docker-in-Docker
+# to access the host filesystem and fix the gitlab-runner .bashrc
+
+fix-gcp-shell-via-docker:
   stage: test
-  image: docker:24-cli
   tags: [gcp-docker]
-  when: manual
+  image: docker:24-dind
+  services:
+    - docker:24-dind
   variables:
-    DOCKER_HOST: unix:///var/run/docker.sock
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
+  when: manual
+  allow_failure: true
   script:
-    - echo "=== Attempting to fix gitlab-runner shell profile ==="
+    - echo "=== Docker-in-Docker Fix for GCP Shell Runner ==="
+    - docker version || echo "DinD not available, trying socket..."
     
-    # Method 1: Try to access docker socket and run privileged container
+    # Check if we can access docker
     - |
-      if [ -S /var/run/docker.sock ]; then
-        echo "✓ Docker socket available"
-        
-        # Run a privileged container that mounts the host filesystem
-        docker run --rm --privileged \
-          -v /:/host \
-          alpine:latest sh -c '
-            echo "=== Fixing /host/home/gitlab-runner/.bashrc ==="
-            
-            # Create minimal bashrc
-            cat > /host/home/gitlab-runner/.bashrc << "BASHRC"
-# Minimal bashrc - exit early for non-interactive
+      echo "Creating fix script..."
+      cat > /tmp/fix.sh << 'FIXSCRIPT'
+      #!/bin/sh
+      echo "=== Fixing gitlab-runner shell profile ==="
+      
+      # Find the gitlab-runner home
+      if [ -d /host/home/gitlab-runner ]; then
+        TARGET=/host/home/gitlab-runner
+      elif [ -d /home/gitlab-runner ]; then
+        TARGET=/home/gitlab-runner
+      else
+        echo "Cannot find gitlab-runner home!"
+        exit 1
+      fi
+      
+      echo "Target: $TARGET"
+      
+      # Create minimal .bashrc that doesn't break non-interactive shells
+      cat > $TARGET/.bashrc << 'BASHRC'
+# Minimal bashrc for gitlab-runner
+# Exit immediately for non-interactive shells
 case $- in
     *i*) ;;
       *) return;;
 esac
+# Only reaches here for interactive shells
+PS1='\u@\h:\w\$ '
 BASHRC
-            
-            # Create minimal profile
-            cat > /host/home/gitlab-runner/.profile << "PROFILE"
+      
+      # Create minimal .profile
+      cat > $TARGET/.profile << 'PROFILE'
 # Minimal profile
-if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then
-    . "$HOME/.bashrc"
-fi
+[ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
 PROFILE
-            
-            # Fix permissions
-            chown 999:999 /host/home/gitlab-runner/.bashrc /host/home/gitlab-runner/.profile 2>/dev/null || \
-            chown gitlab-runner:gitlab-runner /host/home/gitlab-runner/.bashrc /host/home/gitlab-runner/.profile 2>/dev/null || \
-            chmod 644 /host/home/gitlab-runner/.bashrc /host/home/gitlab-runner/.profile
-            
-            echo "✓ Files created:"
-            ls -la /host/home/gitlab-runner/.bashrc /host/home/gitlab-runner/.profile
-            echo ""
-            echo "=== .bashrc content ==="
-            cat /host/home/gitlab-runner/.bashrc
-          '
-        
-        echo ""
-        echo "🎉 Fix applied! Shell runner should work now."
-      else
-        echo "✗ Docker socket not available"
-        echo "Trying alternative method..."
-        
-        # Method 2: Check if we have host volume mounted
+      
+      # Show what we created
+      echo "=== Created .bashrc ==="
+      cat $TARGET/.bashrc
+      echo ""
+      echo "=== Created .profile ==="
+      cat $TARGET/.profile
+      echo ""
+      echo "✓ Fix complete!"
+      FIXSCRIPT
+      chmod +x /tmp/fix.sh
+      
+    # Try to run with host mount (requires privileged runner)
+    - |
+      echo "Attempting privileged container with host mount..."
+      docker run --rm --privileged -v /:/host alpine:latest sh -c '
         if [ -d /host/home/gitlab-runner ]; then
-          echo "Host volume found at /host"
-          cat > /host/home/gitlab-runner/.bashrc << "BASHRC"
+          echo "Found gitlab-runner home on host"
+          cat > /host/home/gitlab-runner/.bashrc << "EOF"
 case $- in *i*) ;; *) return;; esac
-BASHRC
-          echo "✓ Fixed via host volume"
+PS1="\u@\h:\w\$ "
+EOF
+          cat > /host/home/gitlab-runner/.profile << "EOF"
+[ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
+EOF
+          chmod 644 /host/home/gitlab-runner/.bashrc /host/home/gitlab-runner/.profile
+          echo "✓ Fixed!"
+          cat /host/home/gitlab-runner/.bashrc
         else
-          echo "No host access available"
+          echo "No host mount available"
+          ls -la /host/ 2>/dev/null || echo "No /host directory"
           exit 1
         fi
-      fi
+      ' && echo "🎉 SUCCESS!" || echo "❌ Privileged approach failed"
