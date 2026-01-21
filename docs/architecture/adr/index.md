@@ -29,6 +29,7 @@ ADRs document significant architectural decisions, their rationale, and conseque
 | [015](ADR-015-llm-ci-notifications.md) | LLM CI Notifications | Accepted |
 | [016](ADR-016-runner-load-balancing.md) | Runner Load Balancing | Accepted |
 | [017](ADR-017-gdrive-folder-structure.md) | GDrive Folder Structure | Accepted |
+| [019](ADR-019-billing-folder-structure.md) | Billing Folder Structure (Contractors) | Accepted |
 
 ### Repository & Process
 | ADR | Title | Status |
@@ -64,6 +65,7 @@ ADRs document significant architectural decisions, their rationale, and conseque
 | CI notifications | ADR-015 |
 | Runner load balancing | ADR-016 |
 | GDrive organization | ADR-017 |
+| Billing folders (contractors) | ADR-019 |
 | Development workflow | ADR-018 |
 
 ## Cross-References
