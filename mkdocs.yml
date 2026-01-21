@@ -112,6 +112,7 @@ nav:
       - Cheatsheet: guides/contributing/cheatsheet.md
     - Project Management: guides/project-management.md
     - Epics Pattern: guides/epics.md
+    - "🧾 Billing Trigger": billing-trigger.html
 
   - CI:
     - "Runner Management":
