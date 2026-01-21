@@ -963,6 +963,7 @@ build_invoice:
   image: alpine:latest
   tags:
     - docker-any
+  needs: []
   rules:
     # Force run via trigger (from Pages or API)
     - if: '$FORCE_BILLING == "true"'
