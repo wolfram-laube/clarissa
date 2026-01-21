@@ -1010,6 +1010,7 @@ upload_invoice:
   needs:
     - job: build_invoice
       artifacts: true
+      optional: true
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
