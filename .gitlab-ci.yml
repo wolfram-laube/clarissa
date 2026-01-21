@@ -961,6 +961,9 @@ build_invoice:
   tags:
     - docker-any
   rules:
+    # Force run via trigger (from Pages or API)
+    - if: '$FORCE_BILLING == "true"'
+      when: always
     # Auto-run on main when billing files change
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
@@ -1012,6 +1015,9 @@ upload_invoice:
       artifacts: true
       optional: true
   rules:
+    # Force run via trigger (from Pages or API)
+    - if: '$FORCE_BILLING == "true"'
+      when: on_success
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
         - billing/output/**/*.typ
@@ -1034,6 +1040,9 @@ billing_email:
     - job: upload_invoice
       optional: true
   rules:
+    # Force run via trigger (from Pages or API)
+    - if: '$FORCE_BILLING == "true"'
+      when: always
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
         - billing/output/**/*.typ
