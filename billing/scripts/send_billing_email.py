@@ -76,10 +76,10 @@ def find_billing_files(client_id: str, period: str) -> tuple[list, str]:
     output_dir = Path("billing/output")
     
     # Find timesheets: {period}_timesheet_{client}_*.pdf
-    timesheets = list(output_dir.glob(f"{period}_timesheet_{client_id}_*.pdf"))
+    timesheets = list(output_dir.glob(f"*_{client_id}_{period}_timesheet.pdf"))
     
     # Find latest invoice: AR_*_{client}.pdf
-    invoices = sorted(output_dir.glob(f"AR_*_{client_id}.pdf"), reverse=True)
+    invoices = sorted(output_dir.glob(f"{client_id}_{period}_invoice_AR_*.pdf"), reverse=True)
     invoice = invoices[0] if invoices else None
     
     return timesheets, invoice
@@ -88,7 +88,7 @@ def find_billing_files(client_id: str, period: str) -> tuple[list, str]:
 def parse_sync_files(client_id: str, period: str) -> list[dict]:
     """Parse sync.json files to get hours breakdown."""
     output_dir = Path("billing/output")
-    sync_files = output_dir.glob(f"{period}_timesheet_{client_id}_*.sync.json")
+    sync_files = output_dir.glob(f"*_{client_id}_{period}_timesheet.sync.json")
     
     breakdown = []
     for sf in sync_files:
