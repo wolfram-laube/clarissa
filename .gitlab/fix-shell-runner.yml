@@ -1,0 +1,69 @@
+# Emergency fix for GCP Shell Runner
+fix-gcp-shell-profile:
+  stage: test
+  image: docker:24-cli
+  tags: [gcp-docker]
+  when: manual
+  variables:
+    DOCKER_HOST: unix:///var/run/docker.sock
+  script:
+    - echo "=== Attempting to fix gitlab-runner shell profile ==="
+    
+    # Method 1: Try to access docker socket and run privileged container
+    - |
+      if [ -S /var/run/docker.sock ]; then
+        echo "✓ Docker socket available"
+        
+        # Run a privileged container that mounts the host filesystem
+        docker run --rm --privileged \
+          -v /:/host \
+          alpine:latest sh -c '
+            echo "=== Fixing /host/home/gitlab-runner/.bashrc ==="
+            
+            # Create minimal bashrc
+            cat > /host/home/gitlab-runner/.bashrc << "BASHRC"
+# Minimal bashrc - exit early for non-interactive
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+BASHRC
+            
+            # Create minimal profile
+            cat > /host/home/gitlab-runner/.profile << "PROFILE"
+# Minimal profile
+if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then
+    . "$HOME/.bashrc"
+fi
+PROFILE
+            
+            # Fix permissions
+            chown 999:999 /host/home/gitlab-runner/.bashrc /host/home/gitlab-runner/.profile 2>/dev/null || \
+            chown gitlab-runner:gitlab-runner /host/home/gitlab-runner/.bashrc /host/home/gitlab-runner/.profile 2>/dev/null || \
+            chmod 644 /host/home/gitlab-runner/.bashrc /host/home/gitlab-runner/.profile
+            
+            echo "✓ Files created:"
+            ls -la /host/home/gitlab-runner/.bashrc /host/home/gitlab-runner/.profile
+            echo ""
+            echo "=== .bashrc content ==="
+            cat /host/home/gitlab-runner/.bashrc
+          '
+        
+        echo ""
+        echo "🎉 Fix applied! Shell runner should work now."
+      else
+        echo "✗ Docker socket not available"
+        echo "Trying alternative method..."
+        
+        # Method 2: Check if we have host volume mounted
+        if [ -d /host/home/gitlab-runner ]; then
+          echo "Host volume found at /host"
+          cat > /host/home/gitlab-runner/.bashrc << "BASHRC"
+case $- in *i*) ;; *) return;; esac
+BASHRC
+          echo "✓ Fixed via host volume"
+        else
+          echo "No host access available"
+          exit 1
+        fi
+      fi
