@@ -1,0 +1,632 @@
+# ADR-023: CLARISSA Portal - Observability
+
+| Status | Proposed |
+|--------|----------|
+| Date | 2026-01-22 |
+| Authors | Wolfram Laube, Claude (AI Assistant) |
+| Supersedes | - |
+| Related | ADR-021 (System Architecture), ADR-022 (Software Architecture) |
+
+---
+
+## Context
+
+Das CLARISSA Portal wird in der Experimentierphase von ~4 Entwicklern gebaut, soll aber später von erheblich mehr Usern produktiv genutzt werden. Die Observability-Strategie muss:
+
+1. **Jetzt**: Minimal, kostenfrei, schnell einsatzbereit
+2. **Später**: Skalierbar für Production-Workloads
+3. **Immer**: Von Anfang an richtig angelegt (Structured Logging, Correlation IDs)
+
+---
+
+## Decision
+
+### Strategie: "Design for Scale, Start Simple"
+
+| Phase | User | Stack | Kosten |
+|-------|------|-------|--------|
+| **Phase 1** (jetzt) | 4 Devs | GCP Native | $0 |
+| **Phase 2** (50+ User) | Early Adopters | + Sentry | ~$0-26/mo |
+| **Phase 3** (500+ User) | Production | Full Stack | $50-500/mo |
+
+### Key Decisions
+
+| Entscheidung | Wahl | Begründung |
+|--------------|------|------------|
+| **Logging** | Structured JSON (structlog) | Maschinenlesbar, filterbar |
+| **Correlation** | UUID, erzeugt von Portal API | Request-Tracing über Services |
+| **Metrics** | GCP Cloud Monitoring | Automatisch für Cloud Run |
+| **Alerting** | GCP Alerts → Email/Slack | Minimal aber effektiv |
+| **Tracing** | OpenTelemetry (vorbereitet) | Zukunftssicher, noch nicht aktiv |
+
+---
+
+## Phase 1: Experimentierphase (Jetzt)
+
+### Architektur
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         GCP (kostenlos, automatisch)                         │
+│                                                                              │
+│   Cloud Run Services                                                         │
+│      │                                                                       │
+│      │ stdout/stderr (JSON)                                                  │
+│      ▼                                                                       │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                     Cloud Logging                                    │   │
+│   │                                                                      │   │
+│   │  • Structured JSON Logs                                             │   │
+│   │  • 30 Tage Retention (Free)                                         │   │
+│   │  • Filter: correlation_id, user_id, level                           │   │
+│   │                                                                      │   │
+│   │  ┌─────────────────────────────────────────────────────────────┐    │   │
+│   │  │  Log-based Metrics (custom)                                  │    │   │
+│   │  │  • error_count{service, endpoint}                           │    │   │
+│   │  │  • auth_failures{reason}                                    │    │   │
+│   │  └─────────────────────────────────────────────────────────────┘    │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                     Cloud Monitoring                                 │   │
+│   │                                                                      │   │
+│   │  Built-in Metrics (automatisch):                                    │   │
+│   │  • request_count                                                    │   │
+│   │  • request_latencies (P50, P95, P99)                               │   │
+│   │  • instance_count                                                   │   │
+│   │  • cpu_utilization                                                  │   │
+│   │  • memory_utilization                                               │   │
+│   │                                                                      │   │
+│   │  Alerts:                                                            │   │
+│   │  • Error Rate > 10% → Email + Slack                                │   │
+│   │  • Service Down → Email + Slack                                    │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                     Error Reporting                                  │   │
+│   │                                                                      │   │
+│   │  • Stack Traces (automatisch aus Logs)                              │   │
+│   │  • Gruppierung nach Error-Typ                                       │   │
+│   │  • Trending/New Errors                                              │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│   Kosten: $0 (Free Tier)                                                    │
+│   Setup:  ~2h                                                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Was wir NICHT bauen (Phase 1)
+
+- ❌ Custom Dashboards (GCP Console reicht)
+- ❌ Distributed Tracing (nur 2 Services)
+- ❌ SIEM / Security Analytics
+- ❌ Self-hosted Prometheus/Grafana
+
+---
+
+## Structured Logging
+
+### Warum von Anfang an?
+
+```
+❌ Später refactoren:
+   print(f"User {user_id} created invoice {inv_id}")
+   → Nicht filterbar, nicht maschinenlesbar
+
+✅ Von Anfang an richtig:
+   logger.info("invoice_created", user_id=user_id, invoice_id=inv_id)
+   → {"event": "invoice_created", "user_id": "123", "invoice_id": "INV-001"}
+```
+
+### Implementation
+
+```python
+# services/portal-api/src/core/logging.py
+
+import structlog
+from google.cloud import logging as gcp_logging
+
+def setup_logging():
+    """
+    Configure structured logging for Cloud Run.
+    Logs go to stdout as JSON → Cloud Logging picks them up.
+    """
+    
+    structlog.configure(
+        processors=[
+            # Add timestamp
+            structlog.processors.TimeStamper(fmt="iso"),
+            # Add log level
+            structlog.processors.add_log_level,
+            # Format as JSON for Cloud Logging
+            structlog.processors.JSONRenderer()
+        ],
+        wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
+        context_class=dict,
+        logger_factory=structlog.PrintLoggerFactory(),
+        cache_logger_on_first_use=True
+    )
+
+# Usage
+logger = structlog.get_logger()
+
+logger.info("invoice_created", 
+    user_id="user_123",
+    invoice_id="INV-001",
+    amount=1500.00
+)
+
+# Output (JSON):
+# {
+#   "timestamp": "2026-01-22T21:30:00Z",
+#   "level": "info",
+#   "event": "invoice_created",
+#   "user_id": "user_123",
+#   "invoice_id": "INV-001",
+#   "amount": 1500.00
+# }
+```
+
+### Log Levels
+
+| Level | Wann | Beispiel | Alert? |
+|-------|------|----------|--------|
+| **ERROR** | Braucht Aufmerksamkeit | PDF Generation failed | ✅ Ja |
+| **WARNING** | Ungewöhnlich aber OK | Retry succeeded, Rate limit near | Nein |
+| **INFO** | Normale Operationen | Request completed, User logged in | Nein |
+| **DEBUG** | Nur für Entwicklung | SQL queries, Token details | Nein |
+
+---
+
+## Correlation IDs
+
+### Warum?
+
+```
+Ohne Correlation ID:
+  Portal API Log: "PDF generation triggered"
+  Worker Log:     "PDF generation failed: timeout"
+  → Welcher Request? Für welchen User? 🤷
+
+Mit Correlation ID:
+  Portal API Log: {"correlation_id": "abc-123", "event": "pdf_triggered", ...}
+  Worker Log:     {"correlation_id": "abc-123", "event": "pdf_failed", ...}
+  → Filter: correlation_id="abc-123" → Alle Logs für diesen Request ✓
+```
+
+### Wer erzeugt die Correlation ID?
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│   Browser                     Portal API                    Worker           │
+│      │                            │                            │            │
+│      │  (optional)                │                            │            │
+│      │  X-Request-ID: abc         │                            │            │
+│      │───────────────────────────►│                            │            │
+│      │                            │                            │            │
+│      │                     Middleware:                         │            │
+│      │                     if header missing:                  │            │
+│      │                       correlation_id = uuid4()          │            │
+│      │                     else:                               │            │
+│      │                       correlation_id = validate(header) │            │
+│      │                            │                            │            │
+│      │                     Bind to structlog context           │            │
+│      │                            │                            │            │
+│      │                            │  X-Correlation-ID: abc     │            │
+│      │                            │───────────────────────────►│            │
+│      │                            │                            │            │
+│      │                            │                     Bind to context     │
+│      │                            │                     All logs include it │
+│      │                            │                            │            │
+│      │  X-Correlation-ID: abc     │                            │            │
+│      │◄───────────────────────────│                            │            │
+│      │  (für Error Reports)       │                            │            │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Implementation
+
+```python
+# services/portal-api/src/core/middleware.py
+
+import uuid
+import re
+import structlog
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+
+# Validation: alphanumeric + hyphens, max 64 chars
+CORRELATION_ID_PATTERN = re.compile(r'^[a-zA-Z0-9\-]{1,64}$')
+
+logger = structlog.get_logger()
+
+class CorrelationIdMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # 1. Check if client sent one
+        correlation_id = (
+            request.headers.get("X-Correlation-ID") or 
+            request.headers.get("X-Request-ID")
+        )
+        
+        # 2. Validate or generate
+        if not correlation_id or not CORRELATION_ID_PATTERN.match(correlation_id):
+            correlation_id = str(uuid.uuid4())
+        
+        # 3. Bind to logging context (all subsequent logs include it)
+        structlog.contextvars.bind_contextvars(
+            correlation_id=correlation_id
+        )
+        
+        # 4. Also bind user_id if authenticated
+        user = getattr(request.state, "user", None)
+        if user:
+            structlog.contextvars.bind_contextvars(user_id=user.get("id"))
+        
+        # 5. Log request start
+        logger.info("request_started",
+            method=request.method,
+            path=request.url.path,
+            client_ip=request.client.host
+        )
+        
+        # 6. Process request
+        start_time = time.perf_counter()
+        response = await call_next(request)
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        
+        # 7. Log request end
+        logger.info("request_completed",
+            status_code=response.status_code,
+            duration_ms=round(duration_ms, 2)
+        )
+        
+        # 8. Return correlation ID to client
+        response.headers["X-Correlation-ID"] = correlation_id
+        
+        # 9. Clear context for next request
+        structlog.contextvars.unbind_contextvars("correlation_id", "user_id")
+        
+        return response
+```
+
+### Propagation zum Worker
+
+```python
+# services/portal-api/src/services/worker_client.py
+
+import structlog
+
+class WorkerClient:
+    async def generate_pdf(self, invoice_id: str) -> dict:
+        # Get correlation ID from current context
+        ctx = structlog.contextvars.get_contextvars()
+        correlation_id = ctx.get("correlation_id", str(uuid.uuid4()))
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{self.worker_url}/worker/billing/generate-pdf",
+                json={"invoice_id": invoice_id},
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "X-Correlation-ID": correlation_id  # Propagate!
+                }
+            )
+            return response.json()
+```
+
+### Log Output Beispiel
+
+```json
+// Portal API
+{
+  "timestamp": "2026-01-22T21:30:00.000Z",
+  "level": "info",
+  "event": "request_started",
+  "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
+  "user_id": "user_123",
+  "method": "POST",
+  "path": "/api/v1/billing/invoices/INV-001/generate-pdf"
+}
+
+{
+  "timestamp": "2026-01-22T21:30:00.150Z",
+  "level": "info",
+  "event": "pdf_generation_triggered",
+  "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
+  "user_id": "user_123",
+  "invoice_id": "INV-001"
+}
+
+// Worker Service
+{
+  "timestamp": "2026-01-22T21:30:00.200Z",
+  "level": "info",
+  "event": "pdf_generation_started",
+  "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
+  "invoice_id": "INV-001"
+}
+
+{
+  "timestamp": "2026-01-22T21:30:05.500Z",
+  "level": "info",
+  "event": "pdf_generation_completed",
+  "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
+  "invoice_id": "INV-001",
+  "pdf_size_bytes": 145230,
+  "duration_ms": 5300
+}
+```
+
+### Cloud Logging Query
+
+```
+-- Alle Logs für einen Request
+resource.type="cloud_run_revision"
+jsonPayload.correlation_id="550e8400-e29b-41d4-a716-446655440000"
+
+-- Alle Errors für einen User
+resource.type="cloud_run_revision"
+jsonPayload.user_id="user_123"
+jsonPayload.level="error"
+```
+
+---
+
+## Alerting
+
+### Phase 1 Alerts
+
+```yaml
+# GCP Cloud Monitoring Alert Policies
+
+alerts:
+  - name: "CLARISSA - High Error Rate"
+    condition:
+      filter: |
+        resource.type="cloud_run_revision"
+        resource.labels.service_name="clarissa-portal-api"
+        metric.type="run.googleapis.com/request_count"
+        metric.labels.response_code_class="5xx"
+      comparison: COMPARISON_GT
+      threshold: 0.1  # 10%
+      duration: 300s  # 5 Minuten
+    notification:
+      - email: wolfram.laube@blauweiss-edv.at
+      - slack_webhook: $SLACK_WEBHOOK_URL
+
+  - name: "CLARISSA - Service Unavailable"
+    condition:
+      filter: |
+        resource.type="cloud_run_revision"
+        resource.labels.service_name="clarissa-portal-api"
+        metric.type="run.googleapis.com/request_count"
+      absence_duration: 600s  # 10 Minuten kein Traffic
+    notification:
+      - email: wolfram.laube@blauweiss-edv.at
+
+  - name: "CLARISSA - Auth Failures Spike"
+    condition:
+      # Log-based metric
+      filter: |
+        resource.type="cloud_run_revision"
+        jsonPayload.event="auth_failed"
+      comparison: COMPARISON_GT
+      threshold: 50
+      duration: 60s  # 50 failures/minute = possible brute force
+    notification:
+      - email: wolfram.laube@blauweiss-edv.at
+      - slack_webhook: $SLACK_WEBHOOK_URL
+```
+
+### Frontend Error Reporting
+
+```javascript
+// frontend/portal/assets/js/api.js
+
+async function apiCall(endpoint, options = {}) {
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+        ...options,
+        credentials: 'include'
+    });
+    
+    const correlationId = response.headers.get('X-Correlation-ID');
+    
+    if (!response.ok) {
+        // User kann uns das schicken für Support
+        console.error(`Request failed. Correlation ID: ${correlationId}`);
+        
+        // Optional: Show to user
+        showError(`Something went wrong. Reference: ${correlationId.slice(0, 8)}`);
+        
+        throw new Error(`API Error: ${response.status}`);
+    }
+    
+    return response.json();
+}
+```
+
+---
+
+## Phase 2: Early Adopters (50+ User)
+
+### + Sentry für Error Tracking
+
+```python
+# services/portal-api/src/main.py
+
+import sentry_sdk
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.httpx import HttpxIntegration
+
+sentry_sdk.init(
+    dsn=settings.SENTRY_DSN,
+    integrations=[
+        FastApiIntegration(),
+        HttpxIntegration(),
+    ],
+    traces_sample_rate=0.1,  # 10% of requests
+    environment=settings.ENVIRONMENT,
+)
+
+# Correlation ID in Sentry
+@app.middleware("http")
+async def sentry_context(request: Request, call_next):
+    correlation_id = request.headers.get("X-Correlation-ID", str(uuid.uuid4()))
+    
+    with sentry_sdk.configure_scope() as scope:
+        scope.set_tag("correlation_id", correlation_id)
+        scope.set_user({"id": get_user_id(request)})
+    
+    return await call_next(request)
+```
+
+**Sentry bringt:**
+- Error Grouping (gleiche Errors zusammengefasst)
+- Stack Traces mit Context
+- Release Tracking
+- Performance Monitoring
+- User Feedback Widget
+
+**Kosten:** $0 (Developer) / $26/mo (Team)
+
+---
+
+## Phase 3: Production (500+ User)
+
+### Option A: GCP Native (einfacher)
+
+```
+Cloud Logging          → Log Analytics (SQL queries)
+Cloud Monitoring       → Custom Dashboards
+Cloud Trace            → Distributed Tracing
+Cloud Profiler         → Performance Analysis
+Alerting               → PagerDuty/Opsgenie Integration
+```
+
+### Option B: Grafana Stack (mehr Kontrolle)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Grafana Cloud (SaaS)                          │
+│                    oder Self-Hosted                              │
+│                                                                  │
+│   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐            │
+│   │    Loki     │  │ Prometheus  │  │    Tempo    │            │
+│   │   (Logs)    │  │  (Metrics)  │  │  (Traces)   │            │
+│   └─────────────┘  └─────────────┘  └─────────────┘            │
+│          │                │                │                    │
+│          └────────────────┼────────────────┘                    │
+│                           ▼                                      │
+│                    ┌─────────────┐                              │
+│                    │   Grafana   │                              │
+│                    │ Dashboards  │                              │
+│                    └─────────────┘                              │
+│                           │                                      │
+│                    ┌─────────────┐                              │
+│                    │   OnCall    │                              │
+│                    │ (Alerting)  │                              │
+│                    └─────────────┘                              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Entscheidung wird getroffen wenn wir soweit sind** - wichtig ist, dass wir durch OpenTelemetry vorbereitet sind.
+
+---
+
+## OpenTelemetry Vorbereitung
+
+Auch wenn wir Tracing in Phase 1 nicht aktiv nutzen, instrumentieren wir von Anfang an mit OpenTelemetry. Das macht späteren Wechsel zu jedem Backend trivial.
+
+```python
+# services/portal-api/src/core/telemetry.py
+
+from opentelemetry import trace
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+def setup_telemetry(app, export_traces: bool = False):
+    """
+    Setup OpenTelemetry instrumentation.
+    
+    Phase 1: Instrumentation only (no export)
+    Phase 3: Add exporter (Cloud Trace, Jaeger, Tempo)
+    """
+    
+    # Set up provider
+    provider = TracerProvider()
+    trace.set_tracer_provider(provider)
+    
+    # Phase 3: Uncomment to export traces
+    # if export_traces:
+    #     from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+    #     exporter = CloudTraceSpanExporter()
+    #     provider.add_span_processor(BatchSpanProcessor(exporter))
+    
+    # Instrument FastAPI (automatic spans for all requests)
+    FastAPIInstrumentor.instrument_app(app)
+    
+    # Instrument HTTPX (automatic spans for outgoing requests)
+    HTTPXClientInstrumentor().instrument()
+```
+
+---
+
+## Summary
+
+| Was | Phase 1 | Phase 2 | Phase 3 |
+|-----|---------|---------|---------|
+| **Logging** | structlog → Cloud Logging | gleich | + Log Analytics |
+| **Metrics** | Cloud Run built-in | gleich | + Custom Dashboards |
+| **Errors** | Cloud Error Reporting | + Sentry | Sentry |
+| **Tracing** | (vorbereitet) | (vorbereitet) | Cloud Trace / Tempo |
+| **Alerting** | Email + Slack | gleich | PagerDuty/Opsgenie |
+| **Kosten** | $0 | ~$26/mo | $50-500/mo |
+
+### Nicht verhandelbar (alle Phasen)
+
+1. ✅ **Structured Logging** (JSON, nicht print())
+2. ✅ **Correlation IDs** (Portal API erzeugt, propagiert)
+3. ✅ **User ID in Logs** (für Support)
+4. ✅ **Error Alerting** (Email minimum)
+
+---
+
+## Implementation Checklist
+
+### Phase 1 (jetzt)
+
+- [ ] structlog konfigurieren
+- [ ] CorrelationIdMiddleware implementieren
+- [ ] Worker: Correlation ID aus Header lesen
+- [ ] Log-based Metric: auth_failures
+- [ ] Alert: Error Rate > 10%
+- [ ] Alert: Service Down
+- [ ] Frontend: Correlation ID in Errors anzeigen
+
+### Phase 2 (bei 50+ User)
+
+- [ ] Sentry Account erstellen
+- [ ] Sentry SDK integrieren
+- [ ] Release Tracking einrichten
+
+### Phase 3 (bei 500+ User)
+
+- [ ] Entscheidung: GCP Native vs Grafana
+- [ ] OpenTelemetry Exporter aktivieren
+- [ ] Custom Dashboards
+- [ ] PagerDuty/Opsgenie Integration
+
+---
+
+## References
+
+- [Google Cloud Logging](https://cloud.google.com/logging/docs)
+- [Google Cloud Monitoring](https://cloud.google.com/monitoring/docs)
+- [structlog Documentation](https://www.structlog.org/)
+- [OpenTelemetry Python](https://opentelemetry.io/docs/instrumentation/python/)
+- [Sentry for Python](https://docs.sentry.io/platforms/python/)
+- [Grafana Cloud](https://grafana.com/products/cloud/)
