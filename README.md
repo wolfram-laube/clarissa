@@ -119,3 +119,4 @@ clarissa --help
 ---
 
 *Built by BlauWeiss LLC*
+<!-- GitLab→GitHub sync test: 2026-01-23T22:30Z -->
