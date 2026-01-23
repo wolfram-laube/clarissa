@@ -31,8 +31,8 @@ The Software Architecture (Hexagonal Pattern, API Design, Code Structure) is doc
 | **Local Dev** | OpenWhisk Standalone | Benchmarking, no GCP dependency for devs |
 | **Database** | Firestore | Serverless, Free Tier, Document Model passt |
 | **Storage** | GCS | PDFs, Standard, Free Tier |
-| **Frontend Hosting** | GitLab Pages | Bereits vorhanden, $0 |
-| **Auth Provider** | GitLab (OIDC) | Team hat bereits GitLab Accounts |
+| **Frontend Hosting** | GitLab Pages | Already available, $0 |
+| **Auth Provider** | GitLab (OIDC) | Team already has GitLab accounts |
 | **OAuth Flow** | Authorization Code + PKCE | Best Practice, Defense-in-Depth |
 
 ---
