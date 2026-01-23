@@ -475,7 +475,7 @@ pages:
 
 ### Phase 3: OpenWhisk (Week 5)
 - [ ] OpenWhisk Standalone auf Linux Yoga
-- [ ] Benchmark-Vergleich Cloud Run vs OpenWhisk
+- [ ] Benchmark comparison Cloud Run vs OpenWhisk
 
 ---
 
