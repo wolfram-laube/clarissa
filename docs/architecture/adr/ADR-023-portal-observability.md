@@ -95,7 +95,7 @@ The CLARISSA Portal is being built during the experimental phase by ~4 developer
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Was wir NICHT bauen (Phase 1)
+### What we are NOT building (Phase 1)
 
 - ❌ Custom Dashboards (GCP Console reicht)
 - ❌ Distributed Tracing (nur 2 Services)
@@ -188,7 +188,7 @@ Ohne Correlation ID:
   Worker Log:     "PDF generation failed: timeout"
   → Which request? For which user? 🤷
 
-Mit Correlation ID:
+With Correlation ID:
   Portal API Log: {"correlation_id": "abc-123", "event": "pdf_triggered", ...}
   Worker Log:     {"correlation_id": "abc-123", "event": "pdf_failed", ...}
   → Filter: correlation_id="abc-123" → All logs for this request ✓
