@@ -18,7 +18,7 @@ CLARISSA is not an ordinary software system. The testing strategy must cover:
 3. **Conversation Testing**: Dialog-Flows, Intent Recognition
 4. **Simulation Validation**: Physical plausibility of results
 
-Besondere Herausforderung: LLM-Outputs sind **non-deterministic**. Traditionelle assertEqual()-Tests greifen nicht.
+Special challenge: LLM outputs are **non-deterministic**. Traditional assertEqual() tests do not work.
 
 ---
 
@@ -33,7 +33,7 @@ Besondere Herausforderung: LLM-Outputs sind **non-deterministic**. Traditionelle
                               └───────┬───────┘
                                       │
                          ┌────────────┴────────────┐
-                         │      Integration        │  Moderate Anzahl
+                         │      Integration        │  Moderate amount
                          │   (Service-to-Service)  │  "API → LLM → Deck → Validator"
                          └────────────┬────────────┘
                                       │
@@ -212,7 +212,7 @@ class TestDeckGenerationPipeline:
 
 ### 3. LLM Output Evaluation
 
-**Das ist der Kern der Herausforderung.** LLM-Outputs sind nicht deterministisch.
+**This is the core challenge.** LLM outputs are non-deterministic.
 
 #### Approach: Property-Based Testing + Semantic Validation
 
