@@ -13,11 +13,11 @@
 
 CLARISSA is a **Conversational** User Interface - LLM calls are the core of the system, not an add-on. The architecture must support:
 
-1. **Cloud Deployment**: SaaS, API-basierte LLMs (Claude, GPT, Gemini)
-2. **On-Premise**: Enterprise-Kunden mit Datenschutz-Anforderungen
-3. **Air-Gapped**: Öl-Majors, Regierungen, kritische Infrastruktur - kein Internet
+1. **Cloud Deployment**: SaaS, API-based LLMs (Claude, GPT, Gemini)
+2. **On-Premise**: Enterprise customers with data protection requirements
+3. **Air-Gapped**: Oil majors, governments, critical infrastructure - no internet
 
-Zusätzlich: Verschiedene Tasks brauchen verschiedene Models (Intent → klein/schnell, Deck Generation → groß/präzise).
+Additionally: Different tasks require different models (Intent → small/fast, Deck Generation → large/precise).
 
 ---
 
@@ -25,7 +25,7 @@ Zusätzlich: Verschiedene Tasks brauchen verschiedene Models (Intent → klein/s
 
 ### LLM Abstraction Layer (LAL)
 
-Analog zum Simulator Abstraction Layer (SAL) in ADR-024:
+Analogous to the Simulator Abstraction Layer (SAL) in ADR-024:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
@@ -102,17 +102,17 @@ Analog zum Simulator Abstraction Layer (SAL) in ADR-024:
 │   │                │                                       │     │
 │   └────────────────│───────────────────────────────────────┘     │
 │                    │                                             │
-│                    │ (optional, für spezielle Tasks)            │
+│                    │ (optional, for special tasks)               │
 │                    ▼                                             │
 │              ┌──────────┐                                        │
-│              │ Internet │──► Claude API (mit Approval)          │
+│              │ Internet │──► Claude API (with approval)          │
 │              └──────────┘                                        │
 │                                                                  │
 │   ✓ Data stays on-premise (default)                             │
-│   ✓ Cloud für spezielle Tasks (opt-in)                          │
+│   ✓ Cloud for special tasks (opt-in)                            │
 │   ✓ Compliance-friendly                                         │
-│   ✗ GPU Hardware nötig                                          │
-│   ✗ Model Updates selbst managen                                │
+│   ✗ GPU hardware required                                       │
+│   ✗ Model updates self-managed                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -156,7 +156,7 @@ Analog zum Simulator Abstraction Layer (SAL) in ADR-024:
 
 ## Model Router: Task-Based Selection
 
-Nicht jeder Task braucht das größte Model:
+Not every task needs the largest model:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
