@@ -16,7 +16,7 @@ CLARISSA is not an ordinary software system. The testing strategy must cover:
 1. **Standard Software Testing**: Unit, Integration, E2E
 2. **LLM Output Testing**: Wie testet man generierte Decks?
 3. **Conversation Testing**: Dialog-Flows, Intent Recognition
-4. **Simulation Validation**: Physikalische Plausibilität der Ergebnisse
+4. **Simulation Validation**: Physical plausibility of results
 
 Besondere Herausforderung: LLM-Outputs sind **non-deterministic**. Traditionelle assertEqual()-Tests greifen nicht.
 
@@ -24,7 +24,7 @@ Besondere Herausforderung: LLM-Outputs sind **non-deterministic**. Traditionelle
 
 ## Decision
 
-### Testing Pyramid für CLARISSA
+### Testing Pyramid for CLARISSA
 
 ```
                               ┌───────────────┐
@@ -38,7 +38,7 @@ Besondere Herausforderung: LLM-Outputs sind **non-deterministic**. Traditionelle
                          └────────────┬────────────┘
                                       │
               ┌───────────────────────┴───────────────────────┐
-              │                    Unit                        │  Viele, schnell, günstig
+              │                    Unit                        │  Many, fast, cheap
               │        (Functions, Classes, Validators)        │  "Deck Parser", "Keyword Validator"
               └───────────────────────────────────────────────┘
 
@@ -65,7 +65,7 @@ Besondere Herausforderung: LLM-Outputs sind **non-deterministic**. Traditionelle
 
 ### 1. Unit Tests
 
-Klassische Unit Tests für deterministische Komponenten.
+Classic unit tests for deterministic components.
 
 ```python
 # tests/unit/test_deck_parser.py
@@ -139,7 +139,7 @@ class TestPhysicsValidator:
 
 ### 2. Integration Tests
 
-Service-übergreifende Tests, aber ohne LLM (gemockt).
+Cross-service tests, but without LLM (mocked).
 
 ```python
 # tests/integration/test_deck_generation_pipeline.py
@@ -439,7 +439,7 @@ class TestDialogFlows:
 
 ### 5. Simulation Validation
 
-**Der ultimative Test:** Läuft die Simulation und sind die Ergebnisse plausibel?
+**The ultimate test:** Does the simulation run and are the results plausible?
 
 ```python
 # tests/simulation/test_simulation_validation.py
@@ -520,7 +520,7 @@ class TestSimulationValidation:
 
 ### 6. Benchmark Regression Tests
 
-Vergleich gegen bekannte Lösungen (SPE Comparative Solution Projects).
+Comparison against known solutions (SPE Comparative Solution Projects).
 
 ```python
 # tests/benchmarks/test_spe_comparative.py
