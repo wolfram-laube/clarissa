@@ -14,7 +14,7 @@
 CLARISSA is a **Conversational** User Interface - LLM calls are the core of the system, not an add-on. The architecture must support:
 
 1. **Cloud Deployment**: SaaS, API-basierte LLMs (Claude, GPT, Gemini)
-2. **On-Premise**: Enterprise-Kunden mit Datenschutz-Anforderungen
+2. **On-Premise**: Enterprise customers with data protection requirements
 3. **Air-Gapped**: Oil majors, governments, critical infrastructure - no internet
 
 Additionally: Different tasks need different models (Intent → small/fast, Deck Generation → large/precise).
@@ -105,7 +105,7 @@ Analog zum Simulator Abstraction Layer (SAL) in ADR-024:
 │                    │ (optional, for special tasks)            │
 │                    ▼                                             │
 │              ┌──────────┐                                        │
-│              │ Internet │──► Claude API (mit Approval)          │
+│              │ Internet │──► Claude API (with approval)          │
 │              └──────────┘                                        │
 │                                                                  │
 │   ✓ Data stays on-premise (default)                             │
