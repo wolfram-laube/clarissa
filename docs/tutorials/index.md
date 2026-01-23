@@ -79,51 +79,106 @@ flow --version
 
 #### Git Workflow (Contributing Changes)
 
-!!! important "GitLab is the Source of Truth"
-    Always push changes to **GitLab** (the main repository). GitHub is a read-only mirror for Colab access.
+The CLARISSA repository is **bidirectionally synchronized** between GitLab and GitHub. You can work from either platform.
 
-**Cloning:**
+!!! info "Two Repositories, Fully Synced"
+    | Repository | URL | Use Case |
+    |------------|-----|----------|
+    | **GitLab** (primary) | `gitlab.com/wolfram_laube/blauweiss_llc/irena` | CI/CD, MRs, main development |
+    | **GitHub** (mirror) | `github.com/wolfram-laube/clarissa` | Colab notebooks, external collaboration |
+    
+    Both repos stay in sync automatically. Push to whichever you cloned from.
+
+**Step 1: Clone the Repository**
 
 ```bash
-# Clone from GitLab (recommended)
+# Option A: Clone from GitLab
 git clone https://gitlab.com/wolfram_laube/blauweiss_llc/irena.git
 cd irena
 
-# Or if you only have GitHub access:
+# Option B: Clone from GitHub (for Colab users)
 git clone https://github.com/wolfram-laube/clarissa.git
 cd clarissa
 ```
 
-**Pushing Changes:**
+**Step 2: Create a Feature Branch**
+
+!!! warning "Never commit directly to `main`"
+    Always use feature branches. Direct commits to `main` bypass code review and can cause sync conflicts.
 
 ```bash
-# If you cloned from GitLab - just push normally
-git add .
-git commit -m "docs: update notebook example"
-git push origin main  # → GitLab → auto-syncs to GitHub
+# Create and switch to a feature branch
+git checkout -b feature/my-improvement
 
-# If you cloned from GitHub - changes still sync back to GitLab
-git push origin main  # → GitHub → GitHub Actions → GitLab
+# Make your changes...
+# Edit files, run tests, etc.
 ```
+
+**Step 3: Commit and Push**
+
+```bash
+# Stage and commit your changes
+git add .
+git commit -m "feat: add waterflood example to tutorial 03"
+
+# Push your feature branch
+git push origin feature/my-improvement
+```
+
+**Step 4: Create a Merge Request**
+
+| If you pushed to... | Create MR/PR on... | Link |
+|---------------------|-------------------|------|
+| GitLab | GitLab | [Create MR](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/merge_requests/new) |
+| GitHub | GitLab (preferred) or GitHub | [GitLab MR](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/merge_requests/new) |
+
+!!! tip "GitLab for Code Review"
+    Even if you work on GitHub, create the Merge Request on **GitLab** where CI/CD pipelines run. Your GitHub branch will be synced to GitLab automatically.
 
 **Repository Sync Architecture:**
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│                                                          │
-│   GitLab (main repo)  ◄────────────►  GitHub (mirror)   │
-│   wolfram_laube/          Push Mirror  wolfram-laube/    │
-│   blauweiss_llc/irena  ◄──────────── clarissa           │
-│                          GitHub Actions                  │
-│                                                          │
-│   ✅ Clone from here       ⚠️ Colab access only         │
-│   ✅ Push changes here     ✅ Can also push (syncs back)│
-│                                                          │
-└──────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                     Bidirectional Sync                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   GitLab                              GitHub                    │
+│   ══════                              ══════                    │
+│   wolfram_laube/                      wolfram-laube/            │
+│   blauweiss_llc/irena                 clarissa                  │
+│                                                                 │
+│        │                                   │                    │
+│        │◄───────── Push Mirror ───────────│                    │
+│        │           (immediate)             │                    │
+│        │                                   │                    │
+│        │────────► GitHub Actions ─────────►│                    │
+│        │           (~30 seconds)           │                    │
+│        │                                   │                    │
+│   ┌────┴────┐                        ┌────┴────┐               │
+│   │  main   │◄──────────────────────►│  main   │               │
+│   │feature/*│◄──────────────────────►│feature/*│               │
+│   │  tags   │◄──────────────────────►│  tags   │               │
+│   └─────────┘                        └─────────┘               │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-!!! warning "Avoid Simultaneous Edits"
-    If multiple people edit the same file on GitLab AND GitHub before sync completes, merge conflicts can occur. Coordinate with the team or use feature branches.
+**For Colab Users (Saving Notebooks):**
+
+When you edit a notebook in Colab and want to save changes:
+
+1. **File → Save a copy in GitHub**
+2. Select repository: `wolfram-laube/clarissa`
+3. Create a **new branch** (e.g., `colab/tutorial-03-update`)
+4. Add a commit message
+5. Click "OK"
+
+Your branch will automatically sync to GitLab. Then create an MR on GitLab for review.
+
+!!! danger "Avoid Merge Conflicts"
+    **Don't** edit the same file on both GitLab and GitHub simultaneously. The sync takes 30-60 seconds. If two people push conflicting changes within that window, manual conflict resolution is required.
+    
+    **Best Practice:** Communicate with the team before editing shared files, or work on separate feature branches.
 
 #### Dependencies Overview
 
@@ -250,3 +305,4 @@ Save your work frequently. Use Google Drive mount for persistence:
 from google.colab import drive
 drive.mount('/content/drive')
 ```
+
