@@ -11,7 +11,7 @@
 
 ## Context
 
-ADR-021 definiert die System- und Security-Architektur des CLARISSA Portals (Cloud Run, OIDC, etc.). Diese ADR beschreibt die Software-Architektur:
+ADR-021 defines the system and security architecture of the CLARISSA Portal (Cloud Run, OIDC, etc.). This ADR describes the software architecture:
 
 1. **Hexagonal Architecture**: Platform-agnostischer Core mit Adaptern
 2. **API Design**: Endpoints, Contracts, Error Handling
@@ -24,9 +24,9 @@ ADR-021 definiert die System- und Security-Architektur des CLARISSA Portals (Clo
 
 ### Key Decisions
 
-| Entscheidung | Wahl | Begründung |
+| Decision | Choice | Rationale |
 |--------------|------|------------|
-| **Architecture Pattern** | Hexagonal (Ports & Adapters) | Plattform-Portabilität, Testbarkeit |
+| **Architecture Pattern** | Hexagonal (Ports & Adapters) | Platform portability, testability |
 | **Core Language** | Python 3.11+ | Team-Skills, FastAPI, async |
 | **API Framework** | FastAPI | Async, Pydantic, OpenAPI |
 | **Frontend** | Alpine.js + HTMX | Lightweight, kein Build-Step |
@@ -38,7 +38,7 @@ ADR-021 definiert die System- und Security-Architektur des CLARISSA Portals (Clo
 
 ### Prinzip
 
-Die Business-Logik ist plattformunabhängig im `shared/` Verzeichnis. Dünne Adapter übersetzen zwischen Plattform (Cloud Run, OpenWhisk) und Core.
+The business logic is platform-independent in the `shared/` directory. Thin adapters translate between platform (Cloud Run, OpenWhisk) and core.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -78,7 +78,7 @@ Die Business-Logik ist plattformunabhängig im `shared/` Verzeichnis. Dünne Ada
 ### Vorteile
 
 - **Same Core Code**: Business-Logik einmal schreiben, einmal testen
-- **Platform Portability**: Wechsel ohne Code-Änderung
+- **Platform Portability**: Switch without code changes
 - **Benchmarking**: Apples-to-apples Vergleich Cloud Run vs OpenWhisk
 - **Testbarkeit**: Core ohne HTTP/Container testbar
 
@@ -561,7 +561,7 @@ service cloud.firestore {
 ### Tech Stack
 
 - **Alpine.js**: Reactive UI (15KB, no build step)
-- **HTMX**: HTML-over-the-wire (optional, für einfache Interaktionen)
+- **HTMX**: HTML-over-the-wire (optional, for simple interactions)
 - **Tailwind CSS**: Utility-first styling
 - **Chart.js**: Benchmark visualizations
 
@@ -683,7 +683,7 @@ document.addEventListener('alpine:init', () => {
 - [ ] `shared/` module structure
 - [ ] Pydantic models
 - [ ] PDF generator (Jinja2 + WeasyPrint)
-- [ ] Unit tests für Core
+- [ ] Unit tests for Core
 
 ### Phase 2: Services (Week 3-4)
 - [ ] Portal API endpoints
