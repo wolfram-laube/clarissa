@@ -13,11 +13,11 @@
 
 CLARISSA is a **Conversational** User Interface - LLM calls are the core of the system, not an add-on. The architecture must support:
 
-1. **Cloud Deployment**: SaaS, API-based LLMs (Claude, GPT, Gemini)
-2. **On-Premise**: Enterprise customers with data protection requirements
+1. **Cloud Deployment**: SaaS, API-basierte LLMs (Claude, GPT, Gemini)
+2. **On-Premise**: Enterprise-Kunden mit Datenschutz-Anforderungen
 3. **Air-Gapped**: Oil majors, governments, critical infrastructure - no internet
 
-Additionally: Different tasks require different models (Intent → small/fast, Deck Generation → large/precise).
+Additionally: Different tasks need different models (Intent → small/fast, Deck Generation → large/precise).
 
 ---
 
@@ -25,7 +25,7 @@ Additionally: Different tasks require different models (Intent → small/fast, D
 
 ### LLM Abstraction Layer (LAL)
 
-Analogous to the Simulator Abstraction Layer (SAL) in ADR-024:
+Analog zum Simulator Abstraction Layer (SAL) in ADR-024:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
@@ -102,17 +102,17 @@ Analogous to the Simulator Abstraction Layer (SAL) in ADR-024:
 │   │                │                                       │     │
 │   └────────────────│───────────────────────────────────────┘     │
 │                    │                                             │
-│                    │ (optional, for special tasks)               │
+│                    │ (optional, for special tasks)            │
 │                    ▼                                             │
 │              ┌──────────┐                                        │
-│              │ Internet │──► Claude API (with approval)          │
+│              │ Internet │──► Claude API (mit Approval)          │
 │              └──────────┘                                        │
 │                                                                  │
 │   ✓ Data stays on-premise (default)                             │
-│   ✓ Cloud for special tasks (opt-in)                            │
+│   ✓ Cloud for special tasks (opt-in)                          │
 │   ✓ Compliance-friendly                                         │
-│   ✗ GPU hardware required                                       │
-│   ✗ Model updates self-managed                                  │
+│   ✗ GPU hardware required                                          │
+│   ✗ Model Updates selbst managen                                │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
