@@ -4,26 +4,112 @@ Interactive Jupyter notebooks that teach you how to build conversational interfa
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Choose Your Environment
 
-### Option A: GitPod (Recommended)
+### Option A: GitPod (Recommended for Development)
 
-Full development environment with PostgreSQL, OPM Flow, and all dependencies.
+Full development environment with PostgreSQL, OPM Flow, and all dependencies pre-configured.
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://gitlab.com/wolfram_laube/blauweiss_llc/irena)
 
-### Option B: Google Colab (GPU Training)
+### Option B: Google Colab (Best for GPU Training)
 
-Best for RL agent training and embedding generation.
+Zero-setup cloud notebooks with free GPU access. Best for RL agent training and embedding generation.
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com)
 
+**Step 1:** Open a new Colab notebook, then run this setup cell:
+
 ```python
-# Run this in your first Colab cell:
+# 🚀 CLARISSA Colab Setup - Run this first!
 !git clone --depth 1 https://gitlab.com/wolfram_laube/blauweiss_llc/irena.git
 %cd irena/docs/tutorials
-!pip install -q numpy pandas matplotlib sentence-transformers langchain z3-solver
+
+# Install dependencies
+!pip install -q numpy pandas matplotlib seaborn sentence-transformers langchain z3-solver tqdm
+
+# List available notebooks
+import os
+notebooks = sorted([f for f in os.listdir('notebooks') if f.endswith('.ipynb')])
+print("📚 Available notebooks:")
+for nb in notebooks:
+    print(f"   • {nb}")
 ```
+
+**Step 2:** Use the file browser (📁 icon on left) to navigate to `irena/docs/tutorials/notebooks/` and open any notebook.
+
+!!! note "Colab Limitations"
+    Colab doesn't have PostgreSQL or OPM Flow installed. The notebooks use SQLite fallback for vector storage and a mock simulator for demos. For production work, use GitPod or local setup.
+
+### Option C: Local Setup (Your Own Machine)
+
+Run the notebooks on your laptop or workstation with full control.
+
+#### Prerequisites
+
+- Python 3.10+ 
+- pip or conda
+- Git
+- (Optional) Docker for OPM Flow
+
+#### Quick Start
+
+```bash
+# 1. Clone the repository
+git clone https://gitlab.com/wolfram_laube/blauweiss_llc/irena.git
+cd irena
+
+# 2. Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # Linux/Mac
+# .venv\Scripts\activate   # Windows
+
+# 3. Install dependencies
+pip install -r docs/tutorials/requirements.txt
+
+# 4. Launch Jupyter
+cd docs/tutorials
+jupyter lab
+```
+
+#### Full Local Setup (with OPM Flow)
+
+For running actual simulations locally:
+
+```bash
+# Install OPM Flow via Docker
+docker pull opmproject/opm-simulators
+
+# Or on Ubuntu/Debian:
+sudo apt-get install software-properties-common
+sudo apt-add-repository ppa:opm/ppa
+sudo apt-get update
+sudo apt-get install mpi-default-bin libopm-simulators-bin
+
+# Verify installation
+flow --version
+```
+
+#### Dependencies Overview
+
+The `requirements.txt` includes:
+
+| Package | Purpose |
+|---------|---------|
+| `numpy`, `pandas` | Data handling |
+| `matplotlib`, `seaborn` | Visualization |
+| `sentence-transformers` | Embeddings for RAG |
+| `openai`, `anthropic` | LLM APIs (optional) |
+| `langchain` | LLM orchestration |
+| `z3-solver` | Constraint engine |
+| `fastapi`, `httpx` | API framework |
+
+!!! tip "API Keys"
+    For notebooks using LLM APIs, set your keys:
+    ```bash
+    export OPENAI_API_KEY="sk-..."
+    export ANTHROPIC_API_KEY="sk-ant-..."
+    ```
 
 ---
 
@@ -64,15 +150,20 @@ Best for RL agent training and embedding generation.
 
 ## 🛠️ Environment Comparison
 
-| Feature | GitPod | Colab |
-|---------|--------|-------|
-| PostgreSQL + pgvector | ✅ Native | ⚠️ SQLite fallback |
-| OPM Flow | ✅ Docker | ⚠️ Mock simulator |
-| GPU | ❌ | ✅ T4/A100 |
-| Persistent files | ✅ Git | ⚠️ Google Drive |
-| Full pipeline | ✅ | ⚠️ Limited |
+| Feature | GitPod | Colab | Local |
+|---------|--------|-------|-------|
+| PostgreSQL + pgvector | ✅ Native | ⚠️ SQLite fallback | ✅ Install required |
+| OPM Flow | ✅ Docker | ⚠️ Mock simulator | ✅ Docker/native |
+| GPU | ❌ | ✅ T4/A100 | ⚠️ If available |
+| Persistent files | ✅ Git | ⚠️ Google Drive | ✅ Local disk |
+| Full pipeline | ✅ | ⚠️ Limited | ✅ |
+| Setup time | ~2 min | ~1 min | ~15 min |
 
-**Recommendation:** Use GitPod for development, Colab for GPU training.
+**Recommendation:** 
+
+- **Development:** Use GitPod (full features, zero setup)
+- **GPU Training:** Use Colab (free GPU access)
+- **Offline Work:** Use local setup (full control)
 
 ---
 
@@ -92,3 +183,35 @@ No prior ECLIPSE or simulation experience required - we'll teach you!
 - [OPM Flow Documentation](https://opm-project.org)
 - [CLARISSA Architecture Overview](../architecture/README.md)
 - [ADR-011: OPM Flow Integration](../architecture/adr/ADR-011-opm-flow-integration.md)
+
+---
+
+## ❓ Troubleshooting
+
+### "Module not found" errors
+
+```bash
+pip install -r requirements.txt --upgrade
+```
+
+### OPM Flow not working locally
+
+```bash
+# Check if Docker is running
+docker ps
+
+# Pull latest image
+docker pull opmproject/opm-simulators
+
+# Test
+docker run --rm opmproject/opm-simulators flow --help
+```
+
+### Colab session disconnects
+
+Save your work frequently. Use Google Drive mount for persistence:
+
+```python
+from google.colab import drive
+drive.mount('/content/drive')
+```
