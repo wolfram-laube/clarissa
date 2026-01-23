@@ -13,12 +13,12 @@
 
 CLARISSA is a Conversational AI System for Reservoir Simulation. The previous ADRs (021-023) describe the Admin Portal. This ADR defines the **Core System Architecture** - the actual heart of the system.
 
-### Anforderungen
+### Requirements
 
-1. **Modulare Microservices**: Unabhängig deploybar, skalierbar
-2. **Flexible Kommunikation**: REST (extern), gRPC (intern), Message Broker (async)
-3. **Simulator-Agnostik**: Abstraktionsschicht für OPM Flow, MRST, (später: kommerzielle)
-4. **Service Clustering**: Zusammengehörige Microservices gruppiert
+1. **Modular Microservices**: Independently deployable, scalable
+2. **Flexible Communication**: REST (external), gRPC (internal), Message Broker (async)
+3. **Simulator-Agnostic**: Abstraction layer for OPM Flow, MRST, (later: commercial)
+4. **Service Clustering**: Related microservices grouped together
 
 ---
 
@@ -81,12 +81,12 @@ CLARISSA is a Conversational AI System for Reservoir Simulation. The previous AD
 
 ## Service Clusters
 
-### Prinzip: Bounded Context
+### Principle: Bounded Context
 
-Microservices die fachlich zusammengehören werden in **Clusters** gruppiert:
-- **Innerhalb** eines Clusters: Message Broker (Tight Coupling OK)
-- **Zwischen** Clusters: gRPC oder Events (Loose Coupling)
-- **Nach außen**: REST API via Gateway
+Microservices that belong together functionally are grouped into **Clusters**:
+- **Within** a cluster: Message Broker (Tight Coupling OK)
+- **Between** clusters: gRPC or Events (Loose Coupling)
+- **External**: REST API via Gateway
 
 ### Cluster 1: Conversation
 
@@ -94,7 +94,7 @@ Microservices die fachlich zusammengehören werden in **Clusters** gruppiert:
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Conversation Cluster                          │
 │                                                                  │
-│   Verantwortung: NLP, Dialog Management, User Intent             │
+│   Responsibility: NLP, Dialog Management, User Intent            │
 │                                                                  │
 │   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐          │
 │   │ NLP Parser  │   │   Intent    │   │   Dialog    │          │
@@ -123,7 +123,7 @@ Microservices die fachlich zusammengehören werden in **Clusters** gruppiert:
 ┌─────────────────────────────────────────────────────────────────┐
 │                     Simulation Cluster                           │
 │                                                                  │
-│   Verantwortung: Deck-Generierung, Job-Management, Execution     │
+│   Responsibility: Deck Generation, Job Management, Execution     │
 │                                                                  │
 │   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐          │
 │   │    Deck     │   │    Deck     │   │     Job     │          │
@@ -154,7 +154,7 @@ Microservices die fachlich zusammengehören werden in **Clusters** gruppiert:
 ┌─────────────────────────────────────────────────────────────────┐
 │                      Analysis Cluster                            │
 │                                                                  │
-│   Verantwortung: Results Processing, Visualization, Reporting    │
+│   Responsibility: Results Processing, Visualization, Reporting   │
 │                                                                  │
 │   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐          │
 │   │   Results   │   │ Comparison  │   │Visualization│          │
@@ -178,10 +178,10 @@ Microservices die fachlich zusammengehören werden in **Clusters** gruppiert:
 
 ## Communication Patterns
 
-### Wann welches Medium?
+### When to Use Which Medium?
 
-| Medium | Use Case | Beispiel |
-|--------|----------|----------|
+| Medium | Use Case | Example |
+|--------|----------|---------|
 | **REST** | External API, CRUD | User → Gateway |
 | **gRPC** | Internal, High-Perf, Streaming | Cluster ↔ Cluster |
 | **Message Broker** | Async, Events, Decoupled | Job Events |
@@ -212,14 +212,14 @@ clarissa/
 
 ### Motivation
 
-CLARISSA soll **nicht** an einen Simulator gebunden sein:
+CLARISSA should **not** be bound to a single simulator:
 
-| Simulator | Stärke | Use Case |
-|-----------|--------|----------|
-| **OPM Flow** | Production-ready, Eclipse-kompatibel | Full-field, History Match |
-| **MRST** | Flexibel, MATLAB, Rapid Prototyping | Research, Sensitivitäten |
-| *Eclipse* | Industry Standard (proprietär) | Client-Validierung |
-| *CMG* | Thermal, Heavy Oil (proprietär) | Spezialfälle |
+| Simulator | Strength | Use Case |
+|-----------|----------|----------|
+| **OPM Flow** | Production-ready, Eclipse-compatible | Full-field, History Match |
+| **MRST** | Flexible, MATLAB, Rapid Prototyping | Research, Sensitivities |
+| *Eclipse* | Industry Standard (proprietary) | Client Validation |
+| *CMG* | Thermal, Heavy Oil (proprietary) | Special Cases |
 
 ### Interface Definition
 
