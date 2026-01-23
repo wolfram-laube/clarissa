@@ -79,7 +79,7 @@ The business logic is platform-independent in the `shared/` directory. Thin adap
 
 - **Same Core Code**: Business-Logik einmal schreiben, einmal testen
 - **Platform Portability**: Switch without code changes
-- **Benchmarking**: Apples-to-apples Vergleich Cloud Run vs OpenWhisk
+- **Benchmarking**: Apples-to-apples comparison Cloud Run vs OpenWhisk
 - **Testbarkeit**: Core ohne HTTP/Container testbar
 
 ---
