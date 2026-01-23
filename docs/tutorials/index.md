@@ -76,6 +76,55 @@ sudo apt-get install mpi-default-bin libopm-simulators-bin
 flow --version
 ```
 
+
+#### Git Workflow (Contributing Changes)
+
+!!! important "GitLab is the Source of Truth"
+    Always push changes to **GitLab** (the main repository). GitHub is a read-only mirror for Colab access.
+
+**Cloning:**
+
+```bash
+# Clone from GitLab (recommended)
+git clone https://gitlab.com/wolfram_laube/blauweiss_llc/irena.git
+cd irena
+
+# Or if you only have GitHub access:
+git clone https://github.com/wolfram-laube/clarissa.git
+cd clarissa
+```
+
+**Pushing Changes:**
+
+```bash
+# If you cloned from GitLab - just push normally
+git add .
+git commit -m "docs: update notebook example"
+git push origin main  # → GitLab → auto-syncs to GitHub
+
+# If you cloned from GitHub - changes still sync back to GitLab
+git push origin main  # → GitHub → GitHub Actions → GitLab
+```
+
+**Repository Sync Architecture:**
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                                                          │
+│   GitLab (main repo)  ◄────────────►  GitHub (mirror)   │
+│   wolfram_laube/          Push Mirror  wolfram-laube/    │
+│   blauweiss_llc/irena  ◄──────────── clarissa           │
+│                          GitHub Actions                  │
+│                                                          │
+│   ✅ Clone from here       ⚠️ Colab access only         │
+│   ✅ Push changes here     ✅ Can also push (syncs back)│
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+```
+
+!!! warning "Avoid Simultaneous Edits"
+    If multiple people edit the same file on GitLab AND GitHub before sync completes, merge conflicts can occur. Coordinate with the team or use feature branches.
+
 #### Dependencies Overview
 
 The `requirements.txt` includes:
