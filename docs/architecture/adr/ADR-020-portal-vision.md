@@ -13,50 +13,50 @@
 
 ### 1.1 Current State
 
-CLARISSA entwickelt sich als dezentrales Forschungsprojekt mit einem Team verteilt über zwei Kontinente:
+CLARISSA is evolving as a distributed research project with a team spread across two continents:
 
-| Person | Location | Timezone | Rolle | Infrastruktur |
-|--------|----------|----------|-------|---------------|
-| Wolfram | Schärding, AT | CET (UTC+1) | Lead, Admin | Mac #1, Mac #2, Linux Yoga (lokal), GCP VM |
+| Person | Location | Timezone | Role | Infrastructure |
+|--------|----------|----------|------|----------------|
+| Wolfram | Schärding, AT | CET (UTC+1) | Lead, Admin | Mac #1, Mac #2, Linux Yoga (local), GCP VM |
 | Mike | Houston, US | CST (UTC-6) | Consultant | Laptop |
 | Ian | Houston, US | CST (UTC-6) | Consultant | Laptop |
 | Doug | Houston, US | CST (UTC-6) | Consultant | Laptop |
 
-Die physischen CI/CD-Runner (3 lokale Maschinen) stehen in Schärding, während das GCP-basierte System (`gitlab-runner`, europe-west3-a) zentralisiert läuft. Diese Verteilung bringt operative Herausforderungen:
+The physical CI/CD runners (3 local machines) are located in Schärding, while the GCP-based system (`gitlab-runner`, europe-west3-a) runs centrally. This distribution creates operational challenges:
 
-1. **Observability Gap**: Die 12-Runner-Matrix (4 Maschinen × 3 Executors) erfordert zentrale Überwachung
-2. **Time Tracking Friction**: GitLab Issues als Workaround für Consultant-Zeiterfassung
-3. **Billing Overhead**: Manuelle PDF-Generierung und Google Drive Upload via CI/CD-Pipeline
-4. **Documentation Fragmentation**: MkDocs existiert, aber ohne interaktive Dashboards
+1. **Observability Gap**: The 12-runner matrix (4 machines × 3 executors) requires centralized monitoring
+2. **Time Tracking Friction**: GitLab Issues as workaround for consultant time tracking
+3. **Billing Overhead**: Manual PDF generation and Google Drive upload via CI/CD pipeline
+4. **Documentation Fragmentation**: MkDocs exists, but without interactive dashboards
 
 ### 1.2 Problem Statement
 
-Ohne ein zentrales Portal fehlt CLARISSA eine Plattform, die:
+Without a central portal, CLARISSA lacks a platform that:
 
-- Team-übergreifende Zusammenarbeit unabhängig von Zeitzonen ermöglicht
-- Operational Awareness über den CI/CD-Zustand bietet
-- Administrative Aufgaben (Billing, Time Tracking) konsolidiert
-- Als Einstiegspunkt für neue Team-Mitglieder und später externe User dient
+- Enables team-wide collaboration independent of timezones
+- Provides operational awareness of CI/CD state
+- Consolidates administrative tasks (billing, time tracking)
+- Serves as entry point for new team members and later external users
 
 ---
 
 ## 2 Scope
 
-Dieses Dokument definiert die **Vision, Anforderungen und Prinzipien** für das CLARISSA Portal. Es dient als Referenz für:
+This document defines the **vision, requirements, and principles** for the CLARISSA Portal. It serves as reference for:
 
-- [ADR-021: System & Security Architecture](./ADR-021-portal-system-security-architecture.md) - Infrastruktur, Deployment, Auth
+- [ADR-021: System & Security Architecture](./ADR-021-portal-system-security-architecture.md) - Infrastructure, Deployment, Auth
 - [ADR-022: Software Architecture](./ADR-022-portal-software-architecture.md) - Hexagonal Pattern, API Design, Code Structure
 
 **In Scope:**
-- Portal Vision und strategische Ziele
-- Funktionale und nicht-funktionale Anforderungen
-- Architektur-Prinzipien und Guardrails
-- Ecosystem-Integration
+- Portal vision and strategic goals
+- Functional and non-functional requirements
+- Architecture principles and guardrails
+- Ecosystem integration
 
 **Out of Scope:**
-- Technische Implementierungsdetails (→ ADR-021, ADR-022)
-- API-Spezifikationen (→ ADR-022)
-- Security-Details (→ ADR-021)
+- Technical implementation details (→ ADR-021, ADR-022)
+- API specifications (→ ADR-022)
+- Security details (→ ADR-021)
 
 ---
 
@@ -64,7 +64,7 @@ Dieses Dokument definiert die **Vision, Anforderungen und Prinzipien** für das 
 
 ### 3.1 Portal Purpose
 
-Das CLARISSA Portal ist das **zentrale Koordinations- und Observability-Interface** für das verteilte Team. Es abstrahiert die Komplexität der Multi-Runner-Infrastruktur und konsolidiert operative Workflows.
+The CLARISSA Portal is the **central coordination and observability interface** for the distributed team. It abstracts the complexity of the multi-runner infrastructure and consolidates operational workflows.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -110,13 +110,13 @@ Das CLARISSA Portal ist das **zentrale Koordinations- und Observability-Interfac
 
 | User Persona | Needs | Portal Features |
 |--------------|-------|-----------------|
-| **Wolfram (Admin)** | Billing, Runner Monitoring, Time Review | All features + Admin views |
-| **Consultants (Mike, Ian, Doug)** | Time entry, eigene Invoices sehen | Time Tracking, Billing (read) |
-| **Future: External Users** | Simulation access, Results | Public landing + Auth |
+| **Wolfram (Admin)** | Billing, runner monitoring, time review | All features + admin views |
+| **Consultants (Mike, Ian, Doug)** | Time entry, view own invoices | Time tracking, billing (read) |
+| **Future: External Users** | Simulation access, results | Public landing + auth |
 
 ### 3.3 Evolutionary Phases
 
-Evolutionary development in drei Phasen:
+Evolutionary development in three phases:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
@@ -149,60 +149,60 @@ Evolutionary development in drei Phasen:
 #### FR-1: Time Tracking
 | ID | Requirement | Priority |
 |----|-------------|----------|
-| FR-1.1 | Consultant kann Zeiteinträge erfassen (Datum, Dauer, Projekt, Aufgabe) | Must |
-| FR-1.2 | Consultant kann eigene Zeiteinträge bearbeiten/löschen | Must |
-| FR-1.3 | Admin kann alle Zeiteinträge einsehen | Must |
-| FR-1.4 | Aggregierte Ansicht pro Woche/Monat | Should |
+| FR-1.1 | Consultant can create time entries (date, duration, project, task) | Must |
+| FR-1.2 | Consultant can edit/delete own time entries | Must |
+| FR-1.3 | Admin can view all time entries | Must |
+| FR-1.4 | Aggregated view per week/month | Should |
 
 #### FR-2: Billing
 | ID | Requirement | Priority |
 |----|-------------|----------|
-| FR-2.1 | Admin kann Invoice aus Zeiteinträgen generieren | Must |
-| FR-2.2 | System generiert PDF automatisch (async) | Must |
-| FR-2.3 | PDF wird in Cloud Storage abgelegt | Must |
-| FR-2.4 | Contractor kann eigene Invoices einsehen | Should |
+| FR-2.1 | Admin can generate invoice from time entries | Must |
+| FR-2.2 | System generates PDF automatically (async) | Must |
+| FR-2.3 | PDF is stored in cloud storage | Must |
+| FR-2.4 | Contractor can view own invoices | Should |
 
 #### FR-3: Benchmarks (Runner Monitoring)
 | ID | Requirement | Priority |
 |----|-------------|----------|
-| FR-3.1 | Dashboard zeigt aktuellen Status aller 12 Runner | Must |
-| FR-3.2 | Historische Pipeline-Dauern pro Runner | Should |
-| FR-3.3 | Anomalie-Erkennung bei Abweichungen | Could |
+| FR-3.1 | Dashboard shows current status of all 12 runners | Must |
+| FR-3.2 | Historical pipeline durations per runner | Should |
+| FR-3.3 | Anomaly detection for deviations | Could |
 
 #### FR-4: Authentication
 | ID | Requirement | Priority |
 |----|-------------|----------|
 | FR-4.1 | Login via GitLab (OIDC) | Must |
-| FR-4.2 | Keine separate User-Registrierung | Must |
-| FR-4.3 | Session-Management mit Auto-Refresh | Must |
+| FR-4.2 | No separate user registration | Must |
+| FR-4.3 | Session management with auto-refresh | Must |
 
 ### 4.2 Non-Functional Requirements
 
 | ID | Requirement | Target | Rationale |
 |----|-------------|--------|-----------|
-| NFR-1 | **Availability** | 99% (excl. maintenance) | Team-kritisch, aber kein 24/7-Betrieb |
-| NFR-2 | **Latency** | < 500ms für CRUD, < 60s für PDF | Akzeptable UX |
-| NFR-3 | **Cost** | $0/month (Free Tier) | Budget-Constraint während Experimental-Phase |
-| NFR-4 | **Scalability** | 4 → 50 User ohne Architektur-Änderung | Wachstumspfad |
-| NFR-5 | **Security** | OIDC, HTTPS, HttpOnly Cookies | Industry Best Practice |
-| NFR-6 | **Portability** | Plattform-agnostischer Core | Air-Gap Deployment Option |
+| NFR-1 | **Availability** | 99% (excl. maintenance) | Team-critical, but not 24/7 operation |
+| NFR-2 | **Latency** | < 500ms for CRUD, < 60s for PDF | Acceptable UX |
+| NFR-3 | **Cost** | $0/month (Free Tier) | Budget constraint during experimental phase |
+| NFR-4 | **Scalability** | 4 → 50 users without architecture change | Growth path |
+| NFR-5 | **Security** | OIDC, HTTPS, HttpOnly Cookies | Industry best practice |
+| NFR-6 | **Portability** | Platform-agnostic core | Air-gap deployment option |
 
 ---
 
 ## 5 Design Principles
 
-Basierend auf etablierten Microservices- und Platform-Engineering-Prinzipien:
+Based on established microservices and platform engineering principles:
 
 ### 5.1 Service-Based Approach
 
-Statt eines Monolithen strukturiert das Portal seine Funktionalität in logische Services:
+Instead of a monolith, the portal structures its functionality into logical services:
 
 | Service | Responsibility | Coupling |
 |---------|----------------|----------|
-| **Auth Service** | OIDC Flow, Session Management | Standalone |
-| **Time Service** | CRUD für Zeiteinträge | → Auth |
-| **Billing Service** | Invoice Generation, PDF | → Time, Auth |
-| **Benchmark Service** | Runner Metrics, Aggregation | → Auth |
+| **Auth Service** | OIDC flow, session management | Standalone |
+| **Time Service** | CRUD for time entries | → Auth |
+| **Billing Service** | Invoice generation, PDF | → Time, Auth |
+| **Benchmark Service** | Runner metrics, aggregation | → Auth |
 
 ### 5.2 Hexagonal Architecture
 
@@ -235,23 +235,23 @@ Statt eines Monolithen strukturiert das Portal seine Funktionalität in logische
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Rationale:** Diese Architektur ermöglicht:
-- Plattform-Wechsel ohne Core-Code-Änderungen
-- A/B-Benchmarking zwischen Deployments
-- Air-Gapped Installation für security-sensitive Umgebungen
+**Rationale:** This architecture enables:
+- Platform switching without core code changes
+- A/B benchmarking between deployments
+- Air-gapped installation for security-sensitive environments
 
-### 5.3 Zero-Infrastructure für Consultants
+### 5.3 Zero-Infrastructure for Consultants
 
 | Team Member | Infrastructure Responsibility |
 |-------------|-------------------------------|
 | Wolfram | GCP, GitLab, Runners, Portal Deployment |
-| Mike, Ian, Doug | **Keine** - nur Browser + GitLab Login |
+| Mike, Ian, Doug | **None** - only browser + GitLab login |
 
-**Prinzip:** Houston-Team braucht keinen lokalen Setup, keine API-Keys, keine Cloud-Credentials.
+**Principle:** Houston team needs no local setup, no API keys, no cloud credentials.
 
 ### 5.4 Observability by Design
 
-Dreistufige Observability-Architektur:
+Three-tier observability architecture:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -285,14 +285,14 @@ Dreistufige Observability-Architektur:
 
 ### 5.5 Progressive Enhancement
 
-Das Portal ergänzt bestehende Tools, ersetzt sie nicht:
+The portal complements existing tools, does not replace them:
 
 | Capability | Current Tool | Portal Enhancement |
 |------------|--------------|-------------------|
-| Time Tracking | GitLab Issues | Dedizierte UI, Aggregation |
-| Billing | CI/CD Pipeline | Async Generation, Status Tracking |
-| Documentation | MkDocs | Unified Entry Point |
-| CI Monitoring | GitLab UI | Consolidated Dashboard |
+| Time Tracking | GitLab Issues | Dedicated UI, aggregation |
+| Billing | CI/CD Pipeline | Async generation, status tracking |
+| Documentation | MkDocs | Unified entry point |
+| CI Monitoring | GitLab UI | Consolidated dashboard |
 
 ---
 
@@ -302,21 +302,21 @@ Das Portal ergänzt bestehende Tools, ersetzt sie nicht:
 
 | Constraint | Rationale |
 |------------|-----------|
-| Python 3.11+ | Team-Skills, FastAPI Ecosystem |
-| GCP Free Tier | Budget während Experimental-Phase |
-| GitLab OIDC | Keine separate Identity Management |
-| Static Frontend (GitLab Pages) | $0, bereits vorhanden |
+| Python 3.11+ | Team skills, FastAPI ecosystem |
+| GCP Free Tier | Budget during experimental phase |
+| GitLab OIDC | No separate identity management |
+| Static Frontend (GitLab Pages) | $0, already available |
 
 ### 6.2 Architectural Guardrails
 
-Verbindliche Architektur-Regeln:
+Mandatory architecture rules:
 
 | Guardrail | Rule |
 |-----------|------|
-| **No Secrets in Frontend** | GitLab Pages ist public - alle sensiblen Daten nur via Auth'd API |
-| **Core Must Be Platform-Agnostic** | `shared/` hat keine Cloud-spezifischen Imports |
-| **Adapters Are Thin** | Max 50 LOC pro Adapter, Logik gehört in Core |
-| **Explicit Defaults** | Alle Annahmen dokumentiert, keine Magic Values |
+| **No Secrets in Frontend** | GitLab Pages is public - all sensitive data only via auth'd API |
+| **Core Must Be Platform-Agnostic** | `shared/` has no cloud-specific imports |
+| **Adapters Are Thin** | Max 50 LOC per adapter, logic belongs in core |
+| **Explicit Defaults** | All assumptions documented, no magic values |
 
 ### 6.3 Security Boundaries
 
@@ -360,17 +360,17 @@ Verbindliche Architektur-Regeln:
 
 ## 7 Air-Gapped Deployment Option
 
-Für zukünftige Szenarien (z.B. Enterprise-Kunden ohne Cloud-Zugang):
+For future scenarios (e.g., enterprise customers without cloud access):
 
 | Component | Cloud | Air-Gapped |
 |-----------|-------|------------|
 | Compute | Cloud Run | K3s + Deployment |
 | Database | Firestore | SQLite/PostgreSQL |
-| Storage | GCS | Local Filesystem |
-| Auth | GitLab.com OIDC | Self-hosted GitLab / Local Auth |
+| Storage | GCS | Local filesystem |
+| Auth | GitLab.com OIDC | Self-hosted GitLab / Local auth |
 | Serverless | Cloud Run Jobs | OpenWhisk / faasd |
 
-**Hexagonal Architecture macht dies möglich:** Core-Logik bleibt identisch, nur Adapter werden getauscht.
+**Hexagonal architecture makes this possible:** Core logic remains identical, only adapters are swapped.
 
 ---
 
@@ -378,25 +378,25 @@ Für zukünftige Szenarien (z.B. Enterprise-Kunden ohne Cloud-Zugang):
 
 | Metric | Phase 1 Target | Measurement |
 |--------|----------------|-------------|
-| **Adoption** | 4/4 Team Members nutzen Portal | Login Analytics |
-| **Time Tracking** | 90% der Stunden via Portal erfasst | DB Query |
-| **Billing Automation** | 100% der Invoices via Portal | Manual count |
-| **Runner Visibility** | Dashboard zeigt alle 12 Runner | Visual check |
-| **Cost** | $0/month | GCP Billing |
+| **Adoption** | 4/4 team members use portal | Login analytics |
+| **Time Tracking** | 90% of hours tracked via portal | DB query |
+| **Billing Automation** | 100% of invoices via portal | Manual count |
+| **Runner Visibility** | Dashboard shows all 12 runners | Visual check |
+| **Cost** | $0/month | GCP billing |
 
 ---
 
 ## 9 Decision
 
-**Wir bauen das CLARISSA Portal** als zentrales Team-Interface mit:
+**We build the CLARISSA Portal** as central team interface with:
 
 1. **Service-Based Architecture** (Auth, Time, Billing, Benchmarks)
-2. **Hexagonal Core** für Plattform-Portabilität
-3. **GCP Cloud Run** als primäre Deployment-Plattform
-4. **GitLab OIDC** für Authentication
-5. **Progressive Enhancement** der bestehenden Tools
+2. **Hexagonal Core** for platform portability
+3. **GCP Cloud Run** as primary deployment platform
+4. **GitLab OIDC** for authentication
+5. **Progressive Enhancement** of existing tools
 
-Details siehe:
+Details see:
 - [ADR-021: System & Security Architecture](./ADR-021-portal-system-security-architecture.md)
 - [ADR-022: Software Architecture](./ADR-022-portal-software-architecture.md)
 

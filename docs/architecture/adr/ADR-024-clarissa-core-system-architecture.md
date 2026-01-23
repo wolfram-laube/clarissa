@@ -11,14 +11,14 @@
 
 ## Context
 
-CLARISSA ist ein Conversational AI System für Reservoir Simulation. Die bisherigen ADRs (021-023) beschreiben das Admin-Portal. Diese ADR definiert die **Core System Architecture** - das eigentliche Herzstück.
+CLARISSA is a Conversational AI System for Reservoir Simulation. The previous ADRs (021-023) describe the Admin Portal. This ADR defines the **Core System Architecture** - the actual heart of the system.
 
 ### Anforderungen
 
-1. **Modulare Microservices**: Unabhängig deploybar, skalierbar
+1. **Modular Microservices**: Independently deployable, scalable
 2. **Flexible Kommunikation**: REST (extern), gRPC (intern), Message Broker (async)
-3. **Simulator-Agnostik**: Abstraktionsschicht für OPM Flow, MRST, (später: kommerzielle)
-4. **Service Clustering**: Zusammengehörige Microservices gruppiert
+3. **Simulator-Agnostic**: Abstraction layer for OPM Flow, MRST, (later: commercial)
+4. **Service Clustering**: Related microservices grouped together
 
 ---
 
@@ -83,10 +83,10 @@ CLARISSA ist ein Conversational AI System für Reservoir Simulation. Die bisheri
 
 ### Prinzip: Bounded Context
 
-Microservices die fachlich zusammengehören werden in **Clusters** gruppiert:
+Microservices that belong together functionally are grouped into **Clusters**:
 - **Innerhalb** eines Clusters: Message Broker (Tight Coupling OK)
 - **Zwischen** Clusters: gRPC oder Events (Loose Coupling)
-- **Nach außen**: REST API via Gateway
+- **Externally**: REST API via Gateway
 
 ### Cluster 1: Conversation
 
@@ -214,12 +214,12 @@ clarissa/
 
 CLARISSA soll **nicht** an einen Simulator gebunden sein:
 
-| Simulator | Stärke | Use Case |
+| Simulator | Strength | Use Case |
 |-----------|--------|----------|
 | **OPM Flow** | Production-ready, Eclipse-kompatibel | Full-field, History Match |
-| **MRST** | Flexibel, MATLAB, Rapid Prototyping | Research, Sensitivitäten |
-| *Eclipse* | Industry Standard (proprietär) | Client-Validierung |
-| *CMG* | Thermal, Heavy Oil (proprietär) | Spezialfälle |
+| **MRST** | Flexible, MATLAB, Rapid Prototyping | Research, Sensitivities |
+| *Eclipse* | Industry Standard (proprietary) | Client Validation |
+| *CMG* | Thermal, Heavy Oil (proprietary) | Special Cases |
 
 ### Interface Definition
 

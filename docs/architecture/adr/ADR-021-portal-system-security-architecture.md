@@ -11,13 +11,13 @@
 
 ## Context
 
-CLARISSA benötigt ein zentrales Portal für das dezentrale Team (Schärding + Houston). Das Portal wird in der Experimentierphase von ~4 Entwicklern gebaut, soll aber später von erheblich mehr Usern produktiv genutzt werden.
+CLARISSA requires a central portal for the distributed team (Schärding + Houston). The portal is being built during the experimental phase by ~4 developers, but should later be used productively by significantly more users.
 
-Diese ADR definiert:
+This ADR defines:
 1. **System Architecture**: Infrastruktur, Deployment, Services
 2. **Security Architecture**: Authentication, Authorization, Session Management
 
-Die Software Architecture (Hexagonal Pattern, API Design, Code Structure) ist in ADR-022 dokumentiert.
+The Software Architecture (Hexagonal Pattern, API Design, Code Structure) is documented in ADR-022.
 
 ---
 
@@ -25,10 +25,10 @@ Die Software Architecture (Hexagonal Pattern, API Design, Code Structure) ist in
 
 ### Key Decisions
 
-| Entscheidung | Wahl | Begründung |
+| Decision | Choice | Rationale |
 |--------------|------|------------|
 | **Compute** | Cloud Run (GCP) | Scale-to-zero, $0 Free Tier, Team-Zugang |
-| **Local Dev** | OpenWhisk Standalone | Benchmarking, keine GCP-Abhängigkeit für Devs |
+| **Local Dev** | OpenWhisk Standalone | Benchmarking, no GCP dependency for devs |
 | **Database** | Firestore | Serverless, Free Tier, Document Model passt |
 | **Storage** | GCS | PDFs, Standard, Free Tier |
 | **Frontend Hosting** | GitLab Pages | Bereits vorhanden, $0 |
@@ -106,8 +106,8 @@ Die Software Architecture (Hexagonal Pattern, API Design, Code Structure) ist in
 
 | Service | Purpose | Timeout | Memory | Public |
 |---------|---------|---------|--------|--------|
-| `clarissa-portal-api` | Auth, Time, Billing CRUD, Benchmarks | 30s | 512Mi | ✅ Ja |
-| `clarissa-worker` | PDF Generation, Aggregation | 15min | 1Gi | ❌ Nein (IAM) |
+| `clarissa-portal-api` | Auth, Time, Billing CRUD, Benchmarks | 30s | 512Mi | ✅ Yes |
+| `clarissa-worker` | PDF Generation, Aggregation | 15min | 1Gi | ❌ No (IAM) |
 
 ```bash
 # Portal API Deployment
@@ -134,23 +134,23 @@ gcloud run deploy clarissa-worker \
 
 ### OpenWhisk (Local Development)
 
-Für Entwicklung und Benchmarking auf Linux Yoga:
+For development and benchmarking on Linux Yoga:
 
 ```bash
-# Option A: Standalone (empfohlen für Dev)
+# Option A: Standalone (recommended for dev)
 # 1GB RAM, 2 Minuten Setup
 java -jar openwhisk-standalone.jar
 
-# Option B: K3s + Helm (für K8s-Overhead Benchmarks)
+# Option B: K3s + Helm (for K8s overhead benchmarks)
 # 4GB RAM, ~1h Setup
 helm install owdev openwhisk/openwhisk -n openwhisk --create-namespace
 ```
 
-### Team-Verteilung
+### Team Distribution
 
 | Rolle | Maschine | Cloud Run | OpenWhisk |
 |-------|----------|-----------|-----------|
-| Mike, Ian, Doug (Houston) | Beliebig | ✅ Nur Cloud Run | ❌ Nicht nötig |
+| Mike, Ian, Doug (Houston) | Any | ✅ Cloud Run only | ❌ Not needed |
 | Wolfram (Schärding) | Linux Yoga | ✅ Cloud Run | ✅ OpenWhisk (Dev/Benchmark) |
 
 ---
@@ -193,10 +193,10 @@ helm install owdev openwhisk/openwhisk -n openwhisk --create-namespace
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Key Point:** GitLab Pages sind public - das ist OK, weil:
-- Keine Secrets im Frontend-Code
-- Keine API-Keys im JavaScript
-- Alle sensiblen Daten nur über authentifizierte API-Calls
+**Key Point:** GitLab Pages are public - this is OK because:
+- No secrets in frontend code
+- No API keys in JavaScript
+- All sensitive data only via authenticated API calls
 
 ### GitLab als OIDC Provider
 
@@ -215,11 +215,11 @@ Endpoints:
 
 ### OAuth Flow: Authorization Code + PKCE
 
-**Warum PKCE obwohl wir ein Confidential Client sind?**
-- Defense-in-Depth: Schützt gegen Authorization Code Interception
-- Best Practice: OAuth 2.1 wird PKCE für alle Clients vorschreiben
-- Zukunftssicher: Falls wir später Mobile Apps hinzufügen
-- Kein Nachteil: Minimaler Overhead
+**Why PKCE even though we are a Confidential Client?**
+- Defense-in-Depth: Protects against Authorization Code Interception
+- Best Practice: OAuth 2.1 will require PKCE for all clients
+- Future-proof: If we add mobile apps later
+- No downside: Minimal overhead
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
