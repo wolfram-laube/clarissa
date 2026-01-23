@@ -104,6 +104,14 @@ nav:
       - ADR-016 Runner Load Balancing: architecture/adr/ADR-016-runner-load-balancing.md
       - ADR-017 GDrive Folder Structure: architecture/adr/ADR-017-gdrive-folder-structure.md
       - ADR-018 GitLab PM Workflow: architecture/adr/ADR-018-gitlab-pm-workflow.md
+      - ADR-019 Billing Folder Structure: architecture/adr/ADR-019-billing-folder-structure.md
+      - ADR-020 Portal Vision: architecture/adr/ADR-020-portal-vision.md
+      - ADR-021 Portal System Security: architecture/adr/ADR-021-portal-system-security-architecture.md
+      - ADR-022 Portal Software Architecture: architecture/adr/ADR-022-portal-software-architecture.md
+      - ADR-023 Portal Observability: architecture/adr/ADR-023-portal-observability.md
+      - ADR-024 CLARISSA Core Architecture: architecture/adr/ADR-024-clarissa-core-system-architecture.md
+      - ADR-025 LLM Integration Strategy: architecture/adr/ADR-025-llm-integration-strategy.md
+      - ADR-026 Testing Strategy: architecture/adr/ADR-026-testing-strategy.md
 
   - Guides:
     - Overview: guides/index.md
