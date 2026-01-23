@@ -12,20 +12,7 @@ Full development environment with PostgreSQL, OPM Flow, and all dependencies pre
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://gitlab.com/wolfram_laube/blauweiss_llc/irena)
 
-### Option B: Binder (One-Click Notebooks)
-
-Zero-setup, one-click access to any notebook. No account required.
-
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/wolfram_laube%2Fblauweiss_llc%2Firena/main?filepath=docs/tutorials/notebooks)
-
-Or click individual notebook badges in the tables below.
-
-!!! info "Binder Notes"
-    - First launch takes ~2-3 minutes (building environment)
-    - Sessions are ephemeral - download your work before closing
-    - No GPU available
-
-### Option C: Google Colab (Best for GPU Training)
+### Option B: Google Colab (Best for GPU Training)
 
 Zero-setup cloud notebooks with free GPU access. Best for RL agent training and embedding generation.
 
@@ -54,7 +41,7 @@ for nb in notebooks:
 !!! note "Colab Limitations"
     Colab doesn't have PostgreSQL or OPM Flow installed. The notebooks use SQLite fallback for vector storage and a mock simulator for demos. For production work, use GitPod or local setup.
 
-### Option D: Local Setup (Your Own Machine)
+### Option C: Local Setup (Your Own Machine)
 
 Run the notebooks on your laptop or workstation with full control.
 
@@ -130,32 +117,32 @@ The `requirements.txt` includes:
 
 ### Beginner (Notebooks 01-03)
 
-| Notebook | Description | Duration | Binder |
-|----------|-------------|----------|--------|
-| [01 ECLIPSE Fundamentals](notebooks/01_ECLIPSE_Fundamentals.ipynb) | Deck structure, keywords, parsers | ~45 min | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/wolfram_laube%2Fblauweiss_llc%2Firena/main?filepath=docs/tutorials/notebooks/01_ECLIPSE_Fundamentals.ipynb) |
-| [02 OPM Flow Integration](notebooks/02_OPM_Flow_Integration.ipynb) | Docker, simulation runner, results | ~30 min | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/wolfram_laube%2Fblauweiss_llc%2Firena/main?filepath=docs/tutorials/notebooks/02_OPM_Flow_Integration.ipynb) |
-| [03 Knowledge Layer](notebooks/03_Knowledge_Layer.ipynb) | pgvector, RAG, analog database | ~45 min | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/wolfram_laube%2Fblauweiss_llc%2Firena/main?filepath=docs/tutorials/notebooks/03_Knowledge_Layer.ipynb) |
+| Notebook | Description | Duration | Colab |
+|----------|-------------|----------|-------|
+| [01 ECLIPSE Fundamentals](notebooks/01_ECLIPSE_Fundamentals.ipynb) | Deck structure, keywords, parsers | ~45 min | 🔜 |
+| [02 OPM Flow Integration](notebooks/02_OPM_Flow_Integration.ipynb) | Docker, simulation runner, results | ~30 min | 🔜 |
+| [03 Knowledge Layer](notebooks/03_Knowledge_Layer.ipynb) | pgvector, RAG, analog database | ~45 min | 🔜 |
 
 **After completing:** You can parse ECLIPSE decks, run simulations, and query a knowledge base.
 
 ### Intermediate (Notebooks 04-06)
 
-| Notebook | Description | Duration | Binder |
-|----------|-------------|----------|--------|
-| [04 LLM Conversation](notebooks/04_LLM_Conversation.ipynb) | Slot extraction, prompts, state | ~60 min | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/wolfram_laube%2Fblauweiss_llc%2Firena/main?filepath=docs/tutorials/notebooks/04_LLM_Conversation.ipynb) |
-| [05 Constraint Engine](notebooks/05_Constraint_Engine.ipynb) | Z3, physics validation | ~45 min | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/wolfram_laube%2Fblauweiss_llc%2Firena/main?filepath=docs/tutorials/notebooks/05_Constraint_Engine.ipynb) |
-| [06 Deck Generator](notebooks/06_Deck_Generator.ipynb) | Template engine, assembly | ~45 min | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/wolfram_laube%2Fblauweiss_llc%2Firena/main?filepath=docs/tutorials/notebooks/06_Deck_Generator.ipynb) |
+| Notebook | Description | Duration | Colab |
+|----------|-------------|----------|-------|
+| [04 LLM Conversation](notebooks/04_LLM_Conversation.ipynb) | Slot extraction, prompts, state | ~60 min | 🔜 |
+| [05 Constraint Engine](notebooks/05_Constraint_Engine.ipynb) | Z3, physics validation | ~45 min | 🔜 |
+| [06 Deck Generator](notebooks/06_Deck_Generator.ipynb) | Template engine, assembly | ~45 min | 🔜 |
 
 **After completing:** You can build conversational deck generation with physics validation.
 
 ### Advanced (Notebooks 07-10)
 
-| Notebook | Description | Duration | Binder |
-|----------|-------------|----------|--------|
-| [07 RL Agent](notebooks/07_RL_Agent.ipynb) | PPO, reward shaping | ~90 min | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/wolfram_laube%2Fblauweiss_llc%2Firena/main?filepath=docs/tutorials/notebooks/07_RL_Agent.ipynb) |
-| [08 RIGOR Benchmark](notebooks/08_RIGOR_Benchmark.ipynb) | Test framework, scoring | ~60 min | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/wolfram_laube%2Fblauweiss_llc%2Firena/main?filepath=docs/tutorials/notebooks/08_RIGOR_Benchmark.ipynb) |
-| [09 Full Pipeline Demo](notebooks/09_Full_Pipeline_Demo.ipynb) | End-to-end showcase | ~30 min | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/wolfram_laube%2Fblauweiss_llc%2Firena/main?filepath=docs/tutorials/notebooks/09_Full_Pipeline_Demo.ipynb) |
-| [10 API Reference](notebooks/10_API_Reference.ipynb) | FastAPI endpoints | ~30 min | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/wolfram_laube%2Fblauweiss_llc%2Firena/main?filepath=docs/tutorials/notebooks/10_API_Reference.ipynb) |
+| Notebook | Description | Duration | Colab |
+|----------|-------------|----------|-------|
+| [07 RL Agent](notebooks/07_RL_Agent.ipynb) | PPO, reward shaping | ~90 min | 🔜 |
+| [08 RIGOR Benchmark](notebooks/08_RIGOR_Benchmark.ipynb) | Test framework, scoring | ~60 min | 🔜 |
+| [09 Full Pipeline Demo](notebooks/09_Full_Pipeline_Demo.ipynb) | End-to-end showcase | ~30 min | 🔜 |
+| [10 API Reference](notebooks/10_API_Reference.ipynb) | FastAPI endpoints | ~30 min | 🔜 |
 
 **After completing:** You understand the complete CLARISSA system and can extend it.
 
@@ -163,18 +150,17 @@ The `requirements.txt` includes:
 
 ## 🛠️ Environment Comparison
 
-| Feature | GitPod | Binder | Colab | Local |
-|---------|--------|--------|-------|-------|
-| PostgreSQL + pgvector | ✅ Native | ⚠️ SQLite | ⚠️ SQLite | ✅ Install required |
-| OPM Flow | ✅ Docker | ⚠️ Mock | ⚠️ Mock | ✅ Docker/native |
-| GPU | ❌ | ❌ | ✅ T4/A100 | ⚠️ If available |
-| Persistent files | ✅ Git | ❌ Ephemeral | ⚠️ Google Drive | ✅ Local disk |
-| Direct notebook links | ✅ | ✅ | ❌ Manual | ✅ |
-| Setup time | ~2 min | ~3 min | ~1 min | ~15 min |
+| Feature | GitPod | Colab | Local |
+|---------|--------|-------|-------|
+| PostgreSQL + pgvector | ✅ Native | ⚠️ SQLite | ✅ Install required |
+| OPM Flow | ✅ Docker | ⚠️ Mock | ✅ Docker/native |
+| GPU | ❌ | ✅ T4/A100 | ⚠️ If available |
+| Persistent files | ✅ Git | ⚠️ Google Drive | ✅ Local disk |
+| Direct notebook links | ✅ | 🔜 Coming | ✅ |
+| Setup time | ~2 min | ~1 min | ~15 min |
 
 **Recommendation:** 
 
-- **Quick exploration:** Use Binder (one-click, no account needed)
 - **Development:** Use GitPod (full features, zero setup)
 - **GPU Training:** Use Colab (free GPU access)
 - **Offline Work:** Use local setup (full control)
