@@ -11,10 +11,10 @@
 
 ## Context
 
-Das CLARISSA Portal wird in der Experimentierphase von ~4 Entwicklern gebaut, soll aber später von erheblich mehr Usern produktiv genutzt werden. Die Observability-Strategie muss:
+The CLARISSA Portal is being built during the experimental phase by ~4 developers, but should later be used productively by significantly more users. The observability strategy must:
 
 1. **Jetzt**: Minimal, kostenfrei, schnell einsatzbereit
-2. **Später**: Skalierbar für Production-Workloads
+2. **Later**: Scalable for production workloads
 3. **Immer**: Von Anfang an richtig angelegt (Structured Logging, Correlation IDs)
 
 ---
@@ -35,9 +35,9 @@ Das CLARISSA Portal wird in der Experimentierphase von ~4 Entwicklern gebaut, so
 |--------------|------|------------|
 | **Logging** | Structured JSON (structlog) | Maschinenlesbar, filterbar |
 | **Correlation** | UUID, erzeugt von Portal API | Request-Tracing über Services |
-| **Metrics** | GCP Cloud Monitoring | Automatisch für Cloud Run |
+| **Metrics** | GCP Cloud Monitoring | Automatic for Cloud Run |
 | **Alerting** | GCP Alerts → Email/Slack | Minimal aber effektiv |
-| **Tracing** | OpenTelemetry (vorbereitet) | Zukunftssicher, noch nicht aktiv |
+| **Tracing** | OpenTelemetry (vorbereitet) | Future-proof, not yet active |
 
 ---
 
@@ -111,7 +111,7 @@ Das CLARISSA Portal wird in der Experimentierphase von ~4 Entwicklern gebaut, so
 ```
 ❌ Später refactoren:
    print(f"User {user_id} created invoice {inv_id}")
-   → Nicht filterbar, nicht maschinenlesbar
+   → Not filterable, not machine-readable
 
 ✅ Von Anfang an richtig:
    logger.info("invoice_created", user_id=user_id, invoice_id=inv_id)
@@ -174,7 +174,7 @@ logger.info("invoice_created",
 | **ERROR** | Braucht Aufmerksamkeit | PDF Generation failed | ✅ Ja |
 | **WARNING** | Ungewöhnlich aber OK | Retry succeeded, Rate limit near | Nein |
 | **INFO** | Normale Operationen | Request completed, User logged in | Nein |
-| **DEBUG** | Nur für Entwicklung | SQL queries, Token details | Nein |
+| **DEBUG** | Development only | SQL queries, Token details | Nein |
 
 ---
 
@@ -191,7 +191,7 @@ Ohne Correlation ID:
 Mit Correlation ID:
   Portal API Log: {"correlation_id": "abc-123", "event": "pdf_triggered", ...}
   Worker Log:     {"correlation_id": "abc-123", "event": "pdf_failed", ...}
-  → Filter: correlation_id="abc-123" → Alle Logs für diesen Request ✓
+  → Filter: correlation_id="abc-123" → All logs for this request ✓
 ```
 
 ### Wer erzeugt die Correlation ID?
@@ -221,7 +221,7 @@ Mit Correlation ID:
 │      │                            │                            │            │
 │      │  X-Correlation-ID: abc     │                            │            │
 │      │◄───────────────────────────│                            │            │
-│      │  (für Error Reports)       │                            │            │
+│      │  (for error reports)       │                            │            │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -362,11 +362,11 @@ class WorkerClient:
 ### Cloud Logging Query
 
 ```
--- Alle Logs für einen Request
+-- All logs for a request
 resource.type="cloud_run_revision"
 jsonPayload.correlation_id="550e8400-e29b-41d4-a716-446655440000"
 
--- Alle Errors für einen User
+-- All errors for a user
 resource.type="cloud_run_revision"
 jsonPayload.user_id="user_123"
 jsonPayload.level="error"
@@ -434,7 +434,7 @@ async function apiCall(endpoint, options = {}) {
     const correlationId = response.headers.get('X-Correlation-ID');
     
     if (!response.ok) {
-        // User kann uns das schicken für Support
+        // User can send us this for support
         console.error(`Request failed. Correlation ID: ${correlationId}`);
         
         // Optional: Show to user
@@ -451,7 +451,7 @@ async function apiCall(endpoint, options = {}) {
 
 ## Phase 2: Early Adopters (50+ User)
 
-### + Sentry für Error Tracking
+### + Sentry for Error Tracking
 
 ```python
 # services/portal-api/src/main.py
@@ -531,13 +531,13 @@ Alerting               → PagerDuty/Opsgenie Integration
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Entscheidung wird getroffen wenn wir soweit sind** - wichtig ist, dass wir durch OpenTelemetry vorbereitet sind.
+**Decision will be made when we get there** - important is that we are prepared through OpenTelemetry.
 
 ---
 
 ## OpenTelemetry Vorbereitung
 
-Auch wenn wir Tracing in Phase 1 nicht aktiv nutzen, instrumentieren wir von Anfang an mit OpenTelemetry. Das macht späteren Wechsel zu jedem Backend trivial.
+Even if we do not actively use tracing in Phase 1, we instrument from the start with OpenTelemetry. This makes later switching to any backend trivial.
 
 ```python
 # services/portal-api/src/core/telemetry.py
@@ -588,9 +588,9 @@ def setup_telemetry(app, export_traces: bool = False):
 
 ### Nicht verhandelbar (alle Phasen)
 
-1. ✅ **Structured Logging** (JSON, nicht print())
+1. ✅ **Structured Logging** (JSON, not print())
 2. ✅ **Correlation IDs** (Portal API erzeugt, propagiert)
-3. ✅ **User ID in Logs** (für Support)
+3. ✅ **User ID in Logs** (for support)
 4. ✅ **Error Alerting** (Email minimum)
 
 ---
