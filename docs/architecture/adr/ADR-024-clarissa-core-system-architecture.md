@@ -13,10 +13,10 @@
 
 CLARISSA is a Conversational AI System for Reservoir Simulation. The previous ADRs (021-023) describe the Admin Portal. This ADR defines the **Core System Architecture** - the actual heart of the system.
 
-### Requirements
+### Anforderungen
 
 1. **Modular Microservices**: Independently deployable, scalable
-2. **Flexible Communication**: REST (external), gRPC (internal), Message Broker (async)
+2. **Flexible Kommunikation**: REST (extern), gRPC (intern), Message Broker (async)
 3. **Simulator-Agnostic**: Abstraction layer for OPM Flow, MRST, (later: commercial)
 4. **Service Clustering**: Related microservices grouped together
 
@@ -81,12 +81,12 @@ CLARISSA is a Conversational AI System for Reservoir Simulation. The previous AD
 
 ## Service Clusters
 
-### Principle: Bounded Context
+### Prinzip: Bounded Context
 
 Microservices that belong together functionally are grouped into **Clusters**:
-- **Within** a cluster: Message Broker (Tight Coupling OK)
-- **Between** clusters: gRPC or Events (Loose Coupling)
-- **External**: REST API via Gateway
+- **Innerhalb** eines Clusters: Message Broker (Tight Coupling OK)
+- **Zwischen** Clusters: gRPC oder Events (Loose Coupling)
+- **Externally**: REST API via Gateway
 
 ### Cluster 1: Conversation
 
@@ -94,7 +94,7 @@ Microservices that belong together functionally are grouped into **Clusters**:
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Conversation Cluster                          │
 │                                                                  │
-│   Responsibility: NLP, Dialog Management, User Intent            │
+│   Verantwortung: NLP, Dialog Management, User Intent             │
 │                                                                  │
 │   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐          │
 │   │ NLP Parser  │   │   Intent    │   │   Dialog    │          │
@@ -123,7 +123,7 @@ Microservices that belong together functionally are grouped into **Clusters**:
 ┌─────────────────────────────────────────────────────────────────┐
 │                     Simulation Cluster                           │
 │                                                                  │
-│   Responsibility: Deck Generation, Job Management, Execution     │
+│   Verantwortung: Deck-Generierung, Job-Management, Execution     │
 │                                                                  │
 │   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐          │
 │   │    Deck     │   │    Deck     │   │     Job     │          │
@@ -154,7 +154,7 @@ Microservices that belong together functionally are grouped into **Clusters**:
 ┌─────────────────────────────────────────────────────────────────┐
 │                      Analysis Cluster                            │
 │                                                                  │
-│   Responsibility: Results Processing, Visualization, Reporting   │
+│   Verantwortung: Results Processing, Visualization, Reporting    │
 │                                                                  │
 │   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐          │
 │   │   Results   │   │ Comparison  │   │Visualization│          │
@@ -178,10 +178,10 @@ Microservices that belong together functionally are grouped into **Clusters**:
 
 ## Communication Patterns
 
-### When to Use Which Medium?
+### Wann welches Medium?
 
-| Medium | Use Case | Example |
-|--------|----------|---------|
+| Medium | Use Case | Beispiel |
+|--------|----------|----------|
 | **REST** | External API, CRUD | User → Gateway |
 | **gRPC** | Internal, High-Perf, Streaming | Cluster ↔ Cluster |
 | **Message Broker** | Async, Events, Decoupled | Job Events |
@@ -212,11 +212,11 @@ clarissa/
 
 ### Motivation
 
-CLARISSA should **not** be bound to a single simulator:
+CLARISSA soll **nicht** an einen Simulator gebunden sein:
 
 | Simulator | Strength | Use Case |
-|-----------|----------|----------|
-| **OPM Flow** | Production-ready, Eclipse-compatible | Full-field, History Match |
+|-----------|--------|----------|
+| **OPM Flow** | Production-ready, Eclipse-kompatibel | Full-field, History Match |
 | **MRST** | Flexible, MATLAB, Rapid Prototyping | Research, Sensitivities |
 | *Eclipse* | Industry Standard (proprietary) | Client Validation |
 | *CMG* | Thermal, Heavy Oil (proprietary) | Special Cases |
