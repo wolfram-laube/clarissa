@@ -85,7 +85,7 @@ CLARISSA is a Conversational AI System for Reservoir Simulation. The previous AD
 
 Microservices that belong together functionally are grouped into **Clusters**:
 - **Innerhalb** eines Clusters: Message Broker (Tight Coupling OK)
-- **Zwischen** Clusters: gRPC oder Events (Loose Coupling)
+- **Between** Clusters: gRPC or Events (Loose Coupling)
 - **Externally**: REST API via Gateway
 
 ### Cluster 1: Conversation
