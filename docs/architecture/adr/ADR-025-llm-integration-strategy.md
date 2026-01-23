@@ -11,7 +11,7 @@
 
 ## Context
 
-CLARISSA ist ein **Conversational** User Interface - LLM-Calls sind der Kern des Systems, nicht ein Add-on. Die Architektur muss unterstützen:
+CLARISSA is a **Conversational** User Interface - LLM calls are the core of the system, not an add-on. The architecture must support:
 
 1. **Cloud Deployment**: SaaS, API-basierte LLMs (Claude, GPT, Gemini)
 2. **On-Premise**: Enterprise-Kunden mit Datenschutz-Anforderungen
