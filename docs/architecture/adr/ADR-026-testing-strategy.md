@@ -11,7 +11,7 @@
 
 ## Context
 
-CLARISSA ist kein gewöhnliches Software-System. Die Testing-Strategie muss abdecken:
+CLARISSA is not an ordinary software system. The testing strategy must cover:
 
 1. **Standard Software Testing**: Unit, Integration, E2E
 2. **LLM Output Testing**: Wie testet man generierte Decks?
