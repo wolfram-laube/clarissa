@@ -11,7 +11,7 @@
 
 ## Context
 
-CLARISSA ist ein Conversational AI System für Reservoir Simulation. Die bisherigen ADRs (021-023) beschreiben das Admin-Portal. Diese ADR definiert die **Core System Architecture** - das eigentliche Herzstück.
+CLARISSA is a Conversational AI System for Reservoir Simulation. The previous ADRs (021-023) describe the Admin Portal. This ADR defines the **Core System Architecture** - the actual heart of the system.
 
 ### Anforderungen
 
