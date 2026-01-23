@@ -13,7 +13,7 @@
 
 ADR-021 defines the system and security architecture of the CLARISSA Portal (Cloud Run, OIDC, etc.). This ADR describes the software architecture:
 
-1. **Hexagonal Architecture**: Platform-agnostischer Core mit Adaptern
+1. **Hexagonal Architecture**: Platform-agnostic core with adapters
 2. **API Design**: Endpoints, Contracts, Error Handling
 3. **Data Model**: Firestore Collections
 4. **Frontend**: Alpine.js SPA
