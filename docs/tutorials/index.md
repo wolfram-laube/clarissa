@@ -14,7 +14,11 @@ Full development environment with PostgreSQL, OPM Flow, and all dependencies pre
 
 ### Option B: Binder (One-Click Notebooks)
 
-Zero-setup, one-click access to any notebook. No account required. Click the Binder badges in the tables below.
+Zero-setup, one-click access to any notebook. No account required.
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gl/wolfram_laube%2Fblauweiss_llc%2Firena/main?filepath=docs/tutorials/notebooks)
+
+Or click individual notebook badges in the tables below.
 
 !!! info "Binder Notes"
     - First launch takes ~2-3 minutes (building environment)
