@@ -13,7 +13,7 @@
 
 ADR-021 defines the system and security architecture of the CLARISSA Portal (Cloud Run, OIDC, etc.). This ADR describes the software architecture:
 
-1. **Hexagonal Architecture**: Platform-agnostic core with adapters
+1. **Hexagonal Architecture**: Platform-agnostischer Core mit Adaptern
 2. **API Design**: Endpoints, Contracts, Error Handling
 3. **Data Model**: Firestore Collections
 4. **Frontend**: Alpine.js SPA
@@ -25,18 +25,18 @@ ADR-021 defines the system and security architecture of the CLARISSA Portal (Clo
 ### Key Decisions
 
 | Decision | Choice | Rationale |
-|----------|--------|-----------|
+|--------------|------|------------|
 | **Architecture Pattern** | Hexagonal (Ports & Adapters) | Platform portability, testability |
-| **Core Language** | Python 3.11+ | Team skills, FastAPI, async |
+| **Core Language** | Python 3.11+ | Team-Skills, FastAPI, async |
 | **API Framework** | FastAPI | Async, Pydantic, OpenAPI |
-| **Frontend** | Alpine.js + HTMX | Lightweight, no build step |
-| **Styling** | Tailwind CSS | Utility-first, fast iteration |
+| **Frontend** | Alpine.js + HTMX | Lightweight, kein Build-Step |
+| **Styling** | Tailwind CSS | Utility-first, schnell |
 
 ---
 
 ## Hexagonal Architecture
 
-### Principle
+### Prinzip
 
 The business logic is platform-independent in the `shared/` directory. Thin adapters translate between platform (Cloud Run, OpenWhisk) and core.
 
@@ -59,7 +59,7 @@ The business logic is platform-independent in the `shared/` directory. Thin adap
 │       ├── retry.py              # Retry strategy                        │
 │       └── correlation.py        # Request correlation                   │
 │                                                                          │
-└──────────────────────────────────┬──────────────────────────────────────┘
+└──────────────────────────────┬──────────────────────────────────────────┘
                                │
               ┌────────────────┴────────────────┐
               │                                 │
@@ -75,12 +75,12 @@ The business logic is platform-independent in the `shared/` directory. Thin adap
 └─────────────────────────────┘   └─────────────────────────────┘
 ```
 
-### Benefits
+### Vorteile
 
-- **Same Core Code**: Write business logic once, test once
-- **Platform Portability**: Switch platforms without code changes
-- **Benchmarking**: Apples-to-apples comparison Cloud Run vs OpenWhisk
-- **Testability**: Core testable without HTTP/containers
+- **Same Core Code**: Business-Logik einmal schreiben, einmal testen
+- **Platform Portability**: Switch without code changes
+- **Benchmarking**: Apples-to-apples Vergleich Cloud Run vs OpenWhisk
+- **Testbarkeit**: Core ohne HTTP/Container testbar
 
 ---
 
