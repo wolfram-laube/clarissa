@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "description": "Voice test utterances based on SPE Comparative Solution Projects",
+    "models": ["SPE1", "SPE5", "SPE9", "SPE10"],
+    "source": "OPM opm-data repository"
+  },
+  "spe1": {
+    "description": "Simple black-oil, 10x10x3 grid, gas injection",
+    "wells": ["INJ", "PROD"],
+    "utterances": [
+      {"text": "show me the pressure distribution", "intent": "visualize_property", "slots": {"property": "pressure"}},
+      {"text": "what is the gas oil ratio at the producer", "intent": "query_value", "slots": {"property": "gor", "well": "PROD"}},
+      {"text": "display the oil saturation at layer 2", "intent": "visualize_property", "slots": {"property": "oil_saturation", "layer": 2}},
+      {"text": "how much gas have we injected", "intent": "query_value", "slots": {"property": "gas_injection_total"}},
+      {"text": "show porosity in 3D", "intent": "visualize_property", "slots": {"property": "porosity", "view_type": "3d"}},
+      {"text": "what is the BHP at the injector", "intent": "query_value", "slots": {"property": "bhp", "well": "INJ"}}
+    ]
+  },
+  "spe9": {
+    "description": "Waterflood, 24x25x15 grid, 26 wells",
+    "wells": ["INJE1", "PRODU2", "PRODU3", "PRODU4", "PRODU5", "PRODU6", "PRODU7", "PRODU8", "PRODU9", "PRODU10", "PRODU11", "PRODU12", "PRODU13", "PRODU14", "PRODU15", "PRODU16", "PRODU17", "PRODU18", "PRODU19", "PRODU20", "PRODU21", "PRODU22", "PRODU23", "PRODU24", "PRODU25", "PRODU26"],
+    "utterances": [
+      {"text": "show water saturation at day 500", "intent": "visualize_property", "slots": {"property": "water_saturation", "time_days": 500}},
+      {"text": "what is the water cut at producer 10", "intent": "query_value", "slots": {"property": "water_cut", "well": "PRODU10"}},
+      {"text": "display the permeability at layer 8", "intent": "visualize_property", "slots": {"property": "permeability", "layer": 8}},
+      {"text": "how much water have we injected at INJE1", "intent": "query_value", "slots": {"property": "water_injection_total", "well": "INJE1"}},
+      {"text": "show field oil production rate", "intent": "query_value", "slots": {"property": "oil_rate", "well": "FIELD"}},
+      {"text": "what is the cumulative oil production", "intent": "query_value", "slots": {"property": "oil_production_total"}},
+      {"text": "visualize pressure at layer 15 time 1000", "intent": "visualize_property", "slots": {"property": "pressure", "layer": 15, "time_days": 1000}},
+      {"text": "compare water cut for producer 5 and producer 12", "intent": "compare_wells", "slots": {"property": "water_cut", "wells": ["PRODU5", "PRODU12"]}},
+      {"text": "show all producers on the grid", "intent": "visualize_wells", "slots": {"well_type": "producer"}},
+      {"text": "what is the recovery factor", "intent": "query_value", "slots": {"property": "recovery_factor"}}
+    ]
+  },
+  "spe10": {
+    "description": "Upscaling benchmark, 60x220x85 grid, 1.1M cells",
+    "utterances": [
+      {"text": "show the permeability heterogeneity", "intent": "visualize_property", "slots": {"property": "permeability"}},
+      {"text": "display porosity at layer 50", "intent": "visualize_property", "slots": {"property": "porosity", "layer": 50}},
+      {"text": "what is the pore volume", "intent": "query_value", "slots": {"property": "pore_volume"}},
+      {"text": "show cross section at J equals 110", "intent": "visualize_slice", "slots": {"axis": "j", "index": 110}}
+    ]
+  },
+  "general_commands": [
+    {"text": "help", "intent": "help", "slots": {}},
+    {"text": "cancel", "intent": "cancel", "slots": {}},
+    {"text": "yes run it", "intent": "confirm", "slots": {}},
+    {"text": "go back", "intent": "navigate", "slots": {"target": "back"}},
+    {"text": "load SPE9 model", "intent": "load_model", "slots": {"model": "SPE9"}},
+    {"text": "run simulation", "intent": "run_simulation", "slots": {}},
+    {"text": "stop the simulation", "intent": "cancel", "slots": {}},
+    {"text": "save results", "intent": "save", "slots": {"target": "results"}}
+  ]
+}
