@@ -1,0 +1,37 @@
+sequenceDiagram
+    participant U as 👤 User
+    participant M as 🎤 Mic/VAD
+    participant S as 🗣️ STT
+    participant I as 🧠 Intent
+    participant D as 💬 Dialog
+    participant E as ⚡ Execute
+    participant V as 📊 Viz
+    participant T as 🔊 TTS
+
+    U->>M: "Show me layer 3 at day 500"
+    M->>S: Audio stream
+    S->>I: "show me layer 3 at day 500"
+    I->>I: Parse intent
+    
+    alt High confidence (>0.9)
+        I->>E: {intent: visualize, layer: 3, time: 500}
+        E->>V: render_cross_section(layer=3, time=500)
+        V-->>U: Display visualization
+        E->>T: "Showing water saturation at layer 3"
+        T-->>U: Audio response
+    else Medium confidence
+        I->>D: Request confirmation
+        D-->>U: "Show water saturation at layer 3, day 500?"
+        U->>M: "Yes"
+        M->>S: Audio
+        S->>D: "yes"
+        D->>E: Confirmed intent
+        E->>V: render_cross_section()
+    else Low confidence
+        I->>D: Need clarification
+        D-->>U: "Which property? Saturation or pressure?"
+        U->>M: "Saturation"
+        M->>S: Audio
+        S->>D: "saturation"
+        D->>I: Slot filled
+    end
