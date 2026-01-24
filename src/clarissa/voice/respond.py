@@ -1,75 +1,199 @@
 """
-Response Generator Module - Generates text responses for voice feedback.
+Response generation module for CLARISSA voice interface.
+
+Generates natural language responses and confirmation prompts.
 """
 
-from typing import Dict, Optional
 from dataclasses import dataclass
+from typing import Optional, Any
+from .intent import Intent, IntentType
+from .execute import ExecutionResult
 
 
 @dataclass
 class Response:
-    """Generated response for user feedback."""
+    """Generated response for user."""
+    
     text: str
     audio_url: Optional[str] = None
     action_description: Optional[str] = None
     requires_confirmation: bool = False
+    visualization: Any = None
 
 
+# Response templates
 RESPONSE_TEMPLATES = {
-    "visualize_property": {
+    # Success responses
+    IntentType.VISUALIZE_PROPERTY: {
         "success": "Showing {property}{layer_text}{time_text}.",
-        "layer_text": " at layer {layer}",
-        "time_text": ", day {time_days}",
+        "error": "Unable to visualize {property}. {error}",
     },
-    "query_value": {
-        "success": "The {property} is {value} {unit}.",
-        "not_found": "I couldn't find {property} data.",
+    IntentType.QUERY_VALUE: {
+        "success": "{description}",
+        "error": "Unable to get {property}. {error}",
     },
-    "navigate": {"success": "Going to {target}."},
-    "help": {"general": "You can say: 'Show me permeability', 'What is the oil rate?', or 'Go to results'."},
-    "cancel": {"success": "Cancelled."},
-    "confirm": {"prompt": "Did you mean to {action}? Say yes or no."},
-    "clarification": {
-        "property": "Which property? Permeability, porosity, or saturation?",
-        "layer": "Which layer? We have layers 1 through {max_layer}.",
-        "general": "I didn't quite catch that. Could you rephrase?",
+    IntentType.NAVIGATE: {
+        "success": "Navigating to {target}.",
+        "error": "Unable to navigate to {target}. {error}",
     },
-    "error": {
-        "unknown": "I didn't understand that. Try saying 'help' for available commands.",
-        "failed": "Sorry, that command failed: {error}",
+    IntentType.HELP: {
+        "success": "{description}",
     },
+    IntentType.CANCEL: {
+        "success": "Cancelled.",
+    },
+    IntentType.CONFIRM: {
+        "success": "Confirmed. {description}",
+        "error": "Nothing to confirm.",
+    },
+    IntentType.EXPORT_RESULTS: {
+        "success": "Exporting as {format}...",
+        "error": "Export failed. {error}",
+    },
+    IntentType.UNDO: {
+        "success": "Undone.",
+        "error": "Nothing to undo.",
+    },
+    
+    # Generic
+    "unknown": {
+        "error": "I didn't understand that. Try saying 'help' for available commands.",
+    },
+    "clarification": "Could you clarify? {prompt}",
+    "confirmation": "I'll {action}. Confirm?",
 }
 
 
 class ResponseGenerator:
-    """Generate text responses for voice commands."""
+    """
+    Generates natural language responses for voice interface.
     
-    def __init__(self, templates: Dict = None):
-        self.templates = templates or RESPONSE_TEMPLATES
+    Example:
+        generator = ResponseGenerator()
+        response = generator.generate(intent, result)
+        print(response)  # "Showing permeability at layer 3."
+    """
     
-    def success(self, intent_type: str, **kwargs) -> Response:
-        """Generate success response."""
-        template = self.templates.get(intent_type, {}).get("success", "Done.")
+    def __init__(self, verbose: bool = False):
+        """
+        Initialize response generator.
         
-        if intent_type == "visualize_property":
-            layer_text = self.templates[intent_type]["layer_text"].format(**kwargs) if kwargs.get("layer") else ""
-            time_text = self.templates[intent_type]["time_text"].format(**kwargs) if kwargs.get("time_days") else ""
-            text = template.format(property=kwargs.get("property", "property"), layer_text=layer_text, time_text=time_text)
+        Args:
+            verbose: Include additional details in responses
+        """
+        self.verbose = verbose
+    
+    def generate(self, intent: Intent, result: ExecutionResult) -> str:
+        """
+        Generate response text.
+        
+        Args:
+            intent: Parsed intent
+            result: Execution result
+            
+        Returns:
+            Response text
+        """
+        templates = RESPONSE_TEMPLATES.get(intent.type, RESPONSE_TEMPLATES["unknown"])
+        
+        if result.success:
+            template = templates.get("success", "{description}")
         else:
-            text = template.format(**kwargs)
+            template = templates.get("error", "An error occurred. {error}")
         
-        return Response(text=text, action_description=f"{intent_type}: {kwargs}")
+        # Build template variables
+        variables = {
+            "property": intent.slots.get("property", "data"),
+            "layer_text": "",
+            "time_text": "",
+            "target": intent.slots.get("target", ""),
+            "format": intent.slots.get("format", "file"),
+            "description": result.action_description,
+            "error": result.error or "Unknown error",
+            "action": self._describe_action(intent),
+        }
+        
+        # Add layer text if present
+        if intent.slots.get("layer"):
+            variables["layer_text"] = f" at layer {intent.slots['layer']}"
+        
+        # Add time text if present
+        if intent.slots.get("time_days"):
+            variables["time_text"] = f" at day {intent.slots['time_days']}"
+        
+        try:
+            return template.format(**variables)
+        except KeyError:
+            return result.action_description or "Done."
     
-    def clarification(self, slot_name: str, **kwargs) -> Response:
-        """Generate clarification request."""
-        template = self.templates["clarification"].get(slot_name, self.templates["clarification"]["general"])
-        return Response(text=template.format(**kwargs), requires_confirmation=True)
+    def generate_confirmation_prompt(self, intent: Intent) -> str:
+        """
+        Generate confirmation prompt for dangerous actions.
+        
+        Args:
+            intent: Intent requiring confirmation
+            
+        Returns:
+            Confirmation prompt text
+        """
+        action = self._describe_action(intent)
+        return f"I'll {action}. Say 'confirm' to proceed or 'cancel' to abort."
     
-    def error(self, error_type: str = "unknown", **kwargs) -> Response:
-        """Generate error response."""
-        template = self.templates["error"].get(error_type, self.templates["error"]["unknown"])
-        return Response(text=template.format(**kwargs))
+    def generate_clarification(self, prompt: str) -> str:
+        """
+        Generate clarification request.
+        
+        Args:
+            prompt: Clarification prompt
+            
+        Returns:
+            Clarification request text
+        """
+        return f"Could you clarify? {prompt}"
     
-    def help(self, topic: Optional[str] = None) -> Response:
-        """Generate help response."""
-        return Response(text=self.templates["help"]["general"])
+    def generate_error(self, error: str) -> str:
+        """
+        Generate error response.
+        
+        Args:
+            error: Error message
+            
+        Returns:
+            Error response text
+        """
+        return f"Sorry, something went wrong: {error}"
+    
+    def _describe_action(self, intent: Intent) -> str:
+        """Describe the action an intent will perform."""
+        slots = intent.slots
+        
+        if intent.type == IntentType.VISUALIZE_PROPERTY:
+            prop = slots.get("property", "the property")
+            desc = f"show {prop.replace('_', ' ')}"
+            if slots.get("layer"):
+                desc += f" at layer {slots['layer']}"
+            return desc
+        
+        elif intent.type == IntentType.QUERY_VALUE:
+            prop = slots.get("property", "the value")
+            return f"get {prop.replace('_', ' ')}"
+        
+        elif intent.type == IntentType.MODIFY_PARAMETER:
+            return f"modify {slots}"
+        
+        elif intent.type == IntentType.RUN_SIMULATION:
+            return "run the simulation"
+        
+        elif intent.type == IntentType.RUN_SENSITIVITY:
+            return "run sensitivity analysis"
+        
+        elif intent.type == IntentType.EXPORT_RESULTS:
+            fmt = slots.get("format", "file")
+            return f"export as {fmt.upper()}"
+        
+        elif intent.type == IntentType.NAVIGATE:
+            target = slots.get("target", "there")
+            return f"navigate to {target}"
+        
+        else:
+            return intent.type.value.replace("_", " ")
