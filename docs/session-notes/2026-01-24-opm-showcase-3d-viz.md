@@ -1,86 +1,83 @@
-# Session Report: OPM Flow Showcase Notebook
+# Session Report: OPM Flow Showcase - Feature Extensions
 
-**Datum:** 2026-01-24
-**Chat-Thema:** OPM Flow Installation Fix + 3D Visualization
+**Datum:** 2026-01-24 (Fortsetzung)
+**Chat-Thema:** GIF Export, Cross-Sections, UNRST Data Reader
 
 ---
 
-## ✅ Erledigte Aufgaben
+## ✅ Neue Features implementiert
 
-### 1. OPM Flow Installation gefixt
-- **Problem:** Falscher Paketname `opm-simulators`
-- **Lösung:** Korrekter Name `libopm-simulators-bin`
-- **Betroffene Notebooks:** 13, 15
+### 1. GIF/Video Export 🎬
+- **Methode:** `ReservoirVisualizer3D.export_animation_gif()`
+- **Technologie:** kaleido (Frame-Rendering) + Pillow (GIF-Assembly)
+- **Parameter:** FPS, Kamera-Winkel konfigurierbar
+- **Output:** `saturation_animation.gif`
 
-### 2. Result Parser verbessert
-- **Problem:** `parse_rsm()` Methode nicht gefunden
-- **Lösung:** Umbenannt zu `parse()`, nutzt `builder.perm_array`
-- Fallback auf Mock-Daten wenn `opm.io` nicht verfügbar
+### 2. Cross-Sections 📊
+- **Horizontale Schnitte:** `plot_cross_section_xy(prop_3d, layer_k, ...)`
+- **Vertikale Schnitte:** `plot_cross_section_xz()`, `plot_cross_section_yz()`
+- **Features:** Well-Marker, Farbskala, interaktiv (Plotly)
+- **Anwendung:** Permeabilitäts-Verteilung durch verschiedene Ebenen
 
-### 3. 3D Visualisierung hinzugefügt 🆕
-- **Plotly-basiert**, interaktiv im Notebook
-- **Statisch:** 3D Permeabilitäts-Würfel mit Wells
-- **Dynamisch:** Wasser-Sättigungs-Animation (12 Zeitschritte)
-- **Export:** HTML-Dateien für offline Viewing
-- **Klasse:** `ReservoirVisualizer3D`
-
-### 4. Notebook-Struktur aktualisiert
-- ToC aktualisiert (7 Sektionen)
-- Workflow-Diagramm angepasst
-- Sektionen neu nummeriert
-- Colab-Tipp für Sidebar-Navigation hinzugefügt
+### 3. Echte UNRST-Daten 🔥
+- **Funktion:** `read_saturation_from_unrst(workspace, case_name, nx, ny, nz)`
+- **Bibliothek:** `opm.io.ecl.EclFile`
+- **Fallback:** Synthetische Daten wenn UNRST nicht verfügbar
+- **Deck-Update:** RPTRST aktiviert für Restart-Output
 
 ---
 
 ## 📁 Geänderte Dateien
 
 ```
-docs/tutorials/notebooks/
-├── 13_OPM_Flow_Playground.ipynb  # OPM Install fix
-└── 15_OPM_Flow_Showcase.ipynb    # Hauptarbeit
+docs/tutorials/notebooks/15_OPM_Flow_Showcase.ipynb
+├── Cell 6:  EclipseDeckBuilder + RPTRST
+├── Cell 17: Install plotly + kaleido + Pillow  
+├── Cell 18: ReservoirVisualizer3D + neue Methoden
+├── Cell 20: NEU - Cross-Sections
+├── Cell 21: Saturation mit UNRST-Reader
+└── Cell 22: Save + GIF Export
 ```
 
 ---
 
-## 📋 Notebook 15 Struktur (aktuell)
+## 📋 Aktuelle Notebook-Struktur (32 Cells)
 
 ```
-1. Environment Setup     - OPM Flow installieren
-2. Build the Model       - 5-Spot Waterflood ECLIPSE Deck
+1. Environment Setup     - OPM Flow + Dependencies
+2. Build the Model       - 5-Spot Waterflood ECLIPSE Deck (mit RPTRST)
 3. Run Simulation        - OPM Flow ausführen
 4. Analyze Results       - 2D Produktionsplots
-5. 3D Visualization 🆕   - Interaktive 3D-Würfel
+5. 3D Visualization
+   ├── Install (plotly, kaleido, Pillow)
+   ├── ReservoirVisualizer3D Klasse
+   ├── 3D Permeability
+   ├── Cross-Sections 🆕
+   ├── Saturation Animation (mit UNRST-Reader) 🆕
+   └── Save HTML + GIF Export 🆕
 6. Sensitivity Analysis  - Permeabilitäts-Sweeps
-7. Export & Report       - CSV, PNG, HTML Export
+7. Export & Report       - CSV, PNG Export
 ```
 
 ---
 
-## 🔮 Nächste Schritte (geplant)
+## 🔮 Verbleibender Task
 
-1. **GIF/Video Export** - Animation als Datei speichern
-2. **Cross-Sections** - X-Y, X-Z Schnitte durch das Reservoir
-3. **Echte UNRST-Daten** - Binäre OPM-Ergebnisse parsen statt Mock-Daten
-4. **Voice Input** - Sprachsteuerung für CLARISSA ("Zeig mir Layer 3")
+### 4. Voice Input (CLARISSA-Core)
+- **Komplexität:** ⭐⭐⭐⭐
+- **Scope:** Gehört zur CLARISSA-Kernarchitektur
+- **Komponenten:** Whisper API, Intent Recognition, Command Mapping
+- **Beispiel:** "Zeig mir Layer 3 bei Tag 500"
 
----
-
-## 🐛 Bekannte Limitierungen
-
-| Issue | Status | Workaround |
-|-------|--------|------------|
-| Colab ToC-Links funktionieren nicht | Colab Bug | Sidebar (📑) nutzen |
-| `opm.io` Installation kann fehlschlagen | Selten | Mock-Daten Fallback |
-| Linter-Warnungen für Variablen | Kosmetisch | Ignorieren |
+→ Separate Implementierung als CLARISSA-Feature empfohlen
 
 ---
 
 ## 🔗 Links
 
-- **Notebook (Colab):** https://colab.research.google.com/github/wolfram-laube/clarissa/blob/main/docs/tutorials/notebooks/15_OPM_Flow_Showcase.ipynb
+- **Colab:** https://colab.research.google.com/github/wolfram-laube/clarissa/blob/main/docs/tutorials/notebooks/15_OPM_Flow_Showcase.ipynb
 - **GitLab:** https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/docs/tutorials/notebooks/15_OPM_Flow_Showcase.ipynb
-- **GitHub Mirror:** https://github.com/wolfram-laube/clarissa
 
 ---
 
-*Erstellt: 2026-01-24 ~15:00 CET*
+*Aktualisiert: 2026-01-24 ~17:00 CET*
