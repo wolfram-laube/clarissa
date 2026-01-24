@@ -238,6 +238,16 @@ The `requirements.txt` includes:
 
 ---
 
+### 🎮 Interactive Playgrounds
+
+| Notebook | Description | Duration | Colab |
+|----------|-------------|----------|-------|
+| [11 CRUD Playground](notebooks/11_CRUD_Playground.ipynb) | Interactive API testing | ~20 min | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/wolfram-laube/clarissa/blob/main/docs/tutorials/notebooks/11_CRUD_Playground.ipynb) |
+
+**No prior experience required!** Use this notebook to explore CLARISSA's Create, Read, Update, and Delete operations interactively.
+
+---
+
 ## 🛠️ Environment Comparison
 
 | Feature | GitPod | Colab | Local |
@@ -305,4 +315,5 @@ Save your work frequently. Use Google Drive mount for persistence:
 from google.colab import drive
 drive.mount('/content/drive')
 ```
+
 
