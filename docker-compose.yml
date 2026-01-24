@@ -1,0 +1,123 @@
+# CLARISSA Local Development Environment
+# 
+# Usage:
+#   docker-compose up -d        # Start all services
+#   docker-compose logs -f api  # Follow API logs
+#   docker-compose down         # Stop all services
+#
+# First-time setup:
+#   docker exec clarissa-ollama-1 ollama pull llama3.2:3b
+#
+# Documentation: docs/architecture/adr/ADR-029-deployment-infrastructure-strategy.md
+
+version: '3.8'
+
+services:
+  # ============== CLARISSA API ==============
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    container_name: clarissa-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=local
+      - LOG_LEVEL=DEBUG
+      - FIRESTORE_EMULATOR_HOST=firestore:8080
+      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2:3b}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPM_FLOW_URL=http://opm-flow:5000
+      - QDRANT_HOST=http://qdrant:6333
+    volumes:
+      - ./src:/app/src:ro
+    depends_on:
+      firestore:
+        condition: service_started
+      ollama:
+        condition: service_started
+    networks:
+      - clarissa-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ============== FIRESTORE EMULATOR ==============
+  firestore:
+    image: google/cloud-sdk:slim
+    container_name: clarissa-firestore
+    command: >
+      bash -c "
+        apt-get update -qq && 
+        apt-get install -y -qq default-jre > /dev/null 2>&1 &&
+        echo 'Starting Firestore Emulator...' &&
+        gcloud emulators firestore start --host-port=0.0.0.0:8080 --quiet
+      "
+    ports:
+      - "8080:8080"
+    networks:
+      - clarissa-net
+
+  # ============== LOCAL LLM (OLLAMA) ==============
+  ollama:
+    image: ollama/ollama:latest
+    container_name: clarissa-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - clarissa-net
+    # After first start: docker exec clarissa-ollama ollama pull llama3.2:3b
+
+  # ============== OPM FLOW SIMULATOR ==============
+  opm-flow:
+    build:
+      context: ./src/clarissa/simulators/opm
+      dockerfile: Dockerfile
+    container_name: clarissa-opm-flow
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data/simulations:/simulation/data
+      - opm_output:/simulation/output
+    environment:
+      - LOCAL_UID=${LOCAL_UID:-1000}
+      - LOCAL_GID=${LOCAL_GID:-1000}
+    networks:
+      - clarissa-net
+    # Keep running for interactive use
+    entrypoint: ["tail", "-f", "/dev/null"]
+
+  # ============== VECTOR DATABASE ==============
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: clarissa-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - clarissa-net
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+
+volumes:
+  ollama_data:
+    name: clarissa_ollama_data
+  qdrant_data:
+    name: clarissa_qdrant_data
+  opm_output:
+    name: clarissa_opm_output
+
+networks:
+  clarissa-net:
+    name: clarissa-network
+    driver: bridge
