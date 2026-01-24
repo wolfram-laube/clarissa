@@ -817,6 +817,279 @@ terraform apply
 
 ---
 
+
+---
+
+## Local Development Environment
+
+Lokale Entwicklung muss **ohne GCP-Abhängigkeiten** möglich sein.
+
+### Prinzip: Cloud = Optional
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                  │
+│   LOCAL DEV (docker-compose)             CLOUD (GCP)                            │
+│   ──────────────────────────             ──────────────                          │
+│                                                                                  │
+│   clarissa-api (container)        →      Cloud Run Service                      │
+│   Firestore Emulator              →      Firestore (real)                       │
+│   Ollama (local LLM)              →      Claude API                             │
+│   OPM Flow (container)            →      Cloud Run Worker                       │
+│   Qdrant (container)              →      Qdrant Cloud / Managed                 │
+│                                                                                  │
+│   ✅ Kein GCP Account nötig              ⚠️  GCP Credentials nötig              │
+│   ✅ Komplett offline                    ⚠️  Internet nötig                      │
+│   ✅ Kostenlos                           💰 Pay-per-use                          │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### docker-compose.yml
+
+```yaml
+# docker-compose.yml
+
+version: '3.8'
+
+services:
+  # ============== CLARISSA API ==============
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=local
+      - LOG_LEVEL=DEBUG
+      - FIRESTORE_EMULATOR_HOST=firestore:8080
+      - LLM_PROVIDER=ollama
+      - OLLAMA_HOST=http://ollama:11434
+      - OPM_FLOW_URL=http://opm-flow:8080
+      - QDRANT_HOST=http://qdrant:6333
+    volumes:
+      - ./src:/app/src  # Hot reload
+    depends_on:
+      - firestore
+      - ollama
+      - opm-flow
+    networks:
+      - clarissa-net
+
+  # ============== FIRESTORE EMULATOR ==============
+  firestore:
+    image: google/cloud-sdk:slim
+    command: >
+      bash -c "apt-get update && apt-get install -y default-jre &&
+               gcloud emulators firestore start --host-port=0.0.0.0:8080"
+    ports:
+      - "8080:8080"
+    networks:
+      - clarissa-net
+
+  # ============== LOCAL LLM (OLLAMA) ==============
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - clarissa-net
+    # Nach Start: docker exec -it clarissa-ollama-1 ollama pull llama3.2:3b
+
+  # ============== OPM FLOW SIMULATOR ==============
+  opm-flow:
+    image: opm/opm-simulators:latest
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./data/simulations:/data
+    networks:
+      - clarissa-net
+
+  # ============== VECTOR DATABASE ==============
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+      - "6334:6334"  # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - clarissa-net
+
+volumes:
+  ollama_data:
+  qdrant_data:
+
+networks:
+  clarissa-net:
+    driver: bridge
+```
+
+### Environment Configuration
+
+```python
+# src/clarissa/config.py
+
+from pydantic_settings import BaseSettings
+from typing import Literal
+
+class Settings(BaseSettings):
+    """
+    Configuration with local-first defaults.
+    Cloud values come from environment variables or .env file.
+    """
+    
+    # Environment
+    environment: Literal["local", "dev", "staging", "prod"] = "local"
+    log_level: str = "DEBUG"
+    
+    # LLM Configuration
+    llm_provider: Literal["ollama", "anthropic", "openai"] = "ollama"
+    ollama_host: str = "http://localhost:11434"
+    ollama_model: str = "llama3.2:3b"
+    anthropic_api_key: str | None = None
+    openai_api_key: str | None = None
+    
+    # Database
+    firestore_emulator_host: str | None = None  # Set = use emulator
+    firestore_project: str = "myk8sproject-207017"
+    
+    # Simulator
+    opm_flow_url: str = "http://localhost:8081"
+    
+    # Vector Store
+    qdrant_host: str = "http://localhost:6333"
+    
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
+settings = Settings()
+```
+
+```python
+# src/clarissa/llm/factory.py
+
+from clarissa.config import settings
+
+def get_llm():
+    """Factory that returns appropriate LLM based on config."""
+    
+    if settings.llm_provider == "ollama":
+        from clarissa.llm.ollama import OllamaAdapter
+        return OllamaAdapter(
+            host=settings.ollama_host,
+            model=settings.ollama_model
+        )
+    
+    elif settings.llm_provider == "anthropic":
+        from clarissa.llm.anthropic import AnthropicAdapter
+        return AnthropicAdapter(
+            api_key=settings.anthropic_api_key
+        )
+    
+    elif settings.llm_provider == "openai":
+        from clarissa.llm.openai import OpenAIAdapter
+        return OpenAIAdapter(
+            api_key=settings.openai_api_key
+        )
+    
+    raise ValueError(f"Unknown LLM provider: {settings.llm_provider}")
+```
+
+```python
+# src/clarissa/db/factory.py
+
+from clarissa.config import settings
+
+def get_firestore():
+    """Factory that handles emulator vs real Firestore."""
+    
+    import os
+    from google.cloud import firestore
+    
+    if settings.firestore_emulator_host:
+        # Use emulator
+        os.environ["FIRESTORE_EMULATOR_HOST"] = settings.firestore_emulator_host
+    
+    return firestore.Client(project=settings.firestore_project)
+```
+
+### Quick Start (Local)
+
+```bash
+# 1. Clone & Setup
+git clone git@gitlab.com:wolfram_laube/blauweiss_llc/irena.git
+cd irena
+cp .env.example .env
+
+# 2. Start all services
+docker-compose up -d
+
+# 3. Pull local LLM model (first time only, ~2GB)
+docker exec -it irena-ollama-1 ollama pull llama3.2:3b
+
+# 4. Verify
+curl http://localhost:8000/health
+# → {"status": "healthy", "environment": "local"}
+
+# 5. Develop with hot-reload
+# Edit src/ → changes apply automatically
+```
+
+### .env.example
+
+```bash
+# .env.example - Copy to .env for local development
+
+# Environment
+ENVIRONMENT=local
+LOG_LEVEL=DEBUG
+
+# LLM - Local by default
+LLM_PROVIDER=ollama
+OLLAMA_HOST=http://localhost:11434
+OLLAMA_MODEL=llama3.2:3b
+
+# Uncomment for cloud LLM:
+# LLM_PROVIDER=anthropic
+# ANTHROPIC_API_KEY=sk-ant-...
+
+# Database - Emulator by default
+FIRESTORE_EMULATOR_HOST=localhost:8080
+FIRESTORE_PROJECT=myk8sproject-207017
+
+# Simulator
+OPM_FLOW_URL=http://localhost:8081
+
+# Vector Store
+QDRANT_HOST=http://localhost:6333
+```
+
+### Switching Between Local and Cloud
+
+```bash
+# Local (default)
+docker-compose up
+# → Uses Ollama, Firestore Emulator, everything local
+
+# Local + Cloud LLM (for testing Claude responses)
+LLM_PROVIDER=anthropic ANTHROPIC_API_KEY=sk-... docker-compose up
+# → Uses Claude API, but Firestore still local
+
+# Against Dev Environment (careful!)
+ENVIRONMENT=dev \
+FIRESTORE_EMULATOR_HOST= \
+LLM_PROVIDER=anthropic \
+ANTHROPIC_API_KEY=sk-... \
+python -m clarissa.api
+# → Uses real Firestore, real Claude
+```
+
 ## Summary
 
 | Component | Decision | Rationale |
@@ -833,13 +1106,14 @@ terraform apply
 
 ## Next Steps
 
-1. [ ] Create Terraform state bucket
-2. [ ] Enable GCP APIs
-3. [x] GitLab Registry (already have it!)
-4. [ ] Implement Terraform modules
-5. [ ] Add CI pipeline jobs
-6. [ ] Deploy "Hello World" service
-7. [ ] Verify secrets injection works
+1. [ ] Setup local dev (docker-compose up)
+2. [ ] Create Terraform state bucket
+3. [ ] Enable GCP APIs
+4. [x] GitLab Registry (already have it!)
+5. [ ] Implement Terraform modules
+6. [ ] Add CI pipeline jobs
+7. [ ] Deploy "Hello World" to Cloud Run
+8. [ ] Verify secrets injection works
 
 ---
 
