@@ -463,7 +463,7 @@ module "clarissa_api" {
   service_name = "clarissa-api-dev"
   region       = var.region
   
-  image = "europe-west1-docker.pkg.dev/${var.project_id}/clarissa/api:latest"
+  image = "registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:latest"
   
   min_instances = 0  # Scale to zero
   max_instances = 2
@@ -494,7 +494,7 @@ module "clarissa_worker" {
   service_name = "clarissa-worker-dev"
   region       = var.region
   
-  image = "europe-west1-docker.pkg.dev/${var.project_id}/clarissa/worker:latest"
+  image = "registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/worker:latest"
   
   min_instances = 0
   max_instances = 5
@@ -614,7 +614,7 @@ terraform:apply:
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
   before_script:
-    - echo ${GCP_SERVICE_KEY} | docker login -u _json_key --password-stdin https://europe-west1-docker.pkg.dev
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   tags:
     - docker-any
 
@@ -622,10 +622,10 @@ build:api:
   extends: .docker
   stage: build
   script:
-    - docker build -t europe-west1-docker.pkg.dev/${GCP_PROJECT}/clarissa/api:${CI_COMMIT_SHA} -f docker/api/Dockerfile .
-    - docker push europe-west1-docker.pkg.dev/${GCP_PROJECT}/clarissa/api:${CI_COMMIT_SHA}
-    - docker tag europe-west1-docker.pkg.dev/${GCP_PROJECT}/clarissa/api:${CI_COMMIT_SHA} europe-west1-docker.pkg.dev/${GCP_PROJECT}/clarissa/api:latest
-    - docker push europe-west1-docker.pkg.dev/${GCP_PROJECT}/clarissa/api:latest
+    - docker build -t registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:${CI_COMMIT_SHA} -f docker/api/Dockerfile .
+    - docker push registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:${CI_COMMIT_SHA}
+    - docker tag registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:${CI_COMMIT_SHA} registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:latest
+    - docker push registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:latest
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
@@ -636,10 +636,10 @@ build:worker:
   extends: .docker
   stage: build
   script:
-    - docker build -t europe-west1-docker.pkg.dev/${GCP_PROJECT}/clarissa/worker:${CI_COMMIT_SHA} -f docker/worker/Dockerfile .
-    - docker push europe-west1-docker.pkg.dev/${GCP_PROJECT}/clarissa/worker:${CI_COMMIT_SHA}
-    - docker tag europe-west1-docker.pkg.dev/${GCP_PROJECT}/clarissa/worker:${CI_COMMIT_SHA} europe-west1-docker.pkg.dev/${GCP_PROJECT}/clarissa/worker:latest
-    - docker push europe-west1-docker.pkg.dev/${GCP_PROJECT}/clarissa/worker:latest
+    - docker build -t registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/worker:${CI_COMMIT_SHA} -f docker/worker/Dockerfile .
+    - docker push registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/worker:${CI_COMMIT_SHA}
+    - docker tag registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/worker:${CI_COMMIT_SHA} registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/worker:latest
+    - docker push registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/worker:latest
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
@@ -653,8 +653,8 @@ deploy:dev:
   stage: deploy
   script:
     - echo ${GCP_SERVICE_KEY} | gcloud auth activate-service-account --key-file=-
-    - gcloud run services update clarissa-api-dev --image europe-west1-docker.pkg.dev/${GCP_PROJECT}/clarissa/api:${CI_COMMIT_SHA} --region europe-west1 --project ${GCP_PROJECT}
-    - gcloud run services update clarissa-worker-dev --image europe-west1-docker.pkg.dev/${GCP_PROJECT}/clarissa/worker:${CI_COMMIT_SHA} --region europe-west1 --project ${GCP_PROJECT}
+    - gcloud run services update clarissa-api-dev --image registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:${CI_COMMIT_SHA} --region europe-west1 --project ${GCP_PROJECT}
+    - gcloud run services update clarissa-worker-dev --image registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/worker:${CI_COMMIT_SHA} --region europe-west1 --project ${GCP_PROJECT}
   needs:
     - build:api
     - build:worker
@@ -778,7 +778,7 @@ Für spätere Air-Gapped Deployments (ADR-025):
 │   GCP Secret Manager     →      HashiCorp Vault / K8s Secrets                  │
 │   Firestore              →      MongoDB / PostgreSQL                           │
 │   Cloud Monitoring       →      Prometheus + Grafana                           │
-│   Artifact Registry      →      Harbor / Local Registry                        │
+│   GitLab Registry      →      Harbor / Local Registry                        │
 │                                                                                  │
 │   Terraform modules bleiben gleich, nur Provider/Backend ändern!               │
 │                                                                                  │
@@ -801,15 +801,12 @@ gcloud services enable \
   run.googleapis.com \
   secretmanager.googleapis.com \
   firestore.googleapis.com \
-  artifactregistry.googleapis.com \
   cloudbuild.googleapis.com \
   --project=myk8sproject-207017
 
-# 3. Create Artifact Registry (for Docker images)
-gcloud artifacts repositories create clarissa \
-  --repository-format=docker \
-  --location=europe-west1 \
-  --project=myk8sproject-207017
+# 3. GitLab Container Registry
+# Already available at: registry.gitlab.com/wolfram_laube/blauweiss_llc/irena
+# No setup needed - GitLab provides this automatically!
 
 # 4. Initialize Terraform
 cd infrastructure/terraform/environments/dev
@@ -829,7 +826,7 @@ terraform apply
 | **Secrets** | GCP Secret Manager | Native, no extra infrastructure |
 | **Environments** | Dev only (start) | Minimize cost, add later |
 | **GitOps** | GitLab CI (no ArgoCD) | Small team, keep it simple |
-| **Container Registry** | GCP Artifact Registry | Native integration |
+| **Container Registry** | GitLab Registry | Already have it, CI-native |
 | **State Storage** | GCS Bucket | Reliable, supports locking |
 
 ---
@@ -838,7 +835,7 @@ terraform apply
 
 1. [ ] Create Terraform state bucket
 2. [ ] Enable GCP APIs
-3. [ ] Create Artifact Registry
+3. [x] GitLab Registry (already have it!)
 4. [ ] Implement Terraform modules
 5. [ ] Add CI pipeline jobs
 6. [ ] Deploy "Hello World" service
