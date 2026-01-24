@@ -1,0 +1,76 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#4A90D9', 'secondaryColor': '#F5A623', 'tertiaryColor': '#7ED321'}}}%%
+
+flowchart TB
+    subgraph Input["🎤 Audio Input"]
+        MIC[Microphone]
+        VAD[Voice Activity Detection]
+        MIC --> VAD
+    end
+
+    subgraph STT["🗣️ Speech-to-Text"]
+        direction LR
+        CLOUD[Whisper API<br/>Cloud]
+        LOCAL[Whisper Medium<br/>Local/Air-Gap]
+    end
+
+    subgraph NLU["🧠 Natural Language Understanding"]
+        TRANS[Transcription]
+        INTENT[Intent Parser<br/>LLM]
+        SLOTS[Slot Filler]
+        CONF[Confidence<br/>Scorer]
+        
+        TRANS --> INTENT
+        INTENT --> SLOTS
+        SLOTS --> CONF
+    end
+
+    subgraph DIALOG["💬 Dialog Management"]
+        CLARIFY[Clarification<br/>Dialog]
+        CONFIRM[Confirmation<br/>Handler]
+        HISTORY[Context<br/>History]
+    end
+
+    subgraph EXEC["⚡ Execution"]
+        ROUTER[Command<br/>Router]
+        VALID[Validation]
+        
+        subgraph Actions["Actions"]
+            VIZ[Visualization<br/>Service]
+            SIM[Simulation<br/>Service]
+            DECK[Deck<br/>Builder]
+            EXPORT[Export<br/>Service]
+        end
+        
+        ROUTER --> VALID
+        VALID --> Actions
+    end
+
+    subgraph OUTPUT["🔊 Response"]
+        TTS[Text-to-Speech]
+        DISPLAY[Visual<br/>Feedback]
+    end
+
+    VAD --> STT
+    CLOUD --> TRANS
+    LOCAL --> TRANS
+    
+    CONF -->|"High (>0.9)"| ROUTER
+    CONF -->|"Medium"| CONFIRM
+    CONF -->|"Low (<0.7)"| CLARIFY
+    
+    CLARIFY --> HISTORY
+    CONFIRM --> HISTORY
+    HISTORY --> INTENT
+    
+    CONFIRM -->|"Confirmed"| ROUTER
+    
+    Actions --> TTS
+    Actions --> DISPLAY
+    TTS --> MIC
+
+    style Input fill:#E8F5E9
+    style STT fill:#E3F2FD
+    style NLU fill:#FFF3E0
+    style DIALOG fill:#F3E5F5
+    style EXEC fill:#FFEBEE
+    style OUTPUT fill:#E0F7FA
