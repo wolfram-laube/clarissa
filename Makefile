@@ -4,20 +4,34 @@
 PY ?= python
 PIP ?= pip
 
-.PHONY: help install dev test demo clean
-
 help:
-	@echo "Targets:"
-	@echo "  install   Install CLARISSA in editable mode"
-	@echo "  dev       Install CLARISSA + dev dependencies (pytest, ruff)"
-	@echo "  test      Run tests"
-	@echo "  demo      Run minimal governed demo (interactive approval)"
-	@echo "  clean     Remove caches"
+	@echo "CLARISSA Development Commands"
+	@echo ""
+	@echo "Quick Start (Local Docker):"
+	@echo "  make dev          Start everything (docker-compose + pull model)"
+	@echo "  make dev-down     Stop all services"
+	@echo "  make dev-logs     View logs"
+	@echo ""
+	@echo "Development:"
+	@echo "  make install      Install CLARISSA in editable mode"
+	@echo "  make test         Run tests"
+	@echo "  make lint         Run linter"
+	@echo "  make format       Format code"
+	@echo ""
+	@echo "Simulation:"
+	@echo "  make simulate     Run example simulation"
+	@echo "  make opm-shell    Open OPM Flow shell"
+	@echo ""
+	@echo "Cleanup:"
+	@echo "  make clean        Remove caches"
+	@echo "  make dev-clean    Remove Docker volumes"
+
+.PHONY: help install dev-install test demo clean dev dev-up dev-down dev-logs dev-build dev-clean ollama-pull lint format simulate opm-shell
 
 install:
 	$(PY) -m $(PIP) install -e .
 
-dev:
+dev-install:
 	$(PY) -m $(PIP) install -e ".[dev]"
 
 test:
@@ -71,3 +85,94 @@ mr-report:
 
 mr-report-html: mr-report
 	$(PY) scripts/render_report_html.py
+
+# ============================================================
+# CLARISSA Local Development Commands
+# ============================================================
+
+.PHONY: dev dev-up dev-down dev-logs dev-build dev-clean ollama-pull
+
+# ------------------------------------------------------------
+# Quick Start
+# ------------------------------------------------------------
+
+## Start local development environment
+dev: dev-up ollama-pull
+	@echo ""
+	@echo "✅ CLARISSA is running!"
+	@echo ""
+	@echo "   API:       http://localhost:8000"
+	@echo "   Docs:      http://localhost:8000/docs"
+	@echo "   Firestore: http://localhost:8080"
+	@echo "   Ollama:    http://localhost:11434"
+	@echo "   Qdrant:    http://localhost:6333"
+	@echo ""
+	@echo "   Logs: make dev-logs"
+	@echo "   Stop: make dev-down"
+	@echo ""
+
+## Start all services
+dev-up:
+	docker-compose up -d
+
+## Stop all services
+dev-down:
+	docker-compose down
+
+## View logs (follow mode)
+dev-logs:
+	docker-compose logs -f
+
+## View API logs only
+dev-logs-api:
+	docker-compose logs -f api
+
+## Rebuild containers
+dev-build:
+	docker-compose build --no-cache
+
+## Clean up volumes and containers
+dev-clean:
+	docker-compose down -v --remove-orphans
+	docker volume rm clarissa_ollama_data clarissa_qdrant_data clarissa_opm_output 2>/dev/null || true
+
+## Pull Ollama model (first time setup)
+ollama-pull:
+	@echo "Pulling Ollama model (this may take a few minutes)..."
+	@docker exec clarissa-ollama ollama pull llama3.2:3b 2>/dev/null || echo "Ollama not ready yet, run again after 'make dev-up'"
+
+# ------------------------------------------------------------
+# Development Helpers
+# ------------------------------------------------------------
+
+## Run tests
+	pytest tests/ -v
+
+## Run linter
+lint:
+	ruff check src/ tests/
+
+## Format code
+format:
+	ruff format src/ tests/
+
+## Type check
+typecheck:
+	mypy src/
+
+## Run API locally (without Docker)
+run-api:
+	uvicorn clarissa.api.main:app --reload --host 0.0.0.0 --port 8000
+
+# ------------------------------------------------------------
+# Simulation
+# ------------------------------------------------------------
+
+## Run OPM Flow simulation (example)
+simulate:
+	@echo "Running example simulation..."
+	docker exec clarissa-opm-flow flow /simulation/data/SPE1.DATA --output-dir=/simulation/output/
+
+## Open OPM Flow shell
+opm-shell:
+	docker exec -it clarissa-opm-flow bash

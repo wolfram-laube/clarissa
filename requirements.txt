@@ -1,1 +1,28 @@
-# Binder requirements for CLARISSA tutorials# Currently using only Python standard library# Add packages here when notebooks need them
+# CLARISSA Dependencies
+# Install: pip install -r requirements.txt
+
+# ============== Core ==============
+pydantic>=2.0
+pydantic-settings>=2.0
+
+# ============== API ==============
+fastapi>=0.109
+uvicorn[standard]>=0.27
+httpx>=0.26
+
+# ============== LLM ==============
+anthropic>=0.18
+openai>=1.12
+
+# ============== Database ==============
+google-cloud-firestore>=2.14
+qdrant-client>=1.7
+
+# ============== Simulation ==============
+numpy>=1.26
+pandas>=2.1
+
+# ============== Development ==============
+pytest>=7.4
+pytest-asyncio>=0.23
+ruff>=0.1
