@@ -242,9 +242,17 @@ The `requirements.txt` includes:
 
 | Notebook | Description | Duration | Colab |
 |----------|-------------|----------|-------|
-| [11 CRUD Playground](notebooks/11_CRUD_Playground.ipynb) | Interactive API testing | ~20 min | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/wolfram-laube/clarissa/blob/main/docs/tutorials/notebooks/11_CRUD_Playground.ipynb) |
+| [11 CRUD Playground](notebooks/11_CRUD_Playground.ipynb) | CLARISSA API testing | ~20 min | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/wolfram-laube/clarissa/blob/main/docs/tutorials/notebooks/11_CRUD_Playground.ipynb) |
+| [12 GitLab API Playground](notebooks/12_GitLab_API_Playground.ipynb) | Issues, MRs, Pipelines | ~25 min | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/wolfram-laube/clarissa/blob/main/docs/tutorials/notebooks/12_GitLab_API_Playground.ipynb) |
+| [13 OPM Flow Playground](notebooks/13_OPM_Flow_Playground.ipynb) | Deck files, Simulation | ~30 min | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/wolfram-laube/clarissa/blob/main/docs/tutorials/notebooks/13_OPM_Flow_Playground.ipynb) |
+| [14 Infrastructure Playground](notebooks/14_Infrastructure_Playground.ipynb) | Runners, Sync, Metrics | ~20 min | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/wolfram-laube/clarissa/blob/main/docs/tutorials/notebooks/14_Infrastructure_Playground.ipynb) |
 
-**No prior experience required!** Use this notebook to explore CLARISSA's Create, Read, Update, and Delete operations interactively.
+**No prior experience required!** These playgrounds let you explore CLARISSA interactively:
+
+- **11 CRUD**: Test the CLARISSA conversation API
+- **12 GitLab**: Manage issues, merge requests, pipelines
+- **13 OPM Flow**: Create and run reservoir simulations
+- **14 Infrastructure**: Monitor runners, sync status, metrics
 
 ---
 
@@ -315,5 +323,6 @@ Save your work frequently. Use Google Drive mount for persistence:
 from google.colab import drive
 drive.mount('/content/drive')
 ```
+
 
 
