@@ -326,3 +326,15 @@ drive.mount('/content/drive')
 
 
 
+
+### 🎬 Complete Showcases
+
+| Notebook | Description | Duration | Colab |
+|----------|-------------|----------|-------|
+| [15 OPM Flow Showcase](notebooks/15_OPM_Flow_Showcase.ipynb) | End-to-end workflow: Install → Build → Simulate → Analyze | ~15 min | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/wolfram-laube/clarissa/blob/main/docs/tutorials/notebooks/15_OPM_Flow_Showcase.ipynb) |
+
+**Featured Demo:** Build a 5-spot waterflood model, run OPM Flow simulation, analyze production curves, and perform sensitivity analysis - all in one notebook!
+
+---
+
+
