@@ -221,6 +221,11 @@ resource "google_cloud_run_v2_service" "clarissa_api" {
   project  = var.gcp_project
 
   template {
+    # Force new revision on each apply
+    annotations = {
+      "client.knative.dev/user-image" = var.api_image
+      "run.googleapis.com/launch-stage" = "BETA"
+    }
     service_account = google_service_account.clarissa_api.email
 
     scaling {
