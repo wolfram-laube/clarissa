@@ -111,3 +111,19 @@ variable "firestore_location" {
   type        = string
   default     = "eur3"
 }
+# ============================================================
+# GitLab Container Registry Authentication
+# ============================================================
+
+variable "gitlab_deploy_username" {
+  description = "GitLab Deploy Token username for Artifact Registry remote repository"
+  type        = string
+  default     = "gitlab+deploy-token-11019753"
+}
+
+variable "gitlab_deploy_token" {
+  description = "GitLab Deploy Token password for Artifact Registry remote repository"
+  type        = string
+  sensitive   = true
+  default     = ""  # Set via CI variable TF_VAR_gitlab_deploy_token
+}
