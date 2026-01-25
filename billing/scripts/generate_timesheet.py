@@ -46,7 +46,7 @@ OUTPUT_DIR = BILLING_DIR / "output"
 
 # GitLab API
 GITLAB_GRAPHQL_URL = os.environ.get("GITLAB_GRAPHQL_URL", "https://gitlab.com/api/graphql")
-GITLAB_PROJECT_PATH = os.environ.get("GITLAB_PROJECT_PATH", "wolfram_laube/blauweiss_llc/irena")
+GITLAB_PROJECT_PATH = os.environ.get("GITLAB_PROJECT_PATH", "wolfram_laube/blauweiss_llc/clarissa")
 GITLAB_TOKEN = os.environ.get("GITLAB_TOKEN", "")
 
 
@@ -73,7 +73,7 @@ def fetch_time_entries_graphql(
     The GraphQL API correctly returns `spentAt` date, unlike the REST Notes API.
     
     Args:
-        project_path: GitLab project path (e.g., "wolfram_laube/blauweiss_llc/irena")
+        project_path: GitLab project path (e.g., "wolfram_laube/blauweiss_llc/clarissa")
         year: Year (e.g., 2026)
         month: Month (1-12)
         gitlab_label: Label to filter issues (e.g., "client:nemensis")
@@ -268,10 +268,11 @@ def generate_timesheet_typ(
         if len(descriptions) > 2:
             desc += f" (+{len(descriptions)-2} more)"
         # Escape quotes in description
-        desc = desc.replace('"', '\\"')
+        desc = desc.replace('"', '\"')
         daily_entries_parts.append(f'    "{day}": ({total_hours:.2f}, "{desc}"),')
     
-    daily_entries_str = "\n".join(daily_entries_parts) if daily_entries_parts else "    // No entries"
+    daily_entries_str = "
+".join(daily_entries_parts) if daily_entries_parts else "    // No entries"
     
     # Determine country from consultant or default
     country = "AT"  # Default
@@ -324,7 +325,8 @@ def generate_timesheet(
     gitlab_label = client_config.get("gitlab_label", f"client:{client_id}")
     gitlab_username = consultant_config.get("gitlab_username")
     
-    print(f"\n📋 Generating timesheet:")
+    print(f"
+📋 Generating timesheet:")
     print(f"   Client: {client_config['name']}")
     print(f"   Consultant: {consultant_config['name']} (@{gitlab_username})")
     print(f"   Period: {year}-{month:02d}")
@@ -402,7 +404,7 @@ Examples:
     
 Environment:
     GITLAB_TOKEN        GitLab Personal Access Token (required)
-    GITLAB_PROJECT_PATH Project path (default: wolfram_laube/blauweiss_llc/irena)
+    GITLAB_PROJECT_PATH Project path (default: wolfram_laube/blauweiss_llc/clarissa)
 """
     )
     parser.add_argument("--client", "-c", required=True, help="Client ID from clients.yaml")
@@ -466,13 +468,15 @@ Environment:
             generated.append(result)
     
     # Summary
-    print(f"\n{'='*50}")
+    print(f"
+{'='*50}")
     print(f"✅ Generated {len(generated)} timesheet(s)")
     for f in generated:
         print(f"   📄 {f.name}")
     
     if generated:
-        print(f"\nNext steps:")
+        print(f"
+Next steps:")
         print(f"   1. Review and get approvals")
         print(f"   2. Generate invoice:")
         print(f"      python generate_invoice.py --client {args.client} --period {args.period}")
