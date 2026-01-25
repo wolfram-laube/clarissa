@@ -9,7 +9,14 @@ DTEND;TZID=Europe/Vienna:20260121T220000
 DTSTAMP:20260117T153000Z
 UID:clarissa-benchmark-2026-01-17@blauweiss-edv.at
 SUMMARY:CLARISSA - Benchmark Results Discussion
-DESCRIPTION:Diskussion der GitLab Runner Benchmark-Ergebnisse\n\nAgenda:\n- Review der 12-Runner Matrix Performance\n- GCP K8s Konfiguration\n- Next Steps\n\nReport: https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/tree/main/docs/ci/benchmarks
+DESCRIPTION:Diskussion der GitLab Runner Benchmark-Ergebnisse
+
+Agenda:
+- Review der 12-Runner Matrix Performance
+- GCP K8s Konfiguration
+- Next Steps
+
+Report: https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/tree/main/docs/ci/benchmarks
 LOCATION:Remote / Online
 STATUS:CONFIRMED
 ORGANIZER;CN=Wolfram Laube:mailto:wolfram.laube@blauweiss-edv.at

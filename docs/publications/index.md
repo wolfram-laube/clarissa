@@ -16,8 +16,8 @@ Research publications related to the CLARISSA project.
 | Resource | Link |
 |----------|------|
 | **📥 Abstract (PDF)** | [Download](spe-europe-2026/CLARISSA_SPE_Abstract.pdf) |
-| **📄 Abstract (HTML)** | [View Online](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/conference/spe-europe-2026/abstract-corrected-v2.html) |
-| **📊 Diagrams** | [Mermaid Sources](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/tree/main/conference/spe-europe-2026/diagrams) |
+| **📄 Abstract (HTML)** | [View Online](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/blob/main/conference/spe-europe-2026/abstract-corrected-v2.html) |
+| **📊 Diagrams** | [Mermaid Sources](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/tree/main/conference/spe-europe-2026/diagrams) |
 
 **Authors:** Douglas Perschke (Stone Ridge Technology), Michal Matejka (Independent Consultant), Wolfram Laube (Independent Researcher)
 
@@ -31,21 +31,21 @@ Research publications related to the CLARISSA project.
 |----------|------|
 | **📥 Paper (PDF)** | [Download](ijacsa-2026/CLARISSA_Paper_IJACSA.pdf) |
 | **📝 Abstract** | [Read Abstract](ijacsa-2026/abstract.md) |
-| **📄 Paper (LaTeX)** | [View Source](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/conference/ijacsa-2026/CLARISSA_Paper_IJACSA.tex) |
+| **📄 Paper (LaTeX)** | [View Source](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/blob/main/conference/ijacsa-2026/CLARISSA_Paper_IJACSA.tex) |
 
 ### Figures
 
 | Figure | Description |
 |--------|-------------|
-| [Figure 1](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/raw/main/conference/ijacsa-2026/figures/CLARISSA_Figure1_Architecture.png) | System Architecture |
-| [Figure 2](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/raw/main/conference/ijacsa-2026/figures/CLARISSA_Figure2_NLP_Pipeline.png) | NLP Pipeline |
-| [Figure 3](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/raw/main/conference/ijacsa-2026/figures/CLARISSA_Figure3_DataMesh.png) | Data Mesh |
-| [Figure 4](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/raw/main/conference/ijacsa-2026/figures/CLARISSA_Figure4_Communication.png) | Communication Flow |
+| [Figure 1](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/raw/main/conference/ijacsa-2026/figures/CLARISSA_Figure1_Architecture.png) | System Architecture |
+| [Figure 2](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/raw/main/conference/ijacsa-2026/figures/CLARISSA_Figure2_NLP_Pipeline.png) | NLP Pipeline |
+| [Figure 3](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/raw/main/conference/ijacsa-2026/figures/CLARISSA_Figure3_DataMesh.png) | Data Mesh |
+| [Figure 4](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/raw/main/conference/ijacsa-2026/figures/CLARISSA_Figure4_Communication.png) | Communication Flow |
 
 ### Supplementary Materials
 
-- [Abstract (CFP submission)](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/raw/main/conference/ijacsa-2026/supplementary/CLARISSA_Abstract_CFP.pdf)
-- [Architecture Summary](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/raw/main/conference/ijacsa-2026/supplementary/CLARISSA_Architecture_Summary_Detailed.pdf)
+- [Abstract (CFP submission)](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/raw/main/conference/ijacsa-2026/supplementary/CLARISSA_Abstract_CFP.pdf)
+- [Architecture Summary](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/raw/main/conference/ijacsa-2026/supplementary/CLARISSA_Architecture_Summary_Detailed.pdf)
 
 ---
 
@@ -67,6 +67,6 @@ Research publications related to the CLARISSA project.
 
 ## 📁 Source Files
 
-All publication source files are in the [`conference/`](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/tree/main/conference) directory.
+All publication source files are in the [`conference/`](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/tree/main/conference) directory.
 
 <!-- rebuild -->

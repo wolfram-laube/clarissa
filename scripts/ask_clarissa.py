@@ -10,7 +10,7 @@ import urllib.request
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "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")
 
-IRENA_SYSTEM_PROMPT = """Du bist IRENA, eine erfahrene Reservoir Engineering Consultant.
+CLARISSA_SYSTEM_PROMPT = """Du bist CLARISSA, eine erfahrene Reservoir Engineering Consultant.
 
 Deine Expertise:
 - ECLIPSE Simulation (Keywords, Syntax, Best Practices)
@@ -29,27 +29,34 @@ Wenn du Code reviewst, zitiere konkrete Zeilen.
 """
 
 
-def ask_irena(question: str, context: str = "") -> str:
+def ask_clarissa(question: str, context: str = "") -> str:
     """
-    Ask IRENA (ChatGPT) a question and get immediate response.
+    Ask CLARISSA (ChatGPT) a question and get immediate response.
     
     Args:
         question: The question to ask
         context: Optional code/context to include
         
     Returns:
-        IRENA's response as string
+        CLARISSA's response as string
     """
     
     content = question
     if context:
-        content = f"{question}\n\n---\n\n**Context:**\n```\n{context}\n```"
+        content = f"{question}
+
+---
+
+**Context:**
+```
+{context}
+```"
     
     payload = {
         "model": "gpt-4o",
         "max_tokens": 4096,
         "messages": [
-            {"role": "system", "content": IRENA_SYSTEM_PROMPT},
+            {"role": "system", "content": CLARISSA_SYSTEM_PROMPT},
             {"role": "user", "content": content}
         ]
     }
@@ -74,4 +81,4 @@ def ask_irena(question: str, context: str = "") -> str:
 
 if __name__ == "__main__":
     # Test
-    print(ask_irena("Was ist der Unterschied zwischen AQUFETP und AQUCT?"))
+    print(ask_clarissa("Was ist der Unterschied zwischen AQUFETP und AQUCT?"))

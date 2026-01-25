@@ -237,8 +237,8 @@ mmdc -i diagram.mmd -o diagram.png -s 2 -b white
 
 | Resource | URL |
 |----------|-----|
-| Documentation | `https://wolfram-laube.gitlab.io/blauweiss-llc/irena/` |
-| Publications Index | `https://wolfram-laube.gitlab.io/blauweiss-llc/irena/publications/` |
+| Documentation | `https://wolfram-laube.gitlab.io/blauweiss-llc/clarissa/` |
+| Publications Index | `https://wolfram-laube.gitlab.io/blauweiss-llc/clarissa/publications/` |
 | IJACSA PDF | `.../publications/ijacsa-2026/CLARISSA_Paper_IJACSA.pdf` |
 | SPE PDF | `.../publications/spe-europe-2026/abstract-merged.pdf` |
 
@@ -312,7 +312,7 @@ curl -s --header "PRIVATE-TOKEN: $PAT" \
   "https://gitlab.com/api/v4/projects/77260390/pipelines?per_page=5"
 
 # Or use GitLab UI
-# https://gitlab.com/wolfram-laube/blauweiss-llc/irena/-/pipelines
+# https://gitlab.com/wolfram-laube/blauweiss-llc/clarissa/-/pipelines
 ```
 
 ### Common Issues

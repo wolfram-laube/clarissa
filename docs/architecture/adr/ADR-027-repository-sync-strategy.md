@@ -41,7 +41,7 @@ Implement **bidirectional synchronization** between GitLab and GitHub:
 │                                                                 │
 │   GitLab (primary)                    GitHub (mirror)           │
 │   gitlab.com/wolfram_laube/           github.com/wolfram-laube/ │
-│   blauweiss_llc/irena                 clarissa                  │
+│   blauweiss_llc/clarissa                 clarissa                  │
 │                                                                 │
 │        │                                   │                    │
 │        │◄──────── Push Mirror ────────────│                    │
@@ -98,7 +98,7 @@ jobs:
         env:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
         run: |
-          git remote add gitlab https://oauth2:${GITLAB_TOKEN}@gitlab.com/wolfram_laube/blauweiss_llc/irena.git
+          git remote add gitlab https://oauth2:${GITLAB_TOKEN}@gitlab.com/wolfram_laube/blauweiss_llc/clarissa.git
           BRANCH=${GITHUB_REF#refs/heads/}
           git push gitlab "$BRANCH" --force
           git push gitlab --tags --force 2>/dev/null || true
@@ -168,4 +168,4 @@ jobs:
 
 - [GitLab Push Mirroring Documentation](https://docs.gitlab.com/ee/user/project/repository/mirror/push.html)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [CLARISSA Tutorials - Git Workflow](https://irena-40cc50.gitlab.io/tutorials/#git-workflow-contributing-changes)
+- [CLARISSA Tutorials - Git Workflow](https://clarissa-40cc50.gitlab.io/tutorials/#git-workflow-contributing-changes)

@@ -59,8 +59,8 @@ conference/
 
 ```bash
 # Clone repo
-git clone git@gitlab.com:wolfram_laube/blauweiss_llc/irena.git
-cd irena
+git clone git@gitlab.com:wolfram_laube/blauweiss_llc/clarissa.git
+cd clarissa
 
 # Install LaTeX (Ubuntu/Debian)
 sudo apt install texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
@@ -222,7 +222,7 @@ Examples:
 
 | Resource | Link |
 |----------|------|
-| Paper (PDF) | [Download](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/raw/main/conference/ijacsa-2026/CLARISSA_Paper_IJACSA.pdf) |
-| LaTeX Source | [View](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/conference/ijacsa-2026/CLARISSA_Paper_IJACSA.tex) |
-| Figures | [Browse](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/tree/main/conference/ijacsa-2026/figures) |
-| Abstract | [Read](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/conference/spe-europe-2026/canonical/full-paper.md) |
+| Paper (PDF) | [Download](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/raw/main/conference/ijacsa-2026/CLARISSA_Paper_IJACSA.pdf) |
+| LaTeX Source | [View](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/blob/main/conference/ijacsa-2026/CLARISSA_Paper_IJACSA.tex) |
+| Figures | [Browse](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/tree/main/conference/ijacsa-2026/figures) |
+| Abstract | [Read](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/blob/main/conference/spe-europe-2026/canonical/full-paper.md) |

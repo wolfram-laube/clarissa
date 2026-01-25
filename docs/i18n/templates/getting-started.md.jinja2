@@ -52,11 +52,11 @@
 
 ```bash
 # Via HTTPS
-git clone https://gitlab.com/wolfram_laube/blauweiss_llc/irena.git clarissa
+git clone https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa.git clarissa
 cd clarissa
 
 # {{ t.getting_started.clone.or_ssh }}
-git clone git@gitlab.com:wolfram_laube/blauweiss_llc/irena.git clarissa
+git clone git@gitlab.com:wolfram_laube/blauweiss_llc/clarissa.git clarissa
 cd clarissa
 ```
 
@@ -80,7 +80,7 @@ clarissa/
 # {{ t.getting_started.install.create_venv }}
 python3 -m venv venv
 source venv/bin/activate  # Linux/Mac
-# {{ t.getting_started.common.or }}: venv\Scripts\activate  # Windows
+# {{ t.getting_started.common.or }}: venv\Scriptsctivate  # Windows
 
 # {{ t.getting_started.install.install_deps }}
 pip install -e ".[dev]"
@@ -146,7 +146,7 @@ Push → Build → Test → Deploy
 
 ### {{ t.getting_started.pipeline.view_status }}
 
-1. {{ t.getting_started.common.go_to }}: https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/pipelines
+1. {{ t.getting_started.common.go_to }}: https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/pipelines
 2. {{ t.getting_started.pipeline.green }} ✅ = {{ t.getting_started.pipeline.all_ok }}, {{ t.getting_started.pipeline.red }} ❌ = {{ t.getting_started.common.error }}
 
 ### {{ t.getting_started.pipeline.trigger_manual }}
@@ -273,7 +273,7 @@ kubectl port-forward svc/clarissa 8080:80 -n clarissa
 
 ### {{ t.getting_started.verify.pipeline }}
 
-1. {{ t.getting_started.common.go_to }}: https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/pipelines
+1. {{ t.getting_started.common.go_to }}: https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/pipelines
 2. {{ t.getting_started.verify.last_green }} ✅
 3. {{ t.getting_started.verify.on_error }}: {{ t.getting_started.verify.click_red }} → {{ t.getting_started.verify.read_logs }}
 

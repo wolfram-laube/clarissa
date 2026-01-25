@@ -207,7 +207,7 @@ Milestones repräsentieren Release-Versionen:
 
 ## Issue Board
 
-Das [Kanban Board](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/boards) visualisiert den Workflow:
+Das [Kanban Board](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/boards) visualisiert den Workflow:
 
 ```
 ┌──────────┬──────────┬─────────────┬──────────┬──────────┐
@@ -292,10 +292,10 @@ Im Commit-Body oder MR-Description:
 
 | Link | Beschreibung |
 |------|--------------|
-| [Issue Board](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/boards) | Kanban Board |
-| [All Issues](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues) | Issue-Liste |
-| [Merge Requests](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/merge_requests) | Offene MRs |
-| [Pipelines](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/pipelines) | CI/CD Status |
+| [Issue Board](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/boards) | Kanban Board |
+| [All Issues](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/issues) | Issue-Liste |
+| [Merge Requests](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/merge_requests) | Offene MRs |
+| [Pipelines](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/pipelines) | CI/CD Status |
 | [ADR-001](docs/architecture/decisions/ADR-001_GitLab-PM-Workflow.md) | Workflow-Entscheidung |
 | [Cheatsheet](docs/guides/contributing/cheatsheet.md) | Quick Reference |
 

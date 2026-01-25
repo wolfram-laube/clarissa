@@ -6,7 +6,7 @@
 """
 Usage in Colab:
     
-    !wget -q https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/raw/main/docs/tutorials/colab_setup.py
+    !wget -q https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/raw/main/docs/tutorials/colab_setup.py
     exec(open('colab_setup.py').read())
     
 Or copy-paste the COLAB_SETUP_CELL below into your first cell.
@@ -22,7 +22,7 @@ import subprocess
 import sys
 
 def setup_clarissa_colab(
-    gitlab_repo="https://gitlab.com/wolfram_laube/blauweiss_llc/irena.git",
+    gitlab_repo="https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa.git",
     branch="main",
     tutorials_path="docs/tutorials",
     use_gpu=True
@@ -52,7 +52,7 @@ def setup_clarissa_colab(
         if gpu_info.returncode == 0:
             print("✅ GPU available")
             # Extract GPU name
-            for line in gpu_info.stdout.split('\\n'):
+            for line in gpu_info.stdout.split('\n'):
                 if 'Tesla' in line or 'A100' in line or 'V100' in line or 'T4' in line:
                     print(f"   {line.strip()}")
                     break
@@ -60,9 +60,9 @@ def setup_clarissa_colab(
             print("⚠️  No GPU detected - go to Runtime → Change runtime type → GPU")
     
     # 3. Clone repository
-    repo_name = "irena"
+    repo_name = "clarissa"
     if not os.path.exists(repo_name):
-        print(f"\\n📥 Cloning repository...")
+        print(f"\n📥 Cloning repository...")
         subprocess.run([
             'git', 'clone', '--depth', '1', '--branch', branch, gitlab_repo
         ], check=True)
@@ -77,7 +77,7 @@ def setup_clarissa_colab(
         print(f"✅ Working directory: {os.getcwd()}")
     
     # 5. Install Python dependencies
-    print(f"\\n📦 Installing dependencies...")
+    print(f"\n📦 Installing dependencies...")
     subprocess.run([
         sys.executable, '-m', 'pip', 'install', '-q',
         'numpy', 'pandas', 'matplotlib', 'seaborn',
@@ -95,17 +95,17 @@ def setup_clarissa_colab(
         'z3-solver'
     ], check=False)  # Don't fail if these don't install
     
-    print("\\n" + "=" * 50)
+    print("\n" + "=" * 50)
     print("✅ CLARISSA setup complete!")
     print("=" * 50)
     
     # 6. Print available notebooks
-    print("\\n📚 Available notebooks:")
+    print("\n📚 Available notebooks:")
     notebooks = sorted([f for f in os.listdir('notebooks') if f.endswith('.ipynb')])
     for nb in notebooks:
         print(f"   • {nb}")
     
-    print("\\n💡 Tip: Use the file browser (📁) to open notebooks")
+    print("\n💡 Tip: Use the file browser (📁) to open notebooks")
     print("💡 Tip: For GPU tasks, ensure Runtime → GPU is selected")
     
     return True
@@ -311,5 +311,6 @@ class MockOPMFlow:
 if __name__ == "__main__":
     print("CLARISSA Colab Setup Module")
     print("=" * 40)
-    print("\nCopy the COLAB_SETUP_CELL into your first Colab cell:")
+    print("
+Copy the COLAB_SETUP_CELL into your first Colab cell:")
     print(COLAB_SETUP_CELL[:500] + "...")
