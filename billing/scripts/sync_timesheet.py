@@ -275,7 +275,8 @@ def main():
     # Parse current timesheet
     current_entries = parse_timesheet_typ(typ_file)
     
-    print(f"\n📊 Period: {year}-{month:02d}")
+    print(f"
+📊 Period: {year}-{month:02d}")
     print(f"👤 Client: {client_name}")
     print(f"📝 Original entries: {len(original_entries)}")
     print(f"📝 Current entries: {len(current_entries)}")
@@ -284,31 +285,37 @@ def main():
     diffs = calculate_diff(original_entries, current_entries)
     
     if not diffs:
-        print("\n✅ No changes detected - timesheet matches GitLab")
+        print("
+✅ No changes detected - timesheet matches GitLab")
         if not args.force:
             return
         print("   (--force specified, continuing anyway)")
     
     # Show differences
-    print(f"\n📋 Changes detected: {len(diffs)}")
+    print(f"
+📋 Changes detected: {len(diffs)}")
     total_delta = 0
     for diff in diffs:
         delta_str = f"{diff['delta']:+.1f}h"
         print(f"   Tag {diff['day']:2d}: {delta_str:>7}  ({diff['action']}) {diff['description'][:40]}")
         total_delta += diff["delta"]
     
-    print(f"\n   Total Δ: {total_delta:+.1f}h")
+    print(f"
+   Total Δ: {total_delta:+.1f}h")
     
     if args.dry_run:
-        print("\n⚠️ Dry run - no changes made to GitLab")
+        print("
+⚠️ Dry run - no changes made to GitLab")
         return
     
     if not GITLAB_TOKEN:
-        print("\n❌ GITLAB_TOKEN not set - cannot sync to GitLab")
+        print("
+❌ GITLAB_TOKEN not set - cannot sync to GitLab")
         sys.exit(1)
     
     # Find or create correction issue
-    print("\n🔄 Syncing to GitLab...")
+    print("
+🔄 Syncing to GitLab...")
     issue_iid = find_or_create_correction_issue(GITLAB_PROJECT_ID, year, month, client_name)
     
     if not issue_iid:
@@ -324,13 +331,15 @@ def main():
         else:
             print(f"   ❌ Tag {diff['day']}: Failed to post")
     
-    print(f"\n✅ Synced {success_count}/{len(diffs)} corrections")
+    print(f"
+✅ Synced {success_count}/{len(diffs)} corrections")
     
     # Update sync file
     if success_count == len(diffs):
         update_sync_file(typ_file, current_entries)
     
-    print(f"\n🔗 View corrections: https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues/{issue_iid}")
+    print(f"
+🔗 View corrections: https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/issues/{issue_iid}")
 
 
 if __name__ == "__main__":
