@@ -5,7 +5,7 @@
 **New here? Start with these:**
 
 1. **[Workflow Slides](guides/contributing/index.html)** - Interactive 5-minute intro
-2. **[Issue Board](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/boards)** - Pick a task from the "Ready" column
+2. **[Issue Board](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/boards)** - Pick a task from the "Ready" column
 3. **[Project Management Guide](guides/project-management.md)** - Full reference
 
 ## Your First Contribution
@@ -33,7 +33,7 @@ git push -u origin 42-short-description
 
 | Step | Command/Action |
 |------|----------------|
-| Find work | [Issue Board](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/boards) → "Ready" column |
+| Find work | [Issue Board](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/boards) → "Ready" column |
 | Start work | `git checkout -b 42-description` |
 | Commit | `git commit -m "type: message #42"` |
 | Push | `git push -u origin 42-description` |
@@ -62,8 +62,8 @@ Full label reference: [Project Management Guide](guides/project-management.md#la
 
 ```bash
 # Clone and install
-git clone git@gitlab.com:wolfram_laube/blauweiss_llc/irena.git
-cd irena
+git clone git@gitlab.com:wolfram_laube/blauweiss_llc/clarissa.git
+cd clarissa
 pip install -e ".[dev]"
 
 # Run tests
