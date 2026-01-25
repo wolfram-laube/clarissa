@@ -85,10 +85,9 @@ resource "google_secret_manager_secret_version" "openai_api_key" {
   }
 }
 
-# Anthropic API Key (fallback provider - quality)
+# Anthropic API Key (fallback provider)
+# Always create the secret, but version only if key provided
 resource "google_secret_manager_secret" "anthropic_api_key" {
-  count = var.anthropic_api_key != "" ? 1 : 0
-
   secret_id = "anthropic-api-key"
   project   = var.gcp_project
 
@@ -100,10 +99,9 @@ resource "google_secret_manager_secret" "anthropic_api_key" {
 }
 
 resource "google_secret_manager_secret_version" "anthropic_api_key" {
-  count = var.anthropic_api_key != "" ? 1 : 0
-
-  secret      = google_secret_manager_secret.anthropic_api_key[0].id
-  secret_data = var.anthropic_api_key
+  secret      = google_secret_manager_secret.anthropic_api_key.id
+  # Use placeholder if not provided - app will handle empty gracefully
+  secret_data = var.anthropic_api_key != "" ? var.anthropic_api_key : "not-configured"
 
   lifecycle {
     ignore_changes = [secret_data]
@@ -139,11 +137,9 @@ resource "google_secret_manager_secret_iam_member" "api_openai_access" {
   member    = "serviceAccount:${google_service_account.clarissa_api.email}"
 }
 
-# Grant access to Anthropic secret (if configured)
+# Grant access to Anthropic secret
 resource "google_secret_manager_secret_iam_member" "api_anthropic_access" {
-  count = var.anthropic_api_key != "" ? 1 : 0
-
-  secret_id = google_secret_manager_secret.anthropic_api_key[0].id
+  secret_id = google_secret_manager_secret.anthropic_api_key.id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.clarissa_api.email}"
 }
@@ -234,16 +230,14 @@ resource "google_cloud_run_v2_service" "clarissa_api" {
         }
       }
 
-      # Anthropic API Key (from Secret Manager, if configured)
-      dynamic "env" {
-        for_each = var.anthropic_api_key != "" ? [1] : []
-        content {
-          name = "ANTHROPIC_API_KEY"
-          value_source {
-            secret_key_ref {
-              secret  = google_secret_manager_secret.anthropic_api_key[0].secret_id
-              version = "latest"
-            }
+      # Anthropic API Key (from Secret Manager)
+      # Will be "not-configured" if not provided - app handles this
+      env {
+        name = "ANTHROPIC_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.anthropic_api_key.secret_id
+            version = "latest"
           }
         }
       }
@@ -283,6 +277,7 @@ resource "google_cloud_run_v2_service" "clarissa_api" {
   depends_on = [
     google_project_service.required_apis,
     google_secret_manager_secret_version.openai_api_key,
+    google_secret_manager_secret_version.anthropic_api_key,
   ]
 }
 
