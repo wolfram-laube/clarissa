@@ -10,10 +10,16 @@
 # - OpenAI (primary - cost effective)
 # - Anthropic (fallback - quality)
 #
-# Usage:
+# State Management:
+# - GitLab-managed Terraform state (configured via CI)
+#
+# Usage (local):
 #   terraform init
 #   terraform plan
 #   terraform apply
+#
+# Usage (CI):
+#   Automatic on MR (plan) and manual on main (apply)
 
 terraform {
   required_version = ">= 1.5.0"
@@ -25,11 +31,17 @@ terraform {
     }
   }
 
-  # Remote state in GCS (uncomment after bucket exists)
-  # backend "gcs" {
-  #   bucket = "clarissa-terraform-state"
-  #   prefix = "gcp/state"
-  # }
+  # GitLab-managed Terraform state
+  # Configured via CI variables, or manually:
+  # terraform init \
+  #   -backend-config="address=https://gitlab.com/api/v4/projects/77260390/terraform/state/clarissa-gcp" \
+  #   -backend-config="lock_address=https://gitlab.com/api/v4/projects/77260390/terraform/state/clarissa-gcp/lock" \
+  #   -backend-config="unlock_address=https://gitlab.com/api/v4/projects/77260390/terraform/state/clarissa-gcp/lock" \
+  #   -backend-config="username=your-username" \
+  #   -backend-config="password=your-personal-access-token" \
+  #   -backend-config="lock_method=POST" \
+  #   -backend-config="unlock_method=DELETE"
+  backend "http" {}
 }
 
 # ============================================================
