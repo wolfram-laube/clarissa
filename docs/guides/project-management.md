@@ -136,7 +136,7 @@ v0.1 - Foundation
 
 ### Board Configuration
 
-The [CLARISSA Board](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/boards) has the following lists:
+The [CLARISSA Board](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/boards) has the following lists:
 
 | List | Scope | Filter |
 |------|-------|--------|

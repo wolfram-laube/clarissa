@@ -42,7 +42,7 @@ else:
 ### Registry Location
 
 ```
-registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/opm-flow
+registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/opm-flow
 ```
 
 ### Available Tags
@@ -137,7 +137,7 @@ sudo usermod -aG docker $USER
 **"Image not found"**
 ```bash
 # Pull from registry
-docker pull registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/opm-flow:latest
+docker pull registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/opm-flow:latest
 
 # Or build locally
 docker build -t opm-flow:latest src/clarissa/simulators/opm/

@@ -76,7 +76,7 @@ docs/tutorials/notebooks/15_OPM_Flow_Showcase.ipynb
 ## 🔗 Links
 
 - **Colab:** https://colab.research.google.com/github/wolfram-laube/clarissa/blob/main/docs/tutorials/notebooks/15_OPM_Flow_Showcase.ipynb
-- **GitLab:** https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/docs/tutorials/notebooks/15_OPM_Flow_Showcase.ipynb
+- **GitLab:** https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/blob/main/docs/tutorials/notebooks/15_OPM_Flow_Showcase.ipynb
 
 ---
 

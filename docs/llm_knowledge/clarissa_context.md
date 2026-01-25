@@ -68,8 +68,8 @@ Zwischen jeder Pipeline-Stage:
 
 ## Repository
 
-- **GitLab:** https://gitlab.com/wolfram_laube/blauweiss_llc/irena
-- **Docs:** https://wolfram_laube.gitlab.io/blauweiss_llc/irena/
+- **GitLab:** https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa
+- **Docs:** https://wolfram_laube.gitlab.io/blauweiss_llc/clarissa/
 
 ## Tech Stack
 

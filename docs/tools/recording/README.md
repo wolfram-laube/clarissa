@@ -23,7 +23,7 @@ tools/recording/
 
 ```bash
 # Clone repo (if not already)
-git clone https://gitlab.com/wolfram_laube/blauweiss_llc/irena.git ~/Projects/clarissa
+git clone https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa.git ~/Projects/clarissa
 
 # Run setup (auto-detects macOS/Linux)
 ~/Projects/clarissa/tools/recording/setup.sh
@@ -83,8 +83,8 @@ sudo dnf install ffmpeg pulseaudio-utils v4l-utils
 
 No install needed - works in Chrome/Edge:
 
-- [Screen Recorder](https://irena-40cc50.gitlab.io/demos/screen-recorder.html)
-- [Screen Recorder + PiP](https://irena-40cc50.gitlab.io/demos/screen-recorder-pip.html)
+- [Screen Recorder](https://clarissa-40cc50.gitlab.io/demos/screen-recorder.html)
+- [Screen Recorder + PiP](https://clarissa-40cc50.gitlab.io/demos/screen-recorder-pip.html)
 
 ## Update
 
@@ -93,4 +93,4 @@ cd ~/Projects/clarissa && git pull
 ```
 
 ---
-Part of [CLARISSA](https://gitlab.com/wolfram_laube/blauweiss_llc/irena)
+Part of [CLARISSA](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa)

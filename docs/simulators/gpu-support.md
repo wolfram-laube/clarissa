@@ -51,7 +51,7 @@ spec:
       containers:
         - name: opm-flow
           # GPU-enabled image (when available)
-          image: registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/opm-flow-gpu:v1.0.0
+          image: registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/opm-flow-gpu:v1.0.0
           command: ["flow"]
           args: 
             - "data/CASE.DATA"

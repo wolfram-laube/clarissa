@@ -2,7 +2,7 @@
 
 Since GitLab Free doesn't support native Epics, we use **Issues as Epics** with a structured pattern.
 
-> 💡 **Example:** [Epic #39 - CLARISSA Tutorial System](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues/39)
+> 💡 **Example:** [Epic #39 - CLARISSA Tutorial System](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/issues/39)
 
 ---
 
@@ -130,7 +130,9 @@ Labels: type::epic, priority::high, workflow::backlog
 
 ```bash
 # Each child issue references the epic
-Description: "Part of Epic #39\n\nRelates to #39"
+Description: "Part of Epic #39
+
+Relates to #39"
 ```
 
 ### 3. Track Progress
@@ -160,7 +162,7 @@ State: Closed
 
 ### [EPIC] CLARISSA Interactive Tutorial System
 
-**URL:** https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues/39
+**URL:** https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/issues/39
 
 **Child Issues:**
 
@@ -268,6 +270,6 @@ Use the template `.gitlab/issue_templates/epic.md`:
 
 ## References
 
-- [Epic #39 (Live Example)](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues/39)
+- [Epic #39 (Live Example)](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/issues/39)
 - [GitLab Premium Epics](https://docs.gitlab.com/ee/user/group/epics/)
 - [project-management.md](project-management.md)

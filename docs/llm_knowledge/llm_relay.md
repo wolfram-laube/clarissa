@@ -21,7 +21,7 @@ CLARISSA supports two LLM-to-LLM communication modes for collaborative developme
 │   └────┬─────┘   └──────┬───────┘   └───────────────┘        │
 │        ▼                ▼                                      │
 │   ┌──────────┐   ┌──────────────┐                             │
-│   │  IRENA   │   │    IRENA     │                             │
+│   │  CLARISSA   │   │    CLARISSA     │                             │
 │   │ (GPT-4o) │   │   (Claude)   │                             │
 │   └──────────┘   └──────────────┘                             │
 │                                                                 │
@@ -30,7 +30,7 @@ CLARISSA supports two LLM-to-LLM communication modes for collaborative developme
 
 ## Option 1: OpenAI Relay (relay.py)
 
-Uses ChatGPT/GPT-4o as IRENA consultant.
+Uses ChatGPT/GPT-4o as CLARISSA consultant.
 
 **Pros:**
 - Different model perspective (diversity)
@@ -48,7 +48,7 @@ python scripts/relay.py --process
 
 ## Option 2: Claude Relay (claude_relay.py)
 
-Uses another Claude instance as IRENA consultant.
+Uses another Claude instance as CLARISSA consultant.
 
 **Pros:**
 - Instant response (~5 seconds)
@@ -72,9 +72,9 @@ python scripts/claude_relay.py --process
 
 **As library:**
 ```python
-from scripts.claude_relay import ask_irena
+from scripts.claude_relay import ask_clarissa
 
-response = ask_irena(
+response = ask_clarissa(
     question="Review this entity extraction logic",
     context=code_snippet,
     include_repo=True
@@ -90,7 +90,7 @@ Both systems use the same handoff format in `handoffs/`:
 
 **Generated:** 2026-01-04 15:00
 **From:** Claude (Operator)
-**To:** IRENA (Consultant)
+**To:** CLARISSA (Consultant)
 
 ---
 
@@ -121,7 +121,7 @@ For automated relay on push, add to `.gitlab-ci.yml`:
 relay:
   stage: deploy
   rules:
-    - changes: [handoffs/handoff_to_irena.md]
+    - changes: [handoffs/handoff_to_clarissa.md]
   script:
     - pip install openai  # or nothing for claude_relay
     - python scripts/relay.py --process  # or claude_relay.py

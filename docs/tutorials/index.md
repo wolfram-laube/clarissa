@@ -10,7 +10,7 @@ Interactive Jupyter notebooks that teach you how to build conversational interfa
 
 Full development environment with PostgreSQL, OPM Flow, and all dependencies pre-configured.
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://gitlab.com/wolfram_laube/blauweiss_llc/irena)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa)
 
 ### Option B: Google Colab (Best for GPU Training)
 
@@ -42,13 +42,13 @@ Run the notebooks on your laptop or workstation with full control.
 
 ```bash
 # 1. Clone the repository
-git clone https://gitlab.com/wolfram_laube/blauweiss_llc/irena.git
-cd irena
+git clone https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa.git
+cd clarissa
 
 # 2. Create virtual environment
 python -m venv .venv
 source .venv/bin/activate  # Linux/Mac
-# .venv\Scripts\activate   # Windows
+# .venv\Scriptsctivate   # Windows
 
 # 3. Install dependencies
 pip install -r docs/tutorials/requirements.txt
@@ -84,7 +84,7 @@ The CLARISSA repository is **bidirectionally synchronized** between GitLab and G
 !!! info "Two Repositories, Fully Synced"
     | Repository | URL | Use Case |
     |------------|-----|----------|
-    | **GitLab** (primary) | `gitlab.com/wolfram_laube/blauweiss_llc/irena` | CI/CD, MRs, main development |
+    | **GitLab** (primary) | `gitlab.com/wolfram_laube/blauweiss_llc/clarissa` | CI/CD, MRs, main development |
     | **GitHub** (mirror) | `github.com/wolfram-laube/clarissa` | Colab notebooks, external collaboration |
     
     Both repos stay in sync automatically. Push to whichever you cloned from.
@@ -93,8 +93,8 @@ The CLARISSA repository is **bidirectionally synchronized** between GitLab and G
 
 ```bash
 # Option A: Clone from GitLab
-git clone https://gitlab.com/wolfram_laube/blauweiss_llc/irena.git
-cd irena
+git clone https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa.git
+cd clarissa
 
 # Option B: Clone from GitHub (for Colab users)
 git clone https://github.com/wolfram-laube/clarissa.git
@@ -129,8 +129,8 @@ git push origin feature/my-improvement
 
 | If you pushed to... | Create MR/PR on... | Link |
 |---------------------|-------------------|------|
-| GitLab | GitLab | [Create MR](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/merge_requests/new) |
-| GitHub | GitLab (preferred) or GitHub | [GitLab MR](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/merge_requests/new) |
+| GitLab | GitLab | [Create MR](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/merge_requests/new) |
+| GitHub | GitLab (preferred) or GitHub | [GitLab MR](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/merge_requests/new) |
 
 !!! tip "GitLab for Code Review"
     Even if you work on GitHub, create the Merge Request on **GitLab** where CI/CD pipelines run. Your GitHub branch will be synced to GitLab automatically.
@@ -145,7 +145,7 @@ git push origin feature/my-improvement
 │   GitLab                              GitHub                    │
 │   ══════                              ══════                    │
 │   wolfram_laube/                      wolfram-laube/            │
-│   blauweiss_llc/irena                 clarissa                  │
+│   blauweiss_llc/clarissa                 clarissa                  │
 │                                                                 │
 │        │                                   │                    │
 │        │◄───────── Push Mirror ───────────│                    │
@@ -359,5 +359,3 @@ drive.mount('/content/drive')
 **Featured Demo:** Build a 5-spot waterflood model, run OPM Flow simulation, analyze production curves, and perform sensitivity analysis - all in one notebook!
 
 ---
-
-

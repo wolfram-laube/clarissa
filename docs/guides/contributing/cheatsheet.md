@@ -108,10 +108,10 @@ chore: bump dependencies
 
 | Resource | URL |
 |----------|-----|
-| Board | [gitlab.com/.../boards](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/boards) |
-| Issues | [gitlab.com/.../issues](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues) |
-| MRs | [gitlab.com/.../merge_requests](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/merge_requests) |
-| Pipelines | [gitlab.com/.../pipelines](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/pipelines) |
+| Board | [gitlab.com/.../boards](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/boards) |
+| Issues | [gitlab.com/.../issues](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/issues) |
+| MRs | [gitlab.com/.../merge_requests](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/merge_requests) |
+| Pipelines | [gitlab.com/.../pipelines](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/pipelines) |
 
 ---
 

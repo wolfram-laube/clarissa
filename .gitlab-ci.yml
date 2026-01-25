@@ -655,7 +655,7 @@ rebuild_docs:
     expire_in: 1 day
   environment:
     name: docs-preview
-    url: https://wolfram_laube.gitlab.io/blauweiss_llc/irena/
+    url: https://wolfram_laube.gitlab.io/blauweiss_llc/clarissa/
 
 rebuild_opm_image:
   stage: build
@@ -931,7 +931,7 @@ generate_timesheets:
   tags:
     - docker-any
   variables:
-    GITLAB_PROJECT_PATH: "wolfram_laube/blauweiss_llc/irena"
+    GITLAB_PROJECT_PATH: "wolfram_laube/blauweiss_llc/clarissa"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $BILLING_RUN == "true"'
       when: on_success
@@ -1076,33 +1076,33 @@ billing_email:
 
 
 # =============================================================================
-# LLM Relay: Claude ↔ IRENA Communication
+# LLM Relay: Claude ↔ CLARISSA Communication
 # =============================================================================
 
-relay:irena:
+relay:clarissa:
   stage: automation
   image: python:3.11-slim
   tags:
     - docker-any
   rules:
     - changes:
-        - handoffs/handoff_to_irena.md
+        - handoffs/handoff_to_clarissa.md
       when: always
     - when: never
   before_script:
     - pip install openai requests --quiet
     - apt-get update && apt-get install -y curl --quiet
   script:
-    - echo "📥 Processing handoff to IRENA..."
+    - echo "📥 Processing handoff to CLARISSA..."
     - python scripts/relay.py --process
     - |
       if [ -f handoffs/handoff_to_claude.md ]; then
-        echo "📤 Pushing IRENA response..."
+        echo "📤 Pushing CLARISSA response..."
         ENCODED_CONTENT=$(base64 -w 0 handoffs/handoff_to_claude.md)
         curl --silent --request PUT \
           --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
           --header "Content-Type: application/json" \
-          --data "{\"branch\": \"main\", \"encoding\": \"base64\", \"content\": \"${ENCODED_CONTENT}\", \"commit_message\": \"feat(relay): IRENA auto-response [skip ci]\"}" \
+          --data "{\"branch\": \"main\", \"encoding\": \"base64\", \"content\": \"${ENCODED_CONTENT}\", \"commit_message\": \"feat(relay): CLARISSA auto-response [skip ci]\"}" \
           "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/repository/files/handoffs%2Fhandoff_to_claude.md"
         echo "✅ Response pushed!"
       else

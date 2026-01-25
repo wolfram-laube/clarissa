@@ -463,7 +463,7 @@ module "clarissa_api" {
   service_name = "clarissa-api-dev"
   region       = var.region
   
-  image = "registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:latest"
+  image = "registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/api:latest"
   
   min_instances = 0  # Scale to zero
   max_instances = 2
@@ -494,7 +494,7 @@ module "clarissa_worker" {
   service_name = "clarissa-worker-dev"
   region       = var.region
   
-  image = "registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/worker:latest"
+  image = "registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/worker:latest"
   
   min_instances = 0
   max_instances = 5
@@ -622,10 +622,10 @@ build:api:
   extends: .docker
   stage: build
   script:
-    - docker build -t registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:${CI_COMMIT_SHA} -f docker/api/Dockerfile .
-    - docker push registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:${CI_COMMIT_SHA}
-    - docker tag registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:${CI_COMMIT_SHA} registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:latest
-    - docker push registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:latest
+    - docker build -t registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/api:${CI_COMMIT_SHA} -f docker/api/Dockerfile .
+    - docker push registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/api:${CI_COMMIT_SHA}
+    - docker tag registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/api:${CI_COMMIT_SHA} registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/api:latest
+    - docker push registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/api:latest
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
@@ -636,10 +636,10 @@ build:worker:
   extends: .docker
   stage: build
   script:
-    - docker build -t registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/worker:${CI_COMMIT_SHA} -f docker/worker/Dockerfile .
-    - docker push registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/worker:${CI_COMMIT_SHA}
-    - docker tag registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/worker:${CI_COMMIT_SHA} registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/worker:latest
-    - docker push registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/worker:latest
+    - docker build -t registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/worker:${CI_COMMIT_SHA} -f docker/worker/Dockerfile .
+    - docker push registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/worker:${CI_COMMIT_SHA}
+    - docker tag registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/worker:${CI_COMMIT_SHA} registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/worker:latest
+    - docker push registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/worker:latest
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
@@ -653,8 +653,8 @@ deploy:dev:
   stage: deploy
   script:
     - echo ${GCP_SERVICE_KEY} | gcloud auth activate-service-account --key-file=-
-    - gcloud run services update clarissa-api-dev --image registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:${CI_COMMIT_SHA} --region europe-west1 --project ${GCP_PROJECT}
-    - gcloud run services update clarissa-worker-dev --image registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/worker:${CI_COMMIT_SHA} --region europe-west1 --project ${GCP_PROJECT}
+    - gcloud run services update clarissa-api-dev --image registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/api:${CI_COMMIT_SHA} --region europe-west1 --project ${GCP_PROJECT}
+    - gcloud run services update clarissa-worker-dev --image registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/worker:${CI_COMMIT_SHA} --region europe-west1 --project ${GCP_PROJECT}
   needs:
     - build:api
     - build:worker
@@ -805,7 +805,7 @@ gcloud services enable \
   --project=myk8sproject-207017
 
 # 3. GitLab Container Registry
-# Already available at: registry.gitlab.com/wolfram_laube/blauweiss_llc/irena
+# Already available at: registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa
 # No setup needed - GitLab provides this automatically!
 
 # 4. Initialize Terraform
@@ -1023,15 +1023,15 @@ def get_firestore():
 
 ```bash
 # 1. Clone & Setup
-git clone git@gitlab.com:wolfram_laube/blauweiss_llc/irena.git
-cd irena
+git clone git@gitlab.com:wolfram_laube/blauweiss_llc/clarissa.git
+cd clarissa
 cp .env.example .env
 
 # 2. Start all services
 docker-compose up -d
 
 # 3. Pull local LLM model (first time only, ~2GB)
-docker exec -it irena-ollama-1 ollama pull llama3.2:3b
+docker exec -it clarissa-ollama-1 ollama pull llama3.2:3b
 
 # 4. Verify
 curl http://localhost:8000/health

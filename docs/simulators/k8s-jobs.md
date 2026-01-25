@@ -90,7 +90,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: opm-flow
-          image: registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/opm-flow:v1.0.0
+          image: registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/opm-flow:v1.0.0
           command: ["flow"]
           args: ["data/CASE.DATA", "--output-dir=output/"]
           volumeMounts:

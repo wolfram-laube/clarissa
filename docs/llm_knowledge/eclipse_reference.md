@@ -167,7 +167,7 @@ pressure_kpa = pressure_psi * 6.89476
 6. **Grid indices must be valid** (within DIMENS)
 ---
 
-## Group Operations (IRENA Contribution)
+## Group Operations (CLARISSA Contribution)
 
 ### GRUPTREE - Group Hierarchy Definition
 

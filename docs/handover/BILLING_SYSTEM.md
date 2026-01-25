@@ -23,7 +23,7 @@ Das Billing-System ist **funktionsfähig und automatisiert**.
 ## 📁 Relevante Dateien im Repo
 
 ```
-gitlab.com/wolfram_laube/blauweiss_llc/irena (Project ID: 77260390)
+gitlab.com/wolfram_laube/blauweiss_llc/clarissa (Project ID: 77260390)
 
 billing/
 ├── config/
@@ -69,7 +69,7 @@ Pipeline manuell starten mit Variables:
 Die GraphQL API gibt `spentAt` korrekt zurück (im Gegensatz zur REST Notes API):
 ```graphql
 query {
-  project(fullPath: "wolfram_laube/blauweiss_llc/irena") {
+  project(fullPath: "wolfram_laube/blauweiss_llc/clarissa") {
     issues(labelName: ["client:nemensis"]) {
       nodes {
         timelogs {
@@ -149,7 +149,7 @@ Scheduled Pipeline: 4094512
 ```bash
 # Timesheet generieren (lokal)
 export GITLAB_TOKEN="glpat-xxx"
-export GITLAB_PROJECT_PATH="wolfram_laube/blauweiss_llc/irena"
+export GITLAB_PROJECT_PATH="wolfram_laube/blauweiss_llc/clarissa"
 python billing/scripts/generate_timesheet.py --client nemensis --period 2026-01 --all-consultants
 
 # Rechnung generieren

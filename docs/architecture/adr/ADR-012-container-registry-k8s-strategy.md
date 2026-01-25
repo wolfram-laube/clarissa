@@ -27,11 +27,11 @@ concrete requirements emerge.
 
 ### 1. Container Registry: GitLab Container Registry
 
-Use GitLab's built-in Container Registry at `registry.gitlab.com/wolfram_laube/blauweiss_llc/irena`.
+Use GitLab's built-in Container Registry at `registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa`.
 
 **Image naming convention:**
 ```
-registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/opm-flow:<tag>
+registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/opm-flow:<tag>
 ```
 
 **Tagging strategy:**
@@ -150,7 +150,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: opm-flow
-          image: registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/opm-flow:v1.0.0
+          image: registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/opm-flow:v1.0.0
           command: ["flow"]
           args: ["data/CASE.DATA", "--output-dir=output/"]
           volumeMounts:
@@ -180,7 +180,7 @@ spec:
 Update `OPMFlowAdapter` to use the registry image by default:
 
 ```python
-DEFAULT_IMAGE = "registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/opm-flow:latest"
+DEFAULT_IMAGE = "registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/opm-flow:latest"
 ```
 
 Allow override via environment variable `CLARISSA_OPM_IMAGE` for flexibility:
