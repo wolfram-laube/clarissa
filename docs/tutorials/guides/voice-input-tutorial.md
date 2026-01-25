@@ -244,3 +244,29 @@ class VoiceResponse:
 ---
 
 *Part of CLARISSA - Conversational Language Agent for Reservoir Simulation*
+
+---
+
+## 🎬 Recording Demo Videos
+
+Need to record a demo of the voice interface? We have macOS tools for that!
+
+### Quick Setup
+
+```bash
+# Install recording tools
+./tools/recording/setup-recording-tools.sh
+
+# Record a 45-second demo
+record-c-timed.sh 45
+```
+
+### More Options
+
+See the [Demo Recording Tools](../../tools/recording/README.md) for:
+
+- **AppleScript/QuickTime** - Native macOS quality
+- **ffmpeg Toggle** - Flexible start/stop
+- **ffmpeg Timed** - Fire & forget
+
+Videos are saved to `~/Movies/CLARISSA-Demos/`.
