@@ -91,6 +91,7 @@ nav:
 
   - "🎮 Demos":
     - "🎤 Voice Input Demo": demos/voice-demo.html
+    - "🎬 Screen Recorder": demos/screen-recorder.html
 
   - Architecture:
     - Overview: architecture/README.md
