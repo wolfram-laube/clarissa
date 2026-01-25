@@ -85,7 +85,7 @@ class Settings(BaseSettings):
     @property
     def use_firestore_emulator(self) -> bool:
         """Check if Firestore emulator should be used."""
-        return self.firestore_emulator_host is not None
+        return bool(self.firestore_emulator_host)
 
 
 @lru_cache
