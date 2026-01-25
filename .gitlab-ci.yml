@@ -520,7 +520,8 @@ mr_comment_on_failure:
 pages:
   stage: deploy
   image: python:3.11
-  # Using GitLab shared runners (no tags)
+  tags:
+    - saas-linux-small-amd64
   needs: []
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
