@@ -63,7 +63,7 @@ variable "anthropic_model" {
 variable "api_image" {
   description = "Docker image for CLARISSA API"
   type        = string
-  default     = "gcr.io/cloudrun/hello"
+  default     = "europe-west1-docker.pkg.dev/myk8sproject-207017/gitlab-remote/wolfram_laube/blauweiss_llc/clarissa/api:latest"
 }
 
 variable "api_min_instances" {
