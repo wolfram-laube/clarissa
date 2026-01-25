@@ -1,107 +1,95 @@
 #!/bin/bash
-# CLARISSA Recording Tools - Complete Installer
-# Installs all tools to ~/bin/clarissa/
+# CLARISSA Recording Tools - Repo-Based Setup
+# Clones repo and sets up PATH for all platforms (macOS/Linux)
 
 set -e
 
-INSTALL_DIR="$HOME/bin/clarissa"
+# Default install location (can be overridden)
+REPO_DIR="${CLARISSA_HOME:-$HOME/Projects/clarissa}"
 REPO_URL="https://gitlab.com/wolfram_laube/blauweiss_llc/irena.git"
 
-echo "🎬 CLARISSA Recording Tools Installer"
-echo "======================================"
-echo ""
-echo "Installing to: $INSTALL_DIR"
+echo "🎬 CLARISSA Tools Setup"
+echo "======================="
 echo ""
 
-# Create directory
-mkdir -p "$INSTALL_DIR"
+# Detect OS
+OS="$(uname -s)"
+case "$OS" in
+    Darwin) PLATFORM="macOS" ;;
+    Linux)  PLATFORM="Linux" ;;
+    *)      PLATFORM="Unknown" ;;
+esac
+echo "Platform: $PLATFORM"
 
-# Clone only what we need (sparse checkout)
-TEMP_DIR=$(mktemp -d)
-cd "$TEMP_DIR"
-
-echo "📥 Downloading tools..."
-git clone --depth 1 --filter=blob:none --sparse "$REPO_URL" clarissa 2>/dev/null
-cd clarissa
-git sparse-checkout set tools/recording 2>/dev/null
-
-# Copy scripts
-echo "📦 Installing scripts..."
-cp tools/recording/*.sh "$INSTALL_DIR/" 2>/dev/null || true
-
-# Make executable
-chmod +x "$INSTALL_DIR"/*.sh
-
-# Cleanup
-cd /
-rm -rf "$TEMP_DIR"
-
-# Create convenient symlinks in ~/bin for direct access
-mkdir -p "$HOME/bin"
-for script in "$INSTALL_DIR"/*.sh; do
-    name=$(basename "$script" .sh)
-    ln -sf "$script" "$HOME/bin/$name" 2>/dev/null || true
-done
-
-# Add to PATH if needed
-if [[ ":$PATH:" != *":$HOME/bin:"* ]]; then
-    SHELL_RC="$HOME/.zshrc"
-    [[ -f "$HOME/.bashrc" ]] && SHELL_RC="$HOME/.bashrc"
-    
-    if ! grep -q 'export PATH="$HOME/bin:$PATH"' "$SHELL_RC" 2>/dev/null; then
-        echo "" >> "$SHELL_RC"
-        echo '# CLARISSA tools' >> "$SHELL_RC"
-        echo 'export PATH="$HOME/bin:$PATH"' >> "$SHELL_RC"
-        echo "✅ Added ~/bin to PATH in $SHELL_RC"
-        echo "   Run: source $SHELL_RC"
-    fi
+# Check if repo already exists
+if [ -d "$REPO_DIR/.git" ]; then
+    echo "📂 Repo exists at $REPO_DIR"
+    echo "   Updating..."
+    cd "$REPO_DIR"
+    git pull --ff-only 2>/dev/null || echo "   (manual merge needed)"
+else
+    echo "📥 Cloning CLARISSA repository..."
+    mkdir -p "$(dirname "$REPO_DIR")"
+    git clone "$REPO_URL" "$REPO_DIR"
 fi
 
-# Create a handy README
-cat > "$INSTALL_DIR/README.txt" << 'README'
-🎬 CLARISSA Recording Tools
-============================
+# Make scripts executable
+chmod +x "$REPO_DIR/tools/recording/"*.sh 2>/dev/null || true
 
-Installed scripts:
-  record-a-applescript.sh  - QuickTime recording via AppleScript
-  record-b-ffmpeg.sh       - ffmpeg with start/stop toggle
-  record-c-timed.sh        - ffmpeg with timer (e.g., 60 seconds)
-  record-pip.sh            - Screen + webcam picture-in-picture
-  record-demo.sh           - Interactive menu for all options
+# Detect shell config
+if [ -n "$ZSH_VERSION" ] || [ -f "$HOME/.zshrc" ]; then
+    SHELL_RC="$HOME/.zshrc"
+elif [ -f "$HOME/.bashrc" ]; then
+    SHELL_RC="$HOME/.bashrc"
+else
+    SHELL_RC="$HOME/.profile"
+fi
 
-Quick usage:
-  record-pip.sh start 60        # 60 sec with camera PiP
-  record-c-timed.sh 45          # 45 sec screen only
-  record-demo.sh                # Interactive menu
+# Add to PATH
+TOOLS_PATH="$REPO_DIR/tools/recording"
+PATH_LINE="export PATH=\"$TOOLS_PATH:\$PATH\""
 
-Output folder: ~/Movies/CLARISSA-Demos/
+if ! grep -q "clarissa.*tools/recording" "$SHELL_RC" 2>/dev/null; then
+    echo "" >> "$SHELL_RC"
+    echo "# CLARISSA Recording Tools" >> "$SHELL_RC"
+    echo "$PATH_LINE" >> "$SHELL_RC"
+    echo "✅ Added to PATH in $SHELL_RC"
+else
+    echo "✅ PATH already configured"
+fi
 
-Browser alternatives (no install needed):
-  https://irena-40cc50.gitlab.io/demos/screen-recorder.html
-  https://irena-40cc50.gitlab.io/demos/screen-recorder-pip.html
+# Create output directory
+mkdir -p "$HOME/Movies/CLARISSA-Demos" 2>/dev/null || mkdir -p "$HOME/Videos/CLARISSA-Demos"
 
-Update tools:
-  curl -sL https://raw.githubusercontent.com/wolfram-laube/clarissa/main/tools/recording/setup-clarissa-tools.sh | bash
-
-README
-
+# Platform-specific notes
 echo ""
-echo "✅ Installation complete!"
+echo "✅ Setup complete!"
 echo ""
-echo "📁 Installed to: $INSTALL_DIR"
-echo ""
-echo "Scripts available:"
-ls -1 "$INSTALL_DIR"/*.sh | while read f; do
-    echo "   $(basename $f .sh)"
-done
-echo ""
-echo "🚀 Quick start:"
-echo "   record-pip.sh start 60    # Record 60s with camera"
-echo "   record-c-timed.sh 30      # Record 30s screen only"
-echo "   record-demo.sh            # Interactive menu"
-echo ""
-echo "📂 Recordings saved to: ~/Movies/CLARISSA-Demos/"
+echo "📁 Repository: $REPO_DIR"
+echo "🔧 Tools:      $REPO_DIR/tools/recording/"
 echo ""
 
-# Open the install folder
-open "$INSTALL_DIR"
+if [ "$PLATFORM" = "macOS" ]; then
+    echo "📦 Install ffmpeg (if not already):"
+    echo "   brew install ffmpeg"
+    echo ""
+    OUTPUT_DIR="$HOME/Movies/CLARISSA-Demos"
+elif [ "$PLATFORM" = "Linux" ]; then
+    echo "📦 Install ffmpeg (if not already):"
+    echo "   sudo apt install ffmpeg   # Debian/Ubuntu"
+    echo "   sudo dnf install ffmpeg   # Fedora"
+    echo ""
+    OUTPUT_DIR="$HOME/Videos/CLARISSA-Demos"
+fi
+
+echo "🚀 Quick start (restart terminal or run: source $SHELL_RC)"
+echo ""
+echo "   record-pip.sh start 60     # 60s with camera PiP"
+echo "   record-c-timed.sh 30       # 30s screen only"
+echo "   record-demo.sh             # Interactive menu"
+echo ""
+echo "📂 Recordings saved to: $OUTPUT_DIR"
+echo ""
+echo "🔄 To update tools later:"
+echo "   cd $REPO_DIR && git pull"
+echo ""
