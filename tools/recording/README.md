@@ -4,14 +4,25 @@ Screen recording utilities for creating CLARISSA demo videos on macOS.
 
 ## Quick Install
 
+**Option 1: Download & Run (Recommended)**
+
+1. Download the script: [setup-recording-tools.sh](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/tools/recording/setup-recording-tools.sh?ref_type=heads)
+2. Run it:
 ```bash
-# From project root:
-./tools/recording/setup-recording-tools.sh
+chmod +x ~/Downloads/setup-recording-tools.sh
+~/Downloads/setup-recording-tools.sh
 ```
 
-Or manually:
+**Option 2: Clone & Run**
 ```bash
-curl -sL https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/raw/main/tools/recording/setup-recording-tools.sh | bash
+git clone --depth 1 https://gitlab.com/wolfram_laube/blauweiss_llc/irena.git /tmp/clarissa
+bash /tmp/clarissa/tools/recording/setup-recording-tools.sh
+rm -rf /tmp/clarissa
+```
+
+**Option 3: From Project Root (if you have the repo)**
+```bash
+./tools/recording/setup-recording-tools.sh
 ```
 
 ## Three Recording Methods
@@ -62,6 +73,10 @@ record-c-timed.sh 45
 # 4. Video auto-saves to ~/Movies/CLARISSA-Demos/
 ```
 
+## Browser-Based Alternative
+
+Don't want to install anything? Use the [🎬 Screen Recorder](../demos/screen-recorder.html) - works directly in Chrome/Edge!
+
 ## Prerequisites
 
 For Options B & C:
@@ -101,4 +116,4 @@ record-b-ffmpeg.sh devices
 
 ---
 
-Part of [CLARISSA](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa) - Conversational Language Agent for Reservoir Simulation
+Part of [CLARISSA](https://gitlab.com/wolfram_laube/blauweiss_llc/irena) - Conversational Language Agent for Reservoir Simulation
