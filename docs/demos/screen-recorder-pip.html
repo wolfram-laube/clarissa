@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 CLARISSA Screen Recorder with PiP Camera</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 10px; font-size: 2em; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
+        
+        .preview-container {
+            position: relative;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            aspect-ratio: 16/9;
+        }
+        #screenPreview {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        #cameraPreview {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 150px;
+            border-radius: 12px;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            object-fit: cover;
+            cursor: move;
+            z-index: 10;
+        }
+        #cameraPreview.hidden { display: none; }
+        #cameraPreview.dragging { opacity: 0.8; }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        button:hover { transform: translateY(-2px); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
+        .btn-primary { background: #e94560; color: white; }
+        .btn-primary:hover:not(:disabled) { background: #ff6b6b; }
+        .btn-secondary { background: #0f3460; color: white; }
+        .btn-secondary:hover:not(:disabled) { background: #1a4a7a; }
+        .btn-success { background: #00d26a; color: white; }
+        .btn-warning { background: #ffc107; color: #000; }
+        
+        .options {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .options h3 { margin-bottom: 15px; font-size: 1.1em; }
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .option-row label { min-width: 120px; color: #aaa; }
+        select, input[type="range"] {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background: #1a1a2e;
+            color: #fff;
+            font-size: 14px;
+        }
+        select { min-width: 200px; }
+        input[type="range"] { width: 150px; }
+        
+        .pip-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .pip-size-btn {
+            padding: 5px 10px;
+            font-size: 12px;
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .pip-size-btn.active { background: #e94560; border-color: #e94560; }
+        
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .status.recording {
+            background: rgba(233, 69, 96, 0.2);
+            border: 1px solid #e94560;
+            animation: pulse 1.5s infinite;
+        }
+        .status.ready { background: rgba(0, 210, 106, 0.2); border: 1px solid #00d26a; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .timer {
+            font-size: 2em;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .recordings {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .recordings h3 { margin-bottom: 15px; }
+        .recording-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .recording-item a { color: #00d26a; text-decoration: none; }
+        
+        .corner-indicator {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 2px dashed #666;
+            border-radius: 6px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .corner-indicator.visible { opacity: 1; }
+        .corner-tl { top: 20px; left: 20px; }
+        .corner-tr { top: 20px; right: 20px; }
+        .corner-bl { bottom: 20px; left: 20px; }
+        .corner-br { bottom: 20px; right: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Screen Recorder + PiP Camera</h1>
+        <p class="subtitle">Record your screen with picture-in-picture webcam overlay</p>
+        
+        <div class="preview-container" id="previewContainer">
+            <video id="screenPreview" autoplay muted playsinline></video>
+            <video id="cameraPreview" autoplay muted playsinline class="hidden"></video>
+            <div class="corner-indicator corner-tl"></div>
+            <div class="corner-indicator corner-tr"></div>
+            <div class="corner-indicator corner-bl"></div>
+            <div class="corner-indicator corner-br"></div>
+        </div>
+        
+        <div id="status" class="status ready">
+            Ready to record
+        </div>
+        <div id="timer" class="timer" style="display:none">00:00</div>
+        
+        <div class="controls">
+            <button id="startBtn" class="btn-primary" onclick="startCapture()">
+                📺 Select Screen
+            </button>
+            <button id="cameraBtn" class="btn-secondary" onclick="toggleCamera()">
+                📷 Add Camera
+            </button>
+            <button id="recordBtn" class="btn-success" onclick="toggleRecording()" disabled>
+                ⏺️ Start Recording
+            </button>
+        </div>
+        
+        <div class="options">
+            <h3>⚙️ Options</h3>
+            <div class="option-row">
+                <label>Camera Position:</label>
+                <div class="pip-controls">
+                    <button class="pip-size-btn" onclick="setPipPosition('br')" data-pos="br">↘️ Bottom Right</button>
+                    <button class="pip-size-btn" onclick="setPipPosition('bl')" data-pos="bl">↙️ Bottom Left</button>
+                    <button class="pip-size-btn" onclick="setPipPosition('tr')" data-pos="tr">↗️ Top Right</button>
+                    <button class="pip-size-btn" onclick="setPipPosition('tl')" data-pos="tl">↖️ Top Left</button>
+                </div>
+            </div>
+            <div class="option-row">
+                <label>Camera Size:</label>
+                <input type="range" id="pipSize" min="100" max="400" value="200" onchange="updatePipSize()">
+                <span id="pipSizeLabel">200px</span>
+            </div>
+            <div class="option-row">
+                <label>Border Radius:</label>
+                <input type="range" id="pipRadius" min="0" max="50" value="12" onchange="updatePipRadius()">
+                <span id="pipRadiusLabel">12px</span>
+            </div>
+            <div class="option-row">
+                <label>Audio Source:</label>
+                <select id="audioSource">
+                    <option value="mic">🎤 Microphone</option>
+                    <option value="system">🔊 System Audio (if available)</option>
+                    <option value="both">🎚️ Both</option>
+                    <option value="none">🔇 No Audio</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="recordings">
+            <h3>📁 Recordings</h3>
+            <div id="recordingsList">
+                <p style="color: #666;">No recordings yet. Start recording to create one!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let screenStream = null;
+        let cameraStream = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let isRecording = false;
+        let startTime = null;
+        let timerInterval = null;
+        let recordings = [];
+        
+        const screenPreview = document.getElementById('screenPreview');
+        const cameraPreview = document.getElementById('cameraPreview');
+        const previewContainer = document.getElementById('previewContainer');
+        
+        // Draggable PiP
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+        
+        cameraPreview.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            cameraPreview.classList.add('dragging');
+            const rect = cameraPreview.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            showCornerIndicators();
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const containerRect = previewContainer.getBoundingClientRect();
+            let x = e.clientX - containerRect.left - dragOffset.x;
+            let y = e.clientY - containerRect.top - dragOffset.y;
+            
+            // Constrain to container
+            x = Math.max(10, Math.min(x, containerRect.width - cameraPreview.offsetWidth - 10));
+            y = Math.max(10, Math.min(y, containerRect.height - cameraPreview.offsetHeight - 10));
+            
+            cameraPreview.style.left = x + 'px';
+            cameraPreview.style.top = y + 'px';
+            cameraPreview.style.right = 'auto';
+            cameraPreview.style.bottom = 'auto';
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                cameraPreview.classList.remove('dragging');
+                hideCornerIndicators();
+            }
+        });
+        
+        function showCornerIndicators() {
+            document.querySelectorAll('.corner-indicator').forEach(el => el.classList.add('visible'));
+        }
+        
+        function hideCornerIndicators() {
+            document.querySelectorAll('.corner-indicator').forEach(el => el.classList.remove('visible'));
+        }
+        
+        function setPipPosition(pos) {
+            const positions = {
+                'tl': { top: '20px', left: '20px', bottom: 'auto', right: 'auto' },
+                'tr': { top: '20px', right: '20px', bottom: 'auto', left: 'auto' },
+                'bl': { bottom: '20px', left: '20px', top: 'auto', right: 'auto' },
+                'br': { bottom: '20px', right: '20px', top: 'auto', left: 'auto' }
+            };
+            Object.assign(cameraPreview.style, positions[pos]);
+            document.querySelectorAll('.pip-size-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.pos === pos);
+            });
+        }
+        
+        function updatePipSize() {
+            const size = document.getElementById('pipSize').value;
+            cameraPreview.style.width = size + 'px';
+            cameraPreview.style.height = (size * 0.75) + 'px';
+            document.getElementById('pipSizeLabel').textContent = size + 'px';
+        }
+        
+        function updatePipRadius() {
+            const radius = document.getElementById('pipRadius').value;
+            cameraPreview.style.borderRadius = radius + 'px';
+            document.getElementById('pipRadiusLabel').textContent = radius + 'px';
+        }
+        
+        async function startCapture() {
+            try {
+                const audioOption = document.getElementById('audioSource').value;
+                const displayMediaOptions = {
+                    video: { cursor: "always" },
+                    audio: audioOption === 'system' || audioOption === 'both'
+                };
+                
+                screenStream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+                screenPreview.srcObject = screenStream;
+                
+                document.getElementById('startBtn').textContent = '✅ Screen Selected';
+                document.getElementById('recordBtn').disabled = false;
+                updateStatus('ready', 'Screen captured. Ready to record!');
+                
+                screenStream.getVideoTracks()[0].onended = () => {
+                    stopCapture();
+                };
+            } catch (err) {
+                console.error('Error: ' + err);
+                updateStatus('error', 'Failed to capture screen: ' + err.message);
+            }
+        }
+        
+        async function toggleCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+                cameraPreview.classList.add('hidden');
+                document.getElementById('cameraBtn').textContent = '📷 Add Camera';
+            } else {
+                try {
+                    cameraStream = await navigator.mediaDevices.getUserMedia({
+                        video: { width: 640, height: 480 },
+                        audio: false
+                    });
+                    cameraPreview.srcObject = cameraStream;
+                    cameraPreview.classList.remove('hidden');
+                    document.getElementById('cameraBtn').textContent = '📷 Remove Camera';
+                    setPipPosition('br');
+                } catch (err) {
+                    console.error('Camera error: ' + err);
+                    alert('Could not access camera: ' + err.message);
+                }
+            }
+        }
+        
+        async function toggleRecording() {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+        
+        async function startRecording() {
+            recordedChunks = [];
+            
+            // Create a canvas to composite screen + camera
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            const screenTrack = screenStream.getVideoTracks()[0];
+            const settings = screenTrack.getSettings();
+            canvas.width = settings.width || 1920;
+            canvas.height = settings.height || 1080;
+            
+            // Draw loop
+            const drawFrame = () => {
+                if (!isRecording) return;
+                
+                // Draw screen
+                ctx.drawImage(screenPreview, 0, 0, canvas.width, canvas.height);
+                
+                // Draw camera PiP if active
+                if (cameraStream && !cameraPreview.classList.contains('hidden')) {
+                    const pipSize = parseInt(document.getElementById('pipSize').value);
+                    const pipHeight = pipSize * 0.75;
+                    const margin = 20;
+                    
+                    // Get position from CSS
+                    const style = window.getComputedStyle(cameraPreview);
+                    let x, y;
+                    
+                    if (style.right !== 'auto') {
+                        x = canvas.width - pipSize - margin;
+                    } else {
+                        x = margin;
+                    }
+                    if (style.bottom !== 'auto') {
+                        y = canvas.height - pipHeight - margin;
+                    } else {
+                        y = margin;
+                    }
+                    
+                    // Draw rounded rect clip
+                    const radius = parseInt(document.getElementById('pipRadius').value);
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.roundRect(x, y, pipSize, pipHeight, radius);
+                    ctx.clip();
+                    ctx.drawImage(cameraPreview, x, y, pipSize, pipHeight);
+                    ctx.restore();
+                    
+                    // Draw border
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.roundRect(x, y, pipSize, pipHeight, radius);
+                    ctx.stroke();
+                }
+                
+                requestAnimationFrame(drawFrame);
+            };
+            
+            isRecording = true;
+            drawFrame();
+            
+            // Capture canvas stream
+            const canvasStream = canvas.captureStream(30);
+            
+            // Add audio
+            const audioOption = document.getElementById('audioSource').value;
+            let audioTracks = [];
+            
+            if (audioOption !== 'none') {
+                if ((audioOption === 'mic' || audioOption === 'both')) {
+                    try {
+                        const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        audioTracks.push(...micStream.getAudioTracks());
+                    } catch (e) {
+                        console.log('No mic available');
+                    }
+                }
+                if ((audioOption === 'system' || audioOption === 'both') && screenStream.getAudioTracks().length > 0) {
+                    audioTracks.push(...screenStream.getAudioTracks());
+                }
+            }
+            
+            const combinedStream = new MediaStream([
+                ...canvasStream.getVideoTracks(),
+                ...audioTracks
+            ]);
+            
+            mediaRecorder = new MediaRecorder(combinedStream, {
+                mimeType: 'video/webm;codecs=vp9'
+            });
+            
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) recordedChunks.push(e.data);
+            };
+            
+            mediaRecorder.onstop = saveRecording;
+            mediaRecorder.start(1000);
+            
+            startTime = Date.now();
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            document.getElementById('recordBtn').textContent = '⏹️ Stop Recording';
+            document.getElementById('recordBtn').classList.remove('btn-success');
+            document.getElementById('recordBtn').classList.add('btn-primary');
+            updateStatus('recording', '🔴 Recording...');
+        }
+        
+        function stopRecording() {
+            isRecording = false;
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            clearInterval(timerInterval);
+            
+            document.getElementById('recordBtn').textContent = '⏺️ Start Recording';
+            document.getElementById('recordBtn').classList.remove('btn-primary');
+            document.getElementById('recordBtn').classList.add('btn-success');
+            updateStatus('ready', 'Recording saved!');
+        }
+        
+        function saveRecording() {
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const filename = `clarissa-demo-${timestamp}.webm`;
+            
+            recordings.push({ url, filename, timestamp: new Date().toLocaleString() });
+            updateRecordingsList();
+            
+            // Auto-download
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+        }
+        
+        function updateRecordingsList() {
+            const list = document.getElementById('recordingsList');
+            if (recordings.length === 0) {
+                list.innerHTML = '<p style="color: #666;">No recordings yet.</p>';
+                return;
+            }
+            list.innerHTML = recordings.map((r, i) => `
+                <div class="recording-item">
+                    <span>📹 ${r.filename}</span>
+                    <div>
+                        <a href="${r.url}" download="${r.filename}">💾 Download</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const secs = (elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('timer').textContent = `${mins}:${secs}`;
+            document.getElementById('timer').style.display = 'block';
+        }
+        
+        function updateStatus(type, message) {
+            const status = document.getElementById('status');
+            status.className = 'status ' + type;
+            status.textContent = message;
+        }
+        
+        function stopCapture() {
+            if (isRecording) stopRecording();
+            if (screenStream) {
+                screenStream.getTracks().forEach(track => track.stop());
+                screenStream = null;
+            }
+            screenPreview.srcObject = null;
+            document.getElementById('startBtn').textContent = '📺 Select Screen';
+            document.getElementById('recordBtn').disabled = true;
+            updateStatus('ready', 'Ready to record');
+        }
+        
+        // Initialize
+        setPipPosition('br');
+    </script>
+</body>
+</html>
