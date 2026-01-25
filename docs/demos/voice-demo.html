@@ -9,13 +9,12 @@
         :root {
             --bg-primary: #0f0f1a;
             --bg-secondary: #1a1a2e;
-            --bg-tertiary: #252542;
+            --bg-card: #16213e;
             --accent: #e94560;
-            --accent-hover: #ff6b8a;
-            --success: #4ade80;
-            --warning: #fbbf24;
-            --text-primary: #f1f1f1;
-            --text-secondary: #a0a0a0;
+            --accent-hover: #ff6b6b;
+            --success: #4ecca3;
+            --text-primary: #eee;
+            --text-secondary: #888;
         }
         
         * {
@@ -29,74 +28,61 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
         
         header {
-            background: var(--bg-secondary);
-            padding: 1rem 2rem;
-            border-bottom: 1px solid var(--bg-tertiary);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid #333;
+            margin-bottom: 30px;
         }
         
         header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
         }
         
-        header .badge {
-            background: var(--accent);
-            padding: 0.25rem 0.75rem;
-            border-radius: 999px;
-            font-size: 0.75rem;
-            font-weight: 600;
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
         }
         
-        main {
-            flex: 1;
+        .grid {
             display: grid;
             grid-template-columns: 1fr 1.5fr;
-            gap: 1rem;
-            padding: 1rem;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
+            gap: 30px;
         }
         
         @media (max-width: 900px) {
-            main {
+            .grid {
                 grid-template-columns: 1fr;
             }
         }
         
-        .panel {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         
-        .panel-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-secondary);
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 10px;
         }
         
-        /* Voice Control Panel */
-        .voice-control {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            padding: 2rem 1rem;
+        /* Recording Section */
+        .record-section {
+            text-align: center;
         }
         
         #recordBtn {
@@ -104,24 +90,21 @@
             height: 120px;
             border-radius: 50%;
             border: none;
-            background: linear-gradient(135deg, var(--accent), #c73e54);
+            background: var(--accent);
             color: white;
             font-size: 3rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(233, 69, 96, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
         }
         
         #recordBtn:hover {
             transform: scale(1.05);
-            box-shadow: 0 6px 30px rgba(233, 69, 96, 0.5);
+            background: var(--accent-hover);
         }
         
         #recordBtn.recording {
-            background: linear-gradient(135deg, #ff6b8a, var(--accent));
+            background: var(--accent-hover);
             animation: pulse 1.5s infinite;
         }
         
@@ -131,103 +114,160 @@
         }
         
         #status {
-            text-align: center;
+            margin-top: 20px;
             color: var(--text-secondary);
-            min-height: 3rem;
+            min-height: 50px;
         }
         
-        #status.success { color: var(--success); }
-        #status.error { color: var(--accent); }
-        #status.recording { color: var(--warning); }
-        
-        /* Transcript */
-        #transcript {
-            background: var(--bg-tertiary);
-            padding: 1rem;
+        #waveform {
+            height: 60px;
+            background: var(--bg-secondary);
             border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            overflow: hidden;
+        }
+        
+        .wave-bar {
+            width: 4px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: height 0.1s;
+        }
+        
+        /* Transcript Section */
+        #transcript {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 15px;
             min-height: 60px;
-            font-family: 'SF Mono', Monaco, monospace;
-            font-size: 0.9rem;
+            margin-bottom: 20px;
+            font-style: italic;
             color: var(--text-secondary);
         }
         
-        #transcript.has-text {
+        #transcript.filled {
             color: var(--text-primary);
+            font-style: normal;
         }
         
         /* Intent Display */
         .intent-display {
             display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 0.5rem 1rem;
-            font-size: 0.9rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
         }
         
-        .intent-label {
+        .intent-item {
+            background: var(--bg-secondary);
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        .intent-item label {
+            display: block;
+            font-size: 0.8rem;
             color: var(--text-secondary);
+            margin-bottom: 5px;
         }
         
-        .intent-value {
-            font-family: 'SF Mono', Monaco, monospace;
+        .intent-item .value {
+            font-weight: 600;
             color: var(--success);
         }
         
-        .intent-value.unknown {
-            color: var(--accent);
-        }
-        
-        /* Command Examples */
-        .examples {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .example {
-            background: var(--bg-tertiary);
-            padding: 0.75rem 1rem;
+        /* Response */
+        #response {
+            background: linear-gradient(135deg, #1a472a 0%, #16213e 100%);
+            border: 1px solid var(--success);
             border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+            padding: 15px;
+            margin-bottom: 20px;
         }
         
-        .example:hover {
-            background: var(--bg-primary);
-            transform: translateX(4px);
+        #response.error {
+            background: linear-gradient(135deg, #4a1a1a 0%, #16213e 100%);
+            border-color: var(--accent);
         }
         
-        .example .icon {
-            font-size: 1.2rem;
-        }
-        
-        /* Visualization Panel */
-        #vizContainer {
-            flex: 1;
+        /* Visualization */
+        #visualization {
+            background: var(--bg-secondary);
+            border-radius: 12px;
             min-height: 400px;
-            background: var(--bg-tertiary);
-            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--text-secondary);
         }
         
-        #vizContainer.has-viz {
-            background: transparent;
+        /* Example Commands */
+        .examples {
+            margin-top: 20px;
         }
         
-        /* Response Text */
-        #responseText {
-            background: var(--bg-tertiary);
-            padding: 1rem;
-            border-radius: 8px;
+        .examples h3 {
             font-size: 1rem;
-            line-height: 1.5;
-            min-height: 60px;
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+        
+        .example-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 5px;
+            background: var(--bg-secondary);
+            border: 1px solid #333;
+            border-radius: 20px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        .example-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        /* Text Input Fallback */
+        .text-input-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+        }
+        
+        .text-input-section input {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--bg-secondary);
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        
+        .text-input-section input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
         }
         
         /* API Key Modal */
@@ -236,12 +276,12 @@
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0,0,0,0.8);
+            z-index: 1000;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
         }
         
         .modal.show {
@@ -249,519 +289,543 @@
         }
         
         .modal-content {
-            background: var(--bg-secondary);
-            padding: 2rem;
-            border-radius: 12px;
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 16px;
             max-width: 450px;
             width: 90%;
         }
         
         .modal-content h2 {
-            margin-bottom: 1rem;
-        }
-        
-        .modal-content p {
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
+            margin-bottom: 15px;
         }
         
         .modal-content input {
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--bg-tertiary);
+            padding: 12px;
+            margin: 15px 0;
+            background: var(--bg-secondary);
+            border: 1px solid #333;
             border-radius: 8px;
-            background: var(--bg-primary);
             color: var(--text-primary);
-            font-family: 'SF Mono', Monaco, monospace;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
         }
         
         .modal-content button {
             width: 100%;
-            padding: 0.75rem;
+            padding: 12px;
+            background: var(--accent);
             border: none;
             border-radius: 8px;
-            background: var(--accent);
             color: white;
-            font-weight: 600;
+            font-size: 1rem;
             cursor: pointer;
-            transition: background 0.2s;
         }
         
-        .modal-content button:hover {
-            background: var(--accent-hover);
-        }
-        
-        .modal-content .note {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-top: 1rem;
-        }
-        
-        footer {
-            background: var(--bg-secondary);
-            padding: 1rem 2rem;
-            text-align: center;
-            color: var(--text-secondary);
+        .modal-content p {
             font-size: 0.85rem;
-            border-top: 1px solid var(--bg-tertiary);
-        }
-        
-        footer a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-        
-        footer a:hover {
-            text-decoration: underline;
-        }
-        
-        /* Demo mode indicator */
-        .demo-mode {
-            background: var(--warning);
-            color: #000;
-            padding: 0.5rem 1rem;
-            text-align: center;
-            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
-    <div id="demoModeBar" class="demo-mode" style="display: none;">
-        🎭 Demo Mode - Using simulated responses. <a href="#" onclick="showApiModal(); return false;">Add API key</a> for real Whisper transcription.
-    </div>
-    
-    <header>
-        <h1>🎤 CLARISSA Voice Demo</h1>
-        <span class="badge">PROTOTYPE</span>
-    </header>
-    
-    <main>
-        <div class="left-panels">
-            <div class="panel">
-                <div class="panel-title">🎙️ Voice Input</div>
-                <div class="voice-control">
+    <div class="container">
+        <header>
+            <h1>🎤 CLARISSA Voice Demo</h1>
+            <p>Speak to control reservoir simulation</p>
+        </header>
+        
+        <div class="grid">
+            <div class="left-column">
+                <div class="card record-section">
+                    <h2>🎙️ Voice Input</h2>
+                    
                     <button id="recordBtn" onclick="toggleRecording()">🎤</button>
-                    <div id="status">Click to start recording</div>
+                    
+                    <div id="waveform">
+                        <!-- Waveform bars will be added dynamically -->
+                    </div>
+                    
+                    <p id="status">Click to start recording</p>
+                    
+                    <div class="examples">
+                        <h3>Try saying:</h3>
+                        <button class="example-btn" onclick="processText('show me the permeability')">
+                            "Show me the permeability"
+                        </button>
+                        <button class="example-btn" onclick="processText('show layer 3')">
+                            "Show layer 3"
+                        </button>
+                        <button class="example-btn" onclick="processText('what is the water cut')">
+                            "What is the water cut?"
+                        </button>
+                        <button class="example-btn" onclick="processText('show saturation at day 500')">
+                            "Show saturation at day 500"
+                        </button>
+                        <button class="example-btn" onclick="processText('help')">
+                            "Help"
+                        </button>
+                    </div>
+                    
+                    <div class="text-input-section">
+                        <input type="text" id="textInput" placeholder="Or type a command..." 
+                               onkeypress="if(event.key==='Enter') processText(this.value)">
+                    </div>
                 </div>
                 
-                <div class="panel-title">📝 Transcription</div>
-                <div id="transcript">Your spoken command will appear here...</div>
-                
-                <div class="panel-title">🧠 Parsed Intent</div>
-                <div class="intent-display">
-                    <span class="intent-label">Intent:</span>
-                    <span id="intentType" class="intent-value">—</span>
-                    <span class="intent-label">Confidence:</span>
-                    <span id="intentConf" class="intent-value">—</span>
-                    <span class="intent-label">Slots:</span>
-                    <span id="intentSlots" class="intent-value">—</span>
+                <div class="card" style="margin-top: 20px;">
+                    <h2>📝 Transcript</h2>
+                    <div id="transcript">Waiting for voice input...</div>
+                    
+                    <div class="intent-display">
+                        <div class="intent-item">
+                            <label>Intent</label>
+                            <span class="value" id="intentType">-</span>
+                        </div>
+                        <div class="intent-item">
+                            <label>Confidence</label>
+                            <span class="value" id="confidence">-</span>
+                        </div>
+                    </div>
+                    
+                    <div id="response" style="display: none;">
+                        <span id="responseText"></span>
+                    </div>
                 </div>
             </div>
             
-            <div class="panel">
-                <div class="panel-title">💡 Try These Commands</div>
-                <div class="examples">
-                    <div class="example" onclick="simulateCommand('show me the permeability')">
-                        <span class="icon">🗺️</span>
-                        <span>"Show me the permeability"</span>
-                    </div>
-                    <div class="example" onclick="simulateCommand('show water saturation at layer 3')">
-                        <span class="icon">💧</span>
-                        <span>"Show water saturation at layer 3"</span>
-                    </div>
-                    <div class="example" onclick="simulateCommand('what is the oil rate')">
-                        <span class="icon">📊</span>
-                        <span>"What is the oil rate?"</span>
-                    </div>
-                    <div class="example" onclick="simulateCommand('show porosity in 3D')">
-                        <span class="icon">🧊</span>
-                        <span>"Show porosity in 3D"</span>
-                    </div>
-                    <div class="example" onclick="simulateCommand('help')">
-                        <span class="icon">❓</span>
-                        <span>"Help"</span>
+            <div class="right-column">
+                <div class="card">
+                    <h2>📊 Visualization</h2>
+                    <div id="visualization">
+                        <p>Speak a command to generate visualization</p>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="right-panels">
-            <div class="panel" style="flex: 1;">
-                <div class="panel-title">📊 Visualization</div>
-                <div id="vizContainer">
-                    <span>Visualization will appear here</span>
-                </div>
-            </div>
-            
-            <div class="panel">
-                <div class="panel-title">💬 Response</div>
-                <div id="responseText">CLARISSA's response will appear here...</div>
-            </div>
-        </div>
-    </main>
-    
-    <footer>
-        Part of <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa" target="_blank">CLARISSA</a> - 
-        Conversational Language Agent for Reservoir Simulation | 
-        <a href="#" onclick="showApiModal(); return false;">⚙️ Settings</a>
-    </footer>
+        <footer>
+            <p>
+                Part of <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa" target="_blank">CLARISSA</a> - 
+                Conversational Language Agent for Reservoir Simulation<br>
+                <a href="https://github.com/wolfram-laube/clarissa" target="_blank">GitHub</a> · 
+                <a href="#" onclick="showApiKeyModal()">Set API Key</a>
+            </p>
+        </footer>
+    </div>
     
     <!-- API Key Modal -->
-    <div id="apiModal" class="modal">
+    <div class="modal" id="apiKeyModal">
         <div class="modal-content">
             <h2>🔑 OpenAI API Key</h2>
-            <p>Enter your API key for real speech-to-text transcription with Whisper.</p>
-            <input type="password" id="apiKeyInput" placeholder="sk-..." />
-            <button onclick="saveApiKey()">Save & Enable</button>
-            <p class="note">
-                🔒 Your key is stored locally in your browser only.<br>
-                No key? The demo works with simulated responses too!
-            </p>
-            <button onclick="hideApiModal()" style="margin-top: 0.5rem; background: var(--bg-tertiary);">
-                Use Demo Mode
-            </button>
+            <p style="margin-bottom: 15px;">Required for speech-to-text (Whisper) and intent parsing (GPT-4).</p>
+            <input type="password" id="apiKeyInput" placeholder="sk-...">
+            <button onclick="saveApiKey()">Save Key</button>
+            <p>🔒 Stored locally in your browser only. Never sent to our servers.</p>
         </div>
     </div>
 
     <script>
-        // ============================================
-        // CLARISSA Voice Demo - Frontend Logic
-        // ============================================
-        
-        let mediaRecorder;
-        let audioChunks = [];
+        // State
         let isRecording = false;
-        let apiKey = localStorage.getItem('openai_api_key') || '';
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let analyser = null;
+        let animationId = null;
         
-        // Demo mode if no API key
-        const isDemoMode = () => !apiKey;
+        // Demo data
+        const NX = 10, NY = 10, NZ = 5;
+        let demoData = generateDemoData();
         
-        // Show demo mode bar if needed
-        if (isDemoMode()) {
-            document.getElementById('demoModeBar').style.display = 'block';
+        // Initialize waveform bars
+        function initWaveform() {
+            const waveform = document.getElementById('waveform');
+            waveform.innerHTML = '';
+            for (let i = 0; i < 30; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'wave-bar';
+                waveform.appendChild(bar);
+            }
+        }
+        initWaveform();
+        
+        // Check for API key on load
+        window.onload = () => {
+            if (!localStorage.getItem('openai_api_key')) {
+                setTimeout(showApiKeyModal, 1000);
+            }
+        };
+        
+        function showApiKeyModal() {
+            document.getElementById('apiKeyModal').classList.add('show');
         }
         
-        // ============================================
-        // Recording Functions
-        // ============================================
+        function saveApiKey() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if (key.startsWith('sk-')) {
+                localStorage.setItem('openai_api_key', key);
+                document.getElementById('apiKeyModal').classList.remove('show');
+                document.getElementById('status').textContent = '✅ API key saved! Ready to record.';
+            } else {
+                alert('Invalid API key format. Should start with sk-');
+            }
+        }
         
+        // Recording
         async function toggleRecording() {
             const btn = document.getElementById('recordBtn');
             const status = document.getElementById('status');
             
             if (!isRecording) {
+                // Start recording
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ 
-                        audio: {
-                            channelCount: 1,
-                            sampleRate: 16000
-                        } 
-                    });
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     
-                    mediaRecorder = new MediaRecorder(stream, {
-                        mimeType: 'audio/webm;codecs=opus'
-                    });
+                    // Setup analyser for waveform
+                    const audioContext = new AudioContext();
+                    analyser = audioContext.createAnalyser();
+                    const source = audioContext.createMediaStreamSource(stream);
+                    source.connect(analyser);
+                    analyser.fftSize = 64;
+                    
+                    // Start visualizing
+                    visualizeWaveform();
+                    
+                    mediaRecorder = new MediaRecorder(stream);
                     audioChunks = [];
                     
-                    mediaRecorder.ondataavailable = (e) => {
-                        if (e.data.size > 0) {
-                            audioChunks.push(e.data);
-                        }
-                    };
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                     
                     mediaRecorder.onstop = async () => {
-                        stream.getTracks().forEach(track => track.stop());
                         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        stream.getTracks().forEach(track => track.stop());
+                        cancelAnimationFrame(animationId);
+                        resetWaveform();
+                        
+                        status.textContent = '🔄 Processing...';
                         await processAudio(audioBlob);
                     };
                     
                     mediaRecorder.start();
                     isRecording = true;
-                    btn.classList.add('recording');
                     btn.textContent = '⏹️';
-                    status.textContent = '🔴 Recording... click to stop';
-                    status.className = 'recording';
+                    btn.classList.add('recording');
+                    status.textContent = '🔴 Recording... speak now';
                     
                 } catch (err) {
-                    console.error('Mic error:', err);
-                    status.textContent = '❌ Microphone access denied. Check browser permissions.';
-                    status.className = 'error';
+                    status.innerHTML = '❌ Microphone access denied.<br>Use text input below or click example buttons.';
+                    console.error(err);
                 }
             } else {
+                // Stop recording
                 mediaRecorder.stop();
                 isRecording = false;
-                btn.classList.remove('recording');
                 btn.textContent = '🎤';
-                status.textContent = '⏳ Processing...';
-                status.className = '';
+                btn.classList.remove('recording');
             }
         }
         
-        // ============================================
-        // Audio Processing
-        // ============================================
+        function visualizeWaveform() {
+            const bars = document.querySelectorAll('.wave-bar');
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            
+            function draw() {
+                analyser.getByteFrequencyData(dataArray);
+                bars.forEach((bar, i) => {
+                    const value = dataArray[i] || 0;
+                    bar.style.height = Math.max(5, value / 4) + 'px';
+                });
+                animationId = requestAnimationFrame(draw);
+            }
+            draw();
+        }
         
+        function resetWaveform() {
+            document.querySelectorAll('.wave-bar').forEach(bar => {
+                bar.style.height = '20px';
+            });
+        }
+        
+        // Process audio with Whisper
         async function processAudio(audioBlob) {
-            const status = document.getElementById('status');
-            const transcript = document.getElementById('transcript');
+            const apiKey = localStorage.getItem('openai_api_key');
+            if (!apiKey) {
+                showApiKeyModal();
+                document.getElementById('status').textContent = 'Please set API key first';
+                return;
+            }
             
             try {
-                let text;
+                // Transcribe with Whisper
+                const formData = new FormData();
+                formData.append('file', audioBlob, 'audio.webm');
+                formData.append('model', 'whisper-1');
+                formData.append('prompt', 'Reservoir simulation: permeability, porosity, saturation, pressure, layer, waterflood, injector, producer');
                 
-                if (isDemoMode()) {
-                    // Demo mode: use simple speech recognition if available
-                    text = await demoTranscribe();
-                } else {
-                    // Real mode: use Whisper API
-                    text = await whisperTranscribe(audioBlob);
-                }
+                const whisperResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${apiKey}` },
+                    body: formData
+                });
                 
-                transcript.textContent = text;
-                transcript.classList.add('has-text');
+                const whisperData = await whisperResponse.json();
+                const transcript = whisperData.text;
                 
-                // Parse and execute
-                await processCommand(text);
+                document.getElementById('transcript').textContent = transcript;
+                document.getElementById('transcript').classList.add('filled');
                 
-                status.textContent = '✅ Command processed';
-                status.className = 'success';
+                // Process the text
+                await processText(transcript);
                 
             } catch (err) {
-                console.error('Processing error:', err);
-                status.textContent = '❌ ' + err.message;
-                status.className = 'error';
+                console.error(err);
+                document.getElementById('status').textContent = '❌ Error: ' + err.message;
             }
         }
         
-        async function whisperTranscribe(audioBlob) {
-            const formData = new FormData();
-            formData.append('file', audioBlob, 'audio.webm');
-            formData.append('model', 'whisper-1');
-            formData.append('language', 'en');
-            formData.append('prompt', 'Reservoir simulation: permeability, porosity, saturation, pressure, layer, 3D, waterflood');
+        // Process text command
+        async function processText(text) {
+            const status = document.getElementById('status');
+            const transcriptEl = document.getElementById('transcript');
             
-            const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: formData
-            });
+            transcriptEl.textContent = text;
+            transcriptEl.classList.add('filled');
+            status.textContent = '🧠 Parsing intent...';
             
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.error?.message || 'Whisper API error');
-            }
+            // Parse intent
+            const intent = await parseIntent(text);
             
-            const data = await response.json();
-            return data.text;
-        }
-        
-        async function demoTranscribe() {
-            // In demo mode, prompt user for text input
-            return new Promise((resolve) => {
-                const text = prompt('🎭 Demo Mode\n\nMicrophone recorded! Enter what you said:\n\n(Or try: "show me the permeability")');
-                resolve(text || 'help');
-            });
-        }
-        
-        // ============================================
-        // Command Processing (Client-side Intent Parsing)
-        // ============================================
-        
-        async function processCommand(text) {
-            const intent = parseIntent(text);
-            displayIntent(intent);
-            await executeIntent(intent);
-        }
-        
-        function parseIntent(text) {
-            const lower = text.toLowerCase().trim();
-            
-            // Quick pattern matching
-            if (['stop', 'cancel', 'never mind', 'abort'].includes(lower)) {
-                return { type: 'cancel', confidence: 1.0, slots: {}, raw: text };
-            }
-            
-            if (['yes', 'yeah', 'confirm', 'ok', 'okay'].includes(lower)) {
-                return { type: 'confirm', confidence: 1.0, slots: {}, raw: text };
-            }
-            
-            if (lower === 'help' || lower.includes('what can')) {
-                return { type: 'help', confidence: 1.0, slots: {}, raw: text };
-            }
-            
-            // Visualization patterns
-            if (lower.includes('show') || lower.includes('display') || lower.includes('visualize')) {
-                const slots = {};
-                
-                // Property extraction
-                if (lower.includes('permeability') || lower.includes('perm')) {
-                    slots.property = 'permeability';
-                } else if (lower.includes('porosity') || lower.includes('poro')) {
-                    slots.property = 'porosity';
-                } else if (lower.includes('saturation') || lower.includes(' sw')) {
-                    slots.property = 'water_saturation';
-                } else if (lower.includes('pressure')) {
-                    slots.property = 'pressure';
-                }
-                
-                // Layer extraction
-                const layerMatch = lower.match(/layer\s*(\d+)/);
-                if (layerMatch) {
-                    slots.layer = parseInt(layerMatch[1]);
-                }
-                
-                // Time extraction
-                const dayMatch = lower.match(/day\s*(\d+)/);
-                if (dayMatch) {
-                    slots.time_days = parseInt(dayMatch[1]);
-                }
-                
-                // View type
-                if (lower.includes('3d')) {
-                    slots.view_type = '3d';
-                } else if (slots.layer) {
-                    slots.view_type = 'cross_section';
-                }
-                
-                return { 
-                    type: 'visualize_property', 
-                    confidence: slots.property ? 0.95 : 0.7,
-                    slots,
-                    raw: text 
-                };
-            }
-            
-            // Query patterns
-            if (lower.includes('what') || lower.includes('how much')) {
-                const slots = {};
-                
-                if (lower.includes('oil rate') || lower.includes('production rate')) {
-                    slots.property = 'oil_rate';
-                } else if (lower.includes('water cut')) {
-                    slots.property = 'water_cut';
-                } else if (lower.includes('pressure') || lower.includes('bhp')) {
-                    slots.property = 'pressure';
-                } else if (lower.includes('cumulative') || lower.includes('total')) {
-                    slots.property = 'cumulative_oil';
-                }
-                
-                return {
-                    type: 'query_value',
-                    confidence: slots.property ? 0.9 : 0.6,
-                    slots,
-                    raw: text
-                };
-            }
-            
-            return { type: 'unknown', confidence: 0.3, slots: {}, raw: text };
-        }
-        
-        function displayIntent(intent) {
             document.getElementById('intentType').textContent = intent.type;
-            document.getElementById('intentType').className = 
-                'intent-value' + (intent.type === 'unknown' ? ' unknown' : '');
-            document.getElementById('intentConf').textContent = 
-                (intent.confidence * 100).toFixed(0) + '%';
-            document.getElementById('intentSlots').textContent = 
-                Object.keys(intent.slots).length > 0 
-                    ? JSON.stringify(intent.slots) 
-                    : '—';
-        }
-        
-        // ============================================
-        // Intent Execution & Visualization
-        // ============================================
-        
-        async function executeIntent(intent) {
-            const responseEl = document.getElementById('responseText');
-            const vizContainer = document.getElementById('vizContainer');
+            document.getElementById('confidence').textContent = (intent.confidence * 100).toFixed(0) + '%';
             
-            switch (intent.type) {
-                case 'visualize_property':
-                    const prop = intent.slots.property || 'permeability';
-                    const layer = intent.slots.layer;
-                    
-                    if (layer) {
-                        responseEl.textContent = `Showing ${prop.replace('_', ' ')} at layer ${layer}.`;
-                        createCrossSection(prop, layer);
-                    } else {
-                        responseEl.textContent = `Showing ${prop.replace('_', ' ')} in 3D.`;
-                        create3DVisualization(prop);
-                    }
-                    break;
-                    
-                case 'query_value':
-                    const values = {
-                        'oil_rate': ['1,250', 'bbl/day'],
-                        'water_cut': ['26', '%'],
-                        'pressure': ['3,450', 'psi'],
-                        'cumulative_oil': ['2.3', 'MMSTB']
-                    };
-                    const qprop = intent.slots.property || 'oil_rate';
-                    const [val, unit] = values[qprop] || ['N/A', ''];
-                    responseEl.textContent = `The ${qprop.replace('_', ' ')} is ${val} ${unit}.`;
-                    break;
-                    
-                case 'help':
-                    responseEl.innerHTML = `<strong>Available commands:</strong><br>
-                        • "Show me the permeability/porosity/saturation"<br>
-                        • "Show layer 3" - cross-section view<br>
-                        • "What is the oil rate/water cut?"<br>
-                        • "Help" - show this message`;
-                    break;
-                    
-                case 'cancel':
-                    responseEl.textContent = 'Cancelled.';
-                    break;
-                    
-                case 'confirm':
-                    responseEl.textContent = 'Confirmed.';
-                    break;
-                    
-                default:
-                    responseEl.textContent = "I didn't understand that. Try saying 'help' for available commands.";
-            }
+            // Execute
+            status.textContent = '⚡ Executing...';
+            const response = executeIntent(intent);
+            
+            // Show response
+            const responseEl = document.getElementById('response');
+            const responseText = document.getElementById('responseText');
+            responseEl.style.display = 'block';
+            responseText.textContent = response.text;
+            responseEl.classList.toggle('error', !response.success);
+            
+            status.textContent = '✅ Done!';
+            
+            // Clear text input
+            document.getElementById('textInput').value = '';
         }
         
-        // ============================================
-        // Plotly Visualizations
-        // ============================================
+        // Parse intent (LLM or pattern matching)
+        async function parseIntent(text) {
+            const textLower = text.toLowerCase().trim();
+            
+            // Quick patterns
+            if (['stop', 'cancel', 'nevermind', 'never mind'].includes(textLower)) {
+                return { type: 'cancel', confidence: 1.0, slots: {} };
+            }
+            if (['yes', 'yeah', 'yep', 'confirm', 'ok', 'okay'].includes(textLower)) {
+                return { type: 'confirm', confidence: 1.0, slots: {} };
+            }
+            if (textLower === 'help' || textLower.startsWith('what can')) {
+                return { type: 'help', confidence: 1.0, slots: {} };
+            }
+            
+            // Try LLM parsing
+            const apiKey = localStorage.getItem('openai_api_key');
+            if (apiKey) {
+                try {
+                    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: 'gpt-4o-mini',
+                            messages: [{
+                                role: 'user',
+                                content: `Parse this reservoir simulation command into JSON. Respond with ONLY valid JSON.
+
+Available intents: visualize_property, query_value, navigate, help, cancel
+Slots: property (permeability/porosity/water_saturation/pressure), layer (1-5), time_days (number)
+
+Command: "${text}"
+
+JSON format: {"type": "intent_name", "confidence": 0.0-1.0, "slots": {...}}`
+                            }],
+                            temperature: 0.1,
+                            max_tokens: 150
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    let result = data.choices[0].message.content.trim();
+                    
+                    // Clean markdown
+                    if (result.startsWith('```')) {
+                        result = result.split('```')[1].replace('json', '').trim();
+                    }
+                    
+                    return JSON.parse(result);
+                } catch (e) {
+                    console.error('LLM parse error:', e);
+                }
+            }
+            
+            // Fallback pattern matching
+            let intent = { type: 'unknown', confidence: 0.5, slots: {} };
+            
+            if (textLower.includes('show') || textLower.includes('display')) {
+                intent.type = 'visualize_property';
+                intent.confidence = 0.8;
+                
+                if (textLower.includes('perm')) intent.slots.property = 'permeability';
+                else if (textLower.includes('poro')) intent.slots.property = 'porosity';
+                else if (textLower.includes('sat')) intent.slots.property = 'water_saturation';
+                else if (textLower.includes('press')) intent.slots.property = 'pressure';
+                else intent.slots.property = 'permeability';
+                
+                const layerMatch = textLower.match(/layer\s*(\d+)/);
+                if (layerMatch) intent.slots.layer = parseInt(layerMatch[1]);
+                
+                const dayMatch = textLower.match(/day\s*(\d+)/);
+                if (dayMatch) intent.slots.time_days = parseInt(dayMatch[1]);
+            }
+            else if (textLower.includes('what') || textLower.includes('how much')) {
+                intent.type = 'query_value';
+                intent.confidence = 0.8;
+                
+                if (textLower.includes('oil rate')) intent.slots.property = 'oil_rate';
+                else if (textLower.includes('water cut')) intent.slots.property = 'water_cut';
+                else if (textLower.includes('pressure') || textLower.includes('bhp')) intent.slots.property = 'pressure';
+                else intent.slots.property = 'oil_rate';
+            }
+            
+            return intent;
+        }
         
-        const NX = 10, NY = 10, NZ = 5;
+        // Execute intent
+        function executeIntent(intent) {
+            const slots = intent.slots || {};
+            
+            if (intent.type === 'visualize_property') {
+                const prop = slots.property || 'permeability';
+                const layer = slots.layer;
+                const timeDays = slots.time_days || 500;
+                
+                let propData, propName;
+                if (prop.includes('saturation') || prop === 'sw') {
+                    propData = getSaturation(timeDays);
+                    propName = 'Water Saturation';
+                } else if (prop.includes('perm')) {
+                    propData = demoData.permeability;
+                    propName = 'Permeability (mD)';
+                } else if (prop.includes('poro')) {
+                    propData = demoData.porosity;
+                    propName = 'Porosity';
+                } else {
+                    propData = demoData.permeability;
+                    propName = 'Permeability (mD)';
+                }
+                
+                if (layer) {
+                    createCrossSection(propData, propName, layer);
+                    return { success: true, text: `Showing ${propName} at layer ${layer}` };
+                } else {
+                    create3DVisualization(propData, propName);
+                    return { success: true, text: `Showing ${propName} in 3D` };
+                }
+            }
+            
+            if (intent.type === 'query_value') {
+                const prop = slots.property || 'oil_rate';
+                const values = {
+                    'oil_rate': ['1,250', 'bbl/day'],
+                    'water_cut': ['26', '%'],
+                    'pressure': ['3,450', 'psi'],
+                    'bhp': ['3,450', 'psi']
+                };
+                const [val, unit] = values[prop] || ['N/A', ''];
+                return { success: true, text: `The ${prop.replace('_', ' ')} is ${val} ${unit}` };
+            }
+            
+            if (intent.type === 'help') {
+                return { 
+                    success: true, 
+                    text: 'Try: "Show permeability", "Show layer 3", "What is the water cut?", "Show saturation at day 500"' 
+                };
+            }
+            
+            if (intent.type === 'cancel') {
+                return { success: true, text: 'Cancelled.' };
+            }
+            
+            return { success: false, text: "I didn't understand that. Try 'help' for examples." };
+        }
         
-        // Generate synthetic data
-        function generateData(property) {
-            const data = [];
+        // Demo data generation
+        function generateDemoData() {
+            // Seeded random for consistency
+            const random = mulberry32(42);
+            
+            function lognormal(mean, sigma) {
+                const u = 1 - random();
+                const v = random();
+                const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+                return Math.exp(mean + sigma * z);
+            }
+            
+            // Permeability with channel
+            const perm = new Array(NX * NY * NZ);
             for (let i = 0; i < NX; i++) {
-                data[i] = [];
                 for (let j = 0; j < NY; j++) {
-                    data[i][j] = [];
                     for (let k = 0; k < NZ; k++) {
-                        let val;
-                        if (property === 'permeability') {
-                            val = Math.exp(4.5 + Math.random() * 0.5);
-                            if (i >= 3 && i <= 6) val *= 3; // Channel
-                        } else if (property === 'porosity') {
-                            val = 0.15 + Math.random() * 0.1;
-                        } else if (property === 'water_saturation') {
-                            const dist = Math.sqrt(Math.pow(i - NX/2, 2) + Math.pow(j - NY/2, 2));
-                            val = 0.2 + 0.5 * Math.max(0, 1 - dist / (NX * 0.5));
-                        } else {
-                            val = 3000 + Math.random() * 500;
-                        }
-                        data[i][j][k] = val;
+                        let val = lognormal(4.5, 0.5);
+                        if (i >= 3 && i <= 6) val *= 3; // Channel
+                        perm[i * NY * NZ + j * NZ + k] = val;
                     }
                 }
             }
-            return data;
+            
+            // Porosity
+            const poro = perm.map(p => {
+                let val = 0.15 + 0.1 * (Math.log(p) - 4) / 2;
+                return Math.max(0.05, Math.min(0.35, val));
+            });
+            
+            return { permeability: perm, porosity: poro };
         }
         
-        function create3DVisualization(property) {
-            const data = generateData(property);
+        function mulberry32(a) {
+            return function() {
+                var t = a += 0x6D2B79F5;
+                t = Math.imul(t ^ t >>> 15, t | 1);
+                t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+                return ((t ^ t >>> 14) >>> 0) / 4294967296;
+            }
+        }
+        
+        function getSaturation(timeDays) {
+            const progress = Math.min(timeDays / 1800, 1.0);
+            const sw = new Array(NX * NY * NZ);
+            
+            for (let i = 0; i < NX; i++) {
+                for (let j = 0; j < NY; j++) {
+                    for (let k = 0; k < NZ; k++) {
+                        const dist = Math.sqrt(Math.pow(i - NX/2, 2) + Math.pow(j - NY/2, 2));
+                        let val = 0.2; // Connate water
+                        if (dist < progress * NX * 0.7) {
+                            val = 0.2 + 0.5 * (1 - dist / (NX * 0.7));
+                        }
+                        sw[i * NY * NZ + j * NZ + k] = Math.max(0.2, Math.min(0.8, val));
+                    }
+                }
+            }
+            return sw;
+        }
+        
+        // Visualizations
+        function create3DVisualization(data, title) {
             const x = [], y = [], z = [], values = [];
             
             for (let i = 0; i < NX; i++) {
@@ -770,74 +834,69 @@
                         x.push(i);
                         y.push(j);
                         z.push(k);
-                        values.push(data[i][j][k]);
+                        values.push(data[i * NY * NZ + j * NZ + k]);
                     }
                 }
             }
             
             const trace = {
-                x, y, z,
+                x: x, y: y, z: z,
                 mode: 'markers',
                 type: 'scatter3d',
                 marker: {
                     size: 8,
                     color: values,
                     colorscale: 'Viridis',
-                    colorbar: { title: property.replace('_', ' ') },
+                    colorbar: { title: title },
                     opacity: 0.8
                 }
             };
             
             const layout = {
-                title: `3D ${property.replace('_', ' ')}`,
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)',
-                font: { color: '#f1f1f1' },
+                title: title + ' (3D)',
+                paper_bgcolor: '#1a1a2e',
+                plot_bgcolor: '#1a1a2e',
+                font: { color: '#eee' },
                 scene: {
                     xaxis: { title: 'X', gridcolor: '#333' },
                     yaxis: { title: 'Y', gridcolor: '#333' },
                     zaxis: { title: 'Layer', gridcolor: '#333' },
-                    bgcolor: 'rgba(0,0,0,0)'
+                    aspectmode: 'cube'
                 },
-                margin: { l: 0, r: 0, t: 40, b: 0 }
+                margin: { t: 40, b: 20, l: 20, r: 20 }
             };
             
-            const container = document.getElementById('vizContainer');
-            container.innerHTML = '';
-            container.classList.add('has-viz');
-            Plotly.newPlot(container, [trace], layout, { responsive: true });
+            Plotly.newPlot('visualization', [trace], layout);
         }
         
-        function createCrossSection(property, layer) {
-            const data = generateData(property);
-            const layerIdx = Math.min(Math.max(layer - 1, 0), NZ - 1);
+        function createCrossSection(data, title, layer) {
+            const z = [];
+            const layerIdx = Math.max(0, Math.min(layer - 1, NZ - 1));
             
-            const zData = [];
             for (let j = 0; j < NY; j++) {
                 const row = [];
                 for (let i = 0; i < NX; i++) {
-                    row.push(data[i][j][layerIdx]);
+                    row.push(data[i * NY * NZ + j * NZ + layerIdx]);
                 }
-                zData.push(row);
+                z.push(row);
             }
             
             const heatmap = {
-                z: zData,
+                z: z,
                 type: 'heatmap',
                 colorscale: 'Viridis',
-                colorbar: { title: property.replace('_', ' ') }
+                colorbar: { title: title }
             };
             
             // Well markers
             const producer = {
-                x: [NX/2],
-                y: [NY/2],
+                x: [NX/2], y: [NY/2],
                 mode: 'markers+text',
                 type: 'scatter',
-                marker: { size: 15, color: '#3b82f6', symbol: 'circle' },
+                marker: { size: 15, color: '#4CAF50', symbol: 'circle' },
                 text: ['PROD1'],
                 textposition: 'top center',
-                textfont: { color: '#fff' },
+                textfont: { color: '#eee' },
                 name: 'Producer'
             };
             
@@ -846,67 +905,25 @@
                 y: [1, NY-2, 1, NY-2],
                 mode: 'markers+text',
                 type: 'scatter',
-                marker: { size: 12, color: '#ef4444', symbol: 'triangle-up' },
+                marker: { size: 12, color: '#e94560', symbol: 'triangle-up' },
                 text: ['INJ1', 'INJ2', 'INJ3', 'INJ4'],
                 textposition: 'top center',
-                textfont: { color: '#fff' },
+                textfont: { color: '#eee' },
                 name: 'Injectors'
             };
             
             const layout = {
-                title: `${property.replace('_', ' ')} - Layer ${layer}`,
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)',
-                font: { color: '#f1f1f1' },
-                xaxis: { title: 'X', gridcolor: '#333' },
-                yaxis: { title: 'Y', gridcolor: '#333' },
-                margin: { l: 50, r: 50, t: 40, b: 50 }
+                title: `${title} - Layer ${layer}`,
+                paper_bgcolor: '#1a1a2e',
+                plot_bgcolor: '#1a1a2e',
+                font: { color: '#eee' },
+                xaxis: { title: 'X' },
+                yaxis: { title: 'Y' },
+                margin: { t: 40, b: 40, l: 50, r: 20 }
             };
             
-            const container = document.getElementById('vizContainer');
-            container.innerHTML = '';
-            container.classList.add('has-viz');
-            Plotly.newPlot(container, [heatmap, producer, injectors], layout, { responsive: true });
+            Plotly.newPlot('visualization', [heatmap, producer, injectors], layout);
         }
-        
-        // ============================================
-        // Utility Functions
-        // ============================================
-        
-        function simulateCommand(text) {
-            document.getElementById('transcript').textContent = text;
-            document.getElementById('transcript').classList.add('has-text');
-            document.getElementById('status').textContent = '✅ Command processed';
-            document.getElementById('status').className = 'success';
-            processCommand(text);
-        }
-        
-        function showApiModal() {
-            document.getElementById('apiModal').classList.add('show');
-            document.getElementById('apiKeyInput').value = apiKey;
-        }
-        
-        function hideApiModal() {
-            document.getElementById('apiModal').classList.remove('show');
-        }
-        
-        function saveApiKey() {
-            const key = document.getElementById('apiKeyInput').value.trim();
-            if (key && key.startsWith('sk-')) {
-                apiKey = key;
-                localStorage.setItem('openai_api_key', key);
-                document.getElementById('demoModeBar').style.display = 'none';
-                hideApiModal();
-                alert('✅ API key saved! Whisper transcription enabled.');
-            } else {
-                alert('Please enter a valid OpenAI API key (starts with sk-)');
-            }
-        }
-        
-        // Close modal on outside click
-        document.getElementById('apiModal').addEventListener('click', (e) => {
-            if (e.target.id === 'apiModal') hideApiModal();
-        });
     </script>
 </body>
 </html>
