@@ -71,7 +71,7 @@ These go to `Buchhaltung/contractors/{person}/{year}/{month}/{client}/`
 
 ### Manual Trigger (Pages)
 
-Visit: https://wolfram-laube.gitlab.io/blauweiss-llc/irena/billing-trigger.html
+Visit: https://wolfram-laube.gitlab.io/blauweiss-llc/clarissa/billing-trigger.html
 
 Or via curl:
 ```bash
