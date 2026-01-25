@@ -254,6 +254,29 @@ The `requirements.txt` includes:
 - **13 OPM Flow**: Create and run reservoir simulations
 - **14 Infrastructure**: Monitor runners, sync status, metrics
 
+
+### 🎤 Showcases
+
+| Notebook | Description | Duration | Colab |
+|----------|-------------|----------|-------|
+| [15 OPM Flow Showcase](notebooks/15_OPM_Flow_Showcase.ipynb) | 3D Visualization, GIF Export | ~25 min | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/wolfram-laube/clarissa/blob/main/docs/tutorials/notebooks/15_OPM_Flow_Showcase.ipynb) |
+| [16 Voice Input Showcase 🎤](notebooks/16_Voice_Input_Showcase.ipynb) | Speech-to-Simulation | ~30 min | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/wolfram-laube/clarissa/blob/main/docs/tutorials/notebooks/16_Voice_Input_Showcase.ipynb) |
+
+!!! tip "🎤 Voice Input - Talk to Your Simulation!"
+    The **Voice Input Showcase** demonstrates CLARISSA's conversational interface:
+    
+    - **Speech-to-Text** with OpenAI Whisper
+    - **Intent Recognition** for reservoir engineering commands  
+    - **Visualization Execution** triggered by voice
+    
+    Try saying: *"Show me the permeability"* or *"What's the water cut?"*
+    
+    **More resources:**
+    
+    - 📖 [Voice Input Tutorial](guides/voice-input-tutorial.md) - Full guide with tips
+    - 🎮 [Live Voice Demo](../demos/voice-demo.html) - Browser-based demo (works with microphone!)
+    - 📐 [ADR-028: Voice Architecture](../architecture/adr/ADR-028-voice-input-architecture.md) - Technical design
+
 ---
 
 ## 🛠️ Environment Comparison
