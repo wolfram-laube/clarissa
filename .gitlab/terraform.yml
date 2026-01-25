@@ -1,6 +1,8 @@
 # Terraform CI/CD Pipeline
 #
-# Uses GitLab shared runners (no tags required)
+# Triggers:
+#   - MRs that change infrastructure/** → validate + plan
+#   - Push to main with infrastructure/** changes → plan + apply (manual)
 #
 # Required CI Variables:
 #   - GOOGLE_CREDENTIALS: GCP Service Account JSON key (File type)
@@ -17,15 +19,17 @@ variables:
   image:
     name: hashicorp/terraform:1.7
     entrypoint: [""]
-  needs: []
   before_script:
     - cd ${TF_ROOT}
+    # Map existing CI variables to Terraform TF_VAR_ format
     - export TF_VAR_openai_api_key="${OPENAI_API_KEY:-}"
     - export TF_VAR_anthropic_api_key="${ANTHROPIC_API_KEY:-}"
+    # Setup GCP credentials
     - |
       if [ -n "$GOOGLE_CREDENTIALS" ]; then
         export GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_CREDENTIALS"
       fi
+    # Configure GitLab-managed Terraform state backend
     - |
       cat > backend.tf << BACKEND
       terraform {
@@ -44,9 +48,14 @@ variables:
     - terraform --version
     - terraform init
 
+# ============================================================
+# Validation Stage - runs on all MRs
+# ============================================================
+
 terraform:fmt:
   extends: .terraform-base
   stage: test
+  needs: []
   script:
     - terraform fmt -check -recursive -diff
   rules:
@@ -61,6 +70,7 @@ terraform:fmt:
 terraform:validate:
   extends: .terraform-base
   stage: test
+  needs: []
   script:
     - terraform validate
   rules:
@@ -71,10 +81,14 @@ terraform:validate:
       changes:
         - infrastructure/terraform/**/*
 
+# ============================================================
+# Plan Stage - shows what would change
+# ============================================================
+
 terraform:plan:
   extends: .terraform-base
   stage: build
-  needs: ["terraform:validate"]
+  needs: []
   script:
     - terraform plan -out=plan.tfplan
     - terraform show -no-color plan.tfplan > plan.txt
@@ -94,13 +108,18 @@ terraform:plan:
       changes:
         - infrastructure/terraform/**/*
 
+# ============================================================
+# Apply Stage - only on main, manual trigger
+# ============================================================
+
 terraform:apply:
   extends: .terraform-base
   stage: deploy
+  needs: []
   script:
+    # Re-run plan to get tfplan (in case plan artifact expired)
+    - terraform plan -out=plan.tfplan
     - terraform apply -auto-approve plan.tfplan
-  dependencies:
-    - terraform:plan
   environment:
     name: gcp-production
     url: https://clarissa-api-${TF_VAR_gcp_project}.run.app
@@ -110,9 +129,14 @@ terraform:apply:
         - infrastructure/terraform/**/*
       when: manual
 
+# ============================================================
+# Destroy Stage - emergency use only
+# ============================================================
+
 terraform:destroy:
   extends: .terraform-base
   stage: deploy
+  needs: []
   script:
     - terraform destroy -auto-approve
   environment:
