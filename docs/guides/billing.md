@@ -150,4 +150,4 @@ pip install pyyaml requests
 
 ## Full Documentation
 
-See [billing/README.md](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/billing/README.md) for complete reference.
+See [billing/README.md](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/blob/main/billing/README.md) for complete reference.
