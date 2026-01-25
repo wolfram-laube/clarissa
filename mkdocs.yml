@@ -131,6 +131,10 @@ nav:
     - SPE Europe 2026: publications/spe-europe-2026/index.md
     - IJACSA 2026: publications/ijacsa-2026/index.md
 
+
+  - "🛠️ Tools":
+    - "🎬 Demo Recording": tools/recording/README.md
+
   - "⚙️ Infrastructure":
     - Overview: infrastructure.md
     - CI/CD:
