@@ -1,0 +1,146 @@
+# Terraform CI/CD Pipeline
+#
+# Jobs:
+#   - tf:validate  - Syntax validation (on all changes)
+#   - tf:plan      - Plan changes (on MRs, posts comment)
+#   - tf:apply     - Apply changes (manual, main branch only)
+#
+# Required CI Variables:
+#   - GOOGLE_CREDENTIALS     - GCP Service Account JSON
+#   - TF_VAR_gcp_project     - GCP Project ID
+#   - TF_VAR_openai_api_key  - OpenAI API Key
+#   - TF_VAR_anthropic_api_key - Anthropic API Key (optional)
+
+variables:
+  TF_ROOT: infrastructure/terraform/environments/gcp
+  TF_STATE_NAME: clarissa-gcp
+  # Use GitLab-managed Terraform state
+  TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}
+
+.terraform:base:
+  image:
+    name: hashicorp/terraform:1.7
+    entrypoint: [""]
+  tags:
+    - docker-any
+  before_script:
+    - cd ${TF_ROOT}
+    # Configure GCP credentials
+    - |
+      if [ -n "$GOOGLE_CREDENTIALS" ]; then
+        echo "$GOOGLE_CREDENTIALS" > /tmp/gcp-key.json
+        export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
+      fi
+    # Initialize Terraform with GitLab-managed state
+    - |
+      terraform init \
+        -backend-config="address=${TF_ADDRESS}" \
+        -backend-config="lock_address=${TF_ADDRESS}/lock" \
+        -backend-config="unlock_address=${TF_ADDRESS}/lock" \
+        -backend-config="username=gitlab-ci-token" \
+        -backend-config="password=${CI_JOB_TOKEN}" \
+        -backend-config="lock_method=POST" \
+        -backend-config="unlock_method=DELETE" \
+        -backend-config="retry_wait_min=5"
+  cache:
+    key: terraform-${CI_COMMIT_REF_SLUG}
+    paths:
+      - ${TF_ROOT}/.terraform
+
+# ============================================================
+# Validate - runs on all Terraform changes
+# ============================================================
+tf:validate:
+  extends: .terraform:base
+  stage: test
+  script:
+    - terraform fmt -check -recursive
+    - terraform validate
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - infrastructure/terraform/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+        - infrastructure/terraform/**/*
+
+# ============================================================
+# Plan - runs on MRs, posts plan as comment
+# ============================================================
+tf:plan:
+  extends: .terraform:base
+  stage: test
+  script:
+    - terraform plan -out=plan.tfplan -no-color | tee plan.txt
+    # Extract plan summary
+    - |
+      echo "## Terraform Plan Summary" > plan_summary.md
+      echo "" >> plan_summary.md
+      echo '```' >> plan_summary.md
+      grep -E "^(Plan:|No changes|Error)" plan.txt >> plan_summary.md || echo "See full plan below" >> plan_summary.md
+      echo '```' >> plan_summary.md
+      echo "" >> plan_summary.md
+      echo "<details><summary>Full Plan Output</summary>" >> plan_summary.md
+      echo "" >> plan_summary.md
+      echo '```hcl' >> plan_summary.md
+      cat plan.txt >> plan_summary.md
+      echo '```' >> plan_summary.md
+      echo "</details>" >> plan_summary.md
+    # Post plan as MR comment (if MR exists)
+    - |
+      if [ -n "$CI_MERGE_REQUEST_IID" ]; then
+        # URL encode the plan summary
+        PLAN_BODY=$(cat plan_summary.md | jq -Rs .)
+        curl -s --request POST \
+          --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+          --header "Content-Type: application/json" \
+          --data "{\"body\": ${PLAN_BODY}}" \
+          "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/notes" || true
+      fi
+  artifacts:
+    paths:
+      - ${TF_ROOT}/plan.tfplan
+      - ${TF_ROOT}/plan.txt
+      - ${TF_ROOT}/plan_summary.md
+    expire_in: 7 days
+    reports:
+      terraform: ${TF_ROOT}/plan.tfplan
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - infrastructure/terraform/**/*
+
+# ============================================================
+# Apply - manual, main branch only
+# ============================================================
+tf:apply:
+  extends: .terraform:base
+  stage: deploy
+  script:
+    - terraform plan -out=plan.tfplan -no-color
+    - terraform apply -auto-approve plan.tfplan
+  environment:
+    name: gcp-production
+    url: https://clarissa-api-${TF_VAR_gcp_project}.run.app
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+        - infrastructure/terraform/**/*
+      when: manual
+  dependencies: []
+
+# ============================================================
+# Destroy - manual, protected
+# ============================================================
+tf:destroy:
+  extends: .terraform:base
+  stage: deploy
+  script:
+    - echo "⚠️ WARNING: This will destroy all infrastructure!"
+    - terraform plan -destroy -out=destroy.tfplan -no-color
+    - terraform apply -auto-approve destroy.tfplan
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
+      allow_failure: true
+  dependencies: []
