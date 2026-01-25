@@ -520,8 +520,7 @@ mr_comment_on_failure:
 pages:
   stage: deploy
   image: python:3.11
-  tags:
-    - docker-any
+  # Using GitLab shared runners (no tags)
   needs: []
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
