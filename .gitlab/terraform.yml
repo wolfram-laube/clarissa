@@ -21,6 +21,7 @@ variables:
     entrypoint: [""]
   tags:
     - docker-any
+  needs: []  # Run independently of other jobs
   before_script:
     - cd ${TF_ROOT}
     # Map existing CI variables to Terraform TF_VAR_ format
@@ -88,6 +89,9 @@ terraform:validate:
 terraform:plan:
   extends: .terraform-base
   stage: build
+  needs:
+    - job: terraform:validate
+      optional: true  # Don't fail if validate is skipped
   script:
     - terraform plan -out=plan.tfplan
     - terraform show -no-color plan.tfplan > plan.txt
@@ -114,6 +118,8 @@ terraform:plan:
 terraform:apply:
   extends: .terraform-base
   stage: deploy
+  needs:
+    - terraform:plan
   script:
     - terraform apply -auto-approve plan.tfplan
   dependencies:
