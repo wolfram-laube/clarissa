@@ -1,63 +1,50 @@
 #!/bin/bash
 # CLARISSA Recording Tools - Interactive Menu
-# Cross-platform: macOS + Linux
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "🎬 CLARISSA Demo Recording Tools"
-echo "================================="
+# Detect OS
+case "$(uname -s)" in
+    Darwin) PLATFORM="macos" ;;
+    Linux)  PLATFORM="linux" ;;
+    *)      echo "❌ Unsupported OS"; exit 1 ;;
+esac
+
+TOOLS="$SCRIPT_DIR/$PLATFORM"
+
+echo "🎬 CLARISSA Recording Tools"
+echo "==========================="
 echo ""
-echo "Choose recording method:"
-echo ""
-echo "  1) Screen + Camera PiP    (picture-in-picture webcam)"
-echo "  2) Screen Only (timed)    (specify duration)"
-echo "  3) Screen Only (toggle)   (start/stop manually)"
-echo "  4) List Devices           (show available inputs)"
-echo "  5) Open Output Folder     (view recordings)"
-echo ""
+echo "  1) Screen + Camera PiP"
+echo "  2) Screen Only (timed)"
+[ "$PLATFORM" = "macos" ] && echo "  3) QuickTime (AppleScript)"
+echo "  d) List Devices"
+echo "  o) Open Output Folder"
 echo "  q) Quit"
 echo ""
-
-read -p "Selection [1-5, q]: " choice
+read -p "Choice: " choice
 
 case $choice in
     1)
-        read -p "Duration in seconds (or Enter for unlimited): " duration
-        if [ -n "$duration" ]; then
-            "$SCRIPT_DIR/record-pip.sh" start "$duration"
-        else
-            "$SCRIPT_DIR/record-pip.sh" start
-        fi
+        read -p "Duration (seconds, Enter=unlimited): " dur
+        "$TOOLS/record-pip.sh" start $dur
         ;;
     2)
-        read -p "Duration in seconds [30]: " duration
-        duration=${duration:-30}
-        "$SCRIPT_DIR/record-c-timed.sh" "$duration"
+        read -p "Duration [30]: " dur
+        "$TOOLS/record-timed.sh" ${dur:-30}
         ;;
     3)
-        echo "Starting... press Enter to stop"
-        "$SCRIPT_DIR/record-pip.sh" start --no-camera &
-        PID=$!
-        read
-        kill $PID 2>/dev/null
+        [ "$PLATFORM" != "macos" ] && echo "macOS only" && exit 1
+        echo "1) Start  2) Stop"
+        read -p "> " cmd
+        [ "$cmd" = "1" ] && "$TOOLS/record-applescript.sh" start
+        [ "$cmd" = "2" ] && "$TOOLS/record-applescript.sh" stop
         ;;
-    4)
-        "$SCRIPT_DIR/record-pip.sh" devices
+    d) "$TOOLS/record-pip.sh" devices ;;
+    o)
+        [ "$PLATFORM" = "macos" ] && open "$HOME/Movies/CLARISSA-Demos"
+        [ "$PLATFORM" = "linux" ] && xdg-open "$HOME/Videos/CLARISSA-Demos" 2>/dev/null
         ;;
-    5)
-        OS="$(uname -s)"
-        if [ "$OS" = "Darwin" ]; then
-            open "$HOME/Movies/CLARISSA-Demos"
-        else
-            xdg-open "$HOME/Videos/CLARISSA-Demos" 2>/dev/null || ls -la "$HOME/Videos/CLARISSA-Demos"
-        fi
-        ;;
-    q|Q)
-        echo "Bye!"
-        exit 0
-        ;;
-    *)
-        echo "Invalid choice"
-        exit 1
-        ;;
+    q) exit 0 ;;
+    *) echo "Invalid" ;;
 esac
