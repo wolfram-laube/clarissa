@@ -1,39 +1,47 @@
-# Docker Build & Push Pipeline
+# Docker Build & Push Pipeline using Kaniko
 # Builds CLARISSA API image and pushes to GitLab Container Registry
+#
+# Uses Kaniko instead of Docker-in-Docker for better GitLab shared runner compatibility
 #
 # Triggers:
 #   - Push to main branch
 #   - Semantic version tags (v1.0.0, etc.)
 #   - Manual trigger via web
-#
-# Registry: registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api
 
 # ============== Build Job ==============
 docker-build:
   stage: build
-  image: docker:24-dind
-  # Use GitLab shared runners (no tags = any runner)
-  services:
-    - docker:24-dind
+  image:
+    name: gcr.io/kaniko-project/executor:v1.19.2-debug
+    entrypoint: [""]
   variables:
-    DOCKER_HOST: tcp://docker:2376
-    DOCKER_TLS_CERTDIR: "/certs"
-    DOCKER_TLS_VERIFY: 1
-    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     API_IMAGE: ${CI_REGISTRY_IMAGE}/api
-    DOCKER_BUILDKIT: 1
-  before_script:
-    - echo "Logging into GitLab Container Registry..."
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
-    - echo "Building CLARISSA API image..."
-    - export TAGS="-t ${API_IMAGE}:${CI_COMMIT_SHORT_SHA}"
-    - if [ "$CI_COMMIT_BRANCH" = "main" ]; then export TAGS="$TAGS -t ${API_IMAGE}:latest"; fi
-    - if [ -n "$CI_COMMIT_TAG" ]; then export TAGS="$TAGS -t ${API_IMAGE}:${CI_COMMIT_TAG}"; fi
-    - echo "Tags:$TAGS"
-    - docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from ${API_IMAGE}:latest -f docker/api/Dockerfile $TAGS .
-    - echo "Pushing images to registry..."
-    - docker push ${API_IMAGE} --all-tags
+    - echo "Building CLARISSA API image with Kaniko..."
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    - |
+      # Build destinations
+      DESTINATIONS="--destination=${API_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+      
+      # Add latest tag for main branch
+      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
+        DESTINATIONS="$DESTINATIONS --destination=${API_IMAGE}:latest"
+      fi
+      
+      # Add version tag
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        DESTINATIONS="$DESTINATIONS --destination=${API_IMAGE}:${CI_COMMIT_TAG}"
+      fi
+      
+      echo "Building with destinations: $DESTINATIONS"
+      
+      /kaniko/executor \
+        --context="${CI_PROJECT_DIR}" \
+        --dockerfile="${CI_PROJECT_DIR}/docker/api/Dockerfile" \
+        $DESTINATIONS \
+        --cache=true \
+        --cache-repo=${API_IMAGE}/cache
     - echo "Docker build complete! Image - ${API_IMAGE}:${CI_COMMIT_SHORT_SHA}"
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
@@ -49,7 +57,6 @@ docker-build:
 docker-test:
   stage: test
   image: ${CI_REGISTRY_IMAGE}/api:${CI_COMMIT_SHORT_SHA}
-  # Use GitLab shared runners (no tags = any runner)
   needs:
     - docker-build
   script:
