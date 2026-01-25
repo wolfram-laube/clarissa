@@ -5,15 +5,14 @@
 #   - Push to main with infrastructure/** changes → plan + apply (manual)
 #
 # Required CI Variables:
-#   - GOOGLE_CREDENTIALS: GCP Service Account JSON key
+#   - GOOGLE_CREDENTIALS: GCP Service Account JSON key (File type)
 #   - TF_VAR_gcp_project: GCP Project ID
-#   - TF_VAR_openai_api_key: OpenAI API Key
-#   - TF_VAR_anthropic_api_key: Anthropic API Key (optional)
+#   - OPENAI_API_KEY: OpenAI API Key (existing)
+#   - ANTHROPIC_API_KEY: Anthropic API Key (existing, optional)
 
 variables:
   TF_ROOT: ${CI_PROJECT_DIR}/infrastructure/terraform/environments/gcp
-  TF_STATE_NAME: gcp-${CI_ENVIRONMENT_NAME}
-  # Use GitLab managed Terraform state
+  TF_STATE_NAME: clarissa-gcp
   TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}
 
 .terraform-base:
@@ -24,11 +23,13 @@ variables:
     - docker-any
   before_script:
     - cd ${TF_ROOT}
+    # Map existing CI variables to Terraform TF_VAR_ format
+    - export TF_VAR_openai_api_key="${OPENAI_API_KEY:-}"
+    - export TF_VAR_anthropic_api_key="${ANTHROPIC_API_KEY:-}"
     # Setup GCP credentials
     - |
       if [ -n "$GOOGLE_CREDENTIALS" ]; then
-        echo "$GOOGLE_CREDENTIALS" > /tmp/gcp-key.json
-        export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
+        export GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_CREDENTIALS"
       fi
     # Configure GitLab-managed Terraform state backend
     - |
@@ -65,7 +66,7 @@ terraform:fmt:
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
         - infrastructure/terraform/**/*
-  allow_failure: true  # Formatting is advisory
+  allow_failure: true
 
 terraform:validate:
   extends: .terraform-base
@@ -90,14 +91,14 @@ terraform:plan:
   script:
     - terraform plan -out=plan.tfplan
     - terraform show -no-color plan.tfplan > plan.txt
+    - echo "=== Terraform Plan Summary ==="
+    - grep -E "^(Plan:|No changes|Error)" plan.txt || head -50 plan.txt
   artifacts:
     name: "terraform-plan-${CI_COMMIT_SHORT_SHA}"
     paths:
       - ${TF_ROOT}/plan.tfplan
       - ${TF_ROOT}/plan.txt
     expire_in: 7 days
-    reports:
-      terraform: ${TF_ROOT}/plan.json
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
@@ -105,13 +106,6 @@ terraform:plan:
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
         - infrastructure/terraform/**/*
-  after_script:
-    - cd ${TF_ROOT}
-    # Generate JSON for GitLab Terraform report
-    - terraform show -json plan.tfplan > plan.json || true
-    # Summary in job output
-    - echo "=== Terraform Plan Summary ==="
-    - grep -E "^(Plan:|No changes)" plan.txt || echo "See plan.txt artifact for details"
 
 # ============================================================
 # Apply Stage - only on main, manual trigger
@@ -132,7 +126,6 @@ terraform:apply:
       changes:
         - infrastructure/terraform/**/*
       when: manual
-  allow_failure: false
 
 # ============================================================
 # Destroy Stage - emergency use only
@@ -149,5 +142,3 @@ terraform:destroy:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: manual
-  allow_failure: false
-  when: manual
