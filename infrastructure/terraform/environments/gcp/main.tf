@@ -165,6 +165,18 @@ resource "google_secret_manager_secret_version" "gitlab_registry" {
 }
 
 
+# Grant Artifact Registry service account access to GitLab credentials
+# Required for AR remote repository to pull from private GitLab registry
+data "google_project" "current" {
+  project_id = var.gcp_project
+}
+
+resource "google_secret_manager_secret_iam_member" "ar_gitlab_access" {
+  secret_id = google_secret_manager_secret.gitlab_registry.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+}
+
 # ============================================================
 # Service Account for Cloud Run
 # ============================================================
