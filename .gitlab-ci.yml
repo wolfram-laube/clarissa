@@ -521,7 +521,7 @@ pages:
   stage: deploy
   image: python:3.11
   tags:
-    - saas-linux-small-amd64
+    - docker-any
   needs: []
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
