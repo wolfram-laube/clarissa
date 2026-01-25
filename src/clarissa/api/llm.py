@@ -104,7 +104,7 @@ class OpenAIProvider(BaseLLMProvider):
         self._client = None
     
     def is_available(self) -> bool:
-        return bool(self.api_key)
+        return bool(self.api_key) and self.api_key != "not-configured"
     
     async def chat(
         self,
@@ -171,7 +171,7 @@ class AnthropicProvider(BaseLLMProvider):
         self._client = None
     
     def is_available(self) -> bool:
-        return bool(self.api_key)
+        return bool(self.api_key) and self.api_key != "not-configured"
     
     async def chat(
         self,
