@@ -297,7 +297,7 @@ echo "✅ Option C: $SCRIPTS_DIR/record-c-timed.sh"
 # ============================================
 # Convenience Wrapper
 # ============================================
-cat << 'EOF' > "$SCRIPTS_DIR/record-demo.sh"
+cat << 'EOF' > "$SCRIPTS_DIR/record-demo.sh record-pip.sh"
 #!/bin/bash
 # Convenience Wrapper - wähle deine bevorzugte Methode
 
@@ -324,8 +324,8 @@ case "$choice" in
     *) echo "Ungültige Wahl" ;;
 esac
 EOF
-chmod +x "$SCRIPTS_DIR/record-demo.sh"
-echo "✅ Wrapper:  $SCRIPTS_DIR/record-demo.sh"
+chmod +x "$SCRIPTS_DIR/record-demo.sh record-pip.sh"
+echo "✅ Wrapper:  $SCRIPTS_DIR/record-demo.sh record-pip.sh"
 
 # ============================================
 # PATH Setup
@@ -365,7 +365,7 @@ echo "    record-c-timed.sh 30      # 30 Sekunden"
 echo "    record-c-timed.sh 120     # 2 Minuten"
 echo ""
 echo "  Oder interaktiv:"
-echo "    record-demo.sh"
+echo "    record-demo.sh record-pip.sh"
 echo ""
 echo "============================================"
 echo ""
