@@ -49,7 +49,7 @@ variables:
     - terraform init
 
 # ============================================================
-# Validation Stage - runs on all MRs
+# Validation Stage - runs on all MRs with TF changes
 # ============================================================
 
 terraform:fmt:
@@ -61,9 +61,11 @@ terraform:fmt:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
         - infrastructure/terraform/**/*
+      when: always
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
         - infrastructure/terraform/**/*
+      when: always
   allow_failure: true
 
 terraform:validate:
@@ -75,9 +77,11 @@ terraform:validate:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
         - infrastructure/terraform/**/*
+      when: always
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
         - infrastructure/terraform/**/*
+      when: always
 
 # ============================================================
 # Plan Stage - shows what would change
@@ -101,9 +105,11 @@ terraform:plan:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
         - infrastructure/terraform/**/*
+      when: always
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
         - infrastructure/terraform/**/*
+      when: always
 
 # ============================================================
 # Apply Stage - only on main, manual trigger
