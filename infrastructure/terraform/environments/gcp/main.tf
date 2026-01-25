@@ -80,10 +80,18 @@ resource "google_artifact_registry_repository" "gitlab_remote" {
         uri = "https://registry.gitlab.com"
       }
     }
+    upstream_credentials {
+      username_password_credentials {
+        username                = var.gitlab_deploy_username
+        password_secret_version = google_secret_manager_secret_version.gitlab_registry.name
+      }
+    }
   }
 
   depends_on = [google_project_service.required_apis]
 }
+
+
 
 
 # ============================================================
@@ -145,6 +153,17 @@ resource "google_secret_manager_secret" "gitlab_registry" {
 
   depends_on = [google_project_service.required_apis]
 }
+
+# GitLab Deploy Token for AR Remote Repository
+resource "google_secret_manager_secret_version" "gitlab_registry" {
+  secret      = google_secret_manager_secret.gitlab_registry.id
+  secret_data = var.gitlab_deploy_token
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
+}
+
 
 # ============================================================
 # Service Account for Cloud Run
