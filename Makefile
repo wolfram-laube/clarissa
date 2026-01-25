@@ -24,7 +24,13 @@ help:
 	@echo ""
 	@echo "Cleanup:"
 	@echo "  make clean        Remove caches"
-	@echo "  make dev-clean    Remove Docker volumes"
+	@echo "  make dev-clean    Remove Docker volumes
+"
+	@echo "Terraform:"
+	@echo "  make tf-plan      Plan changes (preview)"
+	@echo "  make tf-apply     Apply changes (deploy!)"
+	@echo "  make deploy-gcp   Deploy to GCP"
+	@echo "  make deploy-local-k8s  Deploy to local K8s"
 
 .PHONY: help install dev-install test demo clean dev dev-up dev-down dev-logs dev-build dev-clean ollama-pull lint format simulate opm-shell
 
@@ -176,3 +182,70 @@ simulate:
 ## Open OPM Flow shell
 opm-shell:
 	docker exec -it clarissa-opm-flow bash
+
+# ============================================================
+# CLARISSA Terraform Commands
+# ============================================================
+
+.PHONY: tf-init tf-plan tf-apply tf-destroy tf-fmt tf-validate
+
+TF_ENV ?= gcp
+TF_DIR = infrastructure/terraform/environments/$(TF_ENV)
+
+# ------------------------------------------------------------
+# Terraform Workflow
+# ------------------------------------------------------------
+
+## Initialize Terraform (run first!)
+tf-init:
+	@echo "Initializing Terraform for environment: $(TF_ENV)"
+	cd $(TF_DIR) && terraform init
+
+## Plan changes (preview)
+tf-plan:
+	@echo "Planning Terraform for environment: $(TF_ENV)"
+	cd $(TF_DIR) && terraform plan
+
+## Apply changes (creates real resources!)
+tf-apply:
+	@echo "Applying Terraform for environment: $(TF_ENV)"
+	cd $(TF_DIR) && terraform apply
+
+## Destroy all resources
+tf-destroy:
+	@echo "⚠️  Destroying Terraform resources for environment: $(TF_ENV)"
+	cd $(TF_DIR) && terraform destroy
+
+## Format Terraform files
+tf-fmt:
+	terraform fmt -recursive infrastructure/terraform/
+
+## Validate Terraform configuration
+tf-validate:
+	cd $(TF_DIR) && terraform validate
+
+## Show Terraform outputs
+tf-output:
+	cd $(TF_DIR) && terraform output
+
+# ------------------------------------------------------------
+# Environment-specific shortcuts
+# ------------------------------------------------------------
+
+## Deploy to GCP
+deploy-gcp:
+	$(MAKE) tf-init TF_ENV=gcp
+	$(MAKE) tf-apply TF_ENV=gcp
+
+## Deploy to local K8s
+deploy-local-k8s:
+	$(MAKE) tf-init TF_ENV=local-k8s
+	$(MAKE) tf-apply TF_ENV=local-k8s
+
+## Destroy GCP deployment
+destroy-gcp:
+	$(MAKE) tf-destroy TF_ENV=gcp
+
+## Destroy local K8s deployment
+destroy-local-k8s:
+	$(MAKE) tf-destroy TF_ENV=local-k8s
