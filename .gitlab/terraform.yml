@@ -1,8 +1,6 @@
 # Terraform CI/CD Pipeline
 #
-# Triggers:
-#   - MRs that change infrastructure/** → validate + plan
-#   - Push to main with infrastructure/** changes → plan + apply (manual)
+# Uses GitLab shared runners (no tags required)
 #
 # Required CI Variables:
 #   - GOOGLE_CREDENTIALS: GCP Service Account JSON key (File type)
@@ -19,19 +17,15 @@ variables:
   image:
     name: hashicorp/terraform:1.7
     entrypoint: [""]
-  tags:
-    - docker-gcp
+  needs: []
   before_script:
     - cd ${TF_ROOT}
-    # Map existing CI variables to Terraform TF_VAR_ format
     - export TF_VAR_openai_api_key="${OPENAI_API_KEY:-}"
     - export TF_VAR_anthropic_api_key="${ANTHROPIC_API_KEY:-}"
-    # Setup GCP credentials
     - |
       if [ -n "$GOOGLE_CREDENTIALS" ]; then
         export GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_CREDENTIALS"
       fi
-    # Configure GitLab-managed Terraform state backend
     - |
       cat > backend.tf << BACKEND
       terraform {
@@ -50,10 +44,6 @@ variables:
     - terraform --version
     - terraform init
 
-# ============================================================
-# Validation Stage - runs on all MRs with TF changes
-# ============================================================
-
 terraform:fmt:
   extends: .terraform-base
   stage: test
@@ -63,11 +53,9 @@ terraform:fmt:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
         - infrastructure/terraform/**/*
-      when: always
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
         - infrastructure/terraform/**/*
-      when: always
   allow_failure: true
 
 terraform:validate:
@@ -79,19 +67,14 @@ terraform:validate:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
         - infrastructure/terraform/**/*
-      when: always
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
         - infrastructure/terraform/**/*
-      when: always
-
-# ============================================================
-# Plan Stage - shows what would change
-# ============================================================
 
 terraform:plan:
   extends: .terraform-base
   stage: build
+  needs: ["terraform:validate"]
   script:
     - terraform plan -out=plan.tfplan
     - terraform show -no-color plan.tfplan > plan.txt
@@ -107,15 +90,9 @@ terraform:plan:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
         - infrastructure/terraform/**/*
-      when: always
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
         - infrastructure/terraform/**/*
-      when: always
-
-# ============================================================
-# Apply Stage - only on main, manual trigger
-# ============================================================
 
 terraform:apply:
   extends: .terraform-base
@@ -132,10 +109,6 @@ terraform:apply:
       changes:
         - infrastructure/terraform/**/*
       when: manual
-
-# ============================================================
-# Destroy Stage - emergency use only
-# ============================================================
 
 terraform:destroy:
   extends: .terraform-base
