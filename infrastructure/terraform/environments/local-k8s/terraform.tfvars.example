@@ -1,0 +1,45 @@
+# CLARISSA Local K8s Configuration
+# Copy to terraform.tfvars and adjust:
+#   cp terraform.tfvars.example terraform.tfvars
+
+# ============================================================
+# Kubernetes Settings
+# ============================================================
+
+# kubeconfig_path = "~/.kube/config"
+# kubeconfig_context = "k3d-clarissa"  # or "minikube"
+# namespace = "clarissa"
+
+# ============================================================
+# API Configuration
+# ============================================================
+
+# api_image    = "registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:latest"
+# api_replicas = 1
+
+# ============================================================
+# LLM Configuration
+# ============================================================
+
+# Default: use local Ollama (no API key needed!)
+llm_provider = "ollama"
+ollama_model = "llama3.2:3b"
+
+# Or use Claude (requires internet):
+# llm_provider      = "anthropic"
+# anthropic_api_key = "sk-ant-api03-..."
+
+# ============================================================
+# Component Toggles
+# ============================================================
+
+deploy_ollama  = true   # Local LLM
+deploy_mongodb = true   # Database
+deploy_qdrant  = true   # Vector DB
+deploy_ingress = false  # Use port-forward instead
+
+# ============================================================
+# Logging
+# ============================================================
+
+log_level = "DEBUG"
