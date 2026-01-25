@@ -61,6 +61,32 @@ resource "google_project_service" "required_apis" {
 }
 
 # ============================================================
+# Artifact Registry - Remote Repository for GitLab
+# ============================================================
+
+# Remote repository that proxies GitLab Container Registry
+# This allows Cloud Run to pull images from GitLab via AR
+resource "google_artifact_registry_repository" "gitlab_remote" {
+  location      = var.gcp_region
+  repository_id = "gitlab-remote"
+  description   = "Remote repository proxying GitLab Container Registry"
+  format        = "DOCKER"
+  mode          = "REMOTE_REPOSITORY"
+
+  remote_repository_config {
+    description = "GitLab Container Registry"
+    docker_repository {
+      custom_repository {
+        uri = "https://registry.gitlab.com"
+      }
+    }
+  }
+
+  depends_on = [google_project_service.required_apis]
+}
+
+
+# ============================================================
 # Secrets - LLM API Keys
 # ============================================================
 
