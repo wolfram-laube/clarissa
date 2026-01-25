@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎤 CLARISSA Voice Input</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #e0e0e0;
+        }
+        .container {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        h1 { text-align: center; margin-bottom: 10px; font-size: 1.8em; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
+        
+        .mic-container { text-align: center; margin: 30px 0; }
+        .mic-btn {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(145deg, #e94560, #c23a51);
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(233,69,96,0.4);
+        }
+        .mic-btn:hover { transform: scale(1.05); }
+        .mic-btn.recording {
+            animation: pulse 1.5s infinite;
+            background: linear-gradient(145deg, #00d9ff, #0099cc);
+            box-shadow: 0 4px 20px rgba(0,217,255,0.5);
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            margin: 15px 0;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+        }
+        .status.recording { color: #00d9ff; }
+        .status.ready { color: #4caf50; }
+        
+        .visualizer {
+            width: 100%;
+            height: 60px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .controls { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary { background: #4caf50; color: white; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: white; }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); }
+        
+        .result {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        .result.visible { display: block; }
+        .result h3 { color: #00d9ff; margin-bottom: 10px; }
+        .result-item { margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px; }
+        .result-label { color: #888; font-size: 0.85em; }
+        .result-value { color: #fff; font-size: 1.1em; margin-top: 4px; }
+        .intent-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #e94560;
+            border-radius: 20px;
+            font-size: 0.85em;
+        }
+        
+        .examples { margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .examples h4 { color: #888; margin-bottom: 10px; }
+        .example { padding: 8px 12px; background: rgba(255,255,255,0.05); border-radius: 6px; margin: 5px 0; font-size: 0.9em; cursor: pointer; }
+        .example:hover { background: rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 CLARISSA Voice</h1>
+        <p class="subtitle">Speak to control reservoir simulation</p>
+        
+        <div class="mic-container">
+            <button class="mic-btn" id="micBtn">🎤</button>
+        </div>
+        
+        <div class="status" id="status">Click microphone to start</div>
+        
+        <canvas class="visualizer" id="visualizer"></canvas>
+        
+        <div class="controls">
+            <button class="btn btn-secondary" id="playBtn" disabled>▶️ Play</button>
+            <button class="btn btn-primary" id="sendBtn" disabled>🚀 Send</button>
+        </div>
+        
+        <div class="result" id="result">
+            <h3>📝 Response</h3>
+            <div class="result-item">
+                <div class="result-label">Transcript</div>
+                <div class="result-value" id="transcript"></div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Intent</div>
+                <div class="result-value"><span class="intent-badge" id="intent"></span> <span id="confidence"></span></div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Slots</div>
+                <div class="result-value" id="slots"></div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Response</div>
+                <div class="result-value" id="response"></div>
+            </div>
+        </div>
+        
+        <div class="examples">
+            <h4>💡 Try saying:</h4>
+            <div class="example" onclick="sendText(this.textContent)">"Show me the permeability"</div>
+            <div class="example" onclick="sendText(this.textContent)">"What is the water cut"</div>
+            <div class="example" onclick="sendText(this.textContent)">"Display pressure at layer 5"</div>
+            <div class="example" onclick="sendText(this.textContent)">"Help"</div>
+        </div>
+    </div>
+
+    <script>
+        const micBtn = document.getElementById('micBtn');
+        const status = document.getElementById('status');
+        const playBtn = document.getElementById('playBtn');
+        const sendBtn = document.getElementById('sendBtn');
+        const result = document.getElementById('result');
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+        
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioBlob;
+        let audioContext;
+        let analyser;
+        let isRecording = false;
+        
+        // Setup canvas
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        
+        function drawVisualizer(dataArray) {
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const barWidth = canvas.width / dataArray.length * 2.5;
+            let x = 0;
+            
+            for (let i = 0; i < dataArray.length; i++) {
+                const barHeight = (dataArray[i] / 255) * canvas.height;
+                const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
+                gradient.addColorStop(0, '#e94560');
+                gradient.addColorStop(1, '#00d9ff');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, canvas.height - barHeight, barWidth - 2, barHeight);
+                x += barWidth;
+            }
+        }
+        
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                audioContext = new AudioContext();
+                analyser = audioContext.createAnalyser();
+                const source = audioContext.createMediaStreamSource(stream);
+                source.connect(analyser);
+                analyser.fftSize = 64;
+                
+                const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                
+                function animate() {
+                    if (isRecording) {
+                        analyser.getByteFrequencyData(dataArray);
+                        drawVisualizer(dataArray);
+                        requestAnimationFrame(animate);
+                    }
+                }
+                
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    playBtn.disabled = false;
+                    sendBtn.disabled = false;
+                    stream.getTracks().forEach(t => t.stop());
+                };
+                
+                mediaRecorder.start();
+                isRecording = true;
+                micBtn.classList.add('recording');
+                micBtn.textContent = '⏹️';
+                status.textContent = '🔴 Recording... Click to stop';
+                status.className = 'status recording';
+                animate();
+                
+            } catch (err) {
+                status.textContent = '❌ Microphone access denied';
+                console.error(err);
+            }
+        }
+        
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                micBtn.classList.remove('recording');
+                micBtn.textContent = '🎤';
+                status.textContent = '✅ Recording complete';
+                status.className = 'status ready';
+            }
+        }
+        
+        micBtn.onclick = () => isRecording ? stopRecording() : startRecording();
+        
+        playBtn.onclick = () => {
+            if (audioBlob) {
+                const audio = new Audio(URL.createObjectURL(audioBlob));
+                audio.play();
+            }
+        };
+        
+        sendBtn.onclick = async () => {
+            if (!audioBlob) return;
+            
+            status.textContent = '⏳ Processing...';
+            sendBtn.disabled = true;
+            
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.webm');
+            
+            try {
+                const res = await fetch('/api/voice', { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                document.getElementById('transcript').textContent = data.transcript;
+                document.getElementById('intent').textContent = data.intent.type;
+                document.getElementById('confidence').textContent = `(${Math.round(data.intent.confidence * 100)}%)`;
+                document.getElementById('slots').textContent = JSON.stringify(data.intent.slots, null, 2);
+                document.getElementById('response').textContent = data.response;
+                
+                result.classList.add('visible');
+                status.textContent = '✅ Done!';
+            } catch (err) {
+                status.textContent = '❌ Error: ' + err.message;
+            }
+            
+            sendBtn.disabled = false;
+        };
+        
+        async function sendText(text) {
+            text = text.replace(/"/g, '');
+            status.textContent = '⏳ Processing...';
+            
+            try {
+                const res = await fetch('/api/text?text=' + encodeURIComponent(text), { method: 'POST' });
+                const data = await res.json();
+                
+                document.getElementById('transcript').textContent = data.transcript;
+                document.getElementById('intent').textContent = data.intent.type;
+                document.getElementById('confidence').textContent = `(${Math.round(data.intent.confidence * 100)}%)`;
+                document.getElementById('slots').textContent = JSON.stringify(data.intent.slots, null, 2);
+                document.getElementById('response').textContent = data.response;
+                
+                result.classList.add('visible');
+                status.textContent = '✅ Done!';
+            } catch (err) {
+                status.textContent = '❌ Error: ' + err.message;
+            }
+        }
+        
+        // Spacebar shortcut
+        document.addEventListener('keydown', e => {
+            if (e.code === 'Space' && e.target === document.body) {
+                e.preventDefault();
+                micBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
