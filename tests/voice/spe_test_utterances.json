@@ -1,54 +1,57 @@
 {
-  "metadata": {
-    "description": "Voice test utterances based on SPE Comparative Solution Projects",
-    "models": ["SPE1", "SPE5", "SPE9", "SPE10"],
-    "source": "OPM opm-data repository"
-  },
-  "spe1": {
-    "description": "Simple black-oil, 10x10x3 grid, gas injection",
-    "wells": ["INJ", "PROD"],
-    "utterances": [
-      {"text": "show me the pressure distribution", "intent": "visualize_property", "slots": {"property": "pressure"}},
-      {"text": "what is the gas oil ratio at the producer", "intent": "query_value", "slots": {"property": "gor", "well": "PROD"}},
-      {"text": "display the oil saturation at layer 2", "intent": "visualize_property", "slots": {"property": "oil_saturation", "layer": 2}},
-      {"text": "how much gas have we injected", "intent": "query_value", "slots": {"property": "gas_injection_total"}},
-      {"text": "show porosity in 3D", "intent": "visualize_property", "slots": {"property": "porosity", "view_type": "3d"}},
-      {"text": "what is the BHP at the injector", "intent": "query_value", "slots": {"property": "bhp", "well": "INJ"}}
-    ]
-  },
-  "spe9": {
-    "description": "Waterflood, 24x25x15 grid, 26 wells",
-    "wells": ["INJE1", "PRODU2", "PRODU3", "PRODU4", "PRODU5", "PRODU6", "PRODU7", "PRODU8", "PRODU9", "PRODU10", "PRODU11", "PRODU12", "PRODU13", "PRODU14", "PRODU15", "PRODU16", "PRODU17", "PRODU18", "PRODU19", "PRODU20", "PRODU21", "PRODU22", "PRODU23", "PRODU24", "PRODU25", "PRODU26"],
-    "utterances": [
-      {"text": "show water saturation at day 500", "intent": "visualize_property", "slots": {"property": "water_saturation", "time_days": 500}},
-      {"text": "what is the water cut at producer 10", "intent": "query_value", "slots": {"property": "water_cut", "well": "PRODU10"}},
-      {"text": "display the permeability at layer 8", "intent": "visualize_property", "slots": {"property": "permeability", "layer": 8}},
-      {"text": "how much water have we injected at INJE1", "intent": "query_value", "slots": {"property": "water_injection_total", "well": "INJE1"}},
-      {"text": "show field oil production rate", "intent": "query_value", "slots": {"property": "oil_rate", "well": "FIELD"}},
-      {"text": "what is the cumulative oil production", "intent": "query_value", "slots": {"property": "oil_production_total"}},
-      {"text": "visualize pressure at layer 15 time 1000", "intent": "visualize_property", "slots": {"property": "pressure", "layer": 15, "time_days": 1000}},
-      {"text": "compare water cut for producer 5 and producer 12", "intent": "compare_wells", "slots": {"property": "water_cut", "wells": ["PRODU5", "PRODU12"]}},
-      {"text": "show all producers on the grid", "intent": "visualize_wells", "slots": {"well_type": "producer"}},
-      {"text": "what is the recovery factor", "intent": "query_value", "slots": {"property": "recovery_factor"}}
-    ]
-  },
-  "spe10": {
-    "description": "Upscaling benchmark, 60x220x85 grid, 1.1M cells",
-    "utterances": [
-      {"text": "show the permeability heterogeneity", "intent": "visualize_property", "slots": {"property": "permeability"}},
-      {"text": "display porosity at layer 50", "intent": "visualize_property", "slots": {"property": "porosity", "layer": 50}},
-      {"text": "what is the pore volume", "intent": "query_value", "slots": {"property": "pore_volume"}},
-      {"text": "show cross section at J equals 110", "intent": "visualize_slice", "slots": {"axis": "j", "index": 110}}
-    ]
-  },
-  "general_commands": [
-    {"text": "help", "intent": "help", "slots": {}},
-    {"text": "cancel", "intent": "cancel", "slots": {}},
-    {"text": "yes run it", "intent": "confirm", "slots": {}},
-    {"text": "go back", "intent": "navigate", "slots": {"target": "back"}},
-    {"text": "load SPE9 model", "intent": "load_model", "slots": {"model": "SPE9"}},
-    {"text": "run simulation", "intent": "run_simulation", "slots": {}},
-    {"text": "stop the simulation", "intent": "cancel", "slots": {}},
-    {"text": "save results", "intent": "save", "slots": {"target": "results"}}
-  ]
+  "version": "1.1",
+  "description": "Extended test utterances for CLARISSA voice input - includes SPE terminology",
+  "created": "2026-01-25",
+  "total_utterances": 35,
+  "utterances": [
+    {"id": "viz_001", "text": "show me the permeability", "expected_intent": "visualize_property", "expected_slots": {"property": "permeability"}, "min_confidence": 0.9},
+    {"id": "viz_002", "text": "display porosity in 3D", "expected_intent": "visualize_property", "expected_slots": {"property": "porosity", "view_type": "3d"}, "min_confidence": 0.9},
+    {"id": "viz_003", "text": "show layer 3", "expected_intent": "visualize_property", "expected_slots": {"layer": 3}, "min_confidence": 0.85},
+    {"id": "viz_004", "text": "what does the saturation look like at day 500", "expected_intent": "visualize_property", "expected_slots": {"property": "saturation", "time_days": 500}, "min_confidence": 0.85},
+    {"id": "viz_005", "text": "visualize water saturation animation", "expected_intent": "visualize_property", "expected_slots": {"property": "water_saturation", "view_type": "animation"}, "min_confidence": 0.9},
+    {"id": "viz_006", "text": "plot the pressure distribution", "expected_intent": "visualize_property", "expected_slots": {"property": "pressure"}, "min_confidence": 0.9},
+    {"id": "viz_007", "text": "show Sw at 1000 days", "expected_intent": "visualize_property", "expected_slots": {"property": "water_saturation", "time_days": 1000}, "min_confidence": 0.85},
+    {"id": "viz_008", "text": "display the cross section at layer 5", "expected_intent": "visualize_property", "expected_slots": {"layer": 5, "view_type": "cross_section_xy"}, "min_confidence": 0.85},
+    
+    {"id": "query_001", "text": "what is the oil rate", "expected_intent": "query_value", "expected_slots": {"property": "oil_rate"}, "min_confidence": 0.9},
+    {"id": "query_002", "text": "how much water are we producing", "expected_intent": "query_value", "expected_slots": {"property": "water_rate"}, "min_confidence": 0.85},
+    {"id": "query_003", "text": "tell me the water cut", "expected_intent": "query_value", "expected_slots": {"property": "water_cut"}, "min_confidence": 0.9},
+    {"id": "query_004", "text": "what is the pressure at producer 1", "expected_intent": "query_value", "expected_slots": {"property": "pressure", "well": "PROD1"}, "min_confidence": 0.85},
+    {"id": "query_005", "text": "what is the FWCT", "expected_intent": "query_value", "expected_slots": {"property": "water_cut"}, "min_confidence": 0.85, "note": "FWCT = Field Water Cut"},
+    {"id": "query_006", "text": "tell me the FOPR", "expected_intent": "query_value", "expected_slots": {"property": "oil_rate"}, "min_confidence": 0.85, "note": "FOPR = Field Oil Production Rate"},
+    {"id": "query_007", "text": "what is the BHP at injector 1", "expected_intent": "query_value", "expected_slots": {"property": "pressure", "well": "INJ1"}, "min_confidence": 0.85},
+    {"id": "query_008", "text": "current GOR", "expected_intent": "query_value", "expected_slots": {"property": "gor"}, "min_confidence": 0.85, "note": "GOR = Gas-Oil Ratio"},
+    
+    {"id": "nav_001", "text": "go to the results", "expected_intent": "navigate", "expected_slots": {"target": "results"}, "min_confidence": 0.9},
+    {"id": "nav_002", "text": "show me sensitivity analysis", "expected_intent": "navigate", "expected_slots": {"target": "sensitivity"}, "min_confidence": 0.85},
+    {"id": "nav_003", "text": "back to model building", "expected_intent": "navigate", "expected_slots": {"target": "model"}, "min_confidence": 0.85},
+    {"id": "nav_004", "text": "navigate to grid section", "expected_intent": "navigate", "expected_slots": {"target": "grid"}, "min_confidence": 0.85},
+    
+    {"id": "help_001", "text": "how do I change permeability", "expected_intent": "help", "expected_slots": {"topic": "modify_parameter"}, "min_confidence": 0.9},
+    {"id": "help_002", "text": "what commands are available", "expected_intent": "help", "expected_slots": {}, "min_confidence": 0.9},
+    {"id": "help_003", "text": "help", "expected_intent": "help", "expected_slots": {}, "min_confidence": 1.0},
+    {"id": "help_004", "text": "how do I run a simulation", "expected_intent": "help", "expected_slots": {}, "min_confidence": 0.9},
+    
+    {"id": "cancel_001", "text": "stop", "expected_intent": "cancel", "expected_slots": {}, "min_confidence": 1.0},
+    {"id": "cancel_002", "text": "cancel", "expected_intent": "cancel", "expected_slots": {}, "min_confidence": 1.0},
+    {"id": "cancel_003", "text": "never mind", "expected_intent": "cancel", "expected_slots": {}, "min_confidence": 0.95},
+    {"id": "cancel_004", "text": "abort", "expected_intent": "cancel", "expected_slots": {}, "min_confidence": 1.0},
+    
+    {"id": "confirm_001", "text": "yes", "expected_intent": "confirm", "expected_slots": {}, "min_confidence": 1.0},
+    {"id": "confirm_002", "text": "do it", "expected_intent": "confirm", "expected_slots": {}, "min_confidence": 0.95},
+    {"id": "confirm_003", "text": "go ahead", "expected_intent": "confirm", "expected_slots": {}, "min_confidence": 0.95},
+    {"id": "confirm_004", "text": "okay", "expected_intent": "confirm", "expected_slots": {}, "min_confidence": 1.0},
+    
+    {"id": "spe_001", "text": "show me the SPE9 model", "expected_intent": "visualize_property", "expected_slots": {}, "min_confidence": 0.8, "note": "SPE Comparative Solution Project Model 9"},
+    {"id": "spe_002", "text": "what is the STOIIP", "expected_intent": "query_value", "expected_slots": {"property": "stoiip"}, "min_confidence": 0.8, "note": "Stock Tank Oil Initially In Place"},
+    {"id": "spe_003", "text": "show porosity from the Norne model", "expected_intent": "visualize_property", "expected_slots": {"property": "porosity"}, "min_confidence": 0.85, "note": "Norne = Norwegian Sea field benchmark"}
+  ],
+  "intent_distribution": {
+    "visualize_property": 11,
+    "query_value": 8,
+    "navigate": 4,
+    "help": 4,
+    "cancel": 4,
+    "confirm": 4
+  }
 }
