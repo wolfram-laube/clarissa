@@ -1,0 +1,31 @@
+# CLARISSA GCP Configuration
+# Copy to terraform.tfvars and fill in values:
+#   cp terraform.tfvars.example terraform.tfvars
+
+# ============================================================
+# Required Settings
+# ============================================================
+
+gcp_project = "myk8sproject-207017"
+gcp_region  = "europe-west1"
+
+# Get from: https://console.anthropic.com/
+anthropic_api_key = "sk-ant-api03-..."
+
+# ============================================================
+# Optional Settings (defaults shown)
+# ============================================================
+
+# API Configuration
+# api_image         = "registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:latest"
+# api_min_instances = 0      # Scale to zero when idle
+# api_max_instances = 3
+# api_cpu           = "1"
+# api_memory        = "1Gi"
+# api_public        = true   # Allow unauthenticated access
+
+# Logging
+# log_level = "INFO"         # DEBUG, INFO, WARNING, ERROR
+
+# Firestore
+# firestore_location = "eur3"  # Europe multi-region
