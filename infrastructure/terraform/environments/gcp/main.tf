@@ -88,7 +88,10 @@ resource "google_artifact_registry_repository" "gitlab_remote" {
     }
   }
 
-  depends_on = [google_project_service.required_apis]
+  depends_on = [
+    google_project_service.required_apis,
+    google_secret_manager_secret_iam_member.ar_gitlab_access
+  ]
 }
 
 
