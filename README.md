@@ -34,7 +34,26 @@ It is **explicitly documented and versioned**.
 | [Runner Verwaltung 🇩🇪](https://irena-40cc50.gitlab.io/runner-management-de/) | Runner starten/stoppen |
 | [CI Guide](https://irena-40cc50.gitlab.io/ci/) | How to read CI results |
 | [ADRs](https://irena-40cc50.gitlab.io/architecture/adr/) | Architecture decisions |
+| [🎮 Demos](https://irena-40cc50.gitlab.io/demos/voice-demo.html) | Voice Input & Screen Recorder |
 | [Publications](https://irena-40cc50.gitlab.io/publications/) | Research papers (SPE Europe 2026) |
+---
+
+## 🎤 Voice Input (NEW!)
+
+Control CLARISSA with your voice! Speak natural language commands to visualize reservoir data.
+
+| Try it now | |
+|------------|---|
+| [🎮 **Live Demo**](https://irena-40cc50.gitlab.io/demos/voice-demo.html) | Browser-based, no install needed |
+| [📖 Tutorial](https://irena-40cc50.gitlab.io/tutorials/voice-input/) | Full documentation |
+| [📓 Colab Notebook](https://colab.research.google.com/github/wolfram-laube/clarissa/blob/main/docs/tutorials/notebooks/16_Voice_Input_Showcase.ipynb) | Interactive playground |
+
+**Example commands:**
+- *"Show me the permeability distribution"* → 3D visualization
+- *"Show layer 3"* → Cross-section with well markers
+- *"What is the water cut?"* → Query simulation results
+
+
 
 ---
 
