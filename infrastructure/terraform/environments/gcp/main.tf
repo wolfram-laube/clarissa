@@ -99,7 +99,7 @@ resource "google_secret_manager_secret" "anthropic_api_key" {
 }
 
 resource "google_secret_manager_secret_version" "anthropic_api_key" {
-  secret      = google_secret_manager_secret.anthropic_api_key.id
+  secret = google_secret_manager_secret.anthropic_api_key.id
   # Use placeholder if not provided - app will handle empty gracefully
   secret_data = var.anthropic_api_key != "" ? var.anthropic_api_key : "not-configured"
 
