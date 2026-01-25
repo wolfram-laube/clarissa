@@ -57,6 +57,7 @@ variables:
 terraform:fmt:
   extends: .terraform-base
   stage: test
+  needs: []
   script:
     - terraform fmt -check -recursive -diff
   rules:
@@ -71,6 +72,7 @@ terraform:fmt:
 terraform:validate:
   extends: .terraform-base
   stage: test
+  needs: []
   script:
     - terraform validate
   rules:
@@ -88,6 +90,7 @@ terraform:validate:
 terraform:plan:
   extends: .terraform-base
   stage: build
+  needs: []
   script:
     - terraform plan -out=plan.tfplan
     - terraform show -no-color plan.tfplan > plan.txt
@@ -114,10 +117,11 @@ terraform:plan:
 terraform:apply:
   extends: .terraform-base
   stage: deploy
+  needs: []
   script:
+    # Re-run plan to get tfplan (in case plan artifact expired)
+    - terraform plan -out=plan.tfplan
     - terraform apply -auto-approve plan.tfplan
-  dependencies:
-    - terraform:plan
   environment:
     name: gcp-production
     url: https://clarissa-api-${TF_VAR_gcp_project}.run.app
@@ -134,6 +138,7 @@ terraform:apply:
 terraform:destroy:
   extends: .terraform-base
   stage: deploy
+  needs: []
   script:
     - terraform destroy -auto-approve
   environment:
