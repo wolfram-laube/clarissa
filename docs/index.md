@@ -6,6 +6,14 @@
 
 CLARISSA bridges natural language interaction and domain-specific simulation syntax through governed, simulator-in-the-loop learning.
 
+
+!!! success "🎤 NEW: Voice Input"
+    Control CLARISSA by voice! Say *"Show me the permeability"* or *"What's the water cut?"*
+    
+    [:fontawesome-solid-microphone: **Try Live Demo →**](demos/voice-demo.html){ .md-button .md-button--primary }
+    [:fontawesome-solid-book: **Tutorial**](tutorials/guides/voice-input-tutorial.md){ .md-button }
+
+
 ## 🚀 Neu hier? Start Here!
 
 <div class="grid cards" markdown>
@@ -37,6 +45,7 @@ CLARISSA bridges natural language interaction and domain-specific simulation syn
 
 | I want to... / Ich will... | Guide |
 |-------------|-----------|
+| **🎤 Try Voice Control** | [Live Demo](demos/voice-demo.html) / [Tutorial](tutorials/guides/voice-input-tutorial.md) |
 | Install & run CLARISSA | [🇬🇧 Getting Started](getting-started-en.md) / [🇩🇪 Erste Schritte](getting-started-de.md) |
 | Contribute code | [Contributing Guide](contributing.md) |
 | Understand CI pipeline | [CI Guide](ci/README.md) |
