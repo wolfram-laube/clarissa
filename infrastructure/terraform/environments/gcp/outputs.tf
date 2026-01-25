@@ -24,3 +24,22 @@ output "region" {
   description = "GCP Region"
   value       = var.gcp_region
 }
+
+# LLM Configuration
+output "llm_provider" {
+  description = "Primary LLM provider"
+  value       = var.llm_provider
+}
+
+output "llm_fallback_enabled" {
+  description = "Whether Anthropic fallback is enabled"
+  value       = var.anthropic_api_key != ""
+}
+
+output "secrets_configured" {
+  description = "List of configured secrets"
+  value = compact([
+    "openai-api-key",
+    var.anthropic_api_key != "" ? "anthropic-api-key" : "",
+  ])
+}

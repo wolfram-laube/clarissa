@@ -6,6 +6,10 @@
 # - Firestore for database
 # - Cloud Monitoring for observability
 #
+# Multi-Provider LLM Support:
+# - OpenAI (primary - cost effective)
+# - Anthropic (fallback - quality)
+#
 # Usage:
 #   terraform init
 #   terraform plan
@@ -57,10 +61,34 @@ resource "google_project_service" "required_apis" {
 }
 
 # ============================================================
-# Secrets
+# Secrets - LLM API Keys
 # ============================================================
 
+# OpenAI API Key (primary provider - cost effective)
+resource "google_secret_manager_secret" "openai_api_key" {
+  secret_id = "openai-api-key"
+  project   = var.gcp_project
+
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.required_apis]
+}
+
+resource "google_secret_manager_secret_version" "openai_api_key" {
+  secret      = google_secret_manager_secret.openai_api_key.id
+  secret_data = var.openai_api_key
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
+}
+
+# Anthropic API Key (fallback provider - quality)
 resource "google_secret_manager_secret" "anthropic_api_key" {
+  count = var.anthropic_api_key != "" ? 1 : 0
+
   secret_id = "anthropic-api-key"
   project   = var.gcp_project
 
@@ -72,7 +100,9 @@ resource "google_secret_manager_secret" "anthropic_api_key" {
 }
 
 resource "google_secret_manager_secret_version" "anthropic_api_key" {
-  secret      = google_secret_manager_secret.anthropic_api_key.id
+  count = var.anthropic_api_key != "" ? 1 : 0
+
+  secret      = google_secret_manager_secret.anthropic_api_key[0].id
   secret_data = var.anthropic_api_key
 
   lifecycle {
@@ -102,9 +132,18 @@ resource "google_service_account" "clarissa_api" {
   project      = var.gcp_project
 }
 
-# Grant access to secrets
+# Grant access to OpenAI secret
+resource "google_secret_manager_secret_iam_member" "api_openai_access" {
+  secret_id = google_secret_manager_secret.openai_api_key.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.clarissa_api.email}"
+}
+
+# Grant access to Anthropic secret (if configured)
 resource "google_secret_manager_secret_iam_member" "api_anthropic_access" {
-  secret_id = google_secret_manager_secret.anthropic_api_key.id
+  count = var.anthropic_api_key != "" ? 1 : 0
+
+  secret_id = google_secret_manager_secret.anthropic_api_key[0].id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.clarissa_api.email}"
 }
@@ -140,6 +179,7 @@ resource "google_cloud_run_v2_service" "clarissa_api" {
         container_port = 8000
       }
 
+      # Environment Configuration
       env {
         name  = "ENVIRONMENT"
         value = "gcp"
@@ -151,21 +191,59 @@ resource "google_cloud_run_v2_service" "clarissa_api" {
       }
 
       env {
-        name  = "LLM_PROVIDER"
-        value = "anthropic"
+        name  = "DEBUG"
+        value = "false"
       }
 
+      # LLM Provider Configuration
+      env {
+        name  = "LLM_PROVIDER"
+        value = var.llm_provider
+      }
+
+      env {
+        name  = "OPENAI_MODEL"
+        value = var.openai_model
+      }
+
+      env {
+        name  = "ANTHROPIC_MODEL"
+        value = var.anthropic_model
+      }
+
+      # Database Configuration
       env {
         name  = "FIRESTORE_PROJECT"
         value = var.gcp_project
       }
 
+      # Disable emulator in GCP
       env {
-        name = "ANTHROPIC_API_KEY"
+        name  = "FIRESTORE_EMULATOR_HOST"
+        value = ""
+      }
+
+      # OpenAI API Key (from Secret Manager)
+      env {
+        name = "OPENAI_API_KEY"
         value_source {
           secret_key_ref {
-            secret  = google_secret_manager_secret.anthropic_api_key.secret_id
+            secret  = google_secret_manager_secret.openai_api_key.secret_id
             version = "latest"
+          }
+        }
+      }
+
+      # Anthropic API Key (from Secret Manager, if configured)
+      dynamic "env" {
+        for_each = var.anthropic_api_key != "" ? [1] : []
+        content {
+          name = "ANTHROPIC_API_KEY"
+          value_source {
+            secret_key_ref {
+              secret  = google_secret_manager_secret.anthropic_api_key[0].secret_id
+              version = "latest"
+            }
           }
         }
       }
@@ -204,7 +282,7 @@ resource "google_cloud_run_v2_service" "clarissa_api" {
 
   depends_on = [
     google_project_service.required_apis,
-    google_secret_manager_secret_version.anthropic_api_key,
+    google_secret_manager_secret_version.openai_api_key,
   ]
 }
 
