@@ -1,31 +1,49 @@
-# CLARISSA GCP Configuration
-# Copy to terraform.tfvars and fill in values:
+# CLARISSA Infrastructure - GCP Configuration
+#
+# Copy this file to terraform.tfvars and fill in your values:
 #   cp terraform.tfvars.example terraform.tfvars
+#
+# NEVER commit terraform.tfvars to git (contains secrets)!
 
 # ============================================================
 # Required Settings
 # ============================================================
 
-gcp_project = "myk8sproject-207017"
-gcp_region  = "europe-west1"
+gcp_project = "your-gcp-project-id"
 
+# OpenAI API Key (primary LLM provider - more cost-effective)
+# Get from: https://platform.openai.com/api-keys
+openai_api_key = "sk-..."
+
+# ============================================================
+# Optional Settings
+# ============================================================
+
+# Anthropic API Key (fallback provider, optional)
 # Get from: https://console.anthropic.com/
-anthropic_api_key = "sk-ant-api03-..."
+# anthropic_api_key = "sk-ant-..."
 
-# ============================================================
-# Optional Settings (defaults shown)
-# ============================================================
+# Primary LLM provider (default: openai)
+# Options: openai, anthropic
+# llm_provider = "openai"
 
-# API Configuration
-# api_image         = "registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:latest"
-# api_min_instances = 0      # Scale to zero when idle
+# Models (defaults are usually fine)
+# openai_model    = "gpt-4o"
+# anthropic_model = "claude-sonnet-4-20250514"
+
+# Region (default: europe-west1)
+# gcp_region = "europe-west1"
+
+# API scaling (default: 0-3 instances, scale-to-zero enabled)
+# api_min_instances = 0
 # api_max_instances = 3
-# api_cpu           = "1"
-# api_memory        = "1Gi"
-# api_public        = true   # Allow unauthenticated access
 
-# Logging
-# log_level = "INFO"         # DEBUG, INFO, WARNING, ERROR
+# Resources (default: 1 CPU, 1Gi RAM)
+# api_cpu    = "1"
+# api_memory = "1Gi"
 
-# Firestore
-# firestore_location = "eur3"  # Europe multi-region
+# Log level (default: INFO)
+# log_level = "INFO"
+
+# Public access (default: true)
+# api_public = true

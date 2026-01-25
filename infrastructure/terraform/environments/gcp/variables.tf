@@ -28,7 +28,7 @@ variable "firestore_location" {
 variable "api_image" {
   description = "Docker image for CLARISSA API"
   type        = string
-  default     = "registry.gitlab.com/wolfram_laube/blauweiss_llc/irena/api:latest"
+  default     = "registry.gitlab.com/wolfram_laube/blauweiss_llc/clarissa/api:latest"
 }
 
 variable "api_min_instances" {
@@ -68,13 +68,47 @@ variable "log_level" {
 }
 
 # ============================================================
+# LLM Provider Configuration
+# ============================================================
+
+variable "llm_provider" {
+  description = "Primary LLM provider (openai, anthropic, ollama)"
+  type        = string
+  default     = "openai"  # OpenAI is more cost-effective
+
+  validation {
+    condition     = contains(["openai", "anthropic", "ollama"], var.llm_provider)
+    error_message = "llm_provider must be one of: openai, anthropic, ollama"
+  }
+}
+
+variable "openai_model" {
+  description = "OpenAI model to use"
+  type        = string
+  default     = "gpt-4o"
+}
+
+variable "anthropic_model" {
+  description = "Anthropic model to use"
+  type        = string
+  default     = "claude-sonnet-4-20250514"
+}
+
+# ============================================================
 # Secrets (sensitive)
 # ============================================================
 
-variable "anthropic_api_key" {
-  description = "Anthropic API key for Claude"
+variable "openai_api_key" {
+  description = "OpenAI API key (primary provider)"
   type        = string
   sensitive   = true
+}
+
+variable "anthropic_api_key" {
+  description = "Anthropic API key (fallback provider, optional)"
+  type        = string
+  sensitive   = true
+  default     = ""  # Optional - only needed for fallback
 }
 
 variable "gitlab_deploy_token" {
