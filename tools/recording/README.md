@@ -1,60 +1,62 @@
 # 🎬 CLARISSA Demo Recording Tools
 
-Screen recording utilities for creating CLARISSA demo videos on macOS.
+Cross-platform screen recording utilities (macOS + Linux) for creating CLARISSA demo videos.
 
-## Quick Install
+## Quick Setup
 
-**Option 1: Download & Run (Recommended)**
+**Clone the repo and add to PATH:**
 
-1. Download the script: [setup-recording-tools.sh](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/blob/main/tools/recording/setup-recording-tools.sh?ref_type=heads)
-2. Run it:
 ```bash
-chmod +x ~/Downloads/setup-recording-tools.sh
-~/Downloads/setup-recording-tools.sh
+# Clone to ~/Projects/clarissa (or wherever you prefer)
+git clone https://gitlab.com/wolfram_laube/blauweiss_llc/irena.git ~/Projects/clarissa
+
+# Add tools to PATH (add to ~/.zshrc or ~/.bashrc)
+echo 'export PATH="$HOME/Projects/clarissa/tools/recording:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+
+# Install ffmpeg
+brew install ffmpeg          # macOS
+sudo apt install ffmpeg      # Linux (Debian/Ubuntu)
 ```
 
-**Option 2: Clone & Run**
+**Or use the setup script:**
 ```bash
-git clone --depth 1 https://gitlab.com/wolfram_laube/blauweiss_llc/irena.git /tmp/clarissa
-bash /tmp/clarissa/tools/recording/setup-recording-tools.sh
-rm -rf /tmp/clarissa
+curl -sL https://raw.githubusercontent.com/wolfram-laube/clarissa/main/tools/recording/setup-clarissa-tools.sh | bash
 ```
 
-**Option 3: From Project Root (if you have the repo)**
-```bash
-./tools/recording/setup-recording-tools.sh
-```
+## Available Scripts
 
-## Three Recording Methods
-
-| Method | Best For | Requires |
-|--------|----------|----------|
-| **A: AppleScript** | One-off recordings, precise control | macOS only |
-| **B: ffmpeg Toggle** | Flexible start/stop workflow | ffmpeg |
-| **C: ffmpeg Timed** | Quick demos, fire & forget | ffmpeg |
+| Script | Description | Platform |
+|--------|-------------|----------|
+| `record-pip.sh` | Screen + webcam picture-in-picture | macOS, Linux |
+| `record-c-timed.sh` | Timed screen recording | macOS, Linux |
+| `record-demo.sh` | Interactive menu | macOS, Linux |
 
 ## Usage
 
-After installation, scripts are in `~/bin/`:
-
+### Screen + Camera PiP
 ```bash
-# Option A: QuickTime/AppleScript
-record-a-applescript.sh start
-record-a-applescript.sh stop
-
-# Option B: ffmpeg with toggle
-record-b-ffmpeg.sh start
-record-b-ffmpeg.sh stop
-record-b-ffmpeg.sh toggle   # Start or stop
-record-b-ffmpeg.sh status   # Check if recording
-
-# Option C: Timed recording
-record-c-timed.sh 30        # Record 30 seconds
-record-c-timed.sh 120       # Record 2 minutes
-
-# Interactive wrapper
-record-demo.sh              # Choose method interactively
+record-pip.sh start 60        # 60 seconds with camera overlay
+record-pip.sh start           # Unlimited (Ctrl+C to stop)
+record-pip.sh start --no-camera  # Screen only
+record-pip.sh devices         # List available devices
 ```
+
+### Timed Recording
+```bash
+record-c-timed.sh 30          # Record for 30 seconds
+record-c-timed.sh 120         # Record for 2 minutes
+```
+
+### Interactive Menu
+```bash
+record-demo.sh
+```
+
+## Output Location
+
+- **macOS:** `~/Movies/CLARISSA-Demos/`
+- **Linux:** `~/Videos/CLARISSA-Demos/`
 
 ## Recording the Voice Demo
 
@@ -62,57 +64,35 @@ record-demo.sh              # Choose method interactively
 # 1. Open the demo
 open "https://irena-40cc50.gitlab.io/demos/voice-demo.html"
 
-# 2. Start recording (e.g., 45 seconds)
-record-c-timed.sh 45
+# 2. Start recording with camera
+record-pip.sh start 60
 
-# 3. Perform demo actions while recording
+# 3. Perform demo while recording
 #    - Enter API key
-#    - Click example buttons or use microphone
-#    - Show visualizations
+#    - Click examples or use microphone
+#    - Show results
 
-# 4. Video auto-saves to ~/Movies/CLARISSA-Demos/
+# 4. Video auto-saves to output folder
 ```
 
-## Browser-Based Alternative
+## Browser-Based Alternatives
 
-Don't want to install anything? Use the [🎬 Screen Recorder](../demos/screen-recorder.html) - works directly in Chrome/Edge!
+No installation needed - works in Chrome/Edge:
 
-## Prerequisites
+- **[Screen Recorder](https://irena-40cc50.gitlab.io/demos/screen-recorder.html)** - Basic recording
+- **[Screen Recorder + PiP](https://irena-40cc50.gitlab.io/demos/screen-recorder-pip.html)** - With webcam overlay
 
-For Options B & C:
+## Update Tools
+
 ```bash
-brew install ffmpeg
+cd ~/Projects/clarissa && git pull
 ```
 
-## Output
+## Team Notes
 
-All recordings are saved to:
-```
-~/Movies/CLARISSA-Demos/demo-YYYYMMDD-HHMMSS.mp4
-```
-
-## Tips
-
-- **Mikrofon**: Option A requires manual selection in QuickTime. Options B & C use default mic.
-- **System Audio**: To capture browser sounds, install [BlackHole](https://github.com/ExistentialAudio/BlackHole)
-- **Cursor**: Options B & C capture cursor movement automatically
-
-## Troubleshooting
-
-**ffmpeg not found:**
-```bash
-brew install ffmpeg
-```
-
-**Permission denied (microphone):**
-- System Preferences → Security & Privacy → Privacy → Microphone
-- Enable for Terminal/iTerm
-
-**No video output:**
-```bash
-# List available devices
-record-b-ffmpeg.sh devices
-```
+- **Ian, Mike, Doug:** Clone the repo and add `tools/recording` to your PATH
+- Scripts auto-detect macOS vs Linux and adjust accordingly
+- All recordings saved with timestamp: `demo-pip-YYYYMMDD-HHMMSS.mp4`
 
 ---
 
