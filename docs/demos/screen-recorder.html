@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 CLARISSA Screen Recorder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); }
+        .record-pulse { animation: pulse 1.5s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-gray-900/90 backdrop-blur rounded-2xl shadow-2xl p-6 w-full max-w-md">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                🎬 CLARISSA Demo Recorder
+            </h1>
+            <div id="timer" class="hidden items-center gap-2">
+                <span id="recording-dot" class="w-3 h-3 rounded-full bg-red-500 record-pulse"></span>
+                <span id="duration" class="text-white font-mono text-lg">00:00</span>
+            </div>
+        </div>
+
+        <!-- Options -->
+        <div class="space-y-3 mb-6">
+            <label class="flex items-center gap-3 text-gray-300 cursor-pointer">
+                <input type="checkbox" id="include-mic" checked 
+                       class="w-4 h-4 rounded border-gray-600 bg-gray-700 text-blue-600">
+                <span>🎤 Include Microphone</span>
+            </label>
+            <label class="flex items-center gap-3 text-gray-300 cursor-pointer">
+                <input type="checkbox" id="include-system-audio" checked
+                       class="w-4 h-4 rounded border-gray-600 bg-gray-700 text-blue-600">
+                <span>🔊 Include System Audio (if available)</span>
+            </label>
+        </div>
+
+        <!-- Controls -->
+        <div id="controls" class="space-y-3">
+            <button id="btn-start" onclick="startRecording()"
+                    class="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02]">
+                <span class="w-4 h-4 bg-white rounded-full"></span>
+                <span class="font-semibold">Start Recording</span>
+            </button>
+        </div>
+
+        <div id="recording-controls" class="hidden space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+                <button id="btn-pause" onclick="togglePause()"
+                        class="bg-yellow-600 hover:bg-yellow-700 text-white py-3 px-4 rounded-xl transition-all">
+                    ⏸️ Pause
+                </button>
+                <button onclick="stopRecording()"
+                        class="bg-gray-600 hover:bg-gray-700 text-white py-3 px-4 rounded-xl transition-all">
+                    ⏹️ Stop
+                </button>
+            </div>
+        </div>
+
+        <!-- Preview -->
+        <div id="preview-section" class="hidden mt-6 space-y-3">
+            <video id="preview" controls class="w-full rounded-xl bg-black"></video>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="downloadRecording()"
+                        class="bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2">
+                    💾 Download
+                </button>
+                <button onclick="resetRecorder()"
+                        class="bg-gray-600 hover:bg-gray-700 text-white py-3 px-4 rounded-xl transition-all">
+                    🔄 New Recording
+                </button>
+            </div>
+            <p id="file-info" class="text-gray-400 text-sm text-center"></p>
+        </div>
+
+        <!-- Status -->
+        <div id="status" class="mt-4 text-center text-gray-400 text-sm">
+            Ready to record
+        </div>
+
+        <!-- Browser Support -->
+        <div class="mt-6 pt-4 border-t border-gray-700">
+            <p class="text-gray-500 text-xs text-center">
+                Works in Chrome, Edge, Firefox. Safari has limited support.<br>
+                Part of <a href="https://irena-40cc50.gitlab.io" class="text-blue-400 hover:underline">CLARISSA</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let mediaRecorder = null;
+        let chunks = [];
+        let stream = null;
+        let duration = 0;
+        let timerInterval = null;
+        let isPaused = false;
+        let recordedBlob = null;
+
+        function updateStatus(msg) {
+            document.getElementById('status').textContent = msg;
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimer() {
+            document.getElementById('duration').textContent = formatTime(duration);
+        }
+
+        async function startRecording() {
+            try {
+                updateStatus('Requesting screen access...');
+                
+                const includeMic = document.getElementById('include-mic').checked;
+                const includeSystemAudio = document.getElementById('include-system-audio').checked;
+
+                // Get screen stream
+                const screenStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { 
+                        cursor: 'always',
+                        displaySurface: 'browser'
+                    },
+                    audio: includeSystemAudio
+                });
+
+                const tracks = [...screenStream.getVideoTracks()];
+                
+                // Handle system audio
+                if (includeSystemAudio && screenStream.getAudioTracks().length > 0) {
+                    tracks.push(...screenStream.getAudioTracks());
+                }
+
+                // Get microphone if requested
+                if (includeMic) {
+                    try {
+                        updateStatus('Requesting microphone access...');
+                        const micStream = await navigator.mediaDevices.getUserMedia({ 
+                            audio: { 
+                                echoCancellation: true,
+                                noiseSuppression: true 
+                            } 
+                        });
+                        
+                        // If we have both system audio and mic, mix them
+                        if (includeSystemAudio && screenStream.getAudioTracks().length > 0) {
+                            const audioContext = new AudioContext();
+                            const dest = audioContext.createMediaStreamDestination();
+                            
+                            const systemSource = audioContext.createMediaStreamSource(
+                                new MediaStream(screenStream.getAudioTracks())
+                            );
+                            systemSource.connect(dest);
+                            
+                            const micSource = audioContext.createMediaStreamSource(micStream);
+                            const micGain = audioContext.createGain();
+                            micGain.gain.value = 1.5; // Boost mic slightly
+                            micSource.connect(micGain);
+                            micGain.connect(dest);
+                            
+                            // Remove original audio, add mixed
+                            tracks.length = tracks.filter(t => t.kind === 'video').length;
+                            tracks.push(...dest.stream.getAudioTracks());
+                        } else {
+                            tracks.push(...micStream.getAudioTracks());
+                        }
+                    } catch (e) {
+                        console.warn('Microphone not available:', e);
+                        updateStatus('Recording without microphone...');
+                    }
+                }
+
+                stream = new MediaStream(tracks);
+
+                // Handle user stopping via browser UI
+                screenStream.getVideoTracks()[0].onended = () => {
+                    stopRecording();
+                };
+
+                // Setup recorder
+                const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus') 
+                    ? 'video/webm;codecs=vp9,opus' 
+                    : 'video/webm';
+                    
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType,
+                    videoBitsPerSecond: 3000000
+                });
+
+                chunks = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) {
+                        chunks.push(e.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    recordedBlob = new Blob(chunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(recordedBlob);
+                    
+                    document.getElementById('preview').src = url;
+                    document.getElementById('preview-section').classList.remove('hidden');
+                    
+                    const sizeMB = (recordedBlob.size / 1024 / 1024).toFixed(2);
+                    document.getElementById('file-info').textContent = 
+                        `Duration: ${formatTime(duration)} | Size: ${sizeMB} MB`;
+                    
+                    updateStatus('Recording complete!');
+                };
+
+                mediaRecorder.start(1000);
+
+                // Update UI
+                document.getElementById('controls').classList.add('hidden');
+                document.getElementById('recording-controls').classList.remove('hidden');
+                document.getElementById('timer').classList.remove('hidden');
+                document.getElementById('timer').classList.add('flex');
+                document.getElementById('preview-section').classList.add('hidden');
+
+                duration = 0;
+                isPaused = false;
+                updateTimer();
+                
+                timerInterval = setInterval(() => {
+                    duration++;
+                    updateTimer();
+                }, 1000);
+
+                updateStatus('🔴 Recording...');
+
+            } catch (err) {
+                console.error('Recording failed:', err);
+                updateStatus(`Error: ${err.message}`);
+            }
+        }
+
+        function togglePause() {
+            if (!mediaRecorder) return;
+
+            if (isPaused) {
+                mediaRecorder.resume();
+                timerInterval = setInterval(() => {
+                    duration++;
+                    updateTimer();
+                }, 1000);
+                document.getElementById('btn-pause').textContent = '⏸️ Pause';
+                document.getElementById('recording-dot').classList.add('record-pulse');
+                document.getElementById('recording-dot').classList.remove('bg-yellow-500');
+                document.getElementById('recording-dot').classList.add('bg-red-500');
+                updateStatus('🔴 Recording...');
+            } else {
+                mediaRecorder.pause();
+                clearInterval(timerInterval);
+                document.getElementById('btn-pause').textContent = '▶️ Resume';
+                document.getElementById('recording-dot').classList.remove('record-pulse');
+                document.getElementById('recording-dot').classList.remove('bg-red-500');
+                document.getElementById('recording-dot').classList.add('bg-yellow-500');
+                updateStatus('⏸️ Paused');
+            }
+            isPaused = !isPaused;
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                stream?.getTracks().forEach(track => track.stop());
+                clearInterval(timerInterval);
+                
+                document.getElementById('controls').classList.remove('hidden');
+                document.getElementById('recording-controls').classList.add('hidden');
+                document.getElementById('timer').classList.add('hidden');
+            }
+        }
+
+        function downloadRecording() {
+            if (!recordedBlob) return;
+            
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(recordedBlob);
+            a.download = `clarissa-demo-${timestamp}.webm`;
+            a.click();
+        }
+
+        function resetRecorder() {
+            document.getElementById('preview-section').classList.add('hidden');
+            document.getElementById('preview').src = '';
+            recordedBlob = null;
+            chunks = [];
+            duration = 0;
+            updateStatus('Ready to record');
+        }
+
+        // Check browser support
+        if (!navigator.mediaDevices?.getDisplayMedia) {
+            document.getElementById('btn-start').disabled = true;
+            document.getElementById('btn-start').classList.add('opacity-50', 'cursor-not-allowed');
+            updateStatus('⚠️ Screen recording not supported in this browser');
+        }
+    </script>
+</body>
+</html>
