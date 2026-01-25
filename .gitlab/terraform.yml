@@ -26,6 +26,7 @@ variables:
     # Map existing CI variables to Terraform TF_VAR_ format
     - export TF_VAR_openai_api_key="${OPENAI_API_KEY:-}"
     - export TF_VAR_anthropic_api_key="${ANTHROPIC_API_KEY:-}"
+    - export TF_VAR_gitlab_deploy_token="${GITLAB_DEPLOY_TOKEN:-}"
     # Setup GCP credentials
     - |
       if [ -n "$GOOGLE_CREDENTIALS" ]; then
