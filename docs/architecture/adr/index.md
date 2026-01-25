@@ -41,6 +41,20 @@ ADRs document significant architectural decisions, their rationale, and conseque
 | [014](ADR-014-llm-document-merge.md) | LLM Document Merge | Accepted |
 | [018](ADR-018-gitlab-pm-workflow.md) | GitLab-Native Project Management Workflow | Accepted |
 
+
+### Portal & Advanced Architecture
+| ADR | Title | Status |
+|-----|-------|--------|
+| [020](ADR-020-portal-vision.md) | Portal Vision | Accepted |
+| [021](ADR-021-portal-system-security-architecture.md) | Portal System Security | Accepted |
+| [022](ADR-022-portal-software-architecture.md) | Portal Software Architecture | Accepted |
+| [023](ADR-023-portal-observability.md) | Portal Observability | Accepted |
+| [024](ADR-024-clarissa-core-system-architecture.md) | CLARISSA Core Architecture | Accepted |
+| [025](ADR-025-llm-integration-strategy.md) | LLM Integration Strategy | Accepted |
+| [026](ADR-026-testing-strategy.md) | Testing Strategy | Accepted |
+| [027](ADR-027-bidirectional-sync-strategy.md) | Bidirectional Repo Sync | Accepted |
+| [028](ADR-028-voice-input-architecture.md) | 🎤 Voice Input Architecture | Accepted |
+
 ### Superseded
 | ADR | Title | Status | Superseded By |
 |-----|-------|--------|---------------|
@@ -67,6 +81,12 @@ ADRs document significant architectural decisions, their rationale, and conseque
 | GDrive organization | ADR-017 |
 | Billing folders (contractors) | ADR-019 |
 | Development workflow | ADR-018 |
+| Portal architecture | ADR-020, ADR-021, ADR-022, ADR-023 |
+| CLARISSA core design | ADR-024 |
+| LLM strategy | ADR-025 |
+| Testing & validation | ADR-026 |
+| Repository sync | ADR-027 |
+| Voice interface 🎤 | ADR-028 |
 
 ## Cross-References
 
