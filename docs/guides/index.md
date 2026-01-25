@@ -66,7 +66,7 @@ Jupyter Notebooks for hands-on learning:
 
 | Resource | Link |
 |----------|------|
-| Issue Board | [gitlab.com/.../boards](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/boards) |
-| Issues | [gitlab.com/.../issues](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues) |
-| Merge Requests | [gitlab.com/.../merge_requests](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/merge_requests) |
-| Epic #39 (Example) | [Tutorial System Epic](https://gitlab.com/wolfram_laube/blauweiss_llc/irena/-/issues/39) |
+| Issue Board | [gitlab.com/.../boards](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/boards) |
+| Issues | [gitlab.com/.../issues](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/issues) |
+| Merge Requests | [gitlab.com/.../merge_requests](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/merge_requests) |
+| Epic #39 (Example) | [Tutorial System Epic](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/issues/39) |
