@@ -77,9 +77,20 @@ nav:
       - "08 RIGOR Benchmark": tutorials/notebooks/08_RIGOR_Benchmark.ipynb
       - "09 Full Pipeline Demo": tutorials/notebooks/09_Full_Pipeline_Demo.ipynb
       - "10 API Reference": tutorials/notebooks/10_API_Reference.ipynb
+      - "11 CRUD Playground": tutorials/notebooks/11_CRUD_Playground.ipynb
+      - "12 GitLab API Playground": tutorials/notebooks/12_GitLab_API_Playground.ipynb
+      - "13 OPM Flow Playground": tutorials/notebooks/13_OPM_Flow_Playground.ipynb
+      - "14 Infrastructure Playground": tutorials/notebooks/14_Infrastructure_Playground.ipynb
+      - "15 OPM Flow Showcase": tutorials/notebooks/15_OPM_Flow_Showcase.ipynb
+      - "16 Voice Input Showcase 🎤": tutorials/notebooks/16_Voice_Input_Showcase.ipynb
+    - "Guides":
+      - "🎤 Voice Input Tutorial": tutorials/guides/voice-input-tutorial.md
     - "Legacy":
       - Reservoir Basics: tutorials/reservoir-basics.md
       - Code Examples: tutorials/reservoir-basics-code.ipynb
+
+  - "🎮 Demos":
+    - "🎤 Voice Input Demo": demos/voice-demo.html
 
   - Architecture:
     - Overview: architecture/README.md
@@ -112,43 +123,19 @@ nav:
       - ADR-024 CLARISSA Core Architecture: architecture/adr/ADR-024-clarissa-core-system-architecture.md
       - ADR-025 LLM Integration Strategy: architecture/adr/ADR-025-llm-integration-strategy.md
       - ADR-026 Testing Strategy: architecture/adr/ADR-026-testing-strategy.md
+      - ADR-027 Bidirectional Sync: architecture/adr/ADR-027-bidirectional-sync-strategy.md
+      - ADR-028 Voice Input Architecture 🎤: architecture/adr/ADR-028-voice-input-architecture.md
 
-  - Guides:
-    - Overview: guides/index.md
-    - Workflow:
-      - Interactive Slides: guides/contributing/index.html
-      - Cheatsheet: guides/contributing/cheatsheet.md
-    - Project Management: guides/project-management.md
-    - Epics Pattern: guides/epics.md
-    - "🧾 Billing Trigger": billing-trigger.html
-
-  - CI:
-    - "Runner Management":
-      - "🇬🇧 English": runner-management-en.md
-      - "🇩🇪 Deutsch": runner-management-de.md
-      - "🇻🇳 Tiếng Việt": runner-management-vi.md
-      - "🇸🇦 العربية": runner-management-ar.md
-      - "🇮🇸 Íslenska": runner-management-is.md
-    - How to Read CI Results: ci/README.md
-    - Infrastructure: infrastructure.md
-
-  - Simulators:
-    - Overview: simulators/index.md
-    - Adapter Contract: simulators/adapter-contract.md
-    - OPM Flow Guide: simulators/opm-flow.md
-    - Kubernetes Jobs: simulators/k8s-jobs.md
-    - GPU Support: simulators/gpu-support.md
-    - Adapter Matrix: simulators/adapter_matrix.md
-
-  - ECLIPSE:
-    - Overview: eclipse/index.md
-    - Deck Structure: eclipse/deck-structure.md
-    - Keyword Reference: eclipse/keyword-reference.md
-
-  - Publications:
+  - "📄 Publications":
     - Overview: publications/index.md
-    - CI Workflow: publications/ci-workflow.md
-    - Paper Workflow: publications/paper-workflow.md
-    - "Paper Editing 🇬🇧": publications/paper-editing-en.md
-    - "Paper Editing 🇩🇪": publications/paper-editing-de.md
-    - "Paper Editing 🇻🇳": publications/paper-editing-vi.md
+    - SPE Europe 2026: publications/spe-europe-2026/index.md
+    - IJACSA 2026: publications/ijacsa-2026/index.md
+
+  - "⚙️ Infrastructure":
+    - Overview: infrastructure.md
+    - CI/CD:
+      - CI Pipeline Guide: ci/README.md
+      - CI Workflow Automation: CI_WORKFLOW_AUTOMATION.md
+      - Runner Management: runner-management-en.md
+    - GitLab Runner GCP: gitlab_runner_gcp.md
+    - LLM Handoff: LLM_HANDOFF.md
