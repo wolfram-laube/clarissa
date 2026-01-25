@@ -38,6 +38,13 @@ async def lifespan(app: FastAPI):
     logger.info(f"Starting CLARISSA API in {settings.environment} mode")
     logger.info(f"LLM Provider: {settings.llm_provider}")
     
+    # Initialize LLM provider manager
+    from clarissa.api.llm import get_manager
+    manager = get_manager()
+    available = list(manager._providers.keys())
+    logger.info(f"Available LLM providers: {available}")
+    logger.info(f"Fallback order: {manager.get_fallback_order()}")
+    
     if settings.use_firestore_emulator:
         logger.info(f"Using Firestore Emulator: {settings.firestore_emulator_host}")
     
@@ -51,7 +58,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="CLARISSA API",
     description="Conversational Language Agent for Reservoir Integrated Simulation System Analysis",
-    version="0.1.0",
+    version="0.2.0",
     lifespan=lifespan,
     docs_url="/docs" if settings.debug else None,
     redoc_url="/redoc" if settings.debug else None,
@@ -74,17 +81,25 @@ class HealthResponse(BaseModel):
     timestamp: str
     version: str
     llm_provider: str
+    llm_providers_available: list[str]
 
 
 class ChatRequest(BaseModel):
     message: str
     conversation_id: str | None = None
+    conversation_history: list[dict] | None = None
+    temperature: float = 0.7
+    max_tokens: int = 4096
 
 
 class ChatResponse(BaseModel):
     response: str
     conversation_id: str
     timestamp: str
+    provider: str
+    model: str
+    usage: dict | None = None
+    fallback_used: bool = False
 
 
 class SimulationRequest(BaseModel):
@@ -116,12 +131,16 @@ async def health_check():
     Returns current service status and configuration info.
     Used by Docker health checks and load balancers.
     """
+    from clarissa.api.llm import get_manager
+    manager = get_manager()
+    
     return HealthResponse(
         status="healthy",
         environment=settings.environment,
         timestamp=datetime.now(timezone.utc).isoformat(),
-        version="0.1.0",
+        version="0.2.0",
         llm_provider=settings.llm_provider,
+        llm_providers_available=list(manager._providers.keys()),
     )
 
 
@@ -130,7 +149,7 @@ async def root():
     """API root - returns basic info."""
     return {
         "name": "CLARISSA API",
-        "version": "0.1.0",
+        "version": "0.2.0",
         "description": "Conversational Language Agent for Reservoir Simulation",
         "docs": "/docs" if settings.debug else None,
         "health": "/health",
@@ -143,21 +162,40 @@ async def chat(request: ChatRequest):
     Chat with CLARISSA.
     
     Send a natural language message and receive a response.
-    Optionally provide a conversation_id to continue a previous conversation.
+    Supports conversation history for context continuity.
+    
+    Automatically falls back to alternative LLM providers if the primary
+    provider is unavailable or rate-limited.
     """
     import uuid
+    from clarissa.api.llm import get_llm_response, LLMError
     
-    # TODO: Implement actual LLM integration
     conversation_id = request.conversation_id or str(uuid.uuid4())
     
-    # Placeholder response
-    response_text = f"[{settings.llm_provider}] I received your message: '{request.message[:50]}...'. LLM integration coming soon!"
+    try:
+        llm_response = await get_llm_response(
+            message=request.message,
+            conversation_history=request.conversation_history,
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+        )
+        
+        return ChatResponse(
+            response=llm_response.content,
+            conversation_id=conversation_id,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            provider=llm_response.provider,
+            model=llm_response.model,
+            usage=llm_response.usage,
+            fallback_used=llm_response.fallback_used,
+        )
     
-    return ChatResponse(
-        response=response_text,
-        conversation_id=conversation_id,
-        timestamp=datetime.now(timezone.utc).isoformat(),
-    )
+    except LLMError as e:
+        logger.error(f"LLM error: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"LLM service unavailable: {str(e)}"
+        )
 
 
 @app.post("/api/v1/simulate", response_model=SimulationResponse, tags=["Simulation"])
