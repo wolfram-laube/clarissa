@@ -131,16 +131,15 @@ async def health_check():
     Returns current service status and configuration info.
     Used by Docker health checks and load balancers.
     """
-    from clarissa.api.llm import get_manager
-    manager = get_manager()
-    
+    # Simple health check - don't initialize LLM providers here
+    # to avoid startup delays and potential failures
     return HealthResponse(
         status="healthy",
         environment=settings.environment,
         timestamp=datetime.now(timezone.utc).isoformat(),
         version="0.2.0",
         llm_provider=settings.llm_provider,
-        llm_providers_available=list(manager._providers.keys()),
+        llm_providers_available=[],  # Populated lazily on first request
     )
 
 
