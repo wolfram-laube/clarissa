@@ -67,6 +67,7 @@ nav:
     - Overview: tutorials/index.md
     - Quick Start: tutorials/quickstart.md
     - "🎤 Voice Input": tutorials/voice-input.md
+    - "🎬 Demo Showcase Guide": tutorials/guides/demo-showcase-guide.md
     - "Interactive Notebooks":
       - "01 ECLIPSE Fundamentals": tutorials/notebooks/01_ECLIPSE_Fundamentals.ipynb
       - "02 OPM Flow Integration": tutorials/notebooks/02_OPM_Flow_Integration.ipynb
