@@ -278,11 +278,6 @@ resource "google_cloud_run_v2_service" "clarissa_api" {
         value = var.gcp_project
       }
 
-      # Disable emulator in GCP
-      env {
-        name  = "FIRESTORE_EMULATOR_HOST"
-        value = ""
-      }
 
       # OpenAI API Key (from Secret Manager)
       env {
