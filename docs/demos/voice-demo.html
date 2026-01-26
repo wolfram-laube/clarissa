@@ -616,21 +616,89 @@
         }
         
         // Parse intent (LLM or pattern matching)
+        // Parse intent - Rule-based patterns FIRST, LLM for ambiguous cases only
         async function parseIntent(text) {
             const textLower = text.toLowerCase().trim();
             
-            // Quick patterns
-            if (['stop', 'cancel', 'nevermind', 'never mind'].includes(textLower)) {
+            // === 1. EXACT MATCH CONTROL COMMANDS ===
+            if (['stop', 'cancel', 'nevermind', 'never mind', 'abort', 'quit'].includes(textLower)) {
                 return { type: 'cancel', confidence: 1.0, slots: {} };
             }
-            if (['yes', 'yeah', 'yep', 'confirm', 'ok', 'okay'].includes(textLower)) {
+            if (['yes', 'yeah', 'yep', 'confirm', 'ok', 'okay', 'do it', 'go ahead'].includes(textLower)) {
                 return { type: 'confirm', confidence: 1.0, slots: {} };
             }
-            if (textLower === 'help' || textLower.startsWith('what can')) {
+            if (textLower === 'help' || textLower.startsWith('what can') || textLower.includes('help me')) {
                 return { type: 'help', confidence: 1.0, slots: {} };
             }
             
-            // Try LLM parsing
+            // === 2. RULE-BASED PATTERN MATCHING (PRIORITY) ===
+            // This runs BEFORE LLM to catch common patterns reliably
+            
+            // Visualization patterns - "show", "display", "visualize", "plot", "view"
+            const vizTriggers = ['show', 'display', 'visualize', 'plot', 'view', 'render'];
+            if (vizTriggers.some(t => textLower.includes(t))) {
+                const slots = {};
+                
+                // Property extraction
+                if (textLower.includes('perm')) slots.property = 'permeability';
+                else if (textLower.includes('poro')) slots.property = 'porosity';
+                else if (textLower.includes('sat') || textLower.includes('sw')) slots.property = 'water_saturation';
+                else if (textLower.includes('press') || textLower.includes('bhp')) slots.property = 'pressure';
+                
+                // Layer extraction
+                const layerMatch = textLower.match(/layer\s*(\d+)/);
+                if (layerMatch) slots.layer = parseInt(layerMatch[1]);
+                
+                // Time extraction
+                const dayMatch = textLower.match(/(?:day|time|at)\s*(\d+)/);
+                if (dayMatch) slots.time_days = parseInt(dayMatch[1]);
+                
+                // 3D indicator
+                if (textLower.includes('3d') || textLower.includes('cube')) {
+                    slots.view_type = '3d';
+                }
+                
+                // Default property if none specified but layer is
+                if (!slots.property && slots.layer) {
+                    slots.property = 'permeability';
+                }
+                
+                const confidence = Object.keys(slots).length > 0 ? 0.95 : 0.80;
+                return { type: 'visualize_property', confidence, slots };
+            }
+            
+            // Query patterns - "what is", "how much", "tell me", "get"
+            const queryTriggers = ['what is', 'what\'s', 'how much', 'tell me', 'get the'];
+            if (queryTriggers.some(t => textLower.includes(t))) {
+                const slots = {};
+                
+                if (textLower.includes('oil rate') || textLower.includes('production rate')) slots.property = 'oil_rate';
+                else if (textLower.includes('water cut') || textLower.includes('wct')) slots.property = 'water_cut';
+                else if (textLower.includes('pressure') || textLower.includes('bhp')) slots.property = 'pressure';
+                else if (textLower.includes('gor') || textLower.includes('gas oil')) slots.property = 'gor';
+                
+                if (slots.property) {
+                    return { type: 'query_value', confidence: 0.90, slots };
+                }
+            }
+            
+            // Navigation patterns - "go to", "navigate", "open", "switch to"
+            const navTriggers = ['go to', 'navigate to', 'open the', 'switch to', 'go back'];
+            if (navTriggers.some(t => textLower.includes(t))) {
+                const slots = {};
+                
+                if (textLower.includes('result')) slots.target = 'results';
+                else if (textLower.includes('model')) slots.target = 'model';
+                else if (textLower.includes('grid')) slots.target = 'grid';
+                else if (textLower.includes('well')) slots.target = 'wells';
+                else if (textLower.includes('back')) slots.target = 'back';
+                
+                if (slots.target) {
+                    return { type: 'navigate', confidence: 0.85, slots };
+                }
+            }
+            
+            // === 3. LLM PARSING (ONLY FOR AMBIGUOUS CASES) ===
             const apiKey = localStorage.getItem('openai_api_key');
             if (apiKey) {
                 try {
@@ -646,8 +714,14 @@
                                 role: 'user',
                                 content: `Parse this reservoir simulation command into JSON. Respond with ONLY valid JSON.
 
-Available intents: visualize_property, query_value, navigate, help, cancel
-Slots: property (permeability/porosity/water_saturation/pressure), layer (1-5), time_days (number)
+IMPORTANT RULES:
+- "show", "display", "visualize" → visualize_property (NOT navigate!)
+- "what is", "how much" → query_value
+- "go to", "navigate", "open" → navigate
+- "help", "what can" → help
+
+Available intents: visualize_property, query_value, navigate, help, cancel, confirm
+Slots: property (permeability/porosity/water_saturation/pressure), layer (1-5), time_days (number), target (results/model/grid)
 
 Command: "${text}"
 
@@ -672,36 +746,8 @@ JSON format: {"type": "intent_name", "confidence": 0.0-1.0, "slots": {...}}`
                 }
             }
             
-            // Fallback pattern matching
-            let intent = { type: 'unknown', confidence: 0.5, slots: {} };
-            
-            if (textLower.includes('show') || textLower.includes('display')) {
-                intent.type = 'visualize_property';
-                intent.confidence = 0.8;
-                
-                if (textLower.includes('perm')) intent.slots.property = 'permeability';
-                else if (textLower.includes('poro')) intent.slots.property = 'porosity';
-                else if (textLower.includes('sat')) intent.slots.property = 'water_saturation';
-                else if (textLower.includes('press')) intent.slots.property = 'pressure';
-                else intent.slots.property = 'permeability';
-                
-                const layerMatch = textLower.match(/layer\s*(\d+)/);
-                if (layerMatch) intent.slots.layer = parseInt(layerMatch[1]);
-                
-                const dayMatch = textLower.match(/day\s*(\d+)/);
-                if (dayMatch) intent.slots.time_days = parseInt(dayMatch[1]);
-            }
-            else if (textLower.includes('what') || textLower.includes('how much')) {
-                intent.type = 'query_value';
-                intent.confidence = 0.8;
-                
-                if (textLower.includes('oil rate')) intent.slots.property = 'oil_rate';
-                else if (textLower.includes('water cut')) intent.slots.property = 'water_cut';
-                else if (textLower.includes('pressure') || textLower.includes('bhp')) intent.slots.property = 'pressure';
-                else intent.slots.property = 'oil_rate';
-            }
-            
-            return intent;
+            // === 4. UNKNOWN - ASK FOR CLARIFICATION ===
+            return { type: 'unknown', confidence: 0.0, slots: {} };
         }
         
         // Execute intent
@@ -754,6 +800,12 @@ JSON format: {"type": "intent_name", "confidence": 0.0-1.0, "slots": {...}}`
                     success: true, 
                     text: 'Try: "Show permeability", "Show layer 3", "What is the water cut?", "Show saturation at day 500"' 
                 };
+            }
+            
+
+            if (intent.type === 'navigate') {
+                const target = intent.slots?.target || 'results';
+                return { success: true, text: `Navigating to ${target}...` };
             }
             
             if (intent.type === 'cancel') {
