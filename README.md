@@ -14,28 +14,28 @@ It is **explicitly documented and versioned**.
 
 | What you want | Where to go |
 |---------------|-------------|
-| **Install & run CLARISSA** | [🇬🇧 Getting Started](https://clarissa-40cc50.gitlab.io/getting-started-en/) / [🇩🇪 Erste Schritte](https://clarissa-40cc50.gitlab.io/getting-started-de/) |
-| Learn GitLab workflow | [→ Interactive Slides](https://clarissa-40cc50.gitlab.io/guides/contributing/) |
-| Contribute code | [→ Contributing Guide](https://clarissa-40cc50.gitlab.io/contributing/) |
+| **Install & run CLARISSA** | [🇬🇧 Getting Started](https://irena-40cc50.gitlab.io/getting-started-en/) / [🇩🇪 Erste Schritte](https://irena-40cc50.gitlab.io/getting-started-de/) |
+| Learn GitLab workflow | [→ Interactive Slides](https://irena-40cc50.gitlab.io/guides/contributing/) |
+| Contribute code | [→ Contributing Guide](https://irena-40cc50.gitlab.io/contributing/) |
 
 ---
 
 ## 📚 Documentation
 
-**[→ Full Documentation (GitLab Pages)](https://clarissa-40cc50.gitlab.io/)**
+**[→ Full Documentation (GitLab Pages)](https://irena-40cc50.gitlab.io/)**
 
 | Quick Links | |
 |-------------|---|
-| [🚀 Getting Started 🇬🇧](https://clarissa-40cc50.gitlab.io/getting-started-en/) | Installation, first run, deployment |
-| [🚀 Erste Schritte 🇩🇪](https://clarissa-40cc50.gitlab.io/getting-started-de/) | Installation, erster Start, Deployment |
-| [Contributing Guide](https://clarissa-40cc50.gitlab.io/contributing/) | How to contribute |
-| [Workflow Slides](https://clarissa-40cc50.gitlab.io/guides/contributing/) | Interactive 5-min intro |
-| [Runner Management 🇬🇧](https://clarissa-40cc50.gitlab.io/runner-management-en/) | Start/Stop Runner & GCP VM |
-| [Runner Verwaltung 🇩🇪](https://clarissa-40cc50.gitlab.io/runner-management-de/) | Runner starten/stoppen |
-| [CI Guide](https://clarissa-40cc50.gitlab.io/ci/) | How to read CI results |
-| [ADRs](https://clarissa-40cc50.gitlab.io/architecture/adr/) | Architecture decisions |
-| [🎮 Demos](https://clarissa-40cc50.gitlab.io/demos/voice-demo.html) | Voice Input & Screen Recorder |
-| [Publications](https://clarissa-40cc50.gitlab.io/publications/) | Research papers (SPE Europe 2026) |
+| [🚀 Getting Started 🇬🇧](https://irena-40cc50.gitlab.io/getting-started-en/) | Installation, first run, deployment |
+| [🚀 Erste Schritte 🇩🇪](https://irena-40cc50.gitlab.io/getting-started-de/) | Installation, erster Start, Deployment |
+| [Contributing Guide](https://irena-40cc50.gitlab.io/contributing/) | How to contribute |
+| [Workflow Slides](https://irena-40cc50.gitlab.io/guides/contributing/) | Interactive 5-min intro |
+| [Runner Management 🇬🇧](https://irena-40cc50.gitlab.io/runner-management-en/) | Start/Stop Runner & GCP VM |
+| [Runner Verwaltung 🇩🇪](https://irena-40cc50.gitlab.io/runner-management-de/) | Runner starten/stoppen |
+| [CI Guide](https://irena-40cc50.gitlab.io/ci/) | How to read CI results |
+| [ADRs](https://irena-40cc50.gitlab.io/architecture/adr/) | Architecture decisions |
+| [🎮 Demos](https://irena-40cc50.gitlab.io/demos/voice-demo.html) | Voice Input & Screen Recorder |
+| [Publications](https://irena-40cc50.gitlab.io/publications/) | Research papers (SPE Europe 2026) |
 ---
 
 ## 🎤 Voice Input (NEW!)
@@ -44,8 +44,8 @@ Control CLARISSA with your voice! Speak natural language commands to visualize r
 
 | Try it now | |
 |------------|---|
-| [🎮 **Live Demo**](https://clarissa-40cc50.gitlab.io/demos/voice-demo.html) | Browser-based, no install needed |
-| [📖 Tutorial](https://clarissa-40cc50.gitlab.io/tutorials/voice-input/) | Full documentation |
+| [🎮 **Live Demo**](https://irena-40cc50.gitlab.io/demos/voice-demo.html) | Browser-based, no install needed |
+| [📖 Tutorial](https://irena-40cc50.gitlab.io/tutorials/voice-input/) | Full documentation |
 | [📓 Colab Notebook](https://colab.research.google.com/github/wolfram-laube/clarissa/blob/main/docs/tutorials/notebooks/16_Voice_Input_Showcase.ipynb) | Interactive playground |
 
 **Example commands:**
@@ -61,11 +61,11 @@ Control CLARISSA with your voice! Speak natural language commands to visualize r
 
 | Language | Getting Started | Runner Management | Cheatsheet |
 |----------|-----------------|-------------------|------------|
-| 🇬🇧 English | [Guide](https://clarissa-40cc50.gitlab.io/getting-started-en/) | [Guide](https://clarissa-40cc50.gitlab.io/runner-management-en/) | [Cheatsheet](https://clarissa-40cc50.gitlab.io/guides/contributing/cheatsheet-en/) |
-| 🇩🇪 Deutsch | [Anleitung](https://clarissa-40cc50.gitlab.io/getting-started-de/) | [Anleitung](https://clarissa-40cc50.gitlab.io/runner-management-de/) | [Cheatsheet](https://clarissa-40cc50.gitlab.io/guides/contributing/cheatsheet-de/) |
-| 🇻🇳 Tiếng Việt | [Hướng dẫn](https://clarissa-40cc50.gitlab.io/getting-started-vi/) | [Hướng dẫn](https://clarissa-40cc50.gitlab.io/runner-management-vi/) | [Cheatsheet](https://clarissa-40cc50.gitlab.io/guides/contributing/cheatsheet-vi/) |
-| 🇸🇦 العربية | [دليل](https://clarissa-40cc50.gitlab.io/getting-started-ar/) | [دليل](https://clarissa-40cc50.gitlab.io/runner-management-ar/) | [Cheatsheet](https://clarissa-40cc50.gitlab.io/guides/contributing/cheatsheet-ar/) |
-| 🇮🇸 Íslenska | [Leiðbeiningar](https://clarissa-40cc50.gitlab.io/getting-started-is/) | [Leiðbeiningar](https://clarissa-40cc50.gitlab.io/runner-management-is/) | [Cheatsheet](https://clarissa-40cc50.gitlab.io/guides/contributing/cheatsheet-is/) |
+| 🇬🇧 English | [Guide](https://irena-40cc50.gitlab.io/getting-started-en/) | [Guide](https://irena-40cc50.gitlab.io/runner-management-en/) | [Cheatsheet](https://irena-40cc50.gitlab.io/guides/contributing/cheatsheet-en/) |
+| 🇩🇪 Deutsch | [Anleitung](https://irena-40cc50.gitlab.io/getting-started-de/) | [Anleitung](https://irena-40cc50.gitlab.io/runner-management-de/) | [Cheatsheet](https://irena-40cc50.gitlab.io/guides/contributing/cheatsheet-de/) |
+| 🇻🇳 Tiếng Việt | [Hướng dẫn](https://irena-40cc50.gitlab.io/getting-started-vi/) | [Hướng dẫn](https://irena-40cc50.gitlab.io/runner-management-vi/) | [Cheatsheet](https://irena-40cc50.gitlab.io/guides/contributing/cheatsheet-vi/) |
+| 🇸🇦 العربية | [دليل](https://irena-40cc50.gitlab.io/getting-started-ar/) | [دليل](https://irena-40cc50.gitlab.io/runner-management-ar/) | [Cheatsheet](https://irena-40cc50.gitlab.io/guides/contributing/cheatsheet-ar/) |
+| 🇮🇸 Íslenska | [Leiðbeiningar](https://irena-40cc50.gitlab.io/getting-started-is/) | [Leiðbeiningar](https://irena-40cc50.gitlab.io/runner-management-is/) | [Cheatsheet](https://irena-40cc50.gitlab.io/guides/contributing/cheatsheet-is/) |
 
 ---
 
@@ -120,7 +120,7 @@ pytest
 clarissa --help
 ```
 
-**[→ Detailed instructions in Getting Started Guide](https://clarissa-40cc50.gitlab.io/getting-started-en/)**
+**[→ Detailed instructions in Getting Started Guide](https://irena-40cc50.gitlab.io/getting-started-en/)**
 
 ---
 
@@ -133,7 +133,7 @@ clarissa --help
 | `gcp-vm-start` | Start GCP Runner (manual) |
 | `gcp-vm-stop` | Stop GCP Runner (manual) |
 
-**[→ Full CI Guide](https://clarissa-40cc50.gitlab.io/ci/)**
+**[→ Full CI Guide](https://irena-40cc50.gitlab.io/ci/)**
 
 ---
 
@@ -151,6 +151,6 @@ Create demo recordings with our cross-platform tools:
 record-pip.sh start 60
 ```
 
-**Browser alternative:** [Screen Recorder + PiP](https://clarissa-40cc50.gitlab.io/demos/screen-recorder-pip.html)
+**Browser alternative:** [Screen Recorder + PiP](https://irena-40cc50.gitlab.io/demos/screen-recorder-pip.html)
 
 See [tools/recording/](tools/recording/) for full documentation.
