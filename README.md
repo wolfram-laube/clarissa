@@ -138,3 +138,19 @@ clarissa --help
 ---
 
 *Built by BlauWeiss LLC*
+
+## 🎬 Recording Demo Videos
+
+Create demo recordings with our cross-platform tools:
+
+```bash
+# Setup (one time)
+./tools/recording/setup.sh
+
+# Record with camera PiP
+record-pip.sh start 60
+```
+
+**Browser alternative:** [Screen Recorder + PiP](https://irena-40cc50.gitlab.io/demos/screen-recorder-pip.html)
+
+See [tools/recording/](tools/recording/) for full documentation.
