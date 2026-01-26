@@ -314,9 +314,9 @@ resource "google_cloud_run_v2_service" "clarissa_api" {
           path = "/health"
           port = 8000
         }
-        initial_delay_seconds = 5
-        period_seconds        = 10
-        failure_threshold     = 3
+        initial_delay_seconds = 10
+        period_seconds        = 5
+        failure_threshold     = 12
       }
 
       liveness_probe {
