@@ -135,6 +135,7 @@ nav:
 
 
   - "🛠️ Tools":
+    - Overview: tools/README.md
     - "🎬 Demo Recording": tools/recording/README.md
 
   - "⚙️ Infrastructure":
