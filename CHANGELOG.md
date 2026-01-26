@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Voice Roundtrip Notebook (17)** (2026-01-26)
+  - Cross-platform voice input testing notebook for local machines
+  - Audio recording via `sounddevice` (Mac/Windows/Linux)
+  - Whisper API transcription with reservoir domain vocabulary
+  - Rule-based + LLM intent parsing (Claude/GPT-4 fallback)
+  - 10 test utterances for validation
+  - Ref: ADR-028
+
 - **GitLab Runner Infrastructure: 12/12 Runners Operational** (2026-01-17)
   - K3s Kubernetes cluster on GCP VM configured for GitLab Runner
   - New `.gitlab/k3s-setup.yml` with installation and management jobs
@@ -33,6 +41,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - MIME multipart email construction with inline images
 
 ### Fixed
+- **Notebook 11 JSON Encoding** (2026-01-26)
+  - Fixed invalid control characters in `11_CRUD_Playground.ipynb`
+  - Raw 0x0A bytes replaced with proper escaped newlines
+  - Resolves mkdocs-jupyter build failures
+
 - **Billing System: Time Entry Parsing**
   - Switched from REST Notes API to GraphQL API for time tracking
   - `spent_at` dates now correctly captured (was showing note creation date)
@@ -50,6 +63,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Runner can now execute Kubernetes jobs on GCP VM
 
 ### Added
+- **Voice Roundtrip Notebook (17)** (2026-01-26)
+  - Cross-platform voice input testing notebook for local machines
+  - Audio recording via `sounddevice` (Mac/Windows/Linux)
+  - Whisper API transcription with reservoir domain vocabulary
+  - Rule-based + LLM intent parsing (Claude/GPT-4 fallback)
+  - 10 test utterances for validation
+  - Ref: ADR-028
+
 - **Intent Taxonomy** (`src/clarissa/agent/intents/taxonomy.json`)
   - 6 categories: simulation_control, well_operations, schedule_operations, query_operations, validation, help_and_info
   - 22 distinct intents with examples, required/optional entities, ECLIPSE keyword mappings
@@ -105,6 +126,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.0] - 2025-12-28
 
 ### Added
+- **Voice Roundtrip Notebook (17)** (2026-01-26)
+  - Cross-platform voice input testing notebook for local machines
+  - Audio recording via `sounddevice` (Mac/Windows/Linux)
+  - Whisper API transcription with reservoir domain vocabulary
+  - Rule-based + LLM intent parsing (Claude/GPT-4 fallback)
+  - 10 test utterances for validation
+  - Ref: ADR-028
+
 - **Snapshot Testing System (v24-v30)**
   - Snapshot-style CLI tests in `tests/golden/snapshots/`
   - `make update-snapshots` for regenerating baselines
@@ -144,6 +173,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2025-12-27
 
 ### Added
+- **Voice Roundtrip Notebook (17)** (2026-01-26)
+  - Cross-platform voice input testing notebook for local machines
+  - Audio recording via `sounddevice` (Mac/Windows/Linux)
+  - Whisper API transcription with reservoir domain vocabulary
+  - Rule-based + LLM intent parsing (Claude/GPT-4 fallback)
+  - 10 test utterances for validation
+  - Ref: ADR-028
+
 - **CI Classification System (v10-v17)**
   - `ci_classify.py` emitting machine-readable verdicts
   - Flaky vs confirmed failure detection via rerun
@@ -176,6 +213,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-12-26
 
 ### Added
+- **Voice Roundtrip Notebook (17)** (2026-01-26)
+  - Cross-platform voice input testing notebook for local machines
+  - Audio recording via `sounddevice` (Mac/Windows/Linux)
+  - Whisper API transcription with reservoir domain vocabulary
+  - Rule-based + LLM intent parsing (Claude/GPT-4 fallback)
+  - 10 test utterances for validation
+  - Ref: ADR-028
+
 - **Core Agent Architecture**
   - `src/clarissa/agent/core.py` - CLARISSAAgent with governance gate
   - `src/clarissa/governance/policy.py` - GovernancePolicy with approval logic

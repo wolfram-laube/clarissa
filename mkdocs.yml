@@ -85,6 +85,7 @@ nav:
       - "14 Infrastructure Playground": tutorials/notebooks/14_Infrastructure_Playground.ipynb
       - "15 OPM Flow Showcase": tutorials/notebooks/15_OPM_Flow_Showcase.ipynb
       - "16 Voice Input Showcase 🎤": tutorials/notebooks/16_Voice_Input_Showcase.ipynb
+      - "17 Voice Roundtrip Local 🎤": tutorials/notebooks/17_Voice_Roundtrip_Local.ipynb
     - "Guides":
       - "🎤 Voice Input Tutorial": tutorials/guides/voice-input-tutorial.md
     - "Legacy":
