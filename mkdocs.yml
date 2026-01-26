@@ -86,6 +86,7 @@ nav:
       - "16 Voice Input Showcase 🎤": tutorials/notebooks/16_Voice_Input_Showcase.ipynb
     - "Guides":
       - "🎤 Voice Input Tutorial": tutorials/guides/voice-input-tutorial.md
+        - "🎬 Demo Showcase": tutorials/guides/voice-demo-showcase.md
     - "Legacy":
       - Reservoir Basics: tutorials/reservoir-basics.md
       - Code Examples: tutorials/reservoir-basics-code.ipynb
