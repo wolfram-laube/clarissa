@@ -63,6 +63,8 @@ tools/recording/
     └── record-timed.sh
 ```
 
+📋 **Showcase Guide:** See the [Demo Showcase Guide](guides/demo-showcase-guide.md) for step-by-step instructions on what to say, demonstrate, and expect in your demo video.
+
 See [Recording Tools Documentation](../tools/recording/README.md) for full details.
 
 ---
