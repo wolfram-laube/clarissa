@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4o"
     
     # ============== Database ==============
-    firestore_emulator_host: str | None = "localhost:8080"
+    firestore_emulator_host: str | None = None  # Set via env var for local dev
     firestore_project: str = "myk8sproject-207017"
     
     # ============== Simulator ==============
