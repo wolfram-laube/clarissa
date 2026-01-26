@@ -46,6 +46,7 @@ CLARISSA bridges natural language interaction and domain-specific simulation syn
 | I want to... / Ich will... | Guide |
 |-------------|-----------|
 | **🎤 Try Voice Control** | [Live Demo](demos/voice-demo.html) / [Tutorial](tutorials/guides/voice-input-tutorial.md) |
+| **🎬 Record Demos** | [Browser Recorder](demos/screen-recorder-pip.html) / [CLI Tools](tools/recording/README.md) |
 | Install & run CLARISSA | [🇬🇧 Getting Started](getting-started-en.md) / [🇩🇪 Erste Schritte](getting-started-de.md) |
 | Contribute code | [Contributing Guide](contributing.md) |
 | Understand CI pipeline | [CI Guide](ci/README.md) |
@@ -97,6 +98,7 @@ CLARISSA is a phased AI agent architecture designed to augment reservoir simulat
 | [ADR Index](architecture/adr/index.md) | All Architecture Decision Records |
 | [Publications](publications/index.md) | Research papers, PDFs, editing guides |
 | [CI/CD Guide](ci/README.md) | Understanding pipeline results |
+| [Recording Tools](tools/recording/README.md) | Screen recording with camera PiP (macOS/Linux) |
 | [Runner Management](runner-management-en.md) | Start/Stop Runner, GCP VM Management |
 | [Simulator Adapters](simulators/adapter_matrix.md) | Supported simulators and status |
 
