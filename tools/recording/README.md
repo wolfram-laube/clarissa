@@ -86,6 +86,15 @@ No install needed - works in Chrome/Edge:
 - [Screen Recorder](https://irena-40cc50.gitlab.io/demos/screen-recorder.html)
 - [Screen Recorder + PiP](https://irena-40cc50.gitlab.io/demos/screen-recorder-pip.html)
 
+## 🎬 Demo Showcase Guide
+
+Planning to record a voice demo? See the comprehensive [Demo Showcase Guide](../../docs/tutorials/guides/demo-showcase-guide.md) for:
+
+- Step-by-step recording script
+- Example questions to demonstrate
+- What to expect from the interface
+- Post-processing tips
+
 ## Update
 
 ```bash
