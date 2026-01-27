@@ -28,18 +28,66 @@
         }
         .header {
             background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-            padding: 20px 30px;
-            text-align: center;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .header h1 {
-            font-size: 2em;
+        .header-left h1 {
+            font-size: 1.5em;
             background: linear-gradient(90deg, var(--accent), #0f3460);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
         }
-        .header p { color: var(--text-secondary); }
+        .header-left p { color: var(--text-secondary); font-size: 0.85em; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .record-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255,0,0,0.2);
+            border: 1px solid var(--accent);
+            border-radius: 20px;
+            font-size: 0.85em;
+            color: var(--accent);
+            font-weight: 600;
+        }
+        .record-indicator.show { display: flex; }
+        .record-indicator .dot {
+            width: 10px; height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .screen-btn {
+            padding: 10px 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .screen-btn.start {
+            background: linear-gradient(145deg, #ff4444, #cc0000);
+            color: white;
+        }
+        .screen-btn.start:hover { transform: translateY(-2px); }
+        .screen-btn.stop {
+            background: var(--success);
+            color: white;
+            display: none;
+        }
+        .screen-btn.stop.show { display: inline-block; }
+        .screen-btn.download {
+            background: var(--info);
+            color: white;
+            display: none;
+        }
+        .screen-btn.download.show { display: inline-block; }
         .main {
             flex: 1;
             display: flex;
@@ -50,7 +98,7 @@
             width: 100%;
         }
         .voice-panel {
-            width: 400px;
+            width: 380px;
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -58,21 +106,20 @@
         .card {
             background: var(--bg-secondary);
             border-radius: 16px;
-            padding: 24px;
+            padding: 20px;
             border: 1px solid rgba(255,255,255,0.05);
         }
         .card h2 {
-            font-size: 0.85em;
+            font-size: 0.8em;
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
         /* Language Selector */
         .lang-selector {
             display: flex;
             gap: 10px;
-            margin-bottom: 5px;
         }
         .lang-btn {
             flex: 1;
@@ -91,10 +138,9 @@
             background: rgba(233, 69, 96, 0.15);
         }
         .lang-btn:hover:not(.active) { border-color: rgba(255,255,255,0.3); }
-        .lang-hint { font-size: 0.75em; color: var(--text-secondary); text-align: center; }
         /* Waveform */
         .waveform {
-            height: 100px;
+            height: 80px;
             background: rgba(0,0,0,0.4);
             border-radius: 12px;
             display: flex;
@@ -110,19 +156,17 @@
             border-radius: 2px;
             transition: height 0.05s ease-out;
         }
-        .wave-bar.speaking {
-            background: linear-gradient(180deg, var(--info), #0f3460);
-        }
+        .wave-bar.speaking { background: linear-gradient(180deg, var(--info), #0f3460); }
         /* Voice Controls */
         .voice-controls {
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin-top: 20px;
+            margin-top: 15px;
         }
         .voice-btn {
-            padding: 18px 40px;
-            font-size: 1.1em;
+            padding: 15px 35px;
+            font-size: 1em;
             font-weight: 600;
             border: none;
             border-radius: 50px;
@@ -134,10 +178,7 @@
             color: white;
             box-shadow: 0 4px 25px var(--accent-glow);
         }
-        .voice-btn.record:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 35px var(--accent-glow);
-        }
+        .voice-btn.record:hover:not(:disabled) { transform: translateY(-3px); }
         .voice-btn.record:disabled { opacity: 0.5; cursor: not-allowed; }
         .voice-btn.record.active { animation: recordPulse 1s infinite; }
         .voice-btn.stop {
@@ -153,14 +194,10 @@
         /* Status */
         .status-box {
             text-align: center;
-            padding: 15px;
+            padding: 12px;
             background: rgba(0,0,0,0.3);
             border-radius: 10px;
-            margin-top: 15px;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin-top: 12px;
         }
         .status-box.recording { color: var(--accent); font-weight: 600; }
         .status-box.success { color: var(--success); }
@@ -169,138 +206,109 @@
         .transcript-box {
             background: rgba(0,0,0,0.3);
             border-radius: 10px;
-            padding: 15px;
+            padding: 12px;
+            margin-top: 12px;
         }
         .transcript-box label {
             display: block;
-            font-size: 0.8em;
+            font-size: 0.75em;
             color: var(--text-secondary);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .transcript-box .text {
-            font-size: 1.1em;
+            font-size: 1em;
             color: var(--success);
             font-style: italic;
-            min-height: 1.5em;
         }
         /* Response */
         .response-box {
             background: linear-gradient(135deg, rgba(33,150,243,0.15), rgba(22,33,62,0.5));
             border: 1px solid rgba(33,150,243,0.3);
             border-radius: 10px;
-            padding: 15px;
-            margin-top: 15px;
+            padding: 12px;
+            margin-top: 12px;
             display: none;
         }
         .response-box.show { display: block; }
         .response-box label {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 0.8em;
+            gap: 8px;
+            font-size: 0.75em;
             color: var(--text-secondary);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
-        .response-box .response-text { font-size: 1em; line-height: 1.5; }
+        .response-box .response-text { font-size: 0.95em; line-height: 1.4; }
         .replay-btn {
             background: var(--info);
             color: white;
             border: none;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 0.75em;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7em;
             cursor: pointer;
             margin-left: auto;
         }
         .replay-btn:hover { background: #1976d2; }
-        .speaking-indicator {
-            display: inline-block;
-            color: var(--info);
-            animation: blink 0.5s infinite;
-        }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .speaking-indicator { color: var(--info); animation: blink 0.5s infinite; }
         /* Voice Settings */
         .voice-settings label {
             display: block;
-            font-size: 0.8em;
+            font-size: 0.75em;
             color: var(--text-secondary);
-            margin-bottom: 6px;
-            margin-top: 12px;
+            margin-bottom: 5px;
+            margin-top: 10px;
         }
         .voice-settings label:first-child { margin-top: 0; }
-        .voice-settings select,
-        .voice-settings input[type="range"] {
+        .voice-settings select, .voice-settings input[type="range"] {
             width: 100%;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 8px;
+            border-radius: 6px;
             border: 1px solid rgba(255,255,255,0.1);
             background: var(--bg-tertiary);
             color: var(--text-primary);
-            font-size: 0.9em;
-        }
-        .range-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .range-row input { flex: 1; }
-        .range-row span { 
-            min-width: 40px; 
-            text-align: right;
             font-size: 0.85em;
-            color: var(--text-secondary);
         }
+        .range-row { display: flex; align-items: center; gap: 8px; }
+        .range-row input { flex: 1; }
+        .range-row span { min-width: 35px; text-align: right; font-size: 0.8em; color: var(--text-secondary); }
         .voice-toggle {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-top: 15px;
-            padding-top: 15px;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
-        .voice-toggle input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--info);
-        }
+        .voice-toggle input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--info); }
+        .voice-toggle span { font-size: 0.85em; }
         .test-btn {
             width: 100%;
-            margin-top: 15px;
-            padding: 12px;
+            margin-top: 12px;
+            padding: 10px;
             background: var(--bg-tertiary);
             color: var(--text-primary);
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 0.9em;
+            font-size: 0.85em;
         }
         .test-btn:hover { background: rgba(33,150,243,0.2); border-color: var(--info); }
         /* Examples */
-        .examples {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
+        .examples { display: flex; flex-wrap: wrap; gap: 6px; }
         .example-btn {
-            padding: 10px 16px;
-            font-size: 0.85em;
+            padding: 8px 14px;
+            font-size: 0.8em;
             background: var(--bg-tertiary);
             color: var(--text-primary);
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 25px;
+            border-radius: 20px;
             cursor: pointer;
             transition: all 0.2s;
         }
-        .example-btn:hover {
-            background: rgba(233, 69, 96, 0.2);
-            border-color: var(--accent);
-        }
+        .example-btn:hover { background: rgba(233, 69, 96, 0.2); border-color: var(--accent); }
         /* Viz Panel */
-        .viz-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
+        .viz-panel { flex: 1; display: flex; flex-direction: column; }
         .viz-container {
             flex: 1;
             background: var(--bg-secondary);
@@ -320,19 +328,89 @@
         /* Footer */
         .footer {
             background: var(--bg-secondary);
-            padding: 15px 30px;
+            padding: 12px 30px;
             text-align: center;
             border-top: 1px solid rgba(255,255,255,0.1);
-            font-size: 0.85em;
+            font-size: 0.8em;
             color: var(--text-secondary);
         }
         .footer a { color: var(--accent); text-decoration: none; }
+        /* Download Info */
+        .download-info {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--success);
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 320px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .download-info.show { display: block; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .download-info h3 { color: var(--success); margin-bottom: 10px; font-size: 1em; }
+        .download-info p { font-size: 0.85em; margin-bottom: 6px; }
+        .download-info .filename { background: var(--bg-tertiary); padding: 8px; border-radius: 6px; font-family: monospace; font-size: 0.8em; word-break: break-all; }
+        .download-info .close-btn { position: absolute; top: 8px; right: 10px; background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2em; }
+        /* Countdown */
+        .countdown-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+        }
+        .countdown-overlay.show { display: flex; }
+        .countdown-number {
+            font-size: 10em;
+            font-weight: 700;
+            color: var(--accent);
+            text-shadow: 0 0 50px var(--accent-glow);
+            animation: countPop 1s ease-out;
+        }
+        @keyframes countPop {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .countdown-text { font-size: 1.2em; color: var(--text-secondary); margin-top: 20px; }
     </style>
 </head>
 <body>
+    <div class="countdown-overlay" id="countdownOverlay">
+        <div class="countdown-number" id="countdownNumber">3</div>
+        <div class="countdown-text">Get ready...</div>
+    </div>
+    
+    <div class="download-info" id="downloadInfo">
+        <button class="close-btn" onclick="closeDownloadInfo()">×</button>
+        <h3>✅ Video Saved!</h3>
+        <p>📁 <strong>Filename:</strong></p>
+        <div class="filename" id="savedFilename"></div>
+        <p style="margin-top:10px">📂 <strong>Location:</strong> Downloads folder</p>
+    </div>
+    
     <header class="header">
-        <h1>🎤 CLARISSA Voice Interface</h1>
-        <p id="headerSubtitle">Speak naturally to control reservoir simulation • CLARISSA speaks back!</p>
+        <div class="header-left">
+            <h1>🎤 CLARISSA Voice Interface</h1>
+            <p id="headerSubtitle">Speak to control reservoir simulation • CLARISSA speaks back!</p>
+        </div>
+        <div class="header-right">
+            <div class="record-indicator" id="recordIndicator">
+                <span class="dot"></span>
+                <span>REC</span>
+                <span id="recTimer">00:00</span>
+            </div>
+            <button class="screen-btn start" id="screenStartBtn" onclick="startScreenRecording()">🎬 Record Screen</button>
+            <button class="screen-btn stop" id="screenStopBtn" onclick="stopScreenRecording()">⏹️ Stop</button>
+            <button class="screen-btn download" id="screenDownloadBtn" onclick="downloadRecording()">💾 Download</button>
+        </div>
     </header>
     
     <main class="main">
@@ -344,33 +422,24 @@
                     <button class="lang-btn active" id="langEn" onclick="setLanguage('en')">🇬🇧 English</button>
                     <button class="lang-btn" id="langDe" onclick="setLanguage('de')">🇩🇪 Deutsch</button>
                 </div>
-                <p class="lang-hint">Affects voice input & output</p>
             </div>
             
             <!-- Waveform & Controls -->
             <div class="card">
                 <h2>🎙️ Voice Input</h2>
                 <div class="waveform" id="waveform"></div>
-                
                 <div class="voice-controls">
-                    <button class="voice-btn record" id="recordBtn" onclick="toggleRecording()">
-                        🎤 Start Recording
-                    </button>
-                    <button class="voice-btn stop" id="stopBtn" onclick="stopRecording()">
-                        ⏹️ Stop
-                    </button>
+                    <button class="voice-btn record" id="recordBtn" onclick="toggleRecording()">🎤 Start</button>
+                    <button class="voice-btn stop" id="stopBtn" onclick="stopRecording()">⏹️ Stop</button>
                 </div>
-                
                 <div class="status-box" id="statusBox">Click 🎤 to start</div>
-                
                 <div class="transcript-box">
                     <label id="transcriptLabel">📝 You said:</label>
                     <div class="text" id="transcriptText">—</div>
                 </div>
-                
                 <div class="response-box" id="responseBox">
                     <label>
-                        💬 CLARISSA:
+                        💬 CLARISSA
                         <span class="speaking-indicator" id="speakingIndicator" style="display:none">🔊</span>
                         <button class="replay-btn" onclick="replayResponse()">🔁 Replay</button>
                     </label>
@@ -384,31 +453,27 @@
                 <div class="voice-settings">
                     <label>Voice</label>
                     <select id="voiceSelect"><option>Loading...</option></select>
-                    
                     <label>Speed</label>
                     <div class="range-row">
-                        <input type="range" id="voiceSpeed" min="0.5" max="1.5" step="0.1" value="1.0" oninput="updateSpeedLabel()">
+                        <input type="range" id="voiceSpeed" min="0.5" max="1.5" step="0.1" value="1.0">
                         <span id="speedLabel">1.0x</span>
                     </div>
-                    
                     <label>Pitch</label>
                     <div class="range-row">
-                        <input type="range" id="voicePitch" min="0.5" max="1.5" step="0.1" value="1.0" oninput="updatePitchLabel()">
+                        <input type="range" id="voicePitch" min="0.5" max="1.5" step="0.1" value="1.0">
                         <span id="pitchLabel">1.0</span>
                     </div>
-                    
                     <div class="voice-toggle">
                         <input type="checkbox" id="voiceEnabled" checked>
                         <span id="voiceToggleLabel">Enable voice responses</span>
                     </div>
-                    
                     <button class="test-btn" onclick="testVoice()">🔊 Test Voice</button>
                 </div>
             </div>
             
             <!-- Examples -->
             <div class="card">
-                <h2 id="examplesTitle">💡 Try These Commands</h2>
+                <h2 id="examplesTitle">💡 Try These</h2>
                 <div class="examples" id="examplesContainer"></div>
             </div>
         </div>
@@ -419,16 +484,15 @@
                 <div class="viz-placeholder">
                     <div class="icon">📊</div>
                     <div id="vizPlaceholderText">3D visualization will appear here</div>
-                    <div style="margin-top:10px; font-size:0.9em" id="vizPlaceholderHint">Try a voice command or click an example</div>
                 </div>
             </div>
         </div>
     </main>
     
     <footer class="footer">
-        CLARISSA Voice Interface v3.0 • 
-        <a href="demo-recording-suite.html">📹 Recording Suite</a> • 
-        <a href="../">📚 Documentation</a>
+        CLARISSA Voice Interface v4.0 • 
+        <a href="demo-recording-suite.html">🎬 Recording Suite</a> • 
+        <a href="../">📚 Docs</a>
     </footer>
 
     <script>
@@ -439,64 +503,62 @@
         
         const LANG = {
             en: {
-                subtitle: 'Speak naturally to control reservoir simulation • CLARISSA speaks back!',
+                subtitle: 'Speak to control reservoir simulation • CLARISSA speaks back!',
                 transcriptLabel: '📝 You said:',
                 clickToStart: 'Click 🎤 to start',
-                recording: '🔴 Recording... speak now!',
+                recording: '🔴 Recording...',
                 processing: '⏳ Processing...',
-                speaking: '🔊 CLARISSA is speaking...',
+                speaking: '🔊 Speaking...',
                 ready: '✅ Ready',
-                micDenied: '❌ Microphone access denied',
+                micDenied: '❌ Mic denied',
                 voiceToggle: 'Enable voice responses',
-                examplesTitle: '💡 Try These Commands',
+                examplesTitle: '💡 Try These',
                 vizPlaceholder: '3D visualization will appear here',
-                vizHint: 'Try a voice command or click an example',
                 examples: [
-                    { text: 'Show permeability', cmd: 'show me the permeability' },
-                    { text: 'Show layer 3', cmd: 'display layer 3' },
-                    { text: 'Water cut?', cmd: 'what is the water cut' },
-                    { text: 'Show pressure', cmd: 'show pressure distribution' },
-                    { text: 'Porosity', cmd: 'porosity distribution' }
+                    { text: 'Permeability', cmd: 'show me the permeability' },
+                    { text: 'Layer 3', cmd: 'display layer 3' },
+                    { text: 'Water cut', cmd: 'what is the water cut' },
+                    { text: 'Pressure', cmd: 'show pressure' },
+                    { text: 'Porosity', cmd: 'porosity' }
                 ],
                 responses: {
-                    perm: 'Showing the permeability distribution. Notice the high-permeability channel running through the center of the reservoir, which will be the primary flow path.',
-                    poro: 'Displaying the porosity distribution. The average porosity is approximately 18 percent, with some variation due to depositional environment.',
-                    pressure: 'Here is the pressure distribution. You can observe the pressure drawdown near the producing wells, indicating good reservoir connectivity.',
-                    layer: 'Showing cross-section at layer {n}. This horizontal slice helps identify geological features and permeability trends at this depth.',
-                    watercut: 'The current field water cut is 35 percent. Based on the simulation forecast, water cut will reach 50 percent in approximately 18 months. Consider optimizing injection patterns.',
-                    default: 'I can show you permeability, porosity, pressure distributions, layer cross-sections, or water cut analysis. What would you like to see?'
+                    perm: 'Showing the permeability distribution. Notice the high-permeability channel running through the center.',
+                    poro: 'Displaying porosity. Average is approximately 18 percent.',
+                    pressure: 'Here is the pressure distribution showing drawdown near producers.',
+                    layer: 'Showing cross-section at layer {n}.',
+                    watercut: 'Current water cut is 35 percent, reaching 50 percent in 18 months.',
+                    default: 'I can show permeability, porosity, pressure, layers, or water cut.'
                 },
-                testVoice: 'Hello! I am CLARISSA, your conversational reservoir simulation assistant. Ask me to show permeability, pressure, or any layer cross-section.'
+                testVoice: 'Hello! I am CLARISSA, your reservoir simulation assistant.'
             },
             de: {
-                subtitle: 'Sprich natürlich um die Reservoir-Simulation zu steuern • CLARISSA antwortet!',
-                transcriptLabel: '📝 Du hast gesagt:',
-                clickToStart: 'Klick 🎤 zum Starten',
-                recording: '🔴 Aufnahme... sprich jetzt!',
+                subtitle: 'Sprich um die Simulation zu steuern • CLARISSA antwortet!',
+                transcriptLabel: '📝 Du sagtest:',
+                clickToStart: 'Klick 🎤',
+                recording: '🔴 Aufnahme...',
                 processing: '⏳ Verarbeite...',
-                speaking: '🔊 CLARISSA spricht...',
+                speaking: '🔊 Spricht...',
                 ready: '✅ Bereit',
-                micDenied: '❌ Mikrofon-Zugriff verweigert',
+                micDenied: '❌ Mikrofon verweigert',
                 voiceToggle: 'Sprachausgabe aktivieren',
-                examplesTitle: '💡 Probiere diese Befehle',
+                examplesTitle: '💡 Probiere',
                 vizPlaceholder: '3D-Visualisierung erscheint hier',
-                vizHint: 'Sprich einen Befehl oder klick ein Beispiel',
                 examples: [
-                    { text: 'Zeig Permeabilität', cmd: 'zeig mir die permeabilität' },
-                    { text: 'Zeig Schicht 3', cmd: 'zeig schicht 3' },
-                    { text: 'Wasseranteil?', cmd: 'wie hoch ist der wasseranteil' },
-                    { text: 'Zeig Druck', cmd: 'zeig druckverteilung' },
-                    { text: 'Porosität', cmd: 'porositätsverteilung' }
+                    { text: 'Permeabilität', cmd: 'zeig permeabilität' },
+                    { text: 'Schicht 3', cmd: 'zeig schicht 3' },
+                    { text: 'Wasseranteil', cmd: 'wasseranteil' },
+                    { text: 'Druck', cmd: 'zeig druck' },
+                    { text: 'Porosität', cmd: 'porosität' }
                 ],
                 responses: {
-                    perm: 'Hier ist die Permeabilitätsverteilung. Man sieht einen hochpermeablen Kanal durch die Mitte des Reservoirs, der der primäre Fließweg sein wird.',
-                    poro: 'Die Porositätsverteilung wird angezeigt. Die durchschnittliche Porosität liegt bei etwa 18 Prozent mit Variationen durch die Ablagerungsumgebung.',
-                    pressure: 'Hier ist die Druckverteilung. Man kann den Druckabfall bei den produzierenden Bohrungen erkennen, was auf gute Reservoir-Konnektivität hinweist.',
-                    layer: 'Zeige Querschnitt bei Schicht {n}. Dieser horizontale Schnitt hilft geologische Strukturen und Permeabilitätstrends zu erkennen.',
-                    watercut: 'Der aktuelle Wasseranteil liegt bei 35 Prozent. Laut Simulationsprognose erreicht er in etwa 18 Monaten 50 Prozent. Eine Optimierung der Injektionsmuster wäre zu erwägen.',
-                    default: 'Ich kann dir Permeabilität, Porosität, Druckverteilungen, Schicht-Querschnitte oder Wasseranteil-Analysen zeigen. Was möchtest du sehen?'
+                    perm: 'Hier ist die Permeabilitätsverteilung. Der hochpermeable Kanal läuft durch die Mitte.',
+                    poro: 'Porositätsverteilung. Durchschnitt etwa 18 Prozent.',
+                    pressure: 'Druckverteilung mit Druckabfall bei den Produzenten.',
+                    layer: 'Querschnitt bei Schicht {n}.',
+                    watercut: 'Wasseranteil bei 35 Prozent, erreicht 50 Prozent in 18 Monaten.',
+                    default: 'Ich kann Permeabilität, Porosität, Druck, Schichten oder Wasseranteil zeigen.'
                 },
-                testVoice: 'Hallo! Ich bin CLARISSA, deine Assistentin für Reservoir-Simulation. Frag mich nach Permeabilität, Druck oder einem beliebigen Schicht-Querschnitt.'
+                testVoice: 'Hallo! Ich bin CLARISSA, deine Reservoir-Assistentin.'
             }
         };
 
@@ -504,7 +566,6 @@
             currentLang = lang;
             document.getElementById('langEn').classList.toggle('active', lang === 'en');
             document.getElementById('langDe').classList.toggle('active', lang === 'de');
-            
             const L = LANG[lang];
             document.getElementById('headerSubtitle').textContent = L.subtitle;
             document.getElementById('transcriptLabel').textContent = L.transcriptLabel;
@@ -512,15 +573,10 @@
             document.getElementById('voiceToggleLabel').textContent = L.voiceToggle;
             document.getElementById('examplesTitle').textContent = L.examplesTitle;
             document.getElementById('vizPlaceholderText').textContent = L.vizPlaceholder;
-            document.getElementById('vizPlaceholderHint').textContent = L.vizHint;
-            
-            // Update examples
             const container = document.getElementById('examplesContainer');
             container.innerHTML = L.examples.map(ex => 
                 '<button class="example-btn" onclick="simulateCommand(\'' + ex.cmd.replace(/'/g, "\\'") + '\')">' + ex.text + '</button>'
             ).join('');
-            
-            // Update voice list
             updateVoiceList();
         }
 
@@ -529,13 +585,17 @@
         // ═══════════════════════════════════════════════════════════════════
         let isRecording = false;
         let isSpeaking = false;
+        let isScreenRecording = false;
         let mediaRecorder = null;
+        let screenRecorder = null;
+        let screenChunks = [];
         let audioContext = null;
         let analyser = null;
         let animationId = null;
         let voices = [];
         let lastResponse = '';
-        
+        let screenStartTime = null;
+        let screenTimerInterval = null;
         const NX = 10, NY = 10, NZ = 5;
         let demoData = null;
 
@@ -547,43 +607,127 @@
             generateDemoData();
             initVoices();
             setLanguage('en');
+            document.getElementById('voiceSpeed').oninput = () => {
+                document.getElementById('speedLabel').textContent = parseFloat(document.getElementById('voiceSpeed').value).toFixed(1) + 'x';
+            };
+            document.getElementById('voicePitch').oninput = () => {
+                document.getElementById('pitchLabel').textContent = parseFloat(document.getElementById('voicePitch').value).toFixed(1);
+            };
         });
 
         function initWaveform() {
             const container = document.getElementById('waveform');
-            for (let i = 0; i < 35; i++) {
+            for (let i = 0; i < 30; i++) {
                 const bar = document.createElement('div');
                 bar.className = 'wave-bar';
-                bar.id = 'bar-' + i;
                 container.appendChild(bar);
             }
         }
 
         function generateDemoData() {
-            const perm = [], poro = [], sw = [], press = [];
-            for (let i = 0; i < NX; i++) {
-                for (let j = 0; j < NY; j++) {
-                    for (let k = 0; k < NZ; k++) {
-                        let p = Math.exp(5 + Math.random() * 2);
-                        if (i >= 4 && i <= 6 && j >= 3 && j <= 6) p *= 5;
-                        perm.push({ x: i, y: j, z: k, v: p });
-                        poro.push({ x: i, y: j, z: k, v: 0.1 + Math.random() * 0.2 });
-                        sw.push({ x: i, y: j, z: k, v: 0.2 + 0.6 * (i / NX) + Math.random() * 0.1 });
-                        press.push({ x: i, y: j, z: k, v: 4000 - 500 * Math.sqrt((i/NX)**2 + (j/NY)**2) });
-                    }
-                }
+            const perm = [], poro = [], press = [];
+            for (let i = 0; i < NX; i++) for (let j = 0; j < NY; j++) for (let k = 0; k < NZ; k++) {
+                let p = Math.exp(5 + Math.random() * 2);
+                if (i >= 4 && i <= 6 && j >= 3 && j <= 6) p *= 5;
+                perm.push({ x: i, y: j, z: k, v: p });
+                poro.push({ x: i, y: j, z: k, v: 0.1 + Math.random() * 0.2 });
+                press.push({ x: i, y: j, z: k, v: 4000 - 500 * Math.sqrt((i/NX)**2 + (j/NY)**2) });
             }
-            demoData = { permeability: perm, porosity: poro, water_saturation: sw, pressure: press };
+            demoData = { permeability: perm, porosity: poro, pressure: press };
         }
 
         // ═══════════════════════════════════════════════════════════════════
-        // TEXT-TO-SPEECH
+        // SCREEN RECORDING
+        // ═══════════════════════════════════════════════════════════════════
+        async function startScreenRecording() {
+            try {
+                const displayStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { displaySurface: "browser", width: 1920, height: 1080 },
+                    audio: true
+                });
+                let audioStream;
+                try { audioStream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch(e) {}
+                const tracks = [...displayStream.getTracks()];
+                if (audioStream) tracks.push(...audioStream.getAudioTracks());
+                const combinedStream = new MediaStream(tracks);
+                screenRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9' });
+                screenChunks = [];
+                screenRecorder.ondataavailable = e => { if (e.data.size > 0) screenChunks.push(e.data); };
+                screenRecorder.onstop = () => {
+                    document.getElementById('screenDownloadBtn').classList.add('show');
+                };
+                displayStream.getVideoTracks()[0].onended = () => { if (isScreenRecording) stopScreenRecording(); };
+                
+                await showCountdown();
+                
+                screenRecorder.start(1000);
+                isScreenRecording = true;
+                screenStartTime = Date.now();
+                
+                document.getElementById('screenStartBtn').style.display = 'none';
+                document.getElementById('screenStopBtn').classList.add('show');
+                document.getElementById('recordIndicator').classList.add('show');
+                screenTimerInterval = setInterval(updateScreenTimer, 1000);
+            } catch (err) {
+                alert('Screen recording failed: ' + err.message);
+            }
+        }
+
+        function stopScreenRecording() {
+            if (screenRecorder && screenRecorder.state !== 'inactive') screenRecorder.stop();
+            if (screenRecorder && screenRecorder.stream) screenRecorder.stream.getTracks().forEach(t => t.stop());
+            isScreenRecording = false;
+            clearInterval(screenTimerInterval);
+            document.getElementById('screenStopBtn').classList.remove('show');
+            document.getElementById('recordIndicator').classList.remove('show');
+            document.getElementById('screenStartBtn').style.display = 'inline-block';
+            document.getElementById('screenStartBtn').textContent = '🎬 Record Again';
+        }
+
+        function downloadRecording() {
+            const blob = new Blob(screenChunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const filename = 'CLARISSA_' + new Date().toISOString().slice(0,19).replace(/[:-]/g,'') + '.webm';
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+            document.getElementById('savedFilename').textContent = filename;
+            document.getElementById('downloadInfo').classList.add('show');
+        }
+
+        function closeDownloadInfo() {
+            document.getElementById('downloadInfo').classList.remove('show');
+        }
+
+        function updateScreenTimer() {
+            const elapsed = Math.floor((Date.now() - screenStartTime) / 1000);
+            document.getElementById('recTimer').textContent = 
+                String(Math.floor(elapsed / 60)).padStart(2, '0') + ':' + String(elapsed % 60).padStart(2, '0');
+        }
+
+        async function showCountdown() {
+            const overlay = document.getElementById('countdownOverlay');
+            const number = document.getElementById('countdownNumber');
+            overlay.classList.add('show');
+            for (let i = 3; i > 0; i--) {
+                number.textContent = i;
+                number.style.animation = 'none';
+                number.offsetHeight;
+                number.style.animation = 'countPop 1s ease-out';
+                await new Promise(r => setTimeout(r, 1000));
+            }
+            number.textContent = '🎬';
+            await new Promise(r => setTimeout(r, 500));
+            overlay.classList.remove('show');
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // TTS
         // ═══════════════════════════════════════════════════════════════════
         function initVoices() {
-            const loadVoices = () => {
-                voices = speechSynthesis.getVoices();
-                updateVoiceList();
-            };
+            const loadVoices = () => { voices = speechSynthesis.getVoices(); updateVoiceList(); };
             loadVoices();
             speechSynthesis.onvoiceschanged = loadVoices;
         }
@@ -591,10 +735,8 @@
         function updateVoiceList() {
             const select = document.getElementById('voiceSelect');
             select.innerHTML = '';
-            
             const langPrefix = currentLang === 'en' ? 'en' : 'de';
             const langVoices = voices.filter(v => v.lang.startsWith(langPrefix));
-            
             if (langVoices.length === 0) {
                 voices.forEach((v, i) => {
                     const opt = document.createElement('option');
@@ -604,11 +746,9 @@
                 });
                 return;
             }
-            
             const female = [], male = [], other = [];
             const femaleNames = ['female','samantha','victoria','karen','moira','fiona','tessa','zoe','anna','sara','zira','petra','marlene','vicki'];
             const maleNames = ['male','daniel','alex','tom','david','james','fred','ralph','markus','hans','stefan'];
-            
             langVoices.forEach(v => {
                 const nameLower = v.name.toLowerCase();
                 const idx = voices.indexOf(v);
@@ -616,7 +756,6 @@
                 else if (maleNames.some(n => nameLower.includes(n))) male.push({voice:v,index:idx});
                 else other.push({voice:v,index:idx});
             });
-            
             const addGroup = (label, items) => {
                 if (items.length === 0) return;
                 const group = document.createElement('optgroup');
@@ -629,7 +768,6 @@
                 });
                 select.appendChild(group);
             };
-            
             addGroup('👩 Female', female);
             addGroup('👨 Male', male);
             addGroup('🔊 Other', other);
@@ -639,183 +777,124 @@
             return new Promise((resolve) => {
                 if (!document.getElementById('voiceEnabled').checked) { resolve(); return; }
                 speechSynthesis.cancel();
-                
                 const utterance = new SpeechSynthesisUtterance(text);
                 const select = document.getElementById('voiceSelect');
                 const voiceIndex = parseInt(select.value);
-                if (!isNaN(voiceIndex) && voices[voiceIndex]) {
-                    utterance.voice = voices[voiceIndex];
-                }
-                
+                if (!isNaN(voiceIndex) && voices[voiceIndex]) utterance.voice = voices[voiceIndex];
                 utterance.rate = parseFloat(document.getElementById('voiceSpeed').value);
                 utterance.pitch = parseFloat(document.getElementById('voicePitch').value);
-                
                 const indicator = document.getElementById('speakingIndicator');
                 const status = document.getElementById('statusBox');
                 const bars = document.querySelectorAll('.wave-bar');
                 const L = LANG[currentLang];
-                
                 utterance.onstart = () => {
                     isSpeaking = true;
                     indicator.style.display = 'inline';
                     status.textContent = L.speaking;
                     status.className = 'status-box speaking';
                     bars.forEach(bar => bar.classList.add('speaking'));
-                    animateSpeakingWaveform();
+                    animateSpeaking();
                 };
-                
                 utterance.onend = () => {
                     isSpeaking = false;
                     indicator.style.display = 'none';
                     status.textContent = L.ready;
                     status.className = 'status-box success';
                     bars.forEach(bar => bar.classList.remove('speaking'));
-                    stopSpeakingWaveform();
+                    stopSpeaking();
                     resolve();
                 };
-                
-                utterance.onerror = (e) => {
-                    isSpeaking = false;
-                    indicator.style.display = 'none';
-                    stopSpeakingWaveform();
-                    resolve();
-                };
-                
+                utterance.onerror = () => { isSpeaking = false; indicator.style.display = 'none'; stopSpeaking(); resolve(); };
                 speechSynthesis.speak(utterance);
             });
         }
 
-        function animateSpeakingWaveform() {
+        function animateSpeaking() {
             const bars = document.querySelectorAll('.wave-bar');
             function animate() {
                 if (!isSpeaking) return;
-                bars.forEach(bar => {
-                    bar.style.height = (10 + Math.random() * 50) + 'px';
-                });
+                bars.forEach(bar => { bar.style.height = (10 + Math.random() * 40) + 'px'; });
                 animationId = requestAnimationFrame(animate);
             }
             animate();
         }
 
-        function stopSpeakingWaveform() {
+        function stopSpeaking() {
             cancelAnimationFrame(animationId);
-            document.querySelectorAll('.wave-bar').forEach(bar => {
-                bar.style.height = '20px';
-            });
+            document.querySelectorAll('.wave-bar').forEach(bar => { bar.style.height = '20px'; });
         }
 
-        function testVoice() {
-            speak(LANG[currentLang].testVoice);
-        }
-
-        function replayResponse() {
-            if (lastResponse && !isSpeaking) {
-                speak(lastResponse);
-            }
-        }
-
-        function updateSpeedLabel() {
-            document.getElementById('speedLabel').textContent = 
-                parseFloat(document.getElementById('voiceSpeed').value).toFixed(1) + 'x';
-        }
-
-        function updatePitchLabel() {
-            document.getElementById('pitchLabel').textContent = 
-                parseFloat(document.getElementById('voicePitch').value).toFixed(1);
-        }
+        function testVoice() { speak(LANG[currentLang].testVoice); }
+        function replayResponse() { if (lastResponse && !isSpeaking) speak(lastResponse); }
 
         // ═══════════════════════════════════════════════════════════════════
         // VOICE RECORDING
         // ═══════════════════════════════════════════════════════════════════
         async function toggleRecording() {
             if (isSpeaking) return;
-            if (!isRecording) await startRecording();
+            if (!isRecording) await startVoiceRecording();
         }
 
-        async function startRecording() {
-            const recordBtn = document.getElementById('recordBtn');
-            const stopBtn = document.getElementById('stopBtn');
-            const status = document.getElementById('statusBox');
+        async function startVoiceRecording() {
             const L = LANG[currentLang];
-            
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                
                 audioContext = new AudioContext();
                 analyser = audioContext.createAnalyser();
-                const source = audioContext.createMediaStreamSource(stream);
-                source.connect(analyser);
+                audioContext.createMediaStreamSource(stream).connect(analyser);
                 analyser.fftSize = 64;
-                animateRecordingWaveform();
-                
+                animateVoiceWaveform();
                 mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-                
                 mediaRecorder.onstop = () => {
                     stream.getTracks().forEach(t => t.stop());
                     cancelAnimationFrame(animationId);
                     resetWaveform();
                     simulateTranscription();
                 };
-                
                 mediaRecorder.start();
                 isRecording = true;
-                
-                recordBtn.classList.add('active');
-                recordBtn.style.display = 'none';
-                stopBtn.classList.add('show');
-                status.textContent = L.recording;
-                status.className = 'status-box recording';
-                
+                document.getElementById('recordBtn').classList.add('active');
+                document.getElementById('recordBtn').style.display = 'none';
+                document.getElementById('stopBtn').classList.add('show');
+                document.getElementById('statusBox').textContent = L.recording;
+                document.getElementById('statusBox').className = 'status-box recording';
             } catch (err) {
-                status.textContent = L.micDenied;
-                status.className = 'status-box';
+                document.getElementById('statusBox').textContent = L.micDenied;
             }
         }
 
         function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-            }
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
             isRecording = false;
-            
             document.getElementById('recordBtn').classList.remove('active');
             document.getElementById('recordBtn').style.display = 'inline-block';
             document.getElementById('stopBtn').classList.remove('show');
             document.getElementById('statusBox').textContent = LANG[currentLang].processing;
         }
 
-        function animateRecordingWaveform() {
+        function animateVoiceWaveform() {
             const bars = document.querySelectorAll('.wave-bar');
             const dataArray = new Uint8Array(analyser.frequencyBinCount);
-            
             function draw() {
                 if (!isRecording) return;
                 analyser.getByteFrequencyData(dataArray);
-                bars.forEach((bar, i) => {
-                    const value = dataArray[i] || 0;
-                    bar.style.height = Math.max(8, value / 3) + 'px';
-                });
+                bars.forEach((bar, i) => { bar.style.height = Math.max(8, (dataArray[i] || 0) / 3) + 'px'; });
                 animationId = requestAnimationFrame(draw);
             }
             draw();
         }
 
         function resetWaveform() {
-            document.querySelectorAll('.wave-bar').forEach(bar => {
-                bar.style.height = '20px';
-            });
+            document.querySelectorAll('.wave-bar').forEach(bar => { bar.style.height = '20px'; });
         }
 
         function simulateTranscription() {
             if (audioContext) audioContext.close();
             const examples = LANG[currentLang].examples;
-            const transcript = examples[Math.floor(Math.random() * examples.length)].cmd;
-            processCommand(transcript);
+            const cmd = examples[Math.floor(Math.random() * examples.length)].cmd;
+            processCommand(cmd);
         }
 
-        // ═══════════════════════════════════════════════════════════════════
-        // COMMAND PROCESSING
-        // ═══════════════════════════════════════════════════════════════════
         function simulateCommand(text) {
             if (isSpeaking || isRecording) return;
             processCommand(text);
@@ -824,121 +903,79 @@
         async function processCommand(text) {
             const t = text.toLowerCase();
             document.getElementById('transcriptText').textContent = '"' + text + '"';
-            
-            const responseBox = document.getElementById('responseBox');
-            const responseText = document.getElementById('responseText');
-            responseBox.classList.add('show');
-            
+            document.getElementById('responseBox').classList.add('show');
             const R = LANG[currentLang].responses;
             let response = '';
-            
             if (t.includes('perm') || t.includes('permeab')) {
                 response = R.perm;
-                responseText.textContent = response;
-                create3DPlot('Permeability (mD)', demoData.permeability, 'Viridis');
-                
+                document.getElementById('responseText').textContent = response;
+                create3D('Permeability (mD)', demoData.permeability, 'Viridis');
             } else if (t.includes('poro')) {
                 response = R.poro;
-                responseText.textContent = response;
-                create3DPlot('Porosity', demoData.porosity, 'Plasma');
-                
+                document.getElementById('responseText').textContent = response;
+                create3D('Porosity', demoData.porosity, 'Plasma');
             } else if (t.includes('pressure') || t.includes('druck')) {
                 response = R.pressure;
-                responseText.textContent = response;
-                create3DPlot('Pressure (psi)', demoData.pressure, 'RdYlBu');
-                
+                document.getElementById('responseText').textContent = response;
+                create3D('Pressure (psi)', demoData.pressure, 'RdYlBu');
             } else if (t.includes('layer') || t.includes('schicht')) {
-                const match = t.match(/(?:layer|schicht)\s*(\d+)/i);
-                const layer = match ? parseInt(match[1]) : 3;
+                const m = t.match(/(?:layer|schicht)\s*(\d+)/i);
+                const layer = m ? parseInt(m[1]) : 3;
                 response = R.layer.replace('{n}', layer);
-                responseText.textContent = response;
+                document.getElementById('responseText').textContent = response;
                 createCrossSection(layer);
-                
             } else if (t.includes('water') || t.includes('wasser')) {
                 response = R.watercut;
-                responseText.textContent = response;
+                document.getElementById('responseText').textContent = response;
                 showWaterCut();
-                
             } else {
                 response = R.default;
-                responseText.textContent = response;
+                document.getElementById('responseText').textContent = response;
             }
-            
             lastResponse = response;
             await speak(response);
         }
 
         // ═══════════════════════════════════════════════════════════════════
-        // VISUALIZATIONS
+        // VISUALIZATION
         // ═══════════════════════════════════════════════════════════════════
-        function create3DPlot(title, data, colorscale) {
+        function create3D(title, data, colorscale) {
             Plotly.newPlot('vizContainer', [{
-                x: data.map(d => d.x),
-                y: data.map(d => d.y),
-                z: data.map(d => d.z),
-                mode: 'markers',
-                type: 'scatter3d',
-                marker: {
-                    size: 6,
-                    color: data.map(d => d.v),
-                    colorscale: colorscale,
-                    colorbar: { title: title.split(' ')[0] },
-                    opacity: 0.8
-                }
+                x: data.map(d=>d.x), y: data.map(d=>d.y), z: data.map(d=>d.z),
+                mode: 'markers', type: 'scatter3d',
+                marker: { size:6, color:data.map(d=>d.v), colorscale, colorbar:{title:title.split(' ')[0]}, opacity:0.8 }
             }], {
-                title: { text: title, font: { color: '#fff' } },
-                scene: {
-                    xaxis: { title: 'I', color: '#888' },
-                    yaxis: { title: 'J', color: '#888' },
-                    zaxis: { title: 'K', color: '#888' },
-                    bgcolor: 'rgba(0,0,0,0)'
-                },
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)',
-                font: { color: '#fff' },
-                margin: { l: 0, r: 0, t: 50, b: 0 }
-            }, { responsive: true });
+                title:{text:title,font:{color:'#fff'}},
+                scene:{xaxis:{title:'I',color:'#888'},yaxis:{title:'J',color:'#888'},zaxis:{title:'K',color:'#888'},bgcolor:'rgba(0,0,0,0)'},
+                paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)', font:{color:'#fff'}, margin:{l:0,r:0,t:50,b:0}
+            }, {responsive:true});
         }
 
         function createCrossSection(layer) {
-            const k = Math.max(0, Math.min(layer - 1, NZ - 1));
+            const k = Math.max(0, Math.min(layer-1, NZ-1));
             const filtered = demoData.permeability.filter(d => d.z === k);
-            
             const z = [];
-            for (let i = 0; i < NX; i++) {
+            for (let i=0;i<NX;i++) {
                 const row = [];
-                for (let j = 0; j < NY; j++) {
-                    const point = filtered.find(d => d.x === i && d.y === j);
-                    row.push(point ? point.v : 0);
+                for (let j=0;j<NY;j++) {
+                    const p = filtered.find(d=>d.x===i&&d.y===j);
+                    row.push(p?p.v:0);
                 }
                 z.push(row);
             }
-            
-            Plotly.newPlot('vizContainer', [{
-                z: z,
-                type: 'heatmap',
-                colorscale: 'Viridis',
-                colorbar: { title: 'Perm (mD)' }
-            }], {
-                title: { text: 'Layer ' + layer + ' - Permeability', font: { color: '#fff' } },
-                xaxis: { title: 'J Index', color: '#888' },
-                yaxis: { title: 'I Index', color: '#888' },
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)',
-                font: { color: '#fff' }
-            }, { responsive: true });
+            Plotly.newPlot('vizContainer', [{z,type:'heatmap',colorscale:'Viridis',colorbar:{title:'Perm'}}], {
+                title:{text:'Layer '+layer,font:{color:'#fff'}}, xaxis:{title:'J',color:'#888'}, yaxis:{title:'I',color:'#888'},
+                paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)', font:{color:'#fff'}
+            }, {responsive:true});
         }
 
         function showWaterCut() {
+            const label = currentLang === 'en' ? 'Water Cut' : 'Wasseranteil';
             document.getElementById('vizContainer').innerHTML = 
-                '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding:40px;">' +
-                '<div style="font-size:5em; margin-bottom:20px;">💧</div>' +
-                '<div style="font-size:4em; color:#4caf50; font-weight:bold;">35%</div>' +
-                '<div style="font-size:1.2em; color:#888; margin-top:15px;">' + (currentLang === 'en' ? 'Current Water Cut' : 'Aktueller Wasseranteil') + '</div>' +
-                '<div style="margin-top:30px; padding:20px; background:rgba(0,0,0,0.3); border-radius:10px; max-width:400px; text-align:center;">' +
-                '<div style="color:#ff9800; font-size:1.1em;">⚠️ ' + (currentLang === 'en' ? 'Forecast' : 'Prognose') + '</div>' +
-                '<div style="margin-top:10px; color:#ccc;">' + (currentLang === 'en' ? '50% water cut expected in ~18 months' : '50% Wasseranteil erwartet in ~18 Monaten') + '</div>' +
-                '</div></div>';
+                '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;">' +
+                '<div style="font-size:4em;">💧</div>' +
+                '<div style="font-size:3em;color:#4caf50;font-weight:bold;">35%</div>' +
+                '<div style="color:#888;margin-top:10px;">' + label + '</div></div>';
         }
     </script>
 </body>
