@@ -14,6 +14,14 @@ CLARISSA bridges natural language interaction and domain-specific simulation syn
     [:fontawesome-solid-book: **Tutorial**](tutorials/guides/voice-input-tutorial.md){ .md-button }
 
 
+!!! tip "🎬 Demo Recording Suite"
+    Create professional CLARISSA demo videos with voice input AND voice output!
+    
+    [:fontawesome-solid-video: **Recording Suite →**](demos/demo-recording-suite.html){ .md-button .md-button--primary }
+    
+    Features: Screen capture, TTS voice responses, 3D visualizations, configurable voices (male/female)
+
+
 ## 🚀 Neu hier? Start Here!
 
 <div class="grid cards" markdown>
@@ -114,3 +122,4 @@ CLARISSA is currently in **Phase 0** development, focusing on:
 ---
 
 *Built by BlauWeiss LLC | [GitLab Repository](https://gitlab.com/wolfram_laube/blauweiss_llc/irena)*
+
