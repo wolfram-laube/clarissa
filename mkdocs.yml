@@ -92,9 +92,10 @@ nav:
       - Reservoir Basics: tutorials/reservoir-basics.md
       - Code Examples: tutorials/reservoir-basics-code.ipynb
 
-  - "🎮 Demos":
-    - "🎤 Voice Input Demo": demos/voice-demo.html
-    - "🎬 Screen Recorder": demos/screen-recorder.html
+  - "🎮 Live Demos":
+    - Overview: demos/index.md
+    - "🎤 Voice Notebook": demos/voice-demo.html
+    - "🎬 Recording Suite": demos/demo-recording-suite.html
 
   - Architecture:
     - Overview: architecture/README.md
