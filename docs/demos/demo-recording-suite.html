@@ -751,11 +751,30 @@
         function downloadRecording() {
             const blob = new Blob(screenChunks, {type:'video/webm'});
             const url = URL.createObjectURL(blob);
+            const filename = `CLARISSA_Demo_${new Date().toISOString().slice(0,19).replace(/[:-]/g,'')}.webm`;
             const a = document.createElement('a');
             a.href = url;
-            a.download = `CLARISSA_Demo_${new Date().toISOString().slice(0,19).replace(/[:-]/g,'')}.webm`;
+            a.download = filename;
             a.click();
             URL.revokeObjectURL(url);
+            
+            // Show where file was saved
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.textContent = '✅ Saved!';
+            downloadBtn.style.background = '#4caf50';
+            
+            setTimeout(() => {
+                alert('📁 Video saved!
+
+Filename: ' + filename + '
+
+Look in your Downloads folder:
+• Mac: ~/Downloads
+• Windows: C:\Users\[Name]\Downloads
+• Linux: ~/Downloads
+
+Tip: Check your browser's download bar at the bottom!');
+            }, 500);
         }
         
         // ═══════════════════════════════════════════════════════════════════
@@ -959,3 +978,4 @@
     </script>
 </body>
 </html>
+
