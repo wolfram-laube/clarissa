@@ -54,7 +54,7 @@ CLARISSA bridges natural language interaction and domain-specific simulation syn
 | I want to... / Ich will... | Guide |
 |-------------|-----------|
 | **🎤 Try Voice Control** | [Live Demo](demos/voice-demo.html) / [Tutorial](tutorials/guides/voice-input-tutorial.md) |
-| **🎬 Record Demos** | [Browser Recorder](demos/screen-recorder-pip.html) / [CLI Tools](tools/recording/README.md) |
+| **🎬 Record Demos** | [Recording Suite](demos/demo-recording-suite.html) / [All Demos](demos/index.md) |
 | Install & run CLARISSA | [🇬🇧 Getting Started](getting-started-en.md) / [🇩🇪 Erste Schritte](getting-started-de.md) |
 | Contribute code | [Contributing Guide](contributing.md) |
 | Understand CI pipeline | [CI Guide](ci/README.md) |
