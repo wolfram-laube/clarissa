@@ -19,9 +19,14 @@ theme:
     - toc.integrate
     - search.suggest
     - search.highlight
+    - search.share
 
 plugins:
-  - search
+  - search:
+      lang:
+        - en
+        - de
+      separator: '[\s\-,:!=\[\]()"\'/]+|(?!\b)(?=[A-Z][a-z])|\.|_'
   - mkdocs-jupyter:
       include_source: true
       execute: false
