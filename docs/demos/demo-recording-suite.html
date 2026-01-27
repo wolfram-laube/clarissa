@@ -16,16 +16,13 @@
             --text-primary: #ffffff;
             --text-secondary: #888;
         }
-        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
         }
-        
         .header {
             background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
             padding: 15px 25px;
@@ -34,35 +31,25 @@
             align-items: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        
         .header h1 {
             font-size: 1.3em;
             background: linear-gradient(90deg, var(--accent), #0f3460);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
         .status-bar { display: flex; gap: 20px; align-items: center; }
         .status-item { display: flex; align-items: center; gap: 8px; font-size: 0.85em; }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-secondary); }
         .status-dot.ready { background: var(--success); }
         .status-dot.recording { background: var(--accent); animation: pulse 1s infinite; }
-        
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        
-        .main {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            height: calc(100vh - 60px);
-        }
-        
+        .main { display: grid; grid-template-columns: 300px 1fr; height: calc(100vh - 60px); }
         .control-panel {
             background: var(--bg-secondary);
             padding: 20px;
             border-right: 1px solid rgba(255,255,255,0.1);
             overflow-y: auto;
         }
-        
         .section { margin-bottom: 25px; }
         .section h2 {
             font-size: 0.8em;
@@ -73,7 +60,6 @@
             padding-bottom: 6px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        
         .master-btn {
             width: 100%;
             padding: 16px;
@@ -88,16 +74,13 @@
             transition: all 0.3s ease;
             margin-bottom: 12px;
         }
-        
         .master-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 30px var(--accent-glow); }
         .master-btn.recording { background: linear-gradient(145deg, #ff4444, #cc0000); animation: recordPulse 1.5s infinite; }
         .master-btn.success { background: linear-gradient(145deg, var(--success), #388e3c); }
-        
         @keyframes recordPulse {
             0%, 100% { box-shadow: 0 4px 20px rgba(255,0,0,0.3); }
             50% { box-shadow: 0 4px 40px rgba(255,0,0,0.6); }
         }
-        
         .timer {
             font-size: 2.2em;
             font-weight: 700;
@@ -107,21 +90,17 @@
             color: var(--text-secondary);
         }
         .timer.recording { color: var(--accent); }
-        
-        /* Voice Settings */
         .voice-settings {
             background: var(--bg-tertiary);
             border-radius: 8px;
             padding: 12px;
         }
-        
         .voice-settings label {
             display: block;
             font-size: 0.8em;
             color: var(--text-secondary);
             margin-bottom: 6px;
         }
-        
         .voice-settings select, .voice-settings input {
             width: 100%;
             padding: 8px;
@@ -132,25 +111,9 @@
             font-size: 0.9em;
             margin-bottom: 10px;
         }
-        
-        .voice-toggle {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 8px;
-        }
-        
-        .voice-toggle input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--accent);
-        }
-        
-        .voice-toggle span {
-            font-size: 0.85em;
-        }
-        
-        /* Checklist */
+        .voice-toggle { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+        .voice-toggle input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
+        .voice-toggle span { font-size: 0.85em; }
         .checklist { list-style: none; }
         .checklist li {
             padding: 10px 12px;
@@ -172,8 +135,6 @@
             font-size: 0.75em;
         }
         .checklist li.done .check-icon { background: var(--success); border-color: var(--success); }
-        
-        /* Script */
         .script-item {
             padding: 10px;
             background: var(--bg-tertiary);
@@ -183,8 +144,6 @@
         }
         .script-item .time { color: var(--accent); font-weight: 600; font-size: 0.8em; }
         .script-item .say { color: var(--success); font-style: italic; margin-top: 4px; }
-        
-        /* Demo View */
         .demo-view {
             display: flex;
             flex-direction: column;
@@ -192,9 +151,7 @@
             padding: 30px;
             overflow-y: auto;
         }
-        
         .voice-demo { max-width: 700px; margin: 0 auto; width: 100%; }
-        
         .demo-title { text-align: center; margin-bottom: 25px; }
         .demo-title h2 {
             font-size: 1.8em;
@@ -204,8 +161,6 @@
             margin-bottom: 8px;
         }
         .demo-title p { color: var(--text-secondary); }
-        
-        /* Waveform */
         .waveform {
             height: 80px;
             background: rgba(0,0,0,0.4);
@@ -224,8 +179,6 @@
             border-radius: 2px;
             transition: height 0.05s ease-out;
         }
-        
-        /* Voice Controls */
         .voice-controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
         .voice-btn {
             padding: 15px 35px;
@@ -249,8 +202,6 @@
             display: none;
         }
         .voice-btn.stop.show { display: inline-block; }
-        
-        /* Status & Transcript */
         .voice-status {
             text-align: center;
             padding: 12px;
@@ -261,7 +212,6 @@
         .voice-status.recording { color: var(--accent); font-weight: 600; }
         .voice-status.success { color: var(--success); }
         .voice-status.speaking { color: #2196f3; font-weight: 600; }
-        
         .transcript-box {
             background: rgba(0,0,0,0.3);
             border-radius: 8px;
@@ -270,8 +220,6 @@
         }
         .transcript-box label { display: block; font-size: 0.8em; color: var(--text-secondary); margin-bottom: 8px; }
         .transcript-box .text { font-size: 1.1em; color: var(--success); font-style: italic; }
-        
-        /* Response */
         .response-box {
             background: linear-gradient(135deg, rgba(26,71,42,0.5), rgba(22,33,62,0.5));
             border: 1px solid var(--success);
@@ -282,17 +230,8 @@
         }
         .response-box.show { display: block; }
         .response-box label { display: block; font-size: 0.8em; color: var(--text-secondary); margin-bottom: 8px; }
-        
-        .speaking-indicator {
-            display: inline-block;
-            margin-left: 10px;
-            color: #2196f3;
-            animation: blink 0.5s infinite;
-        }
-        
+        .speaking-indicator { display: inline-block; margin-left: 10px; color: #2196f3; animation: blink 0.5s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-        
-        /* Visualization */
         .viz-container {
             background: var(--bg-tertiary);
             border-radius: 12px;
@@ -307,8 +246,6 @@
             color: var(--text-secondary);
         }
         .viz-placeholder .icon { font-size: 3em; margin-bottom: 10px; }
-        
-        /* Examples */
         .examples { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 15px; }
         .example-btn {
             padding: 8px 16px;
@@ -320,8 +257,6 @@
             cursor: pointer;
         }
         .example-btn:hover { background: rgba(233,69,96,0.2); border-color: var(--accent); }
-        
-        /* Bottom Bar */
         .bottom-bar {
             background: var(--bg-secondary);
             padding: 12px 20px;
@@ -340,8 +275,6 @@
         .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); }
         .btn-secondary:hover { background: rgba(255,255,255,0.1); }
         .btn-success { background: var(--success); color: white; }
-        
-        /* Countdown */
         .countdown-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -366,16 +299,43 @@
             100% { transform: scale(1); opacity: 1; }
         }
         .countdown-text { font-size: 1.3em; color: var(--text-secondary); margin-top: 20px; }
+        /* Download Info Modal */
+        .download-info {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--success);
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 350px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .download-info.show { display: block; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .download-info h3 { color: var(--success); margin-bottom: 10px; }
+        .download-info p { font-size: 0.9em; margin-bottom: 8px; }
+        .download-info .filename { background: var(--bg-tertiary); padding: 8px; border-radius: 6px; font-family: monospace; font-size: 0.85em; word-break: break-all; }
+        .download-info .close-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2em; }
     </style>
 </head>
 <body>
-    <!-- Countdown -->
     <div class="countdown-overlay" id="countdownOverlay">
         <div class="countdown-number" id="countdownNumber">3</div>
         <div class="countdown-text">Get ready...</div>
     </div>
     
-    <!-- Header -->
+    <div class="download-info" id="downloadInfo">
+        <button class="close-btn" onclick="closeDownloadInfo()">×</button>
+        <h3>✅ Video Saved!</h3>
+        <p>📁 <strong>Filename:</strong></p>
+        <div class="filename" id="savedFilename"></div>
+        <p style="margin-top:12px">📂 <strong>Location:</strong> Your Downloads folder</p>
+        <p style="font-size:0.8em; color:var(--text-secondary)">Check your browser's download bar at the bottom!</p>
+    </div>
+    
     <header class="header">
         <h1>🎬 CLARISSA Demo Suite v3</h1>
         <div class="status-bar">
@@ -386,7 +346,6 @@
     </header>
     
     <main class="main">
-        <!-- Control Panel -->
         <aside class="control-panel">
             <div class="section">
                 <h2>🎬 Master Control</h2>
@@ -394,29 +353,20 @@
                 <div class="timer" id="timer">00:00</div>
             </div>
             
-            <!-- Voice Settings NEW -->
             <div class="section">
                 <h2>🗣️ CLARISSA Voice</h2>
                 <div class="voice-settings">
                     <label>Voice Type</label>
-                    <select id="voiceSelect">
-                        <option value="">Loading voices...</option>
-                    </select>
-                    
+                    <select id="voiceSelect"><option value="">Loading voices...</option></select>
                     <label>Speed</label>
                     <input type="range" id="voiceSpeed" min="0.5" max="1.5" step="0.1" value="1.0">
-                    
                     <label>Pitch</label>
                     <input type="range" id="voicePitch" min="0.5" max="1.5" step="0.1" value="1.0">
-                    
                     <div class="voice-toggle">
                         <input type="checkbox" id="voiceEnabled" checked>
                         <span>Enable Voice Output</span>
                     </div>
-                    
-                    <button class="btn btn-secondary" style="width:100%; margin-top:10px" onclick="testVoice()">
-                        🔊 Test Voice
-                    </button>
+                    <button class="btn btn-secondary" style="width:100%; margin-top:10px" onclick="testVoice()">🔊 Test Voice</button>
                 </div>
             </div>
             
@@ -439,40 +389,32 @@
             </div>
         </aside>
         
-        <!-- Voice Demo (EMBEDDED) -->
         <section class="demo-view">
             <div class="voice-demo">
                 <div class="demo-title">
                     <h2>🎤 CLARISSA Voice Interface</h2>
                     <p>Speak to control reservoir simulation • CLARISSA speaks back!</p>
                 </div>
-                
                 <div class="waveform" id="waveform"></div>
-                
                 <div class="voice-controls">
                     <button class="voice-btn record" id="voiceRecordBtn" onclick="toggleVoice()">🎤 Start Recording</button>
                     <button class="voice-btn stop" id="voiceStopBtn" onclick="stopVoice()">⏹️ Stop</button>
                 </div>
-                
                 <div class="voice-status" id="voiceStatus">Click 🎤 to start</div>
-                
                 <div class="transcript-box">
                     <label>📝 You said</label>
                     <div class="text" id="transcriptText">—</div>
                 </div>
-                
                 <div class="response-box" id="responseBox">
                     <label>💬 CLARISSA <span class="speaking-indicator" id="speakingIndicator" style="display:none">🔊 Speaking...</span></label>
                     <div id="responseText"></div>
                 </div>
-                
                 <div class="viz-container" id="vizContainer">
                     <div class="viz-placeholder">
                         <div class="icon">📊</div>
                         <div>3D visualization appears here</div>
                     </div>
                 </div>
-                
                 <div class="examples">
                     <button class="example-btn" onclick="processText('show me the permeability')">"Show permeability"</button>
                     <button class="example-btn" onclick="processText('show layer 3')">"Show layer 3"</button>
@@ -489,9 +431,6 @@
     </footer>
 
     <script>
-        // ═══════════════════════════════════════════════════════════════════
-        // STATE
-        // ═══════════════════════════════════════════════════════════════════
         let isScreenRecording = false;
         let isVoiceRecording = false;
         let screenRecorder, voiceRecorder;
@@ -500,30 +439,26 @@
         let audioContext, analyser, animationId;
         let voices = [];
         let isSpeaking = false;
-        
         const NX=10, NY=10, NZ=5;
         let demoData;
-        
-        // ═══════════════════════════════════════════════════════════════════
-        // INIT
-        // ═══════════════════════════════════════════════════════════════════
+
         document.addEventListener('DOMContentLoaded', () => {
             initWaveform();
             generateData();
             checkMic();
             initVoices();
         });
-        
+
         function initWaveform() {
             const w = document.getElementById('waveform');
             for (let i=0; i<30; i++) {
                 const bar = document.createElement('div');
                 bar.className = 'wave-bar';
-                bar.id = `bar-${i}`;
+                bar.id = 'bar-'+i;
                 w.appendChild(bar);
             }
         }
-        
+
         async function checkMic() {
             try {
                 const s = await navigator.mediaDevices.getUserMedia({audio:true});
@@ -531,132 +466,87 @@
                 document.getElementById('micStatus').classList.add('ready');
             } catch(e) {}
         }
-        
-        // ═══════════════════════════════════════════════════════════════════
-        // TEXT-TO-SPEECH
-        // ═══════════════════════════════════════════════════════════════════
+
         function initVoices() {
             const loadVoices = () => {
                 voices = speechSynthesis.getVoices();
                 const select = document.getElementById('voiceSelect');
                 select.innerHTML = '';
-                
-                // Filter for good voices, prefer English
-                const goodVoices = voices.filter(v => 
-                    v.lang.startsWith('en') || v.lang.startsWith('de')
-                ).sort((a, b) => {
-                    // Prioritize: female voices, then quality
-                    const aFemale = a.name.toLowerCase().includes('female') || 
-                                   a.name.toLowerCase().includes('samantha') ||
-                                   a.name.toLowerCase().includes('victoria') ||
-                                   a.name.toLowerCase().includes('karen') ||
-                                   a.name.toLowerCase().includes('moira');
-                    const bFemale = b.name.toLowerCase().includes('female') || 
-                                   b.name.toLowerCase().includes('samantha') ||
-                                   b.name.toLowerCase().includes('victoria') ||
-                                   b.name.toLowerCase().includes('karen') ||
-                                   b.name.toLowerCase().includes('moira');
-                    if (aFemale && !bFemale) return -1;
-                    if (!aFemale && bFemale) return 1;
-                    return a.name.localeCompare(b.name);
-                });
-                
-                // Add grouped options
-                const femaleGroup = document.createElement('optgroup');
-                femaleGroup.label = '👩 Female Voices';
-                const maleGroup = document.createElement('optgroup');
-                maleGroup.label = '👨 Male Voices';
-                const otherGroup = document.createElement('optgroup');
-                otherGroup.label = '🔊 Other Voices';
-                
-                goodVoices.forEach((voice, i) => {
-                    const option = document.createElement('option');
-                    option.value = i;
-                    option.textContent = `${voice.name} (${voice.lang})`;
-                    option.dataset.voiceIndex = voices.indexOf(voice);
-                    
-                    const nameLower = voice.name.toLowerCase();
-                    if (nameLower.includes('female') || nameLower.includes('samantha') || 
-                        nameLower.includes('victoria') || nameLower.includes('karen') ||
-                        nameLower.includes('moira') || nameLower.includes('fiona') ||
-                        nameLower.includes('tessa') || nameLower.includes('zoe') ||
-                        nameLower.includes('anna') || nameLower.includes('petra')) {
-                        femaleGroup.appendChild(option);
-                    } else if (nameLower.includes('male') || nameLower.includes('daniel') || 
-                               nameLower.includes('alex') || nameLower.includes('tom') ||
-                               nameLower.includes('fred') || nameLower.includes('ralph') ||
-                               nameLower.includes('markus') || nameLower.includes('yannick')) {
-                        maleGroup.appendChild(option);
-                    } else {
-                        otherGroup.appendChild(option);
-                    }
-                });
-                
-                if (femaleGroup.children.length) select.appendChild(femaleGroup);
-                if (maleGroup.children.length) select.appendChild(maleGroup);
-                if (otherGroup.children.length) select.appendChild(otherGroup);
-                
-                if (goodVoices.length > 0) {
-                    document.getElementById('ttsStatus').classList.add('ready');
+                const goodVoices = voices.filter(v => v.lang.startsWith('en') || v.lang.startsWith('de'));
+                if (goodVoices.length === 0) {
+                    voices.forEach((v, i) => {
+                        const opt = document.createElement('option');
+                        opt.value = i;
+                        opt.textContent = v.name + ' (' + v.lang + ')';
+                        select.appendChild(opt);
+                    });
+                    return;
                 }
+                const female = [], male = [], other = [];
+                const femaleNames = ['female','samantha','victoria','karen','moira','fiona','tessa','zoe','anna','sara','zira'];
+                const maleNames = ['male','daniel','alex','tom','david','james','fred','ralph'];
+                goodVoices.forEach(v => {
+                    const nameLower = v.name.toLowerCase();
+                    const idx = voices.indexOf(v);
+                    if (femaleNames.some(n => nameLower.includes(n))) female.push({voice:v,index:idx});
+                    else if (maleNames.some(n => nameLower.includes(n))) male.push({voice:v,index:idx});
+                    else other.push({voice:v,index:idx});
+                });
+                const addGroup = (label, items) => {
+                    if (items.length === 0) return;
+                    const group = document.createElement('optgroup');
+                    group.label = label;
+                    items.forEach(item => {
+                        const opt = document.createElement('option');
+                        opt.value = item.index;
+                        opt.textContent = item.voice.name + ' (' + item.voice.lang + ')';
+                        group.appendChild(opt);
+                    });
+                    select.appendChild(group);
+                };
+                addGroup('👩 Female', female);
+                addGroup('👨 Male', male);
+                addGroup('🔊 Other', other);
+                document.getElementById('ttsStatus').classList.add('ready');
             };
-            
             loadVoices();
             speechSynthesis.onvoiceschanged = loadVoices;
         }
-        
+
         function speak(text) {
-            if (!document.getElementById('voiceEnabled').checked) return Promise.resolve();
-            
             return new Promise((resolve) => {
-                speechSynthesis.cancel(); // Stop any current speech
-                
+                if (!document.getElementById('voiceEnabled').checked) { resolve(); return; }
+                speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
-                
                 const select = document.getElementById('voiceSelect');
-                const selectedOption = select.options[select.selectedIndex];
-                if (selectedOption && selectedOption.dataset.voiceIndex !== undefined) {
-                    utterance.voice = voices[parseInt(selectedOption.dataset.voiceIndex)];
-                }
-                
+                const voiceIndex = parseInt(select.value);
+                if (!isNaN(voiceIndex) && voices[voiceIndex]) utterance.voice = voices[voiceIndex];
                 utterance.rate = parseFloat(document.getElementById('voiceSpeed').value);
                 utterance.pitch = parseFloat(document.getElementById('voicePitch').value);
-                
                 const indicator = document.getElementById('speakingIndicator');
                 const status = document.getElementById('voiceStatus');
-                
                 utterance.onstart = () => {
                     isSpeaking = true;
                     indicator.style.display = 'inline';
                     status.textContent = '🔊 CLARISSA is speaking...';
                     status.className = 'voice-status speaking';
                 };
-                
                 utterance.onend = () => {
                     isSpeaking = false;
                     indicator.style.display = 'none';
-                    status.textContent = '✅ Ready for next command';
+                    status.textContent = '✅ Ready';
                     status.className = 'voice-status success';
                     resolve();
                 };
-                
-                utterance.onerror = () => {
-                    isSpeaking = false;
-                    indicator.style.display = 'none';
-                    resolve();
-                };
-                
+                utterance.onerror = () => { isSpeaking = false; indicator.style.display = 'none'; resolve(); };
                 speechSynthesis.speak(utterance);
             });
         }
-        
+
         function testVoice() {
             speak("Hello! I am CLARISSA, your conversational reservoir simulation assistant. How can I help you today?");
         }
-        
-        // ═══════════════════════════════════════════════════════════════════
-        // DATA
-        // ═══════════════════════════════════════════════════════════════════
+
         function generateData() {
             const perm=[], poro=[], sw=[], press=[];
             for (let i=0;i<NX;i++) for (let j=0;j<NY;j++) for (let k=0;k<NZ;k++) {
@@ -669,20 +559,16 @@
             }
             demoData = {permeability:perm, porosity:poro, water_saturation:sw, pressure:press};
         }
-        
-        // ═══════════════════════════════════════════════════════════════════
-        // SCREEN RECORDING
-        // ═══════════════════════════════════════════════════════════════════
+
         async function toggleScreenRecording() {
             if (!isScreenRecording) await startScreen();
             else stopScreen();
         }
-        
+
         async function startScreen() {
             const btn = document.getElementById('masterBtn');
             btn.textContent = '⏳ Initializing...';
             btn.disabled = true;
-            
             try {
                 setStepActive(1);
                 const displayStream = await navigator.mediaDevices.getDisplayMedia({
@@ -691,14 +577,11 @@
                 });
                 document.getElementById('screenStatus').classList.add('ready');
                 setStepDone(1);
-                
                 let audioStream;
                 try { audioStream = await navigator.mediaDevices.getUserMedia({audio:true}); } catch(e){}
-                
                 const tracks = [...displayStream.getTracks()];
                 if (audioStream) tracks.push(...audioStream.getAudioTracks());
                 const combinedStream = new MediaStream(tracks);
-                
                 screenRecorder = new MediaRecorder(combinedStream, {mimeType:'video/webm;codecs=vp9'});
                 screenChunks = [];
                 screenRecorder.ondataavailable = e => { if(e.data.size>0) screenChunks.push(e.data); };
@@ -706,23 +589,18 @@
                     document.getElementById('downloadBtn').style.display = 'inline-block';
                     setStepDone(4);
                 };
-                
                 displayStream.getVideoTracks()[0].onended = () => { if(isScreenRecording) stopScreen(); };
-                
                 setStepActive(2);
                 await showCountdown();
-                
                 screenRecorder.start(1000);
                 isScreenRecording = true;
                 startTime = Date.now();
-                
                 btn.textContent = '⏹️ STOP RECORDING';
                 btn.classList.add('recording');
                 btn.disabled = false;
                 document.getElementById('screenStatus').classList.add('recording');
                 setStepDone(2);
                 setStepActive(3);
-                
                 timerInterval = setInterval(updateTimer, 1000);
             } catch(err) {
                 btn.textContent = '▶️ START RECORDING';
@@ -730,75 +608,56 @@
                 alert('Recording failed: ' + err.message);
             }
         }
-        
+
         function stopScreen() {
-            if (screenRecorder?.state !== 'inactive') screenRecorder.stop();
-            screenRecorder?.stream?.getTracks().forEach(t => t.stop());
-            
+            if (screenRecorder && screenRecorder.state !== 'inactive') screenRecorder.stop();
+            if (screenRecorder && screenRecorder.stream) screenRecorder.stream.getTracks().forEach(t => t.stop());
             isScreenRecording = false;
             clearInterval(timerInterval);
-            
             const btn = document.getElementById('masterBtn');
             btn.textContent = '✅ RECORDING SAVED';
             btn.classList.remove('recording');
             btn.classList.add('success');
             document.getElementById('screenStatus').classList.remove('recording');
-            
             setStepDone(3);
             setStepActive(4);
         }
-        
+
         function downloadRecording() {
             const blob = new Blob(screenChunks, {type:'video/webm'});
             const url = URL.createObjectURL(blob);
-            const filename = `CLARISSA_Demo_${new Date().toISOString().slice(0,19).replace(/[:-]/g,'')}.webm`;
+            const filename = 'CLARISSA_Demo_' + new Date().toISOString().slice(0,19).replace(/[:-]/g,'') + '.webm';
             const a = document.createElement('a');
             a.href = url;
             a.download = filename;
             a.click();
             URL.revokeObjectURL(url);
-            
-            // Show where file was saved
-            const downloadBtn = document.getElementById('downloadBtn');
-            downloadBtn.textContent = '✅ Saved!';
-            downloadBtn.style.background = '#4caf50';
-            
-            setTimeout(() => {
-                alert('📁 Video saved!
-
-Filename: ' + filename + '
-
-Look in your Downloads folder:
-• Mac: ~/Downloads
-• Windows: C:\Users\[Name]\Downloads
-• Linux: ~/Downloads
-
-Tip: Check your browser's download bar at the bottom!');
-            }, 500);
+            // Show info
+            document.getElementById('savedFilename').textContent = filename;
+            document.getElementById('downloadInfo').classList.add('show');
+            document.getElementById('downloadBtn').textContent = '✅ Saved!';
         }
-        
-        // ═══════════════════════════════════════════════════════════════════
-        // VOICE INPUT
-        // ═══════════════════════════════════════════════════════════════════
+
+        function closeDownloadInfo() {
+            document.getElementById('downloadInfo').classList.remove('show');
+        }
+
         async function toggleVoice() {
             if (!isVoiceRecording) await startVoice();
         }
-        
+
         async function startVoice() {
             const recordBtn = document.getElementById('voiceRecordBtn');
             const stopBtn = document.getElementById('voiceStopBtn');
             const status = document.getElementById('voiceStatus');
-            
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-                
                 audioContext = new AudioContext();
                 analyser = audioContext.createAnalyser();
                 const source = audioContext.createMediaStreamSource(stream);
                 source.connect(analyser);
                 analyser.fftSize = 64;
                 animateWaveform();
-                
                 voiceRecorder = new MediaRecorder(stream, {mimeType:'audio/webm'});
                 const chunks = [];
                 voiceRecorder.ondataavailable = e => chunks.push(e.data);
@@ -808,10 +667,8 @@ Tip: Check your browser's download bar at the bottom!');
                     resetWaveform();
                     processVoice();
                 };
-                
                 voiceRecorder.start();
                 isVoiceRecording = true;
-                
                 recordBtn.classList.add('active');
                 recordBtn.style.display = 'none';
                 stopBtn.classList.add('show');
@@ -821,59 +678,49 @@ Tip: Check your browser's download bar at the bottom!');
                 status.textContent = '❌ Mic access denied';
             }
         }
-        
+
         function stopVoice() {
-            if (voiceRecorder?.state !== 'inactive') voiceRecorder.stop();
+            if (voiceRecorder && voiceRecorder.state !== 'inactive') voiceRecorder.stop();
             isVoiceRecording = false;
-            
             document.getElementById('voiceRecordBtn').classList.remove('active');
             document.getElementById('voiceRecordBtn').style.display = 'inline-block';
             document.getElementById('voiceStopBtn').classList.remove('show');
             document.getElementById('voiceStatus').textContent = '⏳ Processing...';
         }
-        
+
         function animateWaveform() {
             const bars = document.querySelectorAll('.wave-bar');
             const dataArray = new Uint8Array(analyser.frequencyBinCount);
             function draw() {
+                if (!isVoiceRecording) return;
                 analyser.getByteFrequencyData(dataArray);
-                bars.forEach((bar,i) => {
-                    bar.style.height = Math.max(8, (dataArray[i]||0)/3.5) + 'px';
-                });
+                bars.forEach((bar,i) => { bar.style.height = Math.max(8, (dataArray[i]||0)/3.5) + 'px'; });
                 animationId = requestAnimationFrame(draw);
             }
             draw();
         }
-        
+
         function resetWaveform() {
             document.querySelectorAll('.wave-bar').forEach(bar => bar.style.height = '20px');
         }
-        
+
         function processVoice() {
             if (audioContext) audioContext.close();
             const demos = ["show me the permeability", "show layer 3", "what is the water cut", "show pressure distribution"];
             const transcript = demos[Math.floor(Math.random()*demos.length)];
-            
-            document.getElementById('transcriptText').textContent = `"${transcript}"`;
+            document.getElementById('transcriptText').textContent = '"' + transcript + '"';
             document.getElementById('voiceStatus').textContent = '✅ Done';
             document.getElementById('voiceStatus').className = 'voice-status success';
-            
             processText(transcript);
         }
-        
-        // ═══════════════════════════════════════════════════════════════════
-        // COMMAND PROCESSING
-        // ═══════════════════════════════════════════════════════════════════
+
         async function processText(text) {
             const t = text.toLowerCase();
-            document.getElementById('transcriptText').textContent = `"${text}"`;
-            
+            document.getElementById('transcriptText').textContent = '"' + text + '"';
             const responseBox = document.getElementById('responseBox');
             const responseText = document.getElementById('responseText');
             responseBox.classList.add('show');
-            
             let response = '';
-            
             if (t.includes('perm')) {
                 response = 'Showing the permeability distribution in 3D. You can see a high-permeability channel running through the center of the reservoir.';
                 responseText.textContent = response;
@@ -889,7 +736,7 @@ Tip: Check your browser's download bar at the bottom!');
             } else if (t.includes('layer')) {
                 const m = t.match(/layer\s*(\d+)/);
                 const layer = m ? parseInt(m[1]) : 3;
-                response = `Showing a cross-section at layer ${layer}. This view helps identify geological features.`;
+                response = 'Showing a cross-section at layer ' + layer + '. This view helps identify geological features.';
                 responseText.textContent = response;
                 createCrossSection(layer);
             } else if (t.includes('water cut')) {
@@ -900,14 +747,9 @@ Tip: Check your browser's download bar at the bottom!');
                 response = 'I can show you permeability, porosity, pressure, layer cross-sections, or water cut. What would you like to see?';
                 responseText.textContent = response;
             }
-            
-            // Speak the response!
             await speak(response);
         }
-        
-        // ═══════════════════════════════════════════════════════════════════
-        // VISUALIZATION
-        // ═══════════════════════════════════════════════════════════════════
+
         function create3D(title, data, colorscale) {
             Plotly.newPlot('vizContainer', [{
                 x: data.map(d=>d.x), y: data.map(d=>d.y), z: data.map(d=>d.z),
@@ -919,7 +761,7 @@ Tip: Check your browser's download bar at the bottom!');
                 margin:{l:0,r:0,t:40,b:0}
             }, {responsive:true});
         }
-        
+
         function createCrossSection(layer) {
             const k = Math.max(0, Math.min(layer-1, NZ-1));
             const filtered = demoData.permeability.filter(d => d.z === k);
@@ -933,14 +775,11 @@ Tip: Check your browser's download bar at the bottom!');
                 z.push(row);
             }
             Plotly.newPlot('vizContainer', [{z,type:'heatmap',colorscale:'Viridis',colorbar:{title:'Perm'}}], {
-                title:`Layer ${layer}`, xaxis:{title:'J'}, yaxis:{title:'I'},
+                title:'Layer '+layer, xaxis:{title:'J'}, yaxis:{title:'I'},
                 paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)', font:{color:'#fff'}
             }, {responsive:true});
         }
-        
-        // ═══════════════════════════════════════════════════════════════════
-        // UTILITIES
-        // ═══════════════════════════════════════════════════════════════════
+
         async function showCountdown() {
             const overlay = document.getElementById('countdownOverlay');
             const number = document.getElementById('countdownNumber');
@@ -956,21 +795,20 @@ Tip: Check your browser's download bar at the bottom!');
             await new Promise(r=>setTimeout(r,500));
             overlay.classList.remove('show');
         }
-        
+
         function updateTimer() {
             const elapsed = Math.floor((Date.now()-startTime)/1000);
-            document.getElementById('timer').textContent = 
-                String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(elapsed%60).padStart(2,'0');
+            document.getElementById('timer').textContent = String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(elapsed%60).padStart(2,'0');
             document.getElementById('timer').classList.add('recording');
         }
-        
+
         function setStepActive(n) {
             document.querySelectorAll('.checklist li').forEach(li=>li.classList.remove('active'));
-            document.getElementById(`step${n}`).classList.add('active');
+            document.getElementById('step'+n).classList.add('active');
         }
-        
+
         function setStepDone(n) {
-            const step = document.getElementById(`step${n}`);
+            const step = document.getElementById('step'+n);
             step.classList.remove('active');
             step.classList.add('done');
             step.querySelector('.check-icon').textContent = '✓';
@@ -978,4 +816,3 @@ Tip: Check your browser's download bar at the bottom!');
     </script>
 </body>
 </html>
-
