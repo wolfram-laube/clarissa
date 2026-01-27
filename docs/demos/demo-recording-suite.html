@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎬 CLARISSA Demo Recording Suite v3</title>
+    <title>🎬 CLARISSA Demo Recording Suite v4</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         :root {
@@ -43,7 +43,7 @@
         .status-dot.ready { background: var(--success); }
         .status-dot.recording { background: var(--accent); animation: pulse 1s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .main { display: grid; grid-template-columns: 300px 1fr; height: calc(100vh - 60px); }
+        .main { display: grid; grid-template-columns: 320px 1fr; height: calc(100vh - 60px); }
         .control-panel {
             background: var(--bg-secondary);
             padding: 20px;
@@ -111,6 +111,28 @@
             font-size: 0.9em;
             margin-bottom: 10px;
         }
+        .lang-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .lang-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.2s;
+        }
+        .lang-btn.active {
+            border-color: var(--accent);
+            color: var(--text-primary);
+            background: rgba(233, 69, 96, 0.15);
+        }
+        .lang-btn:hover:not(.active) { border-color: rgba(255,255,255,0.3); }
         .voice-toggle { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
         .voice-toggle input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
         .voice-toggle span { font-size: 0.85em; }
@@ -299,7 +321,6 @@
             100% { transform: scale(1); opacity: 1; }
         }
         .countdown-text { font-size: 1.3em; color: var(--text-secondary); margin-top: 20px; }
-        /* Download Info Modal */
         .download-info {
             position: fixed;
             bottom: 20px;
@@ -333,11 +354,10 @@
         <p>📁 <strong>Filename:</strong></p>
         <div class="filename" id="savedFilename"></div>
         <p style="margin-top:12px">📂 <strong>Location:</strong> Your Downloads folder</p>
-        <p style="font-size:0.8em; color:var(--text-secondary)">Check your browser's download bar at the bottom!</p>
     </div>
     
     <header class="header">
-        <h1>🎬 CLARISSA Demo Suite v3</h1>
+        <h1>🎬 CLARISSA Demo Suite v4</h1>
         <div class="status-bar">
             <div class="status-item"><span class="status-dot" id="micStatus"></span><span>Mic</span></div>
             <div class="status-item"><span class="status-dot" id="screenStatus"></span><span>Screen</span></div>
@@ -354,9 +374,18 @@
             </div>
             
             <div class="section">
+                <h2>🌍 Language / Sprache</h2>
+                <div class="lang-selector">
+                    <button class="lang-btn active" id="langEn" onclick="setLanguage('en')">🇬🇧 English</button>
+                    <button class="lang-btn" id="langDe" onclick="setLanguage('de')">🇩🇪 Deutsch</button>
+                </div>
+                <p style="font-size:0.75em; color:var(--text-secondary)">Affects voice input & output</p>
+            </div>
+            
+            <div class="section">
                 <h2>🗣️ CLARISSA Voice</h2>
                 <div class="voice-settings">
-                    <label>Voice Type</label>
+                    <label>Voice</label>
                     <select id="voiceSelect"><option value="">Loading voices...</option></select>
                     <label>Speed</label>
                     <input type="range" id="voiceSpeed" min="0.5" max="1.5" step="0.1" value="1.0">
@@ -380,12 +409,9 @@
                 </ul>
             </div>
             
-            <div class="section">
+            <div class="section" id="scriptSection">
                 <h2>📋 Script</h2>
-                <div class="script-item"><div class="time">0:00</div><div>Show waveform</div></div>
-                <div class="script-item"><div class="time">0:05</div><div class="say">"Show permeability"</div></div>
-                <div class="script-item"><div class="time">0:20</div><div class="say">"Show layer 3"</div></div>
-                <div class="script-item"><div class="time">0:35</div><div class="say">"Water cut?"</div></div>
+                <div id="scriptItems"></div>
             </div>
         </aside>
         
@@ -393,7 +419,7 @@
             <div class="voice-demo">
                 <div class="demo-title">
                     <h2>🎤 CLARISSA Voice Interface</h2>
-                    <p>Speak to control reservoir simulation • CLARISSA speaks back!</p>
+                    <p id="demoSubtitle">Speak to control reservoir simulation • CLARISSA speaks back!</p>
                 </div>
                 <div class="waveform" id="waveform"></div>
                 <div class="voice-controls">
@@ -402,11 +428,11 @@
                 </div>
                 <div class="voice-status" id="voiceStatus">Click 🎤 to start</div>
                 <div class="transcript-box">
-                    <label>📝 You said</label>
+                    <label id="transcriptLabel">📝 You said</label>
                     <div class="text" id="transcriptText">—</div>
                 </div>
                 <div class="response-box" id="responseBox">
-                    <label>💬 CLARISSA <span class="speaking-indicator" id="speakingIndicator" style="display:none">🔊 Speaking...</span></label>
+                    <label>💬 CLARISSA <span class="speaking-indicator" id="speakingIndicator" style="display:none">🔊</span></label>
                     <div id="responseText"></div>
                 </div>
                 <div class="viz-container" id="vizContainer">
@@ -415,12 +441,7 @@
                         <div>3D visualization appears here</div>
                     </div>
                 </div>
-                <div class="examples">
-                    <button class="example-btn" onclick="processText('show me the permeability')">"Show permeability"</button>
-                    <button class="example-btn" onclick="processText('show layer 3')">"Show layer 3"</button>
-                    <button class="example-btn" onclick="processText('what is the water cut')">"Water cut?"</button>
-                    <button class="example-btn" onclick="processText('show pressure distribution')">"Show pressure"</button>
-                </div>
+                <div class="examples" id="examplesContainer"></div>
             </div>
         </section>
     </main>
@@ -431,6 +452,108 @@
     </footer>
 
     <script>
+        // ═══════════════════════════════════════════════════════════════════
+        // LANGUAGE CONFIG
+        // ═══════════════════════════════════════════════════════════════════
+        let currentLang = 'en';
+        
+        const LANG = {
+            en: {
+                subtitle: 'Speak to control reservoir simulation • CLARISSA speaks back!',
+                transcriptLabel: '📝 You said',
+                clickToStart: 'Click 🎤 to start',
+                recording: '🔴 Recording... speak now!',
+                processing: '⏳ Processing...',
+                speaking: '🔊 CLARISSA is speaking...',
+                ready: '✅ Ready',
+                micDenied: '❌ Mic access denied',
+                examples: [
+                    { text: 'Show permeability', cmd: 'show me the permeability' },
+                    { text: 'Show layer 3', cmd: 'show layer 3' },
+                    { text: 'Water cut?', cmd: 'what is the water cut' },
+                    { text: 'Show pressure', cmd: 'show pressure distribution' }
+                ],
+                script: [
+                    { time: '0:00', text: 'Show waveform' },
+                    { time: '0:05', say: '"Show permeability"' },
+                    { time: '0:20', say: '"Show layer 3"' },
+                    { time: '0:35', say: '"Water cut?"' }
+                ],
+                responses: {
+                    perm: 'Showing the permeability distribution in 3D. You can see a high-permeability channel running through the center of the reservoir.',
+                    poro: 'Displaying the porosity distribution. Average porosity is around 18 percent.',
+                    pressure: 'Here is the pressure distribution. Note the pressure drawdown near the producing wells.',
+                    layer: 'Showing a cross-section at layer {n}. This view helps identify geological features.',
+                    watercut: 'The current field water cut is 35 percent. Based on the forecast, it will reach 50 percent in approximately 18 months.',
+                    default: 'I can show you permeability, porosity, pressure, layer cross-sections, or water cut. What would you like to see?'
+                },
+                testVoice: 'Hello! I am CLARISSA, your conversational reservoir simulation assistant. How can I help you today?'
+            },
+            de: {
+                subtitle: 'Sprich um die Reservoir-Simulation zu steuern • CLARISSA antwortet!',
+                transcriptLabel: '📝 Du hast gesagt',
+                clickToStart: 'Klick 🎤 zum Starten',
+                recording: '🔴 Aufnahme... sprich jetzt!',
+                processing: '⏳ Verarbeite...',
+                speaking: '🔊 CLARISSA spricht...',
+                ready: '✅ Bereit',
+                micDenied: '❌ Mikrofon-Zugriff verweigert',
+                examples: [
+                    { text: 'Zeig Permeabilität', cmd: 'zeig mir die permeabilität' },
+                    { text: 'Zeig Schicht 3', cmd: 'zeig schicht 3' },
+                    { text: 'Wasseranteil?', cmd: 'wie hoch ist der wasseranteil' },
+                    { text: 'Zeig Druck', cmd: 'zeig druckverteilung' }
+                ],
+                script: [
+                    { time: '0:00', text: 'Waveform zeigen' },
+                    { time: '0:05', say: '"Zeig Permeabilität"' },
+                    { time: '0:20', say: '"Zeig Schicht 3"' },
+                    { time: '0:35', say: '"Wasseranteil?"' }
+                ],
+                responses: {
+                    perm: 'Hier ist die Permeabilitätsverteilung in 3D. Man sieht einen hochpermeablen Kanal durch die Mitte des Reservoirs.',
+                    poro: 'Die Porositätsverteilung wird angezeigt. Die durchschnittliche Porosität liegt bei etwa 18 Prozent.',
+                    pressure: 'Hier ist die Druckverteilung. Beachte den Druckabfall bei den produzierenden Bohrungen.',
+                    layer: 'Zeige einen Querschnitt bei Schicht {n}. Diese Ansicht hilft geologische Strukturen zu erkennen.',
+                    watercut: 'Der aktuelle Wasseranteil liegt bei 35 Prozent. Laut Prognose erreicht er in etwa 18 Monaten 50 Prozent.',
+                    default: 'Ich kann dir Permeabilität, Porosität, Druck, Schicht-Querschnitte oder Wasseranteil zeigen. Was möchtest du sehen?'
+                },
+                testVoice: 'Hallo! Ich bin CLARISSA, deine Assistentin für Reservoir-Simulation. Wie kann ich dir helfen?'
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('langEn').classList.toggle('active', lang === 'en');
+            document.getElementById('langDe').classList.toggle('active', lang === 'de');
+            
+            // Update UI
+            const L = LANG[lang];
+            document.getElementById('demoSubtitle').textContent = L.subtitle;
+            document.getElementById('transcriptLabel').textContent = L.transcriptLabel;
+            document.getElementById('voiceStatus').textContent = L.clickToStart;
+            
+            // Update examples
+            const container = document.getElementById('examplesContainer');
+            container.innerHTML = L.examples.map(ex => 
+                '<button class="example-btn" onclick="processText(\'' + ex.cmd + '\')">"' + ex.text + '"</button>'
+            ).join('');
+            
+            // Update script
+            const scriptContainer = document.getElementById('scriptItems');
+            scriptContainer.innerHTML = L.script.map(item => 
+                '<div class="script-item"><div class="time">' + item.time + '</div>' +
+                (item.say ? '<div class="say">' + item.say + '</div>' : '<div>' + item.text + '</div>') +
+                '</div>'
+            ).join('');
+            
+            // Update voices
+            updateVoiceList();
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // STATE
+        // ═══════════════════════════════════════════════════════════════════
         let isScreenRecording = false;
         let isVoiceRecording = false;
         let screenRecorder, voiceRecorder;
@@ -442,11 +565,15 @@
         const NX=10, NY=10, NZ=5;
         let demoData;
 
+        // ═══════════════════════════════════════════════════════════════════
+        // INIT
+        // ═══════════════════════════════════════════════════════════════════
         document.addEventListener('DOMContentLoaded', () => {
             initWaveform();
             generateData();
             checkMic();
             initVoices();
+            setLanguage('en');
         });
 
         function initWaveform() {
@@ -467,50 +594,83 @@
             } catch(e) {}
         }
 
+        // ═══════════════════════════════════════════════════════════════════
+        // TEXT-TO-SPEECH
+        // ═══════════════════════════════════════════════════════════════════
         function initVoices() {
             const loadVoices = () => {
                 voices = speechSynthesis.getVoices();
-                const select = document.getElementById('voiceSelect');
-                select.innerHTML = '';
-                const goodVoices = voices.filter(v => v.lang.startsWith('en') || v.lang.startsWith('de'));
-                if (goodVoices.length === 0) {
-                    voices.forEach((v, i) => {
+                updateVoiceList();
+                if (voices.length > 0) {
+                    document.getElementById('ttsStatus').classList.add('ready');
+                }
+            };
+            loadVoices();
+            speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        function updateVoiceList() {
+            const select = document.getElementById('voiceSelect');
+            select.innerHTML = '';
+            
+            // Filter by current language
+            const langPrefix = currentLang === 'en' ? 'en' : 'de';
+            const langVoices = voices.filter(v => v.lang.startsWith(langPrefix));
+            
+            if (langVoices.length === 0) {
+                // Fallback: show all voices with selected language in name
+                const fallback = voices.filter(v => 
+                    v.name.toLowerCase().includes(currentLang === 'en' ? 'english' : 'german') ||
+                    v.name.toLowerCase().includes(currentLang === 'en' ? 'english' : 'deutsch')
+                );
+                if (fallback.length > 0) {
+                    fallback.forEach((v, i) => {
                         const opt = document.createElement('option');
-                        opt.value = i;
-                        opt.textContent = v.name + ' (' + v.lang + ')';
+                        opt.value = voices.indexOf(v);
+                        opt.textContent = v.name;
                         select.appendChild(opt);
                     });
                     return;
                 }
-                const female = [], male = [], other = [];
-                const femaleNames = ['female','samantha','victoria','karen','moira','fiona','tessa','zoe','anna','sara','zira'];
-                const maleNames = ['male','daniel','alex','tom','david','james','fred','ralph'];
-                goodVoices.forEach(v => {
-                    const nameLower = v.name.toLowerCase();
-                    const idx = voices.indexOf(v);
-                    if (femaleNames.some(n => nameLower.includes(n))) female.push({voice:v,index:idx});
-                    else if (maleNames.some(n => nameLower.includes(n))) male.push({voice:v,index:idx});
-                    else other.push({voice:v,index:idx});
+                // Ultimate fallback
+                voices.forEach((v, i) => {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = v.name + ' (' + v.lang + ')';
+                    select.appendChild(opt);
                 });
-                const addGroup = (label, items) => {
-                    if (items.length === 0) return;
-                    const group = document.createElement('optgroup');
-                    group.label = label;
-                    items.forEach(item => {
-                        const opt = document.createElement('option');
-                        opt.value = item.index;
-                        opt.textContent = item.voice.name + ' (' + item.voice.lang + ')';
-                        group.appendChild(opt);
-                    });
-                    select.appendChild(group);
-                };
-                addGroup('👩 Female', female);
-                addGroup('👨 Male', male);
-                addGroup('🔊 Other', other);
-                document.getElementById('ttsStatus').classList.add('ready');
+                return;
+            }
+            
+            // Group by gender
+            const female = [], male = [], other = [];
+            const femaleNames = ['female','samantha','victoria','karen','moira','fiona','tessa','zoe','anna','sara','zira','petra','marlene','vicki'];
+            const maleNames = ['male','daniel','alex','tom','david','james','fred','ralph','markus','hans','stefan'];
+            
+            langVoices.forEach(v => {
+                const nameLower = v.name.toLowerCase();
+                const idx = voices.indexOf(v);
+                if (femaleNames.some(n => nameLower.includes(n))) female.push({voice:v,index:idx});
+                else if (maleNames.some(n => nameLower.includes(n))) male.push({voice:v,index:idx});
+                else other.push({voice:v,index:idx});
+            });
+            
+            const addGroup = (label, items) => {
+                if (items.length === 0) return;
+                const group = document.createElement('optgroup');
+                group.label = label;
+                items.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.index;
+                    opt.textContent = item.voice.name;
+                    group.appendChild(opt);
+                });
+                select.appendChild(group);
             };
-            loadVoices();
-            speechSynthesis.onvoiceschanged = loadVoices;
+            
+            addGroup('👩 Female', female);
+            addGroup('👨 Male', male);
+            addGroup('🔊 Other', other);
         }
 
         function speak(text) {
@@ -520,21 +680,24 @@
                 const utterance = new SpeechSynthesisUtterance(text);
                 const select = document.getElementById('voiceSelect');
                 const voiceIndex = parseInt(select.value);
-                if (!isNaN(voiceIndex) && voices[voiceIndex]) utterance.voice = voices[voiceIndex];
+                if (!isNaN(voiceIndex) && voices[voiceIndex]) {
+                    utterance.voice = voices[voiceIndex];
+                }
                 utterance.rate = parseFloat(document.getElementById('voiceSpeed').value);
                 utterance.pitch = parseFloat(document.getElementById('voicePitch').value);
                 const indicator = document.getElementById('speakingIndicator');
                 const status = document.getElementById('voiceStatus');
+                const L = LANG[currentLang];
                 utterance.onstart = () => {
                     isSpeaking = true;
                     indicator.style.display = 'inline';
-                    status.textContent = '🔊 CLARISSA is speaking...';
+                    status.textContent = L.speaking;
                     status.className = 'voice-status speaking';
                 };
                 utterance.onend = () => {
                     isSpeaking = false;
                     indicator.style.display = 'none';
-                    status.textContent = '✅ Ready';
+                    status.textContent = L.ready;
                     status.className = 'voice-status success';
                     resolve();
                 };
@@ -544,9 +707,12 @@
         }
 
         function testVoice() {
-            speak("Hello! I am CLARISSA, your conversational reservoir simulation assistant. How can I help you today?");
+            speak(LANG[currentLang].testVoice);
         }
 
+        // ═══════════════════════════════════════════════════════════════════
+        // DATA
+        // ═══════════════════════════════════════════════════════════════════
         function generateData() {
             const perm=[], poro=[], sw=[], press=[];
             for (let i=0;i<NX;i++) for (let j=0;j<NY;j++) for (let k=0;k<NZ;k++) {
@@ -560,6 +726,9 @@
             demoData = {permeability:perm, porosity:poro, water_saturation:sw, pressure:press};
         }
 
+        // ═══════════════════════════════════════════════════════════════════
+        // SCREEN RECORDING
+        // ═══════════════════════════════════════════════════════════════════
         async function toggleScreenRecording() {
             if (!isScreenRecording) await startScreen();
             else stopScreen();
@@ -632,7 +801,6 @@
             a.download = filename;
             a.click();
             URL.revokeObjectURL(url);
-            // Show info
             document.getElementById('savedFilename').textContent = filename;
             document.getElementById('downloadInfo').classList.add('show');
             document.getElementById('downloadBtn').textContent = '✅ Saved!';
@@ -642,6 +810,9 @@
             document.getElementById('downloadInfo').classList.remove('show');
         }
 
+        // ═══════════════════════════════════════════════════════════════════
+        // VOICE RECORDING
+        // ═══════════════════════════════════════════════════════════════════
         async function toggleVoice() {
             if (!isVoiceRecording) await startVoice();
         }
@@ -650,6 +821,7 @@
             const recordBtn = document.getElementById('voiceRecordBtn');
             const stopBtn = document.getElementById('voiceStopBtn');
             const status = document.getElementById('voiceStatus');
+            const L = LANG[currentLang];
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({audio:true});
                 audioContext = new AudioContext();
@@ -659,8 +831,7 @@
                 analyser.fftSize = 64;
                 animateWaveform();
                 voiceRecorder = new MediaRecorder(stream, {mimeType:'audio/webm'});
-                const chunks = [];
-                voiceRecorder.ondataavailable = e => chunks.push(e.data);
+                voiceRecorder.ondataavailable = () => {};
                 voiceRecorder.onstop = () => {
                     stream.getTracks().forEach(t => t.stop());
                     cancelAnimationFrame(animationId);
@@ -672,10 +843,10 @@
                 recordBtn.classList.add('active');
                 recordBtn.style.display = 'none';
                 stopBtn.classList.add('show');
-                status.textContent = '🔴 Recording... speak now!';
+                status.textContent = L.recording;
                 status.className = 'voice-status recording';
             } catch(err) {
-                status.textContent = '❌ Mic access denied';
+                status.textContent = L.micDenied;
             }
         }
 
@@ -685,7 +856,7 @@
             document.getElementById('voiceRecordBtn').classList.remove('active');
             document.getElementById('voiceRecordBtn').style.display = 'inline-block';
             document.getElementById('voiceStopBtn').classList.remove('show');
-            document.getElementById('voiceStatus').textContent = '⏳ Processing...';
+            document.getElementById('voiceStatus').textContent = LANG[currentLang].processing;
         }
 
         function animateWaveform() {
@@ -706,50 +877,61 @@
 
         function processVoice() {
             if (audioContext) audioContext.close();
-            const demos = ["show me the permeability", "show layer 3", "what is the water cut", "show pressure distribution"];
-            const transcript = demos[Math.floor(Math.random()*demos.length)];
-            document.getElementById('transcriptText').textContent = '"' + transcript + '"';
-            document.getElementById('voiceStatus').textContent = '✅ Done';
+            // Simulate: pick random example command
+            const examples = LANG[currentLang].examples;
+            const cmd = examples[Math.floor(Math.random()*examples.length)].cmd;
+            document.getElementById('transcriptText').textContent = '"' + cmd + '"';
+            document.getElementById('voiceStatus').textContent = LANG[currentLang].ready;
             document.getElementById('voiceStatus').className = 'voice-status success';
-            processText(transcript);
+            processText(cmd);
         }
 
+        // ═══════════════════════════════════════════════════════════════════
+        // COMMAND PROCESSING
+        // ═══════════════════════════════════════════════════════════════════
         async function processText(text) {
             const t = text.toLowerCase();
             document.getElementById('transcriptText').textContent = '"' + text + '"';
             const responseBox = document.getElementById('responseBox');
             const responseText = document.getElementById('responseText');
             responseBox.classList.add('show');
+            
+            const R = LANG[currentLang].responses;
             let response = '';
-            if (t.includes('perm')) {
-                response = 'Showing the permeability distribution in 3D. You can see a high-permeability channel running through the center of the reservoir.';
+            
+            if (t.includes('perm') || t.includes('permeab')) {
+                response = R.perm;
                 responseText.textContent = response;
                 create3D('Permeability (mD)', demoData.permeability, 'Viridis');
             } else if (t.includes('poro')) {
-                response = 'Displaying the porosity distribution. Average porosity is around 18 percent.';
+                response = R.poro;
                 responseText.textContent = response;
                 create3D('Porosity', demoData.porosity, 'Plasma');
-            } else if (t.includes('pressure')) {
-                response = 'Here is the pressure distribution. Note the pressure drawdown near the producing wells.';
+            } else if (t.includes('pressure') || t.includes('druck')) {
+                response = R.pressure;
                 responseText.textContent = response;
                 create3D('Pressure (psi)', demoData.pressure, 'RdYlBu');
-            } else if (t.includes('layer')) {
-                const m = t.match(/layer\s*(\d+)/);
+            } else if (t.includes('layer') || t.includes('schicht')) {
+                const m = t.match(/(?:layer|schicht)\s*(\d+)/i);
                 const layer = m ? parseInt(m[1]) : 3;
-                response = 'Showing a cross-section at layer ' + layer + '. This view helps identify geological features.';
+                response = R.layer.replace('{n}', layer);
                 responseText.textContent = response;
                 createCrossSection(layer);
-            } else if (t.includes('water cut')) {
-                response = 'The current field water cut is 35 percent. Based on the forecast, it will reach 50 percent in approximately 18 months.';
+            } else if (t.includes('water') || t.includes('wasser')) {
+                response = R.watercut;
                 responseText.textContent = response;
                 document.getElementById('vizContainer').innerHTML = '<div style="text-align:center;padding:80px;font-size:3em;">💧 <span style="color:#4caf50">35%</span></div>';
             } else {
-                response = 'I can show you permeability, porosity, pressure, layer cross-sections, or water cut. What would you like to see?';
+                response = R.default;
                 responseText.textContent = response;
             }
+            
             await speak(response);
         }
 
+        // ═══════════════════════════════════════════════════════════════════
+        // VISUALIZATION
+        // ═══════════════════════════════════════════════════════════════════
         function create3D(title, data, colorscale) {
             Plotly.newPlot('vizContainer', [{
                 x: data.map(d=>d.x), y: data.map(d=>d.y), z: data.map(d=>d.z),
@@ -780,6 +962,9 @@
             }, {responsive:true});
         }
 
+        // ═══════════════════════════════════════════════════════════════════
+        // HELPERS
+        // ═══════════════════════════════════════════════════════════════════
         async function showCountdown() {
             const overlay = document.getElementById('countdownOverlay');
             const number = document.getElementById('countdownNumber');
