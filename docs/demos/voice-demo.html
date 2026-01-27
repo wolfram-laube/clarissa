@@ -17,9 +17,7 @@
             --text-primary: #ffffff;
             --text-secondary: #888;
         }
-        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--bg-primary);
@@ -28,15 +26,12 @@
             display: flex;
             flex-direction: column;
         }
-        
-        /* Header */
         .header {
             background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
             padding: 20px 30px;
             text-align: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        
         .header h1 {
             font-size: 2em;
             background: linear-gradient(90deg, var(--accent), #0f3460);
@@ -44,10 +39,7 @@
             -webkit-text-fill-color: transparent;
             margin-bottom: 8px;
         }
-        
         .header p { color: var(--text-secondary); }
-        
-        /* Main */
         .main {
             flex: 1;
             display: flex;
@@ -57,22 +49,18 @@
             margin: 0 auto;
             width: 100%;
         }
-        
-        /* Voice Panel */
         .voice-panel {
             width: 400px;
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
-        
         .card {
             background: var(--bg-secondary);
             border-radius: 16px;
             padding: 24px;
             border: 1px solid rgba(255,255,255,0.05);
         }
-        
         .card h2 {
             font-size: 0.85em;
             color: var(--text-secondary);
@@ -80,7 +68,30 @@
             letter-spacing: 1px;
             margin-bottom: 16px;
         }
-        
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        .lang-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.2s;
+        }
+        .lang-btn.active {
+            border-color: var(--accent);
+            color: var(--text-primary);
+            background: rgba(233, 69, 96, 0.15);
+        }
+        .lang-btn:hover:not(.active) { border-color: rgba(255,255,255,0.3); }
+        .lang-hint { font-size: 0.75em; color: var(--text-secondary); text-align: center; }
         /* Waveform */
         .waveform {
             height: 100px;
@@ -92,7 +103,6 @@
             gap: 3px;
             padding: 0 20px;
         }
-        
         .wave-bar {
             width: 4px;
             height: 20px;
@@ -100,11 +110,9 @@
             border-radius: 2px;
             transition: height 0.05s ease-out;
         }
-        
         .wave-bar.speaking {
             background: linear-gradient(180deg, var(--info), #0f3460);
         }
-        
         /* Voice Controls */
         .voice-controls {
             display: flex;
@@ -112,7 +120,6 @@
             gap: 15px;
             margin-top: 20px;
         }
-        
         .voice-btn {
             padding: 18px 40px;
             font-size: 1.1em;
@@ -122,40 +129,27 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
         .voice-btn.record {
             background: linear-gradient(145deg, var(--accent), #c23a51);
             color: white;
             box-shadow: 0 4px 25px var(--accent-glow);
         }
-        
         .voice-btn.record:hover:not(:disabled) {
             transform: translateY(-3px);
             box-shadow: 0 8px 35px var(--accent-glow);
         }
-        
-        .voice-btn.record:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .voice-btn.record.active {
-            animation: recordPulse 1s infinite;
-        }
-        
+        .voice-btn.record:disabled { opacity: 0.5; cursor: not-allowed; }
+        .voice-btn.record.active { animation: recordPulse 1s infinite; }
         .voice-btn.stop {
             background: linear-gradient(145deg, var(--success), #388e3c);
             color: white;
             display: none;
         }
-        
         .voice-btn.stop.show { display: inline-block; }
-        
         @keyframes recordPulse {
             0%, 100% { box-shadow: 0 4px 25px var(--accent-glow); }
             50% { box-shadow: 0 4px 50px rgba(233, 69, 96, 0.6); }
         }
-        
         /* Status */
         .status-box {
             text-align: center;
@@ -168,32 +162,27 @@
             align-items: center;
             justify-content: center;
         }
-        
         .status-box.recording { color: var(--accent); font-weight: 600; }
         .status-box.success { color: var(--success); }
         .status-box.speaking { color: var(--info); font-weight: 600; }
-        
         /* Transcript */
         .transcript-box {
             background: rgba(0,0,0,0.3);
             border-radius: 10px;
             padding: 15px;
         }
-        
         .transcript-box label {
             display: block;
             font-size: 0.8em;
             color: var(--text-secondary);
             margin-bottom: 8px;
         }
-        
         .transcript-box .text {
             font-size: 1.1em;
             color: var(--success);
             font-style: italic;
             min-height: 1.5em;
         }
-        
         /* Response */
         .response-box {
             background: linear-gradient(135deg, rgba(33,150,243,0.15), rgba(22,33,62,0.5));
@@ -203,9 +192,7 @@
             margin-top: 15px;
             display: none;
         }
-        
         .response-box.show { display: block; }
-        
         .response-box label {
             display: flex;
             align-items: center;
@@ -214,12 +201,7 @@
             color: var(--text-secondary);
             margin-bottom: 8px;
         }
-        
-        .response-box .response-text {
-            font-size: 1em;
-            line-height: 1.5;
-        }
-        
+        .response-box .response-text { font-size: 1em; line-height: 1.5; }
         .replay-btn {
             background: var(--info);
             color: white;
@@ -230,17 +212,13 @@
             cursor: pointer;
             margin-left: auto;
         }
-        
         .replay-btn:hover { background: #1976d2; }
-        
         .speaking-indicator {
             display: inline-block;
             color: var(--info);
             animation: blink 0.5s infinite;
         }
-        
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-        
         /* Voice Settings */
         .voice-settings label {
             display: block;
@@ -249,9 +227,7 @@
             margin-bottom: 6px;
             margin-top: 12px;
         }
-        
         .voice-settings label:first-child { margin-top: 0; }
-        
         .voice-settings select,
         .voice-settings input[type="range"] {
             width: 100%;
@@ -262,13 +238,11 @@
             color: var(--text-primary);
             font-size: 0.9em;
         }
-        
         .range-row {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
         .range-row input { flex: 1; }
         .range-row span { 
             min-width: 40px; 
@@ -276,7 +250,6 @@
             font-size: 0.85em;
             color: var(--text-secondary);
         }
-        
         .voice-toggle {
             display: flex;
             align-items: center;
@@ -285,13 +258,11 @@
             padding-top: 15px;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
-        
         .voice-toggle input[type="checkbox"] {
             width: 20px;
             height: 20px;
             accent-color: var(--info);
         }
-        
         .test-btn {
             width: 100%;
             margin-top: 15px;
@@ -303,16 +274,13 @@
             cursor: pointer;
             font-size: 0.9em;
         }
-        
         .test-btn:hover { background: rgba(33,150,243,0.2); border-color: var(--info); }
-        
         /* Examples */
         .examples {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
         }
-        
         .example-btn {
             padding: 10px 16px;
             font-size: 0.85em;
@@ -323,19 +291,16 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        
         .example-btn:hover {
             background: rgba(233, 69, 96, 0.2);
             border-color: var(--accent);
         }
-        
         /* Viz Panel */
         .viz-panel {
             flex: 1;
             display: flex;
             flex-direction: column;
         }
-        
         .viz-container {
             flex: 1;
             background: var(--bg-secondary);
@@ -343,7 +308,6 @@
             min-height: 500px;
             border: 1px solid rgba(255,255,255,0.05);
         }
-        
         .viz-placeholder {
             height: 100%;
             display: flex;
@@ -352,9 +316,7 @@
             justify-content: center;
             color: var(--text-secondary);
         }
-        
         .viz-placeholder .icon { font-size: 4em; margin-bottom: 15px; }
-        
         /* Footer */
         .footer {
             background: var(--bg-secondary);
@@ -364,18 +326,27 @@
             font-size: 0.85em;
             color: var(--text-secondary);
         }
-        
         .footer a { color: var(--accent); text-decoration: none; }
     </style>
 </head>
 <body>
     <header class="header">
         <h1>🎤 CLARISSA Voice Interface</h1>
-        <p>Speak naturally to control reservoir simulation • CLARISSA speaks back!</p>
+        <p id="headerSubtitle">Speak naturally to control reservoir simulation • CLARISSA speaks back!</p>
     </header>
     
     <main class="main">
         <div class="voice-panel">
+            <!-- Language Selector -->
+            <div class="card">
+                <h2>🌍 Language / Sprache</h2>
+                <div class="lang-selector">
+                    <button class="lang-btn active" id="langEn" onclick="setLanguage('en')">🇬🇧 English</button>
+                    <button class="lang-btn" id="langDe" onclick="setLanguage('de')">🇩🇪 Deutsch</button>
+                </div>
+                <p class="lang-hint">Affects voice input & output</p>
+            </div>
+            
             <!-- Waveform & Controls -->
             <div class="card">
                 <h2>🎙️ Voice Input</h2>
@@ -393,7 +364,7 @@
                 <div class="status-box" id="statusBox">Click 🎤 to start</div>
                 
                 <div class="transcript-box">
-                    <label>📝 You said:</label>
+                    <label id="transcriptLabel">📝 You said:</label>
                     <div class="text" id="transcriptText">—</div>
                 </div>
                 
@@ -428,7 +399,7 @@
                     
                     <div class="voice-toggle">
                         <input type="checkbox" id="voiceEnabled" checked>
-                        <span>Enable voice responses</span>
+                        <span id="voiceToggleLabel">Enable voice responses</span>
                     </div>
                     
                     <button class="test-btn" onclick="testVoice()">🔊 Test Voice</button>
@@ -437,14 +408,8 @@
             
             <!-- Examples -->
             <div class="card">
-                <h2>💡 Try These Commands</h2>
-                <div class="examples">
-                    <button class="example-btn" onclick="simulateCommand('show me the permeability')">Show permeability</button>
-                    <button class="example-btn" onclick="simulateCommand('display layer 3')">Show layer 3</button>
-                    <button class="example-btn" onclick="simulateCommand('what is the water cut')">Water cut?</button>
-                    <button class="example-btn" onclick="simulateCommand('show pressure distribution')">Show pressure</button>
-                    <button class="example-btn" onclick="simulateCommand('porosity distribution')">Porosity</button>
-                </div>
+                <h2 id="examplesTitle">💡 Try These Commands</h2>
+                <div class="examples" id="examplesContainer"></div>
             </div>
         </div>
         
@@ -453,20 +418,112 @@
             <div class="viz-container" id="vizContainer">
                 <div class="viz-placeholder">
                     <div class="icon">📊</div>
-                    <div>3D visualization will appear here</div>
-                    <div style="margin-top:10px; font-size:0.9em">Try a voice command or click an example</div>
+                    <div id="vizPlaceholderText">3D visualization will appear here</div>
+                    <div style="margin-top:10px; font-size:0.9em" id="vizPlaceholderHint">Try a voice command or click an example</div>
                 </div>
             </div>
         </div>
     </main>
     
     <footer class="footer">
-        CLARISSA Voice Interface v2.0 • 
+        CLARISSA Voice Interface v3.0 • 
         <a href="demo-recording-suite.html">📹 Recording Suite</a> • 
         <a href="../">📚 Documentation</a>
     </footer>
 
     <script>
+        // ═══════════════════════════════════════════════════════════════════
+        // LANGUAGE CONFIG
+        // ═══════════════════════════════════════════════════════════════════
+        let currentLang = 'en';
+        
+        const LANG = {
+            en: {
+                subtitle: 'Speak naturally to control reservoir simulation • CLARISSA speaks back!',
+                transcriptLabel: '📝 You said:',
+                clickToStart: 'Click 🎤 to start',
+                recording: '🔴 Recording... speak now!',
+                processing: '⏳ Processing...',
+                speaking: '🔊 CLARISSA is speaking...',
+                ready: '✅ Ready',
+                micDenied: '❌ Microphone access denied',
+                voiceToggle: 'Enable voice responses',
+                examplesTitle: '💡 Try These Commands',
+                vizPlaceholder: '3D visualization will appear here',
+                vizHint: 'Try a voice command or click an example',
+                examples: [
+                    { text: 'Show permeability', cmd: 'show me the permeability' },
+                    { text: 'Show layer 3', cmd: 'display layer 3' },
+                    { text: 'Water cut?', cmd: 'what is the water cut' },
+                    { text: 'Show pressure', cmd: 'show pressure distribution' },
+                    { text: 'Porosity', cmd: 'porosity distribution' }
+                ],
+                responses: {
+                    perm: 'Showing the permeability distribution. Notice the high-permeability channel running through the center of the reservoir, which will be the primary flow path.',
+                    poro: 'Displaying the porosity distribution. The average porosity is approximately 18 percent, with some variation due to depositional environment.',
+                    pressure: 'Here is the pressure distribution. You can observe the pressure drawdown near the producing wells, indicating good reservoir connectivity.',
+                    layer: 'Showing cross-section at layer {n}. This horizontal slice helps identify geological features and permeability trends at this depth.',
+                    watercut: 'The current field water cut is 35 percent. Based on the simulation forecast, water cut will reach 50 percent in approximately 18 months. Consider optimizing injection patterns.',
+                    default: 'I can show you permeability, porosity, pressure distributions, layer cross-sections, or water cut analysis. What would you like to see?'
+                },
+                testVoice: 'Hello! I am CLARISSA, your conversational reservoir simulation assistant. Ask me to show permeability, pressure, or any layer cross-section.'
+            },
+            de: {
+                subtitle: 'Sprich natürlich um die Reservoir-Simulation zu steuern • CLARISSA antwortet!',
+                transcriptLabel: '📝 Du hast gesagt:',
+                clickToStart: 'Klick 🎤 zum Starten',
+                recording: '🔴 Aufnahme... sprich jetzt!',
+                processing: '⏳ Verarbeite...',
+                speaking: '🔊 CLARISSA spricht...',
+                ready: '✅ Bereit',
+                micDenied: '❌ Mikrofon-Zugriff verweigert',
+                voiceToggle: 'Sprachausgabe aktivieren',
+                examplesTitle: '💡 Probiere diese Befehle',
+                vizPlaceholder: '3D-Visualisierung erscheint hier',
+                vizHint: 'Sprich einen Befehl oder klick ein Beispiel',
+                examples: [
+                    { text: 'Zeig Permeabilität', cmd: 'zeig mir die permeabilität' },
+                    { text: 'Zeig Schicht 3', cmd: 'zeig schicht 3' },
+                    { text: 'Wasseranteil?', cmd: 'wie hoch ist der wasseranteil' },
+                    { text: 'Zeig Druck', cmd: 'zeig druckverteilung' },
+                    { text: 'Porosität', cmd: 'porositätsverteilung' }
+                ],
+                responses: {
+                    perm: 'Hier ist die Permeabilitätsverteilung. Man sieht einen hochpermeablen Kanal durch die Mitte des Reservoirs, der der primäre Fließweg sein wird.',
+                    poro: 'Die Porositätsverteilung wird angezeigt. Die durchschnittliche Porosität liegt bei etwa 18 Prozent mit Variationen durch die Ablagerungsumgebung.',
+                    pressure: 'Hier ist die Druckverteilung. Man kann den Druckabfall bei den produzierenden Bohrungen erkennen, was auf gute Reservoir-Konnektivität hinweist.',
+                    layer: 'Zeige Querschnitt bei Schicht {n}. Dieser horizontale Schnitt hilft geologische Strukturen und Permeabilitätstrends zu erkennen.',
+                    watercut: 'Der aktuelle Wasseranteil liegt bei 35 Prozent. Laut Simulationsprognose erreicht er in etwa 18 Monaten 50 Prozent. Eine Optimierung der Injektionsmuster wäre zu erwägen.',
+                    default: 'Ich kann dir Permeabilität, Porosität, Druckverteilungen, Schicht-Querschnitte oder Wasseranteil-Analysen zeigen. Was möchtest du sehen?'
+                },
+                testVoice: 'Hallo! Ich bin CLARISSA, deine Assistentin für Reservoir-Simulation. Frag mich nach Permeabilität, Druck oder einem beliebigen Schicht-Querschnitt.'
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('langEn').classList.toggle('active', lang === 'en');
+            document.getElementById('langDe').classList.toggle('active', lang === 'de');
+            
+            const L = LANG[lang];
+            document.getElementById('headerSubtitle').textContent = L.subtitle;
+            document.getElementById('transcriptLabel').textContent = L.transcriptLabel;
+            document.getElementById('statusBox').textContent = L.clickToStart;
+            document.getElementById('voiceToggleLabel').textContent = L.voiceToggle;
+            document.getElementById('examplesTitle').textContent = L.examplesTitle;
+            document.getElementById('vizPlaceholderText').textContent = L.vizPlaceholder;
+            document.getElementById('vizPlaceholderHint').textContent = L.vizHint;
+            
+            // Update examples
+            const container = document.getElementById('examplesContainer');
+            container.innerHTML = L.examples.map(ex => 
+                '<button class="example-btn" onclick="simulateCommand(\'' + ex.cmd.replace(/'/g, "\\'") + '\')">' + ex.text + '</button>'
+            ).join('');
+            
+            // Update voice list
+            updateVoiceList();
+        }
+
         // ═══════════════════════════════════════════════════════════════════
         // STATE
         // ═══════════════════════════════════════════════════════════════════
@@ -481,7 +538,7 @@
         
         const NX = 10, NY = 10, NZ = 5;
         let demoData = null;
-        
+
         // ═══════════════════════════════════════════════════════════════════
         // INIT
         // ═══════════════════════════════════════════════════════════════════
@@ -489,27 +546,26 @@
             initWaveform();
             generateDemoData();
             initVoices();
+            setLanguage('en');
         });
-        
+
         function initWaveform() {
             const container = document.getElementById('waveform');
             for (let i = 0; i < 35; i++) {
                 const bar = document.createElement('div');
                 bar.className = 'wave-bar';
-                bar.id = `bar-${i}`;
+                bar.id = 'bar-' + i;
                 container.appendChild(bar);
             }
         }
-        
+
         function generateDemoData() {
             const perm = [], poro = [], sw = [], press = [];
             for (let i = 0; i < NX; i++) {
                 for (let j = 0; j < NY; j++) {
                     for (let k = 0; k < NZ; k++) {
-                        // High-perm channel in center
                         let p = Math.exp(5 + Math.random() * 2);
                         if (i >= 4 && i <= 6 && j >= 3 && j <= 6) p *= 5;
-                        
                         perm.push({ x: i, y: j, z: k, v: p });
                         poro.push({ x: i, y: j, z: k, v: 0.1 + Math.random() * 0.2 });
                         sw.push({ x: i, y: j, z: k, v: 0.2 + 0.6 * (i / NX) + Math.random() * 0.1 });
@@ -519,86 +575,72 @@
             }
             demoData = { permeability: perm, porosity: poro, water_saturation: sw, pressure: press };
         }
-        
+
         // ═══════════════════════════════════════════════════════════════════
         // TEXT-TO-SPEECH
         // ═══════════════════════════════════════════════════════════════════
         function initVoices() {
             const loadVoices = () => {
                 voices = speechSynthesis.getVoices();
-                const select = document.getElementById('voiceSelect');
-                select.innerHTML = '';
-                
-                // Filter English/German voices
-                const goodVoices = voices.filter(v => 
-                    v.lang.startsWith('en') || v.lang.startsWith('de')
-                );
-                
-                if (goodVoices.length === 0) {
-                    // Fallback: show all
-                    voices.forEach((v, i) => {
-                        const opt = document.createElement('option');
-                        opt.value = i;
-                        opt.textContent = `${v.name} (${v.lang})`;
-                        select.appendChild(opt);
-                    });
-                    return;
-                }
-                
-                // Group by gender hints
-                const female = [], male = [], other = [];
-                const femaleNames = ['female', 'samantha', 'victoria', 'karen', 'moira', 'fiona', 'tessa', 'zoe', 'anna', 'sara', 'zira', 'hazel'];
-                const maleNames = ['male', 'daniel', 'alex', 'tom', 'david', 'james', 'fred', 'ralph'];
-                
-                goodVoices.forEach(v => {
-                    const nameLower = v.name.toLowerCase();
-                    const idx = voices.indexOf(v);
-                    const item = { voice: v, index: idx };
-                    
-                    if (femaleNames.some(n => nameLower.includes(n))) {
-                        female.push(item);
-                    } else if (maleNames.some(n => nameLower.includes(n))) {
-                        male.push(item);
-                    } else {
-                        other.push(item);
-                    }
-                });
-                
-                const addGroup = (label, items) => {
-                    if (items.length === 0) return;
-                    const group = document.createElement('optgroup');
-                    group.label = label;
-                    items.forEach(item => {
-                        const opt = document.createElement('option');
-                        opt.value = item.index;
-                        opt.textContent = `${item.voice.name} (${item.voice.lang})`;
-                        group.appendChild(opt);
-                    });
-                    select.appendChild(group);
-                };
-                
-                addGroup('👩 Female', female);
-                addGroup('👨 Male', male);
-                addGroup('🔊 Other', other);
+                updateVoiceList();
             };
-            
             loadVoices();
             speechSynthesis.onvoiceschanged = loadVoices;
         }
-        
+
+        function updateVoiceList() {
+            const select = document.getElementById('voiceSelect');
+            select.innerHTML = '';
+            
+            const langPrefix = currentLang === 'en' ? 'en' : 'de';
+            const langVoices = voices.filter(v => v.lang.startsWith(langPrefix));
+            
+            if (langVoices.length === 0) {
+                voices.forEach((v, i) => {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = v.name + ' (' + v.lang + ')';
+                    select.appendChild(opt);
+                });
+                return;
+            }
+            
+            const female = [], male = [], other = [];
+            const femaleNames = ['female','samantha','victoria','karen','moira','fiona','tessa','zoe','anna','sara','zira','petra','marlene','vicki'];
+            const maleNames = ['male','daniel','alex','tom','david','james','fred','ralph','markus','hans','stefan'];
+            
+            langVoices.forEach(v => {
+                const nameLower = v.name.toLowerCase();
+                const idx = voices.indexOf(v);
+                if (femaleNames.some(n => nameLower.includes(n))) female.push({voice:v,index:idx});
+                else if (maleNames.some(n => nameLower.includes(n))) male.push({voice:v,index:idx});
+                else other.push({voice:v,index:idx});
+            });
+            
+            const addGroup = (label, items) => {
+                if (items.length === 0) return;
+                const group = document.createElement('optgroup');
+                group.label = label;
+                items.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.index;
+                    opt.textContent = item.voice.name;
+                    group.appendChild(opt);
+                });
+                select.appendChild(group);
+            };
+            
+            addGroup('👩 Female', female);
+            addGroup('👨 Male', male);
+            addGroup('🔊 Other', other);
+        }
+
         function speak(text) {
             return new Promise((resolve) => {
-                if (!document.getElementById('voiceEnabled').checked) {
-                    resolve();
-                    return;
-                }
-                
-                // Cancel any ongoing speech
+                if (!document.getElementById('voiceEnabled').checked) { resolve(); return; }
                 speechSynthesis.cancel();
                 
                 const utterance = new SpeechSynthesisUtterance(text);
-                
-                // Get selected voice
                 const select = document.getElementById('voiceSelect');
                 const voiceIndex = parseInt(select.value);
                 if (!isNaN(voiceIndex) && voices[voiceIndex]) {
@@ -611,11 +653,12 @@
                 const indicator = document.getElementById('speakingIndicator');
                 const status = document.getElementById('statusBox');
                 const bars = document.querySelectorAll('.wave-bar');
+                const L = LANG[currentLang];
                 
                 utterance.onstart = () => {
                     isSpeaking = true;
                     indicator.style.display = 'inline';
-                    status.textContent = '🔊 CLARISSA is speaking...';
+                    status.textContent = L.speaking;
                     status.className = 'status-box speaking';
                     bars.forEach(bar => bar.classList.add('speaking'));
                     animateSpeakingWaveform();
@@ -624,7 +667,7 @@
                 utterance.onend = () => {
                     isSpeaking = false;
                     indicator.style.display = 'none';
-                    status.textContent = '✅ Ready';
+                    status.textContent = L.ready;
                     status.className = 'status-box success';
                     bars.forEach(bar => bar.classList.remove('speaking'));
                     stopSpeakingWaveform();
@@ -632,7 +675,6 @@
                 };
                 
                 utterance.onerror = (e) => {
-                    console.error('Speech error:', e);
                     isSpeaking = false;
                     indicator.style.display = 'none';
                     stopSpeakingWaveform();
@@ -642,10 +684,9 @@
                 speechSynthesis.speak(utterance);
             });
         }
-        
+
         function animateSpeakingWaveform() {
             const bars = document.querySelectorAll('.wave-bar');
-            
             function animate() {
                 if (!isSpeaking) return;
                 bars.forEach(bar => {
@@ -655,51 +696,51 @@
             }
             animate();
         }
-        
+
         function stopSpeakingWaveform() {
             cancelAnimationFrame(animationId);
             document.querySelectorAll('.wave-bar').forEach(bar => {
                 bar.style.height = '20px';
             });
         }
-        
+
         function testVoice() {
-            speak("Hello! I am CLARISSA, your conversational reservoir simulation assistant. Ask me to show permeability, pressure, or any layer cross-section.");
+            speak(LANG[currentLang].testVoice);
         }
-        
+
         function replayResponse() {
             if (lastResponse && !isSpeaking) {
                 speak(lastResponse);
             }
         }
-        
+
         function updateSpeedLabel() {
             document.getElementById('speedLabel').textContent = 
                 parseFloat(document.getElementById('voiceSpeed').value).toFixed(1) + 'x';
         }
-        
+
         function updatePitchLabel() {
             document.getElementById('pitchLabel').textContent = 
                 parseFloat(document.getElementById('voicePitch').value).toFixed(1);
         }
-        
+
         // ═══════════════════════════════════════════════════════════════════
         // VOICE RECORDING
         // ═══════════════════════════════════════════════════════════════════
         async function toggleRecording() {
-            if (isSpeaking) return; // Don't start while speaking
+            if (isSpeaking) return;
             if (!isRecording) await startRecording();
         }
-        
+
         async function startRecording() {
             const recordBtn = document.getElementById('recordBtn');
             const stopBtn = document.getElementById('stopBtn');
             const status = document.getElementById('statusBox');
+            const L = LANG[currentLang];
             
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 
-                // Setup audio analysis for waveform
                 audioContext = new AudioContext();
                 analyser = audioContext.createAnalyser();
                 const source = audioContext.createMediaStreamSource(stream);
@@ -707,18 +748,12 @@
                 analyser.fftSize = 64;
                 animateRecordingWaveform();
                 
-                // Setup recorder
                 mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-                const chunks = [];
-                
-                mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
                 
                 mediaRecorder.onstop = () => {
                     stream.getTracks().forEach(t => t.stop());
                     cancelAnimationFrame(animationId);
                     resetWaveform();
-                    
-                    // Simulate transcription (in real app: send to Whisper API)
                     simulateTranscription();
                 };
                 
@@ -728,32 +763,27 @@
                 recordBtn.classList.add('active');
                 recordBtn.style.display = 'none';
                 stopBtn.classList.add('show');
-                status.textContent = '🔴 Recording... speak now!';
+                status.textContent = L.recording;
                 status.className = 'status-box recording';
                 
             } catch (err) {
-                console.error('Mic error:', err);
-                status.textContent = '❌ Microphone access denied';
+                status.textContent = L.micDenied;
                 status.className = 'status-box';
             }
         }
-        
+
         function stopRecording() {
             if (mediaRecorder && mediaRecorder.state !== 'inactive') {
                 mediaRecorder.stop();
             }
             isRecording = false;
             
-            const recordBtn = document.getElementById('recordBtn');
-            const stopBtn = document.getElementById('stopBtn');
-            
-            recordBtn.classList.remove('active');
-            recordBtn.style.display = 'inline-block';
-            stopBtn.classList.remove('show');
-            
-            document.getElementById('statusBox').textContent = '⏳ Processing...';
+            document.getElementById('recordBtn').classList.remove('active');
+            document.getElementById('recordBtn').style.display = 'inline-block';
+            document.getElementById('stopBtn').classList.remove('show');
+            document.getElementById('statusBox').textContent = LANG[currentLang].processing;
         }
-        
+
         function animateRecordingWaveform() {
             const bars = document.querySelectorAll('.wave-bar');
             const dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -769,26 +799,20 @@
             }
             draw();
         }
-        
+
         function resetWaveform() {
             document.querySelectorAll('.wave-bar').forEach(bar => {
                 bar.style.height = '20px';
             });
         }
-        
+
         function simulateTranscription() {
-            // In production: send audio to Whisper API
-            // For demo: pick a random command
-            const commands = [
-                'show me the permeability',
-                'display layer 3',
-                'what is the water cut',
-                'show pressure distribution'
-            ];
-            const transcript = commands[Math.floor(Math.random() * commands.length)];
+            if (audioContext) audioContext.close();
+            const examples = LANG[currentLang].examples;
+            const transcript = examples[Math.floor(Math.random() * examples.length)].cmd;
             processCommand(transcript);
         }
-        
+
         // ═══════════════════════════════════════════════════════════════════
         // COMMAND PROCESSING
         // ═══════════════════════════════════════════════════════════════════
@@ -796,58 +820,54 @@
             if (isSpeaking || isRecording) return;
             processCommand(text);
         }
-        
+
         async function processCommand(text) {
             const t = text.toLowerCase();
+            document.getElementById('transcriptText').textContent = '"' + text + '"';
             
-            // Update transcript
-            document.getElementById('transcriptText').textContent = `"${text}"`;
-            
-            // Show response box
             const responseBox = document.getElementById('responseBox');
             const responseText = document.getElementById('responseText');
             responseBox.classList.add('show');
             
+            const R = LANG[currentLang].responses;
             let response = '';
             
-            if (t.includes('perm')) {
-                response = 'Showing the permeability distribution. Notice the high-permeability channel running through the center of the reservoir, which will be the primary flow path.';
+            if (t.includes('perm') || t.includes('permeab')) {
+                response = R.perm;
                 responseText.textContent = response;
                 create3DPlot('Permeability (mD)', demoData.permeability, 'Viridis');
                 
             } else if (t.includes('poro')) {
-                response = 'Displaying the porosity distribution. The average porosity is approximately 18 percent, with some variation due to depositional environment.';
+                response = R.poro;
                 responseText.textContent = response;
                 create3DPlot('Porosity', demoData.porosity, 'Plasma');
                 
-            } else if (t.includes('pressure')) {
-                response = 'Here is the pressure distribution. You can observe the pressure drawdown near the producing wells, indicating good reservoir connectivity.';
+            } else if (t.includes('pressure') || t.includes('druck')) {
+                response = R.pressure;
                 responseText.textContent = response;
                 create3DPlot('Pressure (psi)', demoData.pressure, 'RdYlBu');
                 
-            } else if (t.includes('layer')) {
-                const match = t.match(/layer\s*(\d+)/);
+            } else if (t.includes('layer') || t.includes('schicht')) {
+                const match = t.match(/(?:layer|schicht)\s*(\d+)/i);
                 const layer = match ? parseInt(match[1]) : 3;
-                response = `Showing cross-section at layer ${layer}. This horizontal slice helps identify geological features and permeability trends at this depth.`;
+                response = R.layer.replace('{n}', layer);
                 responseText.textContent = response;
                 createCrossSection(layer);
                 
-            } else if (t.includes('water') && t.includes('cut')) {
-                response = 'The current field water cut is 35 percent. Based on the simulation forecast, water cut will reach 50 percent in approximately 18 months. Consider optimizing injection patterns.';
+            } else if (t.includes('water') || t.includes('wasser')) {
+                response = R.watercut;
                 responseText.textContent = response;
                 showWaterCut();
                 
             } else {
-                response = 'I can show you permeability, porosity, pressure distributions, layer cross-sections, or water cut analysis. What would you like to see?';
+                response = R.default;
                 responseText.textContent = response;
             }
             
             lastResponse = response;
-            
-            // Speak the response
             await speak(response);
         }
-        
+
         // ═══════════════════════════════════════════════════════════════════
         // VISUALIZATIONS
         // ═══════════════════════════════════════════════════════════════════
@@ -879,7 +899,7 @@
                 margin: { l: 0, r: 0, t: 50, b: 0 }
             }, { responsive: true });
         }
-        
+
         function createCrossSection(layer) {
             const k = Math.max(0, Math.min(layer - 1, NZ - 1));
             const filtered = demoData.permeability.filter(d => d.z === k);
@@ -900,7 +920,7 @@
                 colorscale: 'Viridis',
                 colorbar: { title: 'Perm (mD)' }
             }], {
-                title: { text: `Layer ${layer} - Permeability`, font: { color: '#fff' } },
+                title: { text: 'Layer ' + layer + ' - Permeability', font: { color: '#fff' } },
                 xaxis: { title: 'J Index', color: '#888' },
                 yaxis: { title: 'I Index', color: '#888' },
                 paper_bgcolor: 'rgba(0,0,0,0)',
@@ -908,19 +928,17 @@
                 font: { color: '#fff' }
             }, { responsive: true });
         }
-        
+
         function showWaterCut() {
-            document.getElementById('vizContainer').innerHTML = `
-                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding:40px;">
-                    <div style="font-size:5em; margin-bottom:20px;">💧</div>
-                    <div style="font-size:4em; color:#4caf50; font-weight:bold;">35%</div>
-                    <div style="font-size:1.2em; color:#888; margin-top:15px;">Current Water Cut</div>
-                    <div style="margin-top:30px; padding:20px; background:rgba(0,0,0,0.3); border-radius:10px; max-width:400px; text-align:center;">
-                        <div style="color:#ff9800; font-size:1.1em;">⚠️ Forecast</div>
-                        <div style="margin-top:10px; color:#ccc;">50% water cut expected in ~18 months</div>
-                    </div>
-                </div>
-            `;
+            document.getElementById('vizContainer').innerHTML = 
+                '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding:40px;">' +
+                '<div style="font-size:5em; margin-bottom:20px;">💧</div>' +
+                '<div style="font-size:4em; color:#4caf50; font-weight:bold;">35%</div>' +
+                '<div style="font-size:1.2em; color:#888; margin-top:15px;">' + (currentLang === 'en' ? 'Current Water Cut' : 'Aktueller Wasseranteil') + '</div>' +
+                '<div style="margin-top:30px; padding:20px; background:rgba(0,0,0,0.3); border-radius:10px; max-width:400px; text-align:center;">' +
+                '<div style="color:#ff9800; font-size:1.1em;">⚠️ ' + (currentLang === 'en' ? 'Forecast' : 'Prognose') + '</div>' +
+                '<div style="margin-top:10px; color:#ccc;">' + (currentLang === 'en' ? '50% water cut expected in ~18 months' : '50% Wasseranteil erwartet in ~18 Monaten') + '</div>' +
+                '</div></div>';
         }
     </script>
 </body>
