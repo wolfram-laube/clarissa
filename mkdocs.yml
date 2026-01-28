@@ -26,7 +26,6 @@ plugins:
       lang:
         - en
         - de
-      separator: '[\s\-,:!=\[\]()"\'/]+|(?!\b)(?=[A-Z][a-z])|\.|_'
   - mkdocs-jupyter:
       include_source: true
       execute: false
