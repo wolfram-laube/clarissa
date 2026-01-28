@@ -529,6 +529,7 @@ pages:
     - when: never
   before_script:
     - pip install mkdocs mkdocs-material pymdown-extensions jinja2 pyyaml mkdocs-jupyter
+    - apt-get update -qq && apt-get install -y -qq nodejs npm
   script:
     # Copy architecture diagrams from artifacts BEFORE mkdocs build
     - mkdir -p docs/architecture/rendered
@@ -536,6 +537,9 @@ pages:
     - ls -la docs/architecture/rendered/ || true
     - python scripts/build_i18n_docs.py
     - mkdocs build --site-dir public
+    # Pagefind: Build multilingual search index (Issue #84)
+    - npm install -g pagefind
+    - pagefind --site public
     - mkdir -p public/guides/contributing
     - cp docs/guides/contributing/*.html public/guides/contributing/ 2>/dev/null || true
     - echo "📄 Setting up publication PDFs..."

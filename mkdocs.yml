@@ -26,7 +26,6 @@ plugins:
       lang:
         - en
         - de
-      separator: '[\s\-,:!=\[\]()"\'/]+|(?!\b)(?=[A-Z][a-z])|\.|_'
   - mkdocs-jupyter:
       include_source: true
       execute: false
@@ -60,6 +59,7 @@ extra_javascript:
 
 nav:
   - Home: index.md
+  - "🔍 Search": search.md
   - "🚀 Getting Started":
     - "🇬🇧 English": getting-started-en.md
     - "🇩🇪 Deutsch": getting-started-de.md
