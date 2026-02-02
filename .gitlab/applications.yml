@@ -12,16 +12,28 @@
 #  1. Schedule in GitLab: CI/CD → Schedules → "0 8 * * 1-5"
 #  2. Variable: GMAIL_REFRESH_TOKEN (masked)
 #
+#  Runners:
+#  ────────
+#  Primary:  docker-any (python:3.11-slim) — immer verfügbar
+#  Fallback: mac-group-shell — wenn Mac online
+#
 # ═══════════════════════════════════════════════════════════════════════════════
+
+# Shared config for all application jobs
+.applications-base:
+  image: python:3.11-slim
+  tags:
+    - docker-any
+  before_script:
+    - pip install requests beautifulsoup4 lxml --quiet
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  STAGE 1: CRAWL
 # ═══════════════════════════════════════════════════════════════════════════════
 
 applications:crawl:
+  extends: .applications-base
   stage: .pre
-  tags:
-    - mac-group-shell
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule" && $APPLICATIONS_PIPELINE == "true"
     - if: $APPLICATIONS_CRAWL == "true"
@@ -32,7 +44,6 @@ applications:crawl:
     MIN_REMOTE: "50"
     MAX_PAGES: "3"
   script:
-    - pip3 install requests beautifulsoup4 lxml --quiet --break-system-packages 2>/dev/null || pip3 install requests beautifulsoup4 lxml --quiet
     - python3 scripts/ci/applications_crawl.py
   artifacts:
     paths:
@@ -44,9 +55,8 @@ applications:crawl:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 applications:match:
+  extends: .applications-base
   stage: build
-  tags:
-    - mac-group-shell
   needs:
     - job: applications:crawl
       artifacts: true
@@ -70,9 +80,8 @@ applications:match:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 applications:drafts:
+  extends: .applications-base
   stage: deploy
-  tags:
-    - mac-group-shell
   needs:
     - job: applications:match
       artifacts: true
@@ -84,7 +93,6 @@ applications:drafts:
   variables:
     MAX_DRAFTS: "5"
   script:
-    - pip3 install requests --quiet --break-system-packages 2>/dev/null || pip3 install requests --quiet
     - python3 scripts/ci/applications_drafts.py
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -92,9 +100,8 @@ applications:drafts:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 applications:dry-run:
+  extends: .applications-base
   stage: .pre
-  tags:
-    - mac-group-shell
   rules:
     - when: manual
   script:
