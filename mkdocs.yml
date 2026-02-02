@@ -154,3 +154,8 @@ nav:
       - Runner Management: runner-management-en.md
     - GitLab Runner GCP: gitlab_runner_gcp.md
     - LLM Handoff: LLM_HANDOFF.md
+
+  - "🎯 Operations":
+    - Overview: ops/index.md
+    - "📊 CRM": ops/crm.md
+    - "🚀 Applications Pipeline": ops/applications-pipeline.md
