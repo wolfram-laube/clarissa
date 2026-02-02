@@ -659,7 +659,7 @@ rebuild_docs:
     expire_in: 1 day
   environment:
     name: docs-preview
-    url: https://wolfram_laube.gitlab.io/blauweiss_llc/clarissa/
+    url: https://wolfram_laube.gitlab.io/blauweiss_llc/projects/clarissa/
 
 rebuild_opm_image:
   stage: build
@@ -935,7 +935,7 @@ generate_timesheets:
   tags:
     - docker-any
   variables:
-    GITLAB_PROJECT_PATH: "wolfram_laube/blauweiss_llc/clarissa"
+    GITLAB_PROJECT_PATH: "wolfram_laube/blauweiss_llc/projects/clarissa"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $BILLING_RUN == "true"'
       when: on_success
