@@ -1,0 +1,468 @@
+# =============================================================================
+# CLARISSA: Conversational Language Agent for Reservoir Simulation
+# =============================================================================
+# Research project CI/CD configuration
+# Owner: Wolfram Laube
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# BUILD STAGE: Docker Images
+# -----------------------------------------------------------------------------
+build_opm_image:
+  stage: build
+  image: docker:24
+  tags:
+    - docker-any
+  services:
+    - docker:24-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+    IMAGE_BASE: $CI_REGISTRY_IMAGE/opm-flow
+  before_script:
+    - docker info
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - |
+      echo "Building OPM Flow image..."
+      docker build -t $IMAGE_BASE:$CI_COMMIT_SHORT_SHA -f src/clarissa/simulators/opm/Dockerfile src/clarissa/simulators/opm/
+      
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        echo "Release build: tagging as $CI_COMMIT_TAG"
+        docker tag $IMAGE_BASE:$CI_COMMIT_SHORT_SHA $IMAGE_BASE:$CI_COMMIT_TAG
+        docker tag $IMAGE_BASE:$CI_COMMIT_SHORT_SHA $IMAGE_BASE:latest
+        docker push $IMAGE_BASE:$CI_COMMIT_SHORT_SHA
+        docker push $IMAGE_BASE:$CI_COMMIT_TAG
+        docker push $IMAGE_BASE:latest
+        echo "IMAGE_TAG=$IMAGE_BASE:$CI_COMMIT_TAG" >> build.env
+      else
+        echo "Development build: tagging as $CI_COMMIT_SHORT_SHA and latest"
+        docker tag $IMAGE_BASE:$CI_COMMIT_SHORT_SHA $IMAGE_BASE:latest
+        docker push $IMAGE_BASE:$CI_COMMIT_SHORT_SHA
+        docker push $IMAGE_BASE:latest
+        echo "IMAGE_TAG=$IMAGE_BASE:$CI_COMMIT_SHORT_SHA" >> build.env
+      fi
+      echo "IMAGE_LATEST=$IMAGE_BASE:latest" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - src/clarissa/simulators/opm/**/*
+        - Dockerfile*
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - src/clarissa/simulators/opm/**/*
+        - Dockerfile*
+      when: on_success
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
+    - when: never
+
+rebuild_opm_image:
+  stage: build
+  image: docker:24
+  tags:
+    - docker-any
+  services:
+    - docker:24-dind
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+    - when: never
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+    IMAGE_BASE: $CI_REGISTRY_IMAGE/opm-flow
+  before_script:
+    - docker info
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - |
+      echo "Manual rebuild of OPM Flow image..."
+      docker build --no-cache -t $IMAGE_BASE:$CI_COMMIT_SHORT_SHA -f src/clarissa/simulators/opm/Dockerfile src/clarissa/simulators/opm/
+      docker tag $IMAGE_BASE:$CI_COMMIT_SHORT_SHA $IMAGE_BASE:latest
+      docker push $IMAGE_BASE:$CI_COMMIT_SHORT_SHA
+      docker push $IMAGE_BASE:latest
+      echo "✅ Pushed: $IMAGE_BASE:$CI_COMMIT_SHORT_SHA"
+      echo "✅ Pushed: $IMAGE_BASE:latest"
+
+# -----------------------------------------------------------------------------
+# TEST STAGE: Unit, Integration, Snapshot, Contract Tests
+# -----------------------------------------------------------------------------
+tests:
+  stage: test
+  image: python:3.11
+  tags:
+    - docker-any
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    key: pip-cache
+    paths:
+      - .cache/pip
+  before_script:
+    - python -V
+    - python -m pip install --upgrade pip
+    - pip uninstall clarissa -y 2>/dev/null || true
+    - find $(python -c "import site; print(site.getsitepackages()[0])") -name "__editable__*" -delete 2>/dev/null || true
+    - find $(python -c "import site; print(site.getsitepackages()[0])") -name "*.pth" -exec grep -l clarissa {} \; -delete 2>/dev/null || true
+    - pip cache purge 2>/dev/null || true
+    - python -m pip install -e ".[dev]"
+  script:
+    - python -m pytest -q --ignore=tests/integration --junitxml=junit.xml
+  artifacts:
+    when: always
+    reports:
+      junit: junit.xml
+    paths:
+      - junit.xml
+      - .pytest_cache/
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+    - when: never
+
+integration_tests_opm:
+  stage: test
+  image: docker:24
+  tags:
+    - docker-any
+  services:
+    - docker:24-dind
+  needs:
+    - job: build_opm_image
+      artifacts: true
+      optional: true
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  before_script:
+    - apk add --no-cache python3 py3-pip
+    - python3 -m pip install --break-system-packages -e ".[dev]"
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - |
+      if [ -n "$IMAGE_TAG" ]; then
+        docker pull $IMAGE_TAG && docker tag $IMAGE_TAG opm-flow:latest
+      else
+        docker pull $CI_REGISTRY_IMAGE/opm-flow:latest && docker tag $CI_REGISTRY_IMAGE/opm-flow:latest opm-flow:latest || echo "No image available, tests will skip"
+      fi
+  script:
+    - |
+      echo "[pytest]" > pytest.ini
+      echo "markers = docker: marks tests as requiring docker" >> pytest.ini
+      python3 -m pytest -v tests/integration/test_opm_flow.py --junitxml=junit_integration.xml || true
+  artifacts:
+    when: always
+    reports:
+      junit: junit_integration.xml
+    paths:
+      - junit_integration.xml
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - src/clarissa/simulators/opm/**/*
+        - tests/integration/test_opm_flow.py
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - src/clarissa/simulators/opm/**/*
+        - tests/integration/test_opm_flow.py
+      when: on_success
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+      when: on_success
+    - when: never
+  allow_failure: true
+
+snapshot_tests:
+  stage: test
+  image: python:3.11
+  tags:
+    - docker-any
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    key: pip-cache
+    paths:
+      - .cache/pip
+  before_script:
+    - python -V
+    - python -m pip install --upgrade pip
+    - pip uninstall clarissa -y 2>/dev/null || true
+    - find $(python -c "import site; print(site.getsitepackages()[0])") -name "__editable__*" -delete 2>/dev/null || true
+    - find $(python -c "import site; print(site.getsitepackages()[0])") -name "*.pth" -exec grep -l clarissa {} \; -delete 2>/dev/null || true
+    - pip cache purge 2>/dev/null || true
+    - python -m pip install -e ".[dev]"
+  script:
+    - |
+      set -e
+      mkdir -p tests/golden tests/golden/snapshots tests/golden/diffs
+
+      echo '# Snapshot diffs' > tests/golden/summary.md
+      echo '' >> tests/golden/summary.md
+      echo '_No snapshot diffs produced._' >> tests/golden/summary.md
+      echo '' >> tests/golden/summary.md
+
+      python -m pytest -q \
+        tests/golden/test_cli_help_snapshot.py \
+        tests/golden/test_cli_demo_snapshot.py || EXIT=$?
+
+      if [ -d tests/golden/diffs ] && ls -1 tests/golden/diffs/*.diff >/dev/null 2>&1; then
+        echo '# Snapshot diffs' > tests/golden/summary.md
+        echo '' >> tests/golden/summary.md
+        for f in tests/golden/diffs/*.diff; do
+          echo "## $(basename "$f")" >> tests/golden/summary.md
+          echo '```diff' >> tests/golden/summary.md
+          cat "$f" >> tests/golden/summary.md
+          echo '```' >> tests/golden/summary.md
+          echo '' >> tests/golden/summary.md
+        done
+      fi
+
+      if [ -n "${EXIT:-}" ]; then exit "$EXIT"; fi
+  artifacts:
+    when: on_failure
+    paths:
+      - tests/golden/snapshots/
+      - tests/golden/summary.md
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+    - when: never
+
+contract_tests:
+  stage: test
+  image: python:3.11
+  tags:
+    - docker-any
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    key: pip-cache
+    paths:
+      - .cache/pip
+  before_script:
+    - python -V
+    - python -m pip install --upgrade pip
+    - pip uninstall clarissa -y 2>/dev/null || true
+    - find $(python -c "import site; print(site.getsitepackages()[0])") -name "__editable__*" -delete 2>/dev/null || true
+    - find $(python -c "import site; print(site.getsitepackages()[0])") -name "*.pth" -exec grep -l clarissa {} \; -delete 2>/dev/null || true
+    - pip cache purge 2>/dev/null || true
+    - python -m pip install -e ".[dev]"
+  script:
+    - |
+      set -e
+      mkdir -p tests/contracts
+      python -m pytest -q tests/contracts 2>&1 | tee pytest_contracts.log || EXIT=$?
+      python scripts/generate_contract_summary.py || true
+      if [ -n "${EXIT:-}" ]; then exit "$EXIT"; fi
+  artifacts:
+    when: on_failure
+    paths:
+      - tests/contracts/summary.md
+      - pytest_contracts.log
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+    - when: never
+
+governance_impact:
+  stage: test
+  image: python:3.11
+  tags:
+    - docker-any
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - when: never
+  script:
+    - mkdir -p tests/governance
+    - python scripts/detect_governance_impact.py
+  artifacts:
+    when: always
+    paths:
+      - tests/governance/impact.md
+
+architecture_graphs:
+  stage: test
+  image:
+    name: ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:latest
+    entrypoint: [""]
+  tags:
+    - docker-any
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - when: never
+  script:
+    - mkdir -p docs/architecture/diagrams docs/architecture/rendered
+    - mmdc --version || true
+    - bash scripts/render_mermaid.sh || echo "Mermaid render failed; keeping sources."
+  artifacts:
+    when: always
+    paths:
+      - docs/architecture/diagrams/
+      - docs/architecture/rendered/
+  allow_failure: true
+
+tests_rerun:
+  stage: test
+  image: python:3.11
+  tags:
+    - docker-any
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    key: pip-cache
+    paths:
+      - .cache/pip
+  before_script:
+    - python -V
+    - python -m pip install --upgrade pip
+    - pip uninstall clarissa -y 2>/dev/null || true
+    - find $(python -c "import site; print(site.getsitepackages()[0])") -name "__editable__*" -delete 2>/dev/null || true
+    - find $(python -c "import site; print(site.getsitepackages()[0])") -name "*.pth" -exec grep -l clarissa {} \; -delete 2>/dev/null || true
+    - pip cache purge 2>/dev/null || true
+    - python -m pip install -e ".[dev]"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_failure
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_failure
+    - when: never
+  needs:
+    - job: tests
+      artifacts: true
+      optional: true
+  script:
+    - |
+      set +e
+      python -m pytest -q \
+        --last-failed \
+        --last-failed-no-failures=none \
+        --maxfail=${CI_BOT_RERUN_MAXFAIL:-1} \
+        -x \
+        --junitxml=junit_rerun.xml
+      echo $? > rerun_exit_code.txt
+      exit 0
+  artifacts:
+    when: always
+    paths:
+      - junit_rerun.xml
+      - rerun_exit_code.txt
+
+rerun_all_tests:
+  stage: test
+  image: python:3.11
+  tags:
+    - docker-any
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    key: pip-cache
+    paths:
+      - .cache/pip
+  before_script:
+    - python -V
+    - python -m pip install --upgrade pip
+    - pip uninstall clarissa -y 2>/dev/null || true
+    - find $(python -c "import site; print(site.getsitepackages()[0])") -name "__editable__*" -delete 2>/dev/null || true
+    - find $(python -c "import site; print(site.getsitepackages()[0])") -name "*.pth" -exec grep -l clarissa {} \; -delete 2>/dev/null || true
+    - pip cache purge 2>/dev/null || true
+    - python -m pip install -e ".[dev]"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+    - when: never
+  script:
+    - echo "Running full test suite (manual trigger)..."
+    - python -m pytest -v --junitxml=junit_manual.xml
+  artifacts:
+    when: always
+    reports:
+      junit: junit_manual.xml
+    paths:
+      - junit_manual.xml
+
+# -----------------------------------------------------------------------------
+# DEPLOY STAGE: LLM Sync, Relay
+# -----------------------------------------------------------------------------
+llm_sync_package:
+  stage: deploy
+  image: python:3.11
+  tags:
+    - docker-any
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
+    - when: never
+  script:
+    - |
+      BRANCH="${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME:-${CI_COMMIT_BRANCH:-${CI_COMMIT_TAG:-main}}}"
+      echo "Generating sync package for branch: $BRANCH"
+      cd scripts
+      python llm_sync_generator.py --branch "$BRANCH" --lite -o ../clarissa_sync_lite.md
+      python llm_sync_generator.py --branch "$BRANCH" --medium -o ../clarissa_sync_medium.md
+      python llm_sync_generator.py --branch "$BRANCH" --lite --since ${CI_COMMIT_BEFORE_SHA:-HEAD~5} -o ../clarissa_sync_diff.md || true
+  artifacts:
+    paths:
+      - clarissa_sync_lite.md
+      - clarissa_sync_medium.md
+      - clarissa_sync_diff.md
+    expire_in: 4 weeks
+
+relay:clarissa:
+  stage: automation
+  image: python:3.11-slim
+  tags:
+    - docker-any
+  rules:
+    - changes:
+        - handoffs/handoff_to_clarissa.md
+      when: always
+    - when: never
+  before_script:
+    - pip install openai requests --quiet
+    - apt-get update && apt-get install -y curl --quiet
+  script:
+    - echo "📥 Processing handoff to CLARISSA..."
+    - python scripts/relay.py --process
+    - |
+      if [ -f handoffs/handoff_to_claude.md ]; then
+        echo "📤 Pushing CLARISSA response..."
+        ENCODED_CONTENT=$(base64 -w 0 handoffs/handoff_to_claude.md)
+        curl --silent --request PUT \
+          --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+          --header "Content-Type: application/json" \
+          --data "{\"branch\": \"main\", \"encoding\": \"base64\", \"content\": \"${ENCODED_CONTENT}\", \"commit_message\": \"feat(relay): CLARISSA auto-response [skip ci]\"}" \
+          "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/repository/files/handoffs%2Fhandoff_to_claude.md"
+        echo "✅ Response pushed!"
+      else
+        echo "❌ No response generated"
+        exit 1
+      fi
+  variables:
+    OPENAI_API_KEY: ${OPENAI_API_KEY}
+    GITLAB_TOKEN: ${GITLAB_TOKEN}
