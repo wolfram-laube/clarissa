@@ -18,7 +18,7 @@ jobs:
         env:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
         run: |
-          git remote add gitlab https://oauth2:${GITLAB_TOKEN}@gitlab.com/wolfram_laube/blauweiss_llc/clarissa.git
+          git remote add gitlab https://oauth2:${GITLAB_TOKEN}@gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa.git
           BRANCH=${GITHUB_REF#refs/heads/}
           echo "Syncing branch: $BRANCH"
           git push gitlab "$BRANCH" --force
