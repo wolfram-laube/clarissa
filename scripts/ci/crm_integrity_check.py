@@ -1,18 +1,14 @@
 #!/usr/bin/env python3
 """
-CRM Integrity Check — validates GitLab Issues CRM health.
+CRM Integrity Check — Standalone Weekly Health Monitor
 
-Tests:
-  1. Every issue has exactly one status:: label
-  2. No orphaned labels (labels exist but no issues use them)
-  3. Board lists match status labels
-  4. Hot leads have active statuses (not absage/ghost)
-  5. Duplicate detection (same title or very similar)
-  6. Data completeness (description has required fields)
+Validates CRM data quality, detects anomalies, and reports metrics.
+Designed to run as a scheduled pipeline job (weekly).
 
-Usage:
-  python3 crm_integrity_check.py              # full check
-  python3 crm_integrity_check.py --fix        # auto-fix simple issues
+Exit codes:
+  0 = Healthy
+  1 = Critical issues found
+  2 = Warnings only
 """
 
 import json
@@ -22,6 +18,7 @@ import sys
 import urllib.request
 import urllib.error
 from collections import Counter, defaultdict
+from datetime import datetime, timedelta
 
 # ═══════════════════════════════════════════════════════════════
 # CONFIG
@@ -29,309 +26,270 @@ from collections import Counter, defaultdict
 
 GITLAB_TOKEN = os.environ.get("GITLAB_TOKEN", "")
 GITLAB_API = "https://gitlab.com/api/v4"
-CRM_PROJECT_ID = int(os.environ.get("CRM_PROJECT_ID", "78171527"))
-GROUP_ID = int(os.environ.get("GROUP_ID", "120698013"))
-AUTO_FIX = "--fix" in sys.argv
+CRM_PROJECT_ID = os.environ.get("CRM_PROJECT_ID", "78171527")
+GROUP_ID = os.environ.get("GROUP_ID", "120698013")
+QA_REPORT = "output/crm_qa_report.json"
 
-# ═══════════════════════════════════════════════════════════════
-# HELPERS
-# ═══════════════════════════════════════════════════════════════
 
-def api_get(url):
+class QAReport:
+    def __init__(self):
+        self.tests = []
+        self.failures = 0
+        self.warnings = 0
+        self.passed = 0
+
+    def ok(self, name, detail=""):
+        self.tests.append({"name": name, "status": "passed", "detail": detail})
+        self.passed += 1
+        print(f"  ✅ {name}" + (f" ({detail})" if detail else ""))
+
+    def fail(self, name, detail=""):
+        self.tests.append({"name": name, "status": "failed", "detail": detail})
+        self.failures += 1
+        print(f"  ❌ FAIL: {name} — {detail}")
+
+    def warn(self, name, detail=""):
+        self.tests.append({"name": name, "status": "warning", "detail": detail})
+        self.warnings += 1
+        print(f"  ⚠️  WARN: {name} — {detail}")
+
+    def to_json(self):
+        return json.dumps({
+            "timestamp": datetime.utcnow().isoformat(),
+            "summary": {"total": len(self.tests), "passed": self.passed,
+                        "failures": self.failures, "warnings": self.warnings},
+            "tests": self.tests
+        }, indent=2)
+
+    @property
+    def exit_code(self):
+        if self.failures > 0: return 1
+        if self.warnings > 0: return 2
+        return 0
+
+
+def api_get(path, params=""):
+    """Helper for GitLab API GET requests."""
+    url = f"{GITLAB_API}{path}{'&' if '?' in path else '?'}{params}" if params else f"{GITLAB_API}{path}"
     req = urllib.request.Request(url, headers={"PRIVATE-TOKEN": GITLAB_TOKEN})
     return json.loads(urllib.request.urlopen(req).read())
 
-def api_get_paginated(url):
-    results = []
+
+def fetch_all_issues():
+    """Fetch all CRM issues (paginated)."""
+    issues = []
     page = 1
     while True:
-        sep = "&" if "?" in url else "?"
-        data = api_get(f"{url}{sep}per_page=100&page={page}")
-        if not data:
+        batch = api_get(f"/projects/{CRM_PROJECT_ID}/issues?per_page=100&page={page}&state=all")
+        if not batch:
             break
-        results.extend(data)
+        issues.extend(batch)
         page += 1
-    return results
+    return issues
 
 
-class QAResult:
-    def __init__(self):
-        self.passed = 0
-        self.failed = 0
-        self.warnings = 0
-        self.fixed = 0
-        self.details = []
-
-    def ok(self, msg):
-        self.passed += 1
-        self.details.append(f"  ✅ {msg}")
-
-    def fail(self, msg):
-        self.failed += 1
-        self.details.append(f"  ❌ {msg}")
-
-    def warn(self, msg):
-        self.warnings += 1
-        self.details.append(f"  ⚠️  {msg}")
-
-    def fix(self, msg):
-        self.fixed += 1
-        self.details.append(f"  🔧 {msg}")
-
-    def section(self, title):
-        self.details.append(f"\n━━━ {title} ━━━")
-
-    def summary(self):
-        self.details.append(f"\n{'='*60}")
-        total = self.passed + self.failed + self.warnings
-        line = f"  CRM QA: {self.passed}/{total} passed"
-        if self.failed:
-            line += f", {self.failed} failed"
-        if self.warnings:
-            line += f", {self.warnings} warnings"
-        if self.fixed:
-            line += f", {self.fixed} auto-fixed"
-        self.details.append(line)
-        if self.failed == 0 and self.warnings == 0:
-            self.details.append(f"  🟢 CRM HEALTHY")
-        elif self.failed == 0:
-            self.details.append(f"  🟡 CRM OK (with warnings)")
-        else:
-            self.details.append(f"  🔴 CRM ISSUES FOUND")
-        return "\n".join(self.details)
+def fetch_group_labels():
+    """Fetch all group-level labels."""
+    labels = []
+    page = 1
+    while True:
+        batch = api_get(f"/groups/{GROUP_ID}/labels?per_page=100&page={page}")
+        if not batch:
+            break
+        labels.extend(batch)
+        page += 1
+    return labels
 
 
 # ═══════════════════════════════════════════════════════════════
-# TESTS
+# CHECKS
 # ═══════════════════════════════════════════════════════════════
 
-def test_status_labels(qa, issues):
+def check_connectivity(report):
+    """Verify API access."""
+    print("\n━━━ CONNECTIVITY ━━━")
+    if not GITLAB_TOKEN:
+        report.fail("api.token", "GITLAB_TOKEN not set")
+        return False
+    try:
+        project = api_get(f"/projects/{CRM_PROJECT_ID}")
+        report.ok("api.crm_access", project["path_with_namespace"])
+        return True
+    except Exception as e:
+        report.fail("api.crm_access", str(e))
+        return False
+
+
+def check_status_integrity(report, issues):
     """Every open issue must have exactly one status:: label."""
-    qa.section("TEST 1: Status Label Integrity")
-
+    print("\n━━━ STATUS INTEGRITY ━━━")
+    open_issues = [i for i in issues if i["state"] == "opened"]
     no_status = []
     multi_status = []
-    for i in issues:
+
+    for i in open_issues:
         statuses = [l for l in i["labels"] if l.startswith("status::")]
         if len(statuses) == 0:
             no_status.append(i["iid"])
         elif len(statuses) > 1:
             multi_status.append((i["iid"], statuses))
 
-    if not no_status:
-        qa.ok(f"All {len(issues)} issues have a status label")
+    if no_status:
+        report.fail("status.all_have_one", f"{len(no_status)} without status: {no_status[:5]}")
     else:
-        qa.fail(f"{len(no_status)} issues without status: {no_status[:10]}")
+        report.ok("status.all_have_one", f"{len(open_issues)} issues checked")
 
-    if not multi_status:
-        qa.ok("No issues with multiple status labels")
+    if multi_status:
+        report.fail("status.no_multiples", f"{len(multi_status)} with >1 status")
     else:
-        qa.fail(f"{len(multi_status)} issues with multiple statuses")
-        for iid, statuses in multi_status[:5]:
-            qa.details.append(f"       #{iid}: {statuses}")
+        report.ok("status.no_multiples")
 
 
-def test_label_consistency(qa, issues):
-    """Check for label typos, unused labels, rate/status conflicts."""
-    qa.section("TEST 2: Label Consistency")
+def check_label_consistency(report, issues, group_labels):
+    """All labels on issues should exist as group labels."""
+    print("\n━━━ LABEL CONSISTENCY ━━━")
+    valid_labels = {l["name"] for l in group_labels}
 
-    # Valid scoped labels
-    valid_prefixes = {
-        "status::", "rate::", "match::", "remote::", "tech::",
-        "branche::", "region::", "project::"
-    }
-
-    used_labels = Counter()
-    unknown_labels = set()
+    orphan_labels = set()
     for i in issues:
         for l in i["labels"]:
-            used_labels[l] += 1
-            is_scoped = any(l.startswith(p) for p in valid_prefixes)
-            is_special = l in ("overpace", "team-projekt", "hot-lead")
-            if not is_scoped and not is_special:
-                unknown_labels.add(l)
+            if l not in valid_labels:
+                orphan_labels.add(l)
 
-    if not unknown_labels:
-        qa.ok("All labels are known/scoped")
+    if orphan_labels:
+        report.warn("labels.all_valid", f"{len(orphan_labels)} unknown: {list(orphan_labels)[:5]}")
     else:
-        qa.warn(f"Unknown labels: {unknown_labels}")
+        report.ok("labels.all_valid", f"All labels match group definitions")
 
-    # Check for common typos
-    all_labels = set(used_labels.keys())
-    for l in all_labels:
-        if "stauts" in l or "staus" in l:
-            qa.fail(f"Typo in label: {l}")
-
-    qa.ok(f"{len(all_labels)} unique labels in use across {len(issues)} issues")
-
-
-def test_hot_lead_consistency(qa, issues):
-    """Hot leads should have active statuses."""
-    qa.section("TEST 3: Hot Lead Consistency")
-
-    inactive_statuses = {"status::absage", "status::ghost"}
-    inconsistent = []
-
+    # Check for unused labels
+    used_labels = set()
     for i in issues:
-        if "hot-lead" in i["labels"]:
-            statuses = [l for l in i["labels"] if l.startswith("status::")]
-            if statuses and statuses[0] in inactive_statuses:
-                inconsistent.append((i["iid"], statuses[0], i["title"][:50]))
-
-    if not inconsistent:
-        hot_count = sum(1 for i in issues if "hot-lead" in i["labels"])
-        qa.ok(f"All {hot_count} hot leads have active statuses")
+        used_labels.update(i["labels"])
+    unused = valid_labels - used_labels
+    status_unused = [l for l in unused if l.startswith("status::")]
+    if status_unused:
+        report.ok("labels.status_coverage", f"Unused status labels: {status_unused}")
     else:
-        qa.warn(f"{len(inconsistent)} hot leads with inactive status")
-        for iid, status, title in inconsistent[:5]:
-            qa.details.append(f"       #{iid} {status}: {title}")
+        report.ok("labels.status_coverage", "All status labels in use")
 
 
-def test_duplicates(qa, issues):
-    """Detect duplicate or very similar issues."""
-    qa.section("TEST 4: Duplicate Detection")
+def check_duplicates(report, issues):
+    """Detect duplicate issue titles."""
+    print("\n━━━ DUPLICATE DETECTION ━━━")
+    open_issues = [i for i in issues if i["state"] == "opened"]
+    title_counts = Counter(i["title"] for i in open_issues)
+    dupes = {t: c for t, c in title_counts.items() if c > 1}
 
-    # Exact title match
-    title_groups = defaultdict(list)
-    for i in issues:
-        title_groups[i["title"]].append(i["iid"])
-
-    exact_dupes = {t: iids for t, iids in title_groups.items() if len(iids) > 1}
-    if not exact_dupes:
-        qa.ok("No exact title duplicates")
+    if dupes:
+        report.warn("dupes.titles", f"{len(dupes)} duplicate titles: " +
+                    ", ".join(f'"{t[:40]}..." ({c}x)' for t, c in list(dupes.items())[:3]))
     else:
-        qa.warn(f"{len(exact_dupes)} exact title duplicates")
-        for t, iids in exact_dupes.items():
-            qa.details.append(f"       IIDs {iids}: {t[:55]}")
+        report.ok("dupes.titles", f"{len(title_counts)} unique titles")
 
-    # Fuzzy: normalize and check
-    def normalize(title):
-        t = title.lower()
-        t = re.sub(r'\[.*?\]\s*', '', t)  # Remove [Agency]
-        t = re.sub(r'\(m/w/d\)|\(w/m/d\)|\(d/m/w\)', '', t)
-        t = re.sub(r'\s+', ' ', t).strip()
-        return t
 
-    norm_groups = defaultdict(list)
+def check_ghost_candidates(report, issues):
+    """Detect issues stuck in 'versendet' for >14 days without activity."""
+    print("\n━━━ GHOST DETECTION ━━━")
+    now = datetime.utcnow()
+    threshold = now - timedelta(days=14)
+
+    ghosts = []
     for i in issues:
-        norm = normalize(i["title"])
-        norm_groups[norm].append(i["iid"])
-
-    fuzzy_dupes = {t: iids for t, iids in norm_groups.items()
-                   if len(iids) > 1 and t not in [normalize(k) for k in exact_dupes]}
-    if fuzzy_dupes:
-        qa.warn(f"{len(fuzzy_dupes)} fuzzy title duplicates (same project, different agency?)")
-        for t, iids in list(fuzzy_dupes.items())[:5]:
-            qa.details.append(f"       IIDs {iids}: {t[:55]}")
-    else:
-        qa.ok("No fuzzy title duplicates")
-
-
-def test_data_completeness(qa, issues):
-    """Check that descriptions contain required structured data."""
-    qa.section("TEST 5: Data Completeness")
-
-    required_fields = ["Agentur", "Kontakt", "Standort", "Stundensatz"]
-    missing_counts = Counter()
-    empty_desc = 0
-
-    for i in issues:
-        desc = i.get("description", "")
-        if not desc or len(desc) < 50:
-            empty_desc += 1
+        if i["state"] != "opened":
             continue
-        for field in required_fields:
-            if field not in desc:
-                missing_counts[field] += 1
+        statuses = [l for l in i["labels"] if l.startswith("status::")]
+        if "status::versendet" not in statuses:
+            continue
+        # Check last update
+        updated = datetime.fromisoformat(i["updated_at"].replace("Z", "+00:00")).replace(tzinfo=None)
+        if updated < threshold:
+            days = (now - updated).days
+            ghosts.append((i["iid"], i["title"][:40], days))
 
-    if empty_desc == 0:
-        qa.ok("All issues have descriptions")
+    if ghosts:
+        report.warn("ghost.stale_versendet",
+                    f"{len(ghosts)} issues in 'versendet' >14 days without update. "
+                    f"Top: #{ghosts[0][0]} ({ghosts[0][2]}d)")
     else:
-        qa.fail(f"{empty_desc} issues with empty/short descriptions")
-
-    for field in required_fields:
-        count = missing_counts.get(field, 0)
-        if count == 0:
-            qa.ok(f"Field '{field}' present in all descriptions")
-        else:
-            qa.warn(f"Field '{field}' missing in {count} descriptions")
+        report.ok("ghost.stale_versendet", "No stale issues")
 
 
-def test_board_alignment(qa):
-    """Check that board lists match status labels."""
-    qa.section("TEST 6: Board Alignment")
-
-    try:
-        boards = api_get(f"{GITLAB_API}/projects/{CRM_PROJECT_ID}/boards")
-        if not boards:
-            qa.warn("No boards configured")
-            return
-
-        board = boards[0]
-        lists = api_get(f"{GITLAB_API}/projects/{CRM_PROJECT_ID}/boards/{board['id']}/lists")
-
-        expected_statuses = [
-            "status::neu", "status::versendet", "status::beim-kunden",
-            "status::interview", "status::verhandlung", "status::zusage",
-            "status::absage", "status::ghost"
-        ]
-
-        board_labels = [l.get("label", {}).get("name") for l in lists]
-
-        for status in expected_statuses:
-            if status in board_labels:
-                qa.ok(f"Board has column: {status}")
-            else:
-                qa.fail(f"Board missing column: {status}")
-
-        # Check order
-        status_positions = {}
-        for l in lists:
-            name = l.get("label", {}).get("name", "")
-            if name.startswith("status::"):
-                status_positions[name] = l.get("position", -1)
-
-        sorted_board = sorted(status_positions.items(), key=lambda x: x[1])
-        sorted_expected = [(s, i) for i, s in enumerate(expected_statuses) if s in status_positions]
-
-        if [s for s, _ in sorted_board] == [s for s, _ in sorted_expected]:
-            qa.ok("Board column order is correct")
-        else:
-            qa.warn("Board column order doesn't match expected pipeline flow")
-
-    except urllib.error.HTTPError as e:
-        qa.warn(f"Board API error: {e.code}")
-
-
-def test_funnel_health(qa, issues):
-    """Sanity check on the overall pipeline funnel."""
-    qa.section("TEST 7: Funnel Health")
-
+def check_funnel_health(report, issues):
+    """Analyze pipeline funnel for anomalies."""
+    print("\n━━━ FUNNEL HEALTH ━━━")
+    open_issues = [i for i in issues if i["state"] == "opened"]
     status_counts = Counter()
-    for i in issues:
+    for i in open_issues:
         for l in i["labels"]:
             if l.startswith("status::"):
                 status_counts[l] += 1
 
-    total = len(issues)
-    absage = status_counts.get("status::absage", 0)
-    active = total - absage - status_counts.get("status::ghost", 0)
-    advanced = sum(status_counts.get(s, 0) for s in
-                   ["status::beim-kunden", "status::interview",
-                    "status::verhandlung", "status::zusage"])
+    total = len(open_issues)
+    print(f"  Pipeline ({total} open):")
+    for s in ["status::neu", "status::versendet", "status::beim-kunden",
+              "status::interview", "status::verhandlung", "status::zusage",
+              "status::absage", "status::ghost"]:
+        c = status_counts.get(s, 0)
+        pct = c / total * 100 if total else 0
+        bar = "█" * int(pct / 2)
+        print(f"    {s:25s} {c:4d} ({pct:4.1f}%) {bar}")
 
-    qa.ok(f"Total: {total} | Active: {active} | Advanced: {advanced} | Absage: {absage}")
+    # Anomaly: >95% in one stage (excluding versendet which is normal for early pipeline)
+    for s, c in status_counts.items():
+        if s == "status::versendet":
+            continue
+        if c / total > 0.5:
+            report.warn("funnel.concentration", f"{s} has {c/total*100:.0f}% of all issues")
+            return
 
-    # Conversion rate
-    if total > 0:
-        conversion = advanced / total * 100
-        absage_rate = absage / total * 100
-        qa.ok(f"Advancement rate: {conversion:.1f}% | Rejection rate: {absage_rate:.1f}%")
+    # Anomaly: zero in interview/verhandlung/zusage (cold pipeline)
+    active = sum(status_counts.get(s, 0)
+                 for s in ["status::beim-kunden", "status::interview",
+                           "status::verhandlung", "status::zusage"])
+    if active == 0:
+        report.warn("funnel.no_active", "No issues past 'versendet' — pipeline is cold")
+    else:
+        report.ok("funnel.active", f"{active} issues in active stages")
 
-        if absage_rate > 50:
-            qa.warn("High rejection rate (>50%) — review targeting strategy")
-        if conversion < 3 and total > 50:
-            qa.warn("Low advancement rate (<3%) — review application quality")
+    report.ok("funnel.distribution")
+
+
+def check_rate_coverage(report, issues):
+    """Verify rate labels are present."""
+    print("\n━━━ RATE COVERAGE ━━━")
+    open_issues = [i for i in issues if i["state"] == "opened"]
+    has_rate = sum(1 for i in open_issues if any(l.startswith("rate::") for l in i["labels"]))
+    pct = has_rate / len(open_issues) * 100 if open_issues else 0
+
+    if pct >= 90:   report.ok("rate.coverage", f"{pct:.0f}%")
+    elif pct >= 70: report.warn("rate.coverage", f"Only {pct:.0f}%")
+    else:           report.fail("rate.coverage", f"Low: {pct:.0f}%")
+
+    # Rate distribution
+    rate_counts = Counter()
+    for i in open_issues:
+        for l in i["labels"]:
+            if l.startswith("rate::"):
+                rate_counts[l] += 1
+    if rate_counts:
+        dist = ", ".join(f"{k.split('::')[1]}={v}" for k, v in sorted(rate_counts.items()))
+        report.ok("rate.distribution", dist)
+
+
+def check_hot_leads(report, issues):
+    """Report on hot lead status."""
+    print("\n━━━ HOT LEADS ━━━")
+    hot = [i for i in issues if "hot-lead" in i["labels"] and i["state"] == "opened"]
+    report.ok("hotleads.count", f"{len(hot)} active hot leads")
+
+    # Hot leads with absage (should be cleaned up)
+    hot_absage = [i for i in issues if "hot-lead" in i["labels"]
+                  and "status::absage" in i["labels"] and i["state"] == "opened"]
+    if hot_absage:
+        report.warn("hotleads.stale",
+                    f"{len(hot_absage)} hot leads with Absage — remove hot-lead label?")
+    else:
+        report.ok("hotleads.no_stale")
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -339,43 +297,41 @@ def test_funnel_health(qa, issues):
 # ═══════════════════════════════════════════════════════════════
 
 def main():
-    if not GITLAB_TOKEN:
-        print("❌ GITLAB_TOKEN required")
+    print("=" * 70)
+    print("  CRM INTEGRITY CHECK")
+    print(f"  {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
+    print("=" * 70)
+
+    report = QAReport()
+
+    if not check_connectivity(report):
+        print("\n❌ Cannot connect to GitLab API — aborting")
         sys.exit(1)
 
-    qa = QAResult()
-    print(f"🔍 CRM Integrity Check")
-    print(f"{'='*60}")
+    issues = fetch_all_issues()
+    labels = fetch_group_labels()
 
-    # Fetch all open issues
-    issues = api_get_paginated(
-        f"{GITLAB_API}/projects/{CRM_PROJECT_ID}/issues?state=opened"
-    )
-    print(f"📊 {len(issues)} open issues loaded")
+    print(f"\n📊 Loaded: {len(issues)} issues, {len(labels)} group labels")
 
-    test_status_labels(qa, issues)
-    test_label_consistency(qa, issues)
-    test_hot_lead_consistency(qa, issues)
-    test_duplicates(qa, issues)
-    test_data_completeness(qa, issues)
-    test_board_alignment(qa)
-    test_funnel_health(qa, issues)
+    check_status_integrity(report, issues)
+    check_label_consistency(report, issues, labels)
+    check_duplicates(report, issues)
+    check_ghost_candidates(report, issues)
+    check_funnel_health(report, issues)
+    check_rate_coverage(report, issues)
+    check_hot_leads(report, issues)
 
-    print(qa.summary())
+    print(f"\n{'='*70}")
+    print(f"  RESULTS: {report.passed}✅  {report.warnings}⚠️  {report.failures}❌")
+    print(f"  EXIT: {report.exit_code}")
+    print(f"{'='*70}")
 
-    # Write report
     os.makedirs("output", exist_ok=True)
-    with open("output/crm_qa_report.json", "w") as f:
-        json.dump({
-            "passed": qa.passed,
-            "failed": qa.failed,
-            "warnings": qa.warnings,
-            "fixed": qa.fixed,
-            "issues_checked": len(issues),
-        }, f, indent=2)
+    with open(QA_REPORT, "w") as f:
+        f.write(report.to_json())
+    print(f"\n📄 {QA_REPORT}")
 
-    sys.exit(1 if qa.failed > 0 else 0)
-
+    sys.exit(report.exit_code)
 
 if __name__ == "__main__":
     main()

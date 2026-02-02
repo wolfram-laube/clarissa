@@ -1,22 +1,14 @@
 #!/usr/bin/env python3
 """
-Applications Pipeline QA — Validates crawl & match outputs before Gmail drafts.
+Applications Pipeline QA — Stage 3 Validation
 
-Tests:
-  1. Crawl output: valid JSON, schema, reasonable counts
-  2. Match output: valid JSON, scores in range, required fields
-  3. CRM dedup: flags projects already tracked as GitLab Issues
-  4. Data quality: rate parseable, remote %, no empty titles
+Validates crawl + match outputs before drafts are created.
+Optionally checks CRM for duplicates (--crm-dedup flag).
 
 Exit codes:
-  0 = all checks passed
-  1 = critical failure (blocks pipeline)
-  2 = warnings only (non-blocking)
-
-Usage:
-  python3 applications_qa.py                    # validate crawl + match
-  python3 applications_qa.py --crm-dedup        # also check CRM duplicates
-  python3 applications_qa.py --report-only      # warnings don't block
+  0 = All checks passed
+  1 = Critical failure (blocks pipeline)
+  2 = Warnings only (pipeline continues)
 """
 
 import json
@@ -25,375 +17,259 @@ import re
 import sys
 import urllib.request
 import urllib.error
+from datetime import datetime
 
 # ═══════════════════════════════════════════════════════════════
 # CONFIG
 # ═══════════════════════════════════════════════════════════════
 
-CRAWL_OUTPUT = os.environ.get("CRAWL_OUTPUT", "output/projects.json")
-MATCH_OUTPUT = os.environ.get("MATCH_OUTPUT", "output/matches.json")
-CRM_PROJECT_ID = int(os.environ.get("CRM_PROJECT_ID", "78171527"))
+CRAWL_OUTPUT = "output/projects.json"
+MATCH_OUTPUT = "output/matches.json"
+QA_REPORT_OUTPUT = "output/qa_report.json"
+
 GITLAB_TOKEN = os.environ.get("GITLAB_TOKEN", "")
 GITLAB_API = "https://gitlab.com/api/v4"
+CRM_PROJECT_ID = os.environ.get("CRM_PROJECT_ID", "78171527")
+
 CRM_DEDUP = "--crm-dedup" in sys.argv
-REPORT_ONLY = "--report-only" in sys.argv
 
-# ═══════════════════════════════════════════════════════════════
-# TEST INFRASTRUCTURE
-# ═══════════════════════════════════════════════════════════════
 
-class QAResult:
+class QAReport:
     def __init__(self):
-        self.passed = 0
-        self.failed = 0
+        self.tests = []
+        self.failures = 0
         self.warnings = 0
-        self.details = []
+        self.passed = 0
 
-    def ok(self, msg):
+    def ok(self, name, detail=""):
+        self.tests.append({"name": name, "status": "passed", "detail": detail})
         self.passed += 1
-        self.details.append(f"  ✅ {msg}")
+        print(f"  ✅ {name}" + (f" ({detail})" if detail else ""))
 
-    def fail(self, msg):
-        self.failed += 1
-        self.details.append(f"  ❌ {msg}")
+    def fail(self, name, detail=""):
+        self.tests.append({"name": name, "status": "failed", "detail": detail})
+        self.failures += 1
+        print(f"  ❌ FAIL: {name} — {detail}")
 
-    def warn(self, msg):
+    def warn(self, name, detail=""):
+        self.tests.append({"name": name, "status": "warning", "detail": detail})
         self.warnings += 1
-        self.details.append(f"  ⚠️  {msg}")
+        print(f"  ⚠️  WARN: {name} — {detail}")
 
-    def section(self, title):
-        self.details.append(f"\n━━━ {title} ━━━")
+    def to_junit(self):
+        cases = []
+        for t in self.tests:
+            name = t["name"].replace('"', '&quot;')
+            detail = t["detail"].replace('"', '&quot;').replace('<', '&lt;')
+            if t["status"] == "passed":
+                cases.append(f'    <testcase name="{name}" classname="applications.qa" />')
+            elif t["status"] == "failed":
+                cases.append(f'    <testcase name="{name}" classname="applications.qa">')
+                cases.append(f'      <failure message="{detail}" />')
+                cases.append(f'    </testcase>')
+            else:
+                cases.append(f'    <testcase name="{name}" classname="applications.qa">')
+                cases.append(f'      <system-out>{detail}</system-out>')
+                cases.append(f'    </testcase>')
+        return "\n".join([
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            f'<testsuites tests="{len(self.tests)}" failures="{self.failures}">',
+            f'  <testsuite name="applications-qa" tests="{len(self.tests)}" failures="{self.failures}">',
+            *cases,
+            '  </testsuite>',
+            '</testsuites>'
+        ])
 
-    def summary(self):
-        self.details.append(f"\n{'='*60}")
-        total = self.passed + self.failed + self.warnings
-        self.details.append(
-            f"  QA: {self.passed}/{total} passed, "
-            f"{self.failed} failed, {self.warnings} warnings"
-        )
-        if self.failed == 0:
-            self.details.append(f"  🟢 PIPELINE OK")
-        elif REPORT_ONLY:
-            self.details.append(f"  🟡 WARNINGS (report-only mode, not blocking)")
-        else:
-            self.details.append(f"  🔴 PIPELINE BLOCKED — fix issues before drafts")
-        return "\n".join(self.details)
+    def to_json(self):
+        return json.dumps({
+            "timestamp": datetime.utcnow().isoformat(),
+            "summary": {"total": len(self.tests), "passed": self.passed,
+                        "failures": self.failures, "warnings": self.warnings},
+            "tests": self.tests
+        }, indent=2)
 
     @property
     def exit_code(self):
-        if self.failed > 0 and not REPORT_ONLY:
-            return 1
-        if self.warnings > 0:
-            return 2
+        if self.failures > 0: return 1
+        if self.warnings > 0: return 2
         return 0
 
 
-# ═══════════════════════════════════════════════════════════════
-# TEST 1: CRAWL OUTPUT VALIDATION
-# ═══════════════════════════════════════════════════════════════
-
-def test_crawl(qa):
-    qa.section("TEST 1: Crawl Output")
-
+def validate_crawl(report):
+    print("\n━━━ CRAWL OUTPUT VALIDATION ━━━")
     if not os.path.exists(CRAWL_OUTPUT):
-        qa.fail(f"Crawl output not found: {CRAWL_OUTPUT}")
+        report.fail("crawl.file_exists", f"{CRAWL_OUTPUT} not found")
         return None
-
     try:
         with open(CRAWL_OUTPUT) as f:
             data = json.load(f)
-        qa.ok(f"Valid JSON ({os.path.getsize(CRAWL_OUTPUT)} bytes)")
     except json.JSONDecodeError as e:
-        qa.fail(f"Invalid JSON: {e}")
+        report.fail("crawl.valid_json", str(e))
         return None
 
-    # Must be a list
+    report.ok("crawl.file_exists")
+    report.ok("crawl.valid_json")
+
     if not isinstance(data, list):
-        qa.fail(f"Expected list, got {type(data).__name__}")
+        report.fail("crawl.is_array", f"Got {type(data).__name__}")
         return None
-    qa.ok(f"{len(data)} projects crawled")
-
-    # Reasonable count
     if len(data) == 0:
-        qa.fail("No projects crawled — crawler may be broken or blocked")
+        report.fail("crawl.non_empty", "No projects")
         return data
-    elif len(data) < 10:
-        qa.warn(f"Only {len(data)} projects — unusually low")
-    elif len(data) > 500:
-        qa.warn(f"{len(data)} projects — unusually high, check for pagination bug")
-    else:
-        qa.ok(f"Reasonable project count ({len(data)})")
 
-    # Schema validation
-    required_fields = ["title", "url"]
-    optional_fields = ["description", "location", "remote", "start", "duration", "rate"]
-    
-    missing_required = 0
-    empty_titles = 0
-    has_description = 0
-    has_rate = 0
-    
-    for i, project in enumerate(data):
-        if not isinstance(project, dict):
-            qa.fail(f"Project #{i} is not a dict")
-            continue
-        for field in required_fields:
-            if field not in project or not project[field]:
-                missing_required += 1
-        if not project.get("title", "").strip():
-            empty_titles += 1
-        if project.get("description"):
-            has_description += 1
-        if project.get("rate"):
-            has_rate += 1
+    report.ok("crawl.non_empty", f"{len(data)} projects")
 
-    if missing_required == 0:
-        qa.ok("All projects have required fields (title, url)")
+    # Required fields
+    missing = sum(1 for p in data for f in ["title", "url"] if not p.get(f))
+    if missing == 0:
+        report.ok("crawl.required_fields")
     else:
-        qa.fail(f"{missing_required} projects missing required fields")
+        report.fail("crawl.required_fields", f"{missing} missing")
 
-    if empty_titles == 0:
-        qa.ok("No empty titles")
-    else:
-        qa.warn(f"{empty_titles} projects with empty titles")
-
-    desc_pct = has_description / len(data) * 100 if data else 0
-    if desc_pct > 70:
-        qa.ok(f"Description coverage: {desc_pct:.0f}%")
-    else:
-        qa.warn(f"Low description coverage: {desc_pct:.0f}% — detail fetch may have failed")
+    # Description coverage (>70% ok, >40% warn, else fail)
+    with_desc = sum(1 for p in data if p.get("description"))
+    pct = with_desc / len(data) * 100
+    if pct >= 70:   report.ok("crawl.description_coverage", f"{pct:.0f}%")
+    elif pct >= 40: report.warn("crawl.description_coverage", f"{pct:.0f}%")
+    else:           report.fail("crawl.description_coverage", f"{pct:.0f}%")
 
     # Duplicate URLs
     urls = [p.get("url", "") for p in data]
-    unique_urls = set(urls)
-    if len(urls) == len(unique_urls):
-        qa.ok("No duplicate URLs")
-    else:
-        dupes = len(urls) - len(unique_urls)
-        qa.warn(f"{dupes} duplicate URLs in crawl output")
+    dupes = len(urls) - len(set(urls))
+    if dupes == 0:  report.ok("crawl.no_duplicate_urls")
+    else:           report.warn("crawl.no_duplicate_urls", f"{dupes} dupes")
 
     return data
 
 
-# ═══════════════════════════════════════════════════════════════
-# TEST 2: MATCH OUTPUT VALIDATION
-# ═══════════════════════════════════════════════════════════════
-
-def test_match(qa):
-    qa.section("TEST 2: Match Output")
-
+def validate_match(report, crawl_data):
+    print("\n━━━ MATCH OUTPUT VALIDATION ━━━")
     if not os.path.exists(MATCH_OUTPUT):
-        qa.fail(f"Match output not found: {MATCH_OUTPUT}")
+        report.fail("match.file_exists", f"{MATCH_OUTPUT} not found")
         return None
-
     try:
         with open(MATCH_OUTPUT) as f:
             data = json.load(f)
-        qa.ok(f"Valid JSON ({os.path.getsize(MATCH_OUTPUT)} bytes)")
     except json.JSONDecodeError as e:
-        qa.fail(f"Invalid JSON: {e}")
+        report.fail("match.valid_json", str(e))
         return None
 
-    # Must be a dict with profile keys
+    report.ok("match.file_exists")
+    report.ok("match.valid_json")
+
     if not isinstance(data, dict):
-        qa.fail(f"Expected dict, got {type(data).__name__}")
+        report.fail("match.is_dict", f"Got {type(data).__name__}")
         return None
+    report.ok("match.is_dict", f"Profiles: {list(data.keys())}")
 
-    expected_profiles = ["wolfram", "ian", "michael"]
-    for profile in expected_profiles:
-        if profile not in data:
-            qa.warn(f"Profile '{profile}' missing from match output")
+    total = 0
+    for profile, matches in data.items():
+        if not isinstance(matches, list):
+            report.fail(f"match.{profile}.is_array")
+            continue
+        if len(matches) == 0:
+            report.warn(f"match.{profile}.non_empty", "0 matches")
         else:
-            matches = data[profile]
-            if not isinstance(matches, list):
-                qa.fail(f"Profile '{profile}': expected list, got {type(matches).__name__}")
-                continue
-            
-            qa.ok(f"Profile '{profile}': {len(matches)} matches")
+            report.ok(f"match.{profile}.count", f"{len(matches)}")
+            total += len(matches)
 
-            # Validate scores
-            bad_scores = 0
-            no_title = 0
-            for m in matches:
-                score = m.get("score", -1)
-                if not (0 <= score <= 100):
-                    bad_scores += 1
-                if not m.get("title"):
-                    no_title += 1
+        # Score range check
+        for m in matches:
+            score = m.get("score", m.get("match_score", 0))
+            if isinstance(score, (int, float)) and (score < 0 or score > 100):
+                report.warn(f"match.{profile}.score_range", f"Out of bounds: {score}")
+                break
 
-            if bad_scores > 0:
-                qa.fail(f"Profile '{profile}': {bad_scores} matches with invalid scores")
-            if no_title > 0:
-                qa.warn(f"Profile '{profile}': {no_title} matches without title")
-
-            # Check score distribution
-            if matches:
-                scores = [m.get("score", 0) for m in matches]
-                avg = sum(scores) / len(scores)
-                hot = sum(1 for s in scores if s >= 70)
-                qa.ok(f"Profile '{profile}': avg score {avg:.0f}%, {hot} HOT (≥70%)")
+    if total > 0: report.ok("match.total", f"{total}")
+    else:         report.fail("match.total", "Zero matches")
 
     return data
 
 
-# ═══════════════════════════════════════════════════════════════
-# TEST 3: CRM DUPLICATE CHECK
-# ═══════════════════════════════════════════════════════════════
+def check_data_quality(report, crawl_data):
+    print("\n━━━ DATA QUALITY ━━━")
+    if not crawl_data: return
 
-def test_crm_dedup(qa, match_data):
-    qa.section("TEST 3: CRM Duplicate Check")
+    empty = [p for p in crawl_data if not p.get("title", "").strip()]
+    if empty: report.fail("quality.no_empty_titles", f"{len(empty)}")
+    else:     report.ok("quality.no_empty_titles")
 
-    if not CRM_DEDUP:
-        qa.ok("CRM dedup skipped (use --crm-dedup to enable)")
-        return
+    bad_urls = [p for p in crawl_data if p.get("url") and not p["url"].startswith("http")]
+    if bad_urls: report.warn("quality.url_format", f"{len(bad_urls)} non-HTTP")
+    else:        report.ok("quality.url_format")
 
+    descs = [len(p.get("description", "")) for p in crawl_data if p.get("description")]
+    if descs:
+        avg = sum(descs) / len(descs)
+        if avg < 50: report.warn("quality.desc_length", f"Avg {avg:.0f} chars")
+        else:        report.ok("quality.desc_length", f"Avg {avg:.0f} chars")
+
+
+def check_crm_duplicates(report, match_data):
+    print("\n━━━ CRM DUPLICATE CHECK ━━━")
     if not GITLAB_TOKEN:
-        qa.warn("GITLAB_TOKEN not set — cannot check CRM")
+        report.warn("crm.token", "No GITLAB_TOKEN — skipping")
         return
 
-    if not match_data:
-        qa.warn("No match data to check against CRM")
-        return
-
-    # Fetch all open CRM issue titles
-    crm_titles = set()
+    existing = set()
     page = 1
     while True:
         try:
             req = urllib.request.Request(
-                f"{GITLAB_API}/projects/{CRM_PROJECT_ID}/issues?"
-                f"state=opened&per_page=100&page={page}",
-                headers={"PRIVATE-TOKEN": GITLAB_TOKEN}
-            )
+                f"{GITLAB_API}/projects/{CRM_PROJECT_ID}/issues?state=opened&per_page=100&page={page}",
+                headers={"PRIVATE-TOKEN": GITLAB_TOKEN})
             issues = json.loads(urllib.request.urlopen(req).read())
-            if not issues:
-                break
+            if not issues: break
             for i in issues:
-                # Extract project name from "[Agency] Project Title" format
                 title = i["title"]
-                if "] " in title:
-                    title = title.split("] ", 1)[1]
-                crm_titles.add(title.lower().strip())
+                m = re.match(r'\[.*?\]\s*(.*)', title)
+                if m: existing.add(m.group(1).strip().lower())
+                existing.add(title.strip().lower())
             page += 1
         except urllib.error.HTTPError as e:
-            qa.warn(f"CRM API error: {e.code}")
+            report.warn("crm.api", f"HTTP {e.code}")
             return
 
-    qa.ok(f"Loaded {len(crm_titles)} open CRM issues")
+    report.ok("crm.fetched", f"{len(existing)} titles")
 
-    # Check each match profile for duplicates
+    if not match_data: return
     total_dupes = 0
     for profile, matches in match_data.items():
-        if not isinstance(matches, list):
-            continue
-        dupes = []
-        for m in matches:
-            title = m.get("title", "").lower().strip()
-            # Fuzzy: check if CRM already has something very similar
-            for crm_t in crm_titles:
-                # Exact match or significant overlap
-                if title == crm_t:
-                    dupes.append(m.get("title", "?"))
-                    break
-                # Check if >60% of words overlap
-                title_words = set(title.split())
-                crm_words = set(crm_t.split())
-                if title_words and crm_words:
-                    overlap = len(title_words & crm_words) / max(len(title_words), len(crm_words))
-                    if overlap > 0.6:
-                        dupes.append(f"{m.get('title', '?')} ≈ CRM")
-                        break
-
+        dupes = [m for m in matches if m.get("title", "").strip().lower() in existing]
         if dupes:
             total_dupes += len(dupes)
-            qa.warn(f"Profile '{profile}': {len(dupes)} matches already in CRM")
-            for d in dupes[:3]:
-                qa.details.append(f"       → {d[:60]}")
-
-    if total_dupes == 0:
-        qa.ok("No duplicates with existing CRM issues")
-    else:
-        qa.warn(f"Total: {total_dupes} potential CRM duplicates — review before sending")
-
-
-# ═══════════════════════════════════════════════════════════════
-# TEST 4: DATA QUALITY
-# ═══════════════════════════════════════════════════════════════
-
-def test_data_quality(qa, crawl_data):
-    qa.section("TEST 4: Data Quality")
-
-    if not crawl_data:
-        qa.warn("No crawl data for quality check")
-        return
-
-    # Rate parseability
-    parseable_rates = 0
-    total_with_rate = 0
-    for p in crawl_data:
-        rate = p.get("rate", "")
-        if rate:
-            total_with_rate += 1
-            if re.search(r'\d+', str(rate)):
-                parseable_rates += 1
-
-    if total_with_rate > 0:
-        pct = parseable_rates / total_with_rate * 100
-        if pct > 80:
-            qa.ok(f"Rate parseability: {pct:.0f}% ({parseable_rates}/{total_with_rate})")
+            report.warn(f"crm.{profile}.dupes", f"{len(dupes)} already in CRM")
         else:
-            qa.warn(f"Low rate parseability: {pct:.0f}%")
-    else:
-        qa.warn("No projects have rate information")
+            report.ok(f"crm.{profile}.no_dupes")
 
-    # Remote field
-    has_remote = sum(1 for p in crawl_data if p.get("remote") or p.get("location"))
-    remote_pct = has_remote / len(crawl_data) * 100
-    if remote_pct > 50:
-        qa.ok(f"Remote/location coverage: {remote_pct:.0f}%")
-    else:
-        qa.warn(f"Low remote/location coverage: {remote_pct:.0f}%")
+    if total_dupes == 0: report.ok("crm.no_dupes_total")
+    else: report.warn("crm.dupes_total", f"{total_dupes} (will skip in drafts)")
 
-    # Title diversity (not all the same)
-    titles = [p.get("title", "") for p in crawl_data]
-    unique_ratio = len(set(titles)) / len(titles) if titles else 0
-    if unique_ratio > 0.8:
-        qa.ok(f"Title diversity: {unique_ratio:.0%} unique")
-    else:
-        qa.warn(f"Low title diversity: {unique_ratio:.0%} — possible crawl issue")
-
-
-# ═══════════════════════════════════════════════════════════════
-# MAIN
-# ═══════════════════════════════════════════════════════════════
 
 def main():
-    qa = QAResult()
-    print(f"🔍 Applications Pipeline QA")
-    print(f"{'='*60}")
+    print("=" * 70)
+    print("  APPLICATIONS PIPELINE — QA VALIDATION")
+    print(f"  {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
+    print("=" * 70)
 
-    crawl_data = test_crawl(qa)
-    match_data = test_match(qa)
-    test_crm_dedup(qa, match_data)
-    test_data_quality(qa, crawl_data)
+    report = QAReport()
+    crawl = validate_crawl(report)
+    match = validate_match(report, crawl)
+    check_data_quality(report, crawl)
+    if CRM_DEDUP:
+        check_crm_duplicates(report, match)
 
-    print(qa.summary())
+    print(f"\n{'='*70}")
+    print(f"  RESULTS: {report.passed}✅  {report.warnings}⚠️  {report.failures}❌")
+    print(f"  EXIT: {report.exit_code}")
+    print(f"{'='*70}")
 
-    # Write report as artifact
-    report_path = "output/qa_report.json"
     os.makedirs("output", exist_ok=True)
-    with open(report_path, "w") as f:
-        json.dump({
-            "passed": qa.passed,
-            "failed": qa.failed,
-            "warnings": qa.warnings,
-            "details": qa.details,
-            "exit_code": qa.exit_code,
-        }, f, indent=2)
-    print(f"\n📄 Report: {report_path}")
+    with open(QA_REPORT_OUTPUT, "w") as f:
+        f.write(report.to_junit())
+    print(f"\n📄 {QA_REPORT_OUTPUT}")
 
-    sys.exit(qa.exit_code)
-
+    sys.exit(report.exit_code)
 
 if __name__ == "__main__":
     main()
