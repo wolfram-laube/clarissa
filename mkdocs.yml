@@ -1,6 +1,6 @@
-site_name: CLARISSA Documentation
+site_name: Blauweiss Operations
 site_url: https://irena-40cc50.gitlab.io/
-repo_url: https://gitlab.com/wolfram_laube/blauweiss_llc/irena
+repo_url: https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa
 repo_name: GitLab
 
 docs_dir: docs
@@ -10,7 +10,7 @@ theme:
   name: material
   palette:
     scheme: slate
-    primary: deep purple
+    primary: blue
     accent: orange
   features:
     - navigation.tabs
@@ -59,93 +59,94 @@ extra_javascript:
 
 nav:
   - Home: index.md
-  - "🔍 Search": search.md
-  - "🚀 Getting Started":
-    - "🇬🇧 English": getting-started-en.md
-    - "🇩🇪 Deutsch": getting-started-de.md
-    - "🇻🇳 Tiếng Việt": getting-started-vi.md
-    - "🇸🇦 العربية": getting-started-ar.md
-    - "🇮🇸 Íslenska": getting-started-is.md
-  - Contributing: contributing.md
-
-  - "📓 Tutorials":
-    - Overview: tutorials/index.md
-    - Quick Start: tutorials/quickstart.md
-    - "🎤 Voice Input": tutorials/voice-input.md
-    - "🎬 Demo Showcase Guide": tutorials/guides/demo-showcase-guide.md
-    - "Interactive Notebooks":
-      - "01 ECLIPSE Fundamentals": tutorials/notebooks/01_ECLIPSE_Fundamentals.ipynb
-      - "02 OPM Flow Integration": tutorials/notebooks/02_OPM_Flow_Integration.ipynb
-      - "03 Knowledge Layer": tutorials/notebooks/03_Knowledge_Layer.ipynb
-      - "04 LLM Conversation": tutorials/notebooks/04_LLM_Conversation.ipynb
-      - "05 Constraint Engine": tutorials/notebooks/05_Constraint_Engine.ipynb
-      - "06 Deck Generator": tutorials/notebooks/06_Deck_Generator.ipynb
-      - "07 RL Agent": tutorials/notebooks/07_RL_Agent.ipynb
-      - "08 RIGOR Benchmark": tutorials/notebooks/08_RIGOR_Benchmark.ipynb
-      - "09 Full Pipeline Demo": tutorials/notebooks/09_Full_Pipeline_Demo.ipynb
-      - "10 API Reference": tutorials/notebooks/10_API_Reference.ipynb
-      - "11 CRUD Playground": tutorials/notebooks/11_CRUD_Playground.ipynb
-      - "12 GitLab API Playground": tutorials/notebooks/12_GitLab_API_Playground.ipynb
-      - "13 OPM Flow Playground": tutorials/notebooks/13_OPM_Flow_Playground.ipynb
-      - "14 Infrastructure Playground": tutorials/notebooks/14_Infrastructure_Playground.ipynb
-      - "15 OPM Flow Showcase": tutorials/notebooks/15_OPM_Flow_Showcase.ipynb
-      - "16 Voice Input Showcase 🎤": tutorials/notebooks/16_Voice_Input_Showcase.ipynb
-      - "17 Voice Roundtrip Local 🎤": tutorials/notebooks/17_Voice_Roundtrip_Local.ipynb
-    - "Guides":
-      - "🎤 Voice Input Tutorial": tutorials/guides/voice-input-tutorial.md
-    - "Legacy":
-      - Reservoir Basics: tutorials/reservoir-basics.md
-      - Code Examples: tutorials/reservoir-basics-code.ipynb
-
-  - "🎮 Live Demos":
-    - Overview: demos/index.md
-    - "🎤 Voice Notebook": demos/voice-demo.html
-    - "🎬 Recording Suite": demos/demo-recording-suite.html
-
-  - Architecture:
-    - Overview: architecture/README.md
-    - ADRs:
-      - Index: architecture/adr/index.md
-      - ADR-000 Template: architecture/adr/ADR-000-template.md
-      - ADR-001 Physics-Centric: architecture/adr/ADR-001-physics-centric.md
-      - ADR-002 Separation of Roles: architecture/adr/ADR-002-separation-of-roles.md
-      - ADR-003 Native Kernel: architecture/adr/ADR-003-native-kernel.md
-      - ADR-004 Dual Simulator Strategy: architecture/adr/ADR-004-dual-simulator-strategy.md
-      - ADR-005 Repo Decomposition: architecture/adr/ADR-005-repo-decomposition.md
-      - ADR-006 Noise-Free CI Artifacts: architecture/adr/ADR-006-noise-free-ci-artifacts.md
-      - ADR-007 CI as Observability Layer: architecture/adr/ADR-007-ci-as-observability-layer.md
-      - ADR-008 Governance Signals vs Enforcement: architecture/adr/ADR-008-governance-signals-vs-enforcement.md
-      - ADR-009 NLP Translation Pipeline: architecture/adr/ADR-009-nlp-translation-pipeline.md
-      - ADR-010 Project Renaming CLARISSA: architecture/adr/ADR-010-project-renaming-clarissa.md
-      - ADR-011 OPM Flow Integration: architecture/adr/ADR-011-opm-flow-integration.md
-      - ADR-012 Container Registry K8s Strategy: architecture/adr/ADR-012-container-registry-k8s-strategy.md
-      - ADR-013 i18n Architecture: architecture/adr/ADR-013-i18n-architecture.md
-      - ADR-014 LLM Document Merge: architecture/adr/ADR-014-llm-document-merge.md
-      - ADR-015 LLM CI Notifications: architecture/adr/ADR-015-llm-ci-notifications.md
-      - ADR-016 Runner Load Balancing: architecture/adr/ADR-016-runner-load-balancing.md
-      - ADR-017 GDrive Folder Structure: architecture/adr/ADR-017-gdrive-folder-structure.md
-      - ADR-018 GitLab PM Workflow: architecture/adr/ADR-018-gitlab-pm-workflow.md
-      - ADR-019 Billing Folder Structure: architecture/adr/ADR-019-billing-folder-structure.md
-      - ADR-020 Portal Vision: architecture/adr/ADR-020-portal-vision.md
-      - ADR-021 Portal System Security: architecture/adr/ADR-021-portal-system-security-architecture.md
-      - ADR-022 Portal Software Architecture: architecture/adr/ADR-022-portal-software-architecture.md
-      - ADR-023 Portal Observability: architecture/adr/ADR-023-portal-observability.md
-      - ADR-024 CLARISSA Core Architecture: architecture/adr/ADR-024-clarissa-core-system-architecture.md
-      - ADR-025 LLM Integration Strategy: architecture/adr/ADR-025-llm-integration-strategy.md
-      - ADR-026 Testing Strategy: architecture/adr/ADR-026-testing-strategy.md
-      - ADR-027 Bidirectional Sync: architecture/adr/ADR-027-bidirectional-sync-strategy.md
-      - ADR-028 Voice Input Architecture 🎤: architecture/adr/ADR-028-voice-input-architecture.md
-
-  - "📄 Publications":
-    - Overview: publications/index.md
-    - SPE Europe 2026: publications/spe-europe-2026/index.md
-    - IJACSA 2026: publications/ijacsa-2026/index.md
-
-
-  - "🛠️ Tools":
-    - Overview: tools/README.md
-    - "🎬 Demo Recording": tools/recording/README.md
-
+  - "🎯 Operations":
+    - "🎛️ Portal Dashboard": portal.html
+    - "🚀 Quick Start": ops/quickstart.md
+    - "📊 CRM": ops/crm.md
+    - "🚀 Applications Pipeline": ops/applications-pipeline.md
+    - "🔗 API Reference": ops/api-reference.md
+  - "🔬 CLARISSA Research":
+    - Overview: research/index.md
+    - "🔍 Search": search.md
+    - "🚀 Getting Started":
+      - "🇬🇧 English": getting-started-en.md
+      - "🇩🇪 Deutsch": getting-started-de.md
+      - "🇻🇳 Tiếng Việt": getting-started-vi.md
+      - "🇸🇦 العربية": getting-started-ar.md
+      - "🇮🇸 Íslenska": getting-started-is.md
+    - Contributing: contributing.md
+    - "📓 Tutorials":
+      - Overview: tutorials/index.md
+      - Quick Start: tutorials/quickstart.md
+      - "🎤 Voice Input": tutorials/voice-input.md
+      - "🎬 Demo Showcase Guide": tutorials/guides/demo-showcase-guide.md
+      - "Interactive Notebooks":
+        - "01 ECLIPSE Fundamentals": tutorials/notebooks/01_ECLIPSE_Fundamentals.ipynb
+        - "02 OPM Flow Integration": tutorials/notebooks/02_OPM_Flow_Integration.ipynb
+        - "03 Knowledge Layer": tutorials/notebooks/03_Knowledge_Layer.ipynb
+        - "04 LLM Conversation": tutorials/notebooks/04_LLM_Conversation.ipynb
+        - "05 Constraint Engine": tutorials/notebooks/05_Constraint_Engine.ipynb
+        - "06 Deck Generator": tutorials/notebooks/06_Deck_Generator.ipynb
+        - "07 RL Agent": tutorials/notebooks/07_RL_Agent.ipynb
+        - "08 RIGOR Benchmark": tutorials/notebooks/08_RIGOR_Benchmark.ipynb
+        - "09 Full Pipeline Demo": tutorials/notebooks/09_Full_Pipeline_Demo.ipynb
+        - "10 API Reference": tutorials/notebooks/10_API_Reference.ipynb
+        - "11 CRUD Playground": tutorials/notebooks/11_CRUD_Playground.ipynb
+        - "12 GitLab API Playground": tutorials/notebooks/12_GitLab_API_Playground.ipynb
+        - "13 OPM Flow Playground": tutorials/notebooks/13_OPM_Flow_Playground.ipynb
+        - "14 Infrastructure Playground": tutorials/notebooks/14_Infrastructure_Playground.ipynb
+        - "15 OPM Flow Showcase": tutorials/notebooks/15_OPM_Flow_Showcase.ipynb
+        - "16 Voice Input Showcase 🎤": tutorials/notebooks/16_Voice_Input_Showcase.ipynb
+        - "17 Voice Roundtrip Local 🎤": tutorials/notebooks/17_Voice_Roundtrip_Local.ipynb
+      - "Guides":
+        - "🎤 Voice Input Tutorial": tutorials/guides/voice-input-tutorial.md
+      - "Legacy":
+        - Reservoir Basics: tutorials/reservoir-basics.md
+        - Code Examples: tutorials/reservoir-basics-code.ipynb
+    - "🎮 Live Demos":
+      - Overview: demos/index.md
+      - "🎤 Voice Notebook": demos/voice-demo.html
+      - "🎬 Recording Suite": demos/demo-recording-suite.html
+    - Architecture:
+      - Overview: architecture/README.md
+      - ADRs:
+        - Index: architecture/adr/index.md
+        - ADR-000 Template: architecture/adr/ADR-000-template.md
+        - ADR-001 Physics-Centric: architecture/adr/ADR-001-physics-centric.md
+        - ADR-002 Separation of Roles: architecture/adr/ADR-002-separation-of-roles.md
+        - ADR-003 Native Kernel: architecture/adr/ADR-003-native-kernel.md
+        - ADR-004 Dual Simulator Strategy: architecture/adr/ADR-004-dual-simulator-strategy.md
+        - ADR-005 Repo Decomposition: architecture/adr/ADR-005-repo-decomposition.md
+        - ADR-006 Noise-Free CI Artifacts: architecture/adr/ADR-006-noise-free-ci-artifacts.md
+        - ADR-007 CI as Observability Layer: architecture/adr/ADR-007-ci-as-observability-layer.md
+        - ADR-008 Governance Signals vs Enforcement: architecture/adr/ADR-008-governance-signals-vs-enforcement.md
+        - ADR-009 NLP Translation Pipeline: architecture/adr/ADR-009-nlp-translation-pipeline.md
+        - ADR-010 Project Renaming CLARISSA: architecture/adr/ADR-010-project-renaming-clarissa.md
+        - ADR-011 OPM Flow Integration: architecture/adr/ADR-011-opm-flow-integration.md
+        - ADR-012 Container Registry K8s Strategy: architecture/adr/ADR-012-container-registry-k8s-strategy.md
+        - ADR-013 i18n Architecture: architecture/adr/ADR-013-i18n-architecture.md
+        - ADR-014 LLM Document Merge: architecture/adr/ADR-014-llm-document-merge.md
+        - ADR-015 LLM CI Notifications: architecture/adr/ADR-015-llm-ci-notifications.md
+        - ADR-016 Runner Load Balancing: architecture/adr/ADR-016-runner-load-balancing.md
+        - ADR-017 GDrive Folder Structure: architecture/adr/ADR-017-gdrive-folder-structure.md
+        - ADR-018 GitLab PM Workflow: architecture/adr/ADR-018-gitlab-pm-workflow.md
+        - ADR-019 Billing Folder Structure: architecture/adr/ADR-019-billing-folder-structure.md
+        - ADR-020 Portal Vision: architecture/adr/ADR-020-portal-vision.md
+        - ADR-021 Portal System Security: architecture/adr/ADR-021-portal-system-security-architecture.md
+        - ADR-022 Portal Software Architecture: architecture/adr/ADR-022-portal-software-architecture.md
+        - ADR-023 Portal Observability: architecture/adr/ADR-023-portal-observability.md
+        - ADR-024 CLARISSA Core Architecture: architecture/adr/ADR-024-clarissa-core-system-architecture.md
+        - ADR-025 LLM Integration Strategy: architecture/adr/ADR-025-llm-integration-strategy.md
+        - ADR-026 Testing Strategy: architecture/adr/ADR-026-testing-strategy.md
+        - ADR-027 Bidirectional Sync: architecture/adr/ADR-027-bidirectional-sync-strategy.md
+        - ADR-028 Voice Input Architecture 🎤: architecture/adr/ADR-028-voice-input-architecture.md
+    - "📄 Publications":
+      - Overview: publications/index.md
+      - SPE Europe 2026: publications/spe-europe-2026/index.md
+      - IJACSA 2026: publications/ijacsa-2026/index.md
+    - "🛠️ Tools":
+      - Overview: tools/README.md
+      - "🎬 Demo Recording": tools/recording/README.md
   - "⚙️ Infrastructure":
     - Overview: infrastructure.md
     - CI/CD:
@@ -154,11 +155,3 @@ nav:
       - Runner Management: runner-management-en.md
     - GitLab Runner GCP: gitlab_runner_gcp.md
     - LLM Handoff: LLM_HANDOFF.md
-
-  - "🎯 Operations":
-    - Overview: ops/index.md
-    - "🚀 Quick Start": ops/quickstart.md
-    - "📊 CRM": ops/crm.md
-    - "🚀 Applications Pipeline": ops/applications-pipeline.md
-    - "🔗 API Reference": ops/api-reference.md
-    - "🎛️ Portal Dashboard": portal.html
