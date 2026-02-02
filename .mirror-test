@@ -1,0 +1,2 @@
+Mirror round-trip test at 2026-02-02T14:56:36Z
+Expected flow: GitLab → GitHub (push mirror) → GitHub Actions → GitLab (new URL)
