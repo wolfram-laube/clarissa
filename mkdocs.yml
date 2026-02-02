@@ -157,5 +157,8 @@ nav:
 
   - "🎯 Operations":
     - Overview: ops/index.md
+    - "🚀 Quick Start": ops/quickstart.md
     - "📊 CRM": ops/crm.md
     - "🚀 Applications Pipeline": ops/applications-pipeline.md
+    - "🔗 API Reference": ops/api-reference.md
+    - "🎛️ Portal Dashboard": portal.html
