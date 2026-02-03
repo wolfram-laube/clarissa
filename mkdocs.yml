@@ -1,4 +1,4 @@
-site_name: Blauweiss Operations
+site_name: CLARISSA Research
 site_url: https://irena-40cc50.gitlab.io/
 repo_url: https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa
 repo_name: GitLab
@@ -59,12 +59,6 @@ extra_javascript:
 
 nav:
   - Home: index.md
-  - "🎯 Operations":
-    - "🎛️ Portal Dashboard": portal.html
-    - "🚀 Quick Start": ops/quickstart.md
-    - "📊 CRM": ops/crm.md
-    - "🚀 Applications Pipeline": ops/applications-pipeline.md
-    - "🔗 API Reference": ops/api-reference.md
   - "🔬 CLARISSA Research":
     - Overview: research/index.md
     - "🔍 Search": search.md

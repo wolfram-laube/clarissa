@@ -21,12 +21,12 @@ include:
   # - local: '.gitlab/aurora.yml'           # AURORA: Future project
 
   # === BUSINESS OPERATIONS ===
-  - local: '.gitlab/billing.yml'            # Invoicing, Timesheets, Email
-  - local: '.gitlab/applications.yml'       # Job Applications Pipeline (existing)
+  # - local: '.gitlab/billing.yml'           # MOVED TO backoffice            # Invoicing, Timesheets, Email
+  # - local: '.gitlab/applications.yml'     # MOVED TO backoffice       # Job Applications Pipeline (existing)
 
   # === PLATFORM SERVICES ===
-  - local: '.gitlab/pages.yml'              # MkDocs, Portal, Publications
-  - local: '.gitlab/ci-automation.yml'      # Issue Bots, MR Reports, Flaky Ledger
+  # - local: '.gitlab/pages.yml'             # MOVED TO backoffice              # MkDocs, Portal, Publications
+  # - local: '.gitlab/ci-automation.yml'    # MOVED TO backoffice      # Issue Bots, MR Reports, Flaky Ledger
 
   # === INFRASTRUCTURE (existing) ===
   - local: '.gitlab/infra-setup.yml'
