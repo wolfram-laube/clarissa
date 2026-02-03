@@ -29,20 +29,20 @@ include:
   # - local: '.gitlab/ci-automation.yml'    # MOVED TO backoffice      # Issue Bots, MR Reports, Flaky Ledger
 
   # === INFRASTRUCTURE (existing) ===
-  - local: '.gitlab/infra-setup.yml'
-  - local: '.gitlab/gcp-check.yml'
-  - local: '.gitlab/gcp-setup.yml'
-  - local: '.gitlab/gcp-vm-control.yml'
-  - local: '.gitlab/terraform.yml'
-  - local: '.gitlab/docker-build.yml'
-  - local: '.gitlab/k3s-setup.yml'
+  # - local: '.gitlab/infra-setup.yml'      # MOVED TO backoffice
+  # - local: '.gitlab/gcp-check.yml'        # MOVED TO backoffice
+  # - local: '.gitlab/gcp-setup.yml'        # MOVED TO backoffice
+  # - local: '.gitlab/gcp-vm-control.yml'   # MOVED TO backoffice
+  # - local: '.gitlab/terraform.yml'        # MOVED TO backoffice
+  # - local: '.gitlab/docker-build.yml'     # MOVED TO backoffice
+  # - local: '.gitlab/k3s-setup.yml'        # MOVED TO backoffice
 
   # === INTEGRATIONS (existing) ===
   # - local: '.gitlab/gmail-drafts.yml'    # MOVED TO backoffice
   # - local: '.gitlab/gdrive-upload.yml'   # MOVED TO backoffice
-  - local: '.gitlab/benchmark.yml'
-  - local: '.gitlab/fix-shell-runner.yml'
-  - local: '.gitlab/parallel-jobs.yml'
+  # - local: '.gitlab/benchmark.yml'        # MOVED TO backoffice
+  # - local: '.gitlab/fix-shell-runner.yml' # MOVED TO backoffice
+  # - local: '.gitlab/parallel-jobs.yml'    # MOVED TO backoffice
 
   # === CONFERENCE PAPERS ===
   - local: 'conference/spe-europe-2026/ci/document-merge.gitlab-ci.yml'
