@@ -1,0 +1,64 @@
+{
+    "actions": {
+        "start": "เริ่ม",
+        "stop": "หยุด",
+        "status": "สถานะ",
+        "configure": "กำหนดค่า",
+        "open": "เปิด",
+        "new": "ใหม่",
+        "save": "บันทึก",
+        "cancel": "ยกเลิก",
+        "delete": "ลบ",
+        "edit": "แก้ไข",
+        "refresh": "รีเฟรช",
+        "close": "ปิด",
+        "confirm": "ยืนยัน",
+        "back": "กลับ",
+        "next": "ถัดไป",
+        "search": "ค้นหา",
+        "filter": "กรอง",
+        "export": "ส่งออก",
+        "import": "นำเข้า"
+    },
+    "status": {
+        "active": "ใช้งาน",
+        "inactive": "ไม่ใช้งาน",
+        "pending": "รอดำเนินการ",
+        "completed": "เสร็จสิ้น",
+        "error": "ข้อผิดพลาด",
+        "warning": "คำเตือน",
+        "success": "สำเร็จ",
+        "loading": "กำลังโหลด...",
+        "ready": "พร้อม"
+    },
+    "time": {
+        "today": "วันนี้",
+        "yesterday": "เมื่อวาน",
+        "tomorrow": "พรุ่งนี้",
+        "daily": "รายวัน",
+        "weekly": "รายสัปดาห์",
+        "monthly": "รายเดือน",
+        "yearly": "รายปี"
+    },
+    "errors": {
+        "networkError": "ข้อผิดพลาดเครือข่าย",
+        "serverError": "ข้อผิดพลาดเซิร์ฟเวอร์",
+        "notFound": "ไม่พบ",
+        "unauthorized": "ไม่ได้รับอนุญาต",
+        "forbidden": "ปฏิเสธการเข้าถึง",
+        "generic": "เกิดข้อผิดพลาด"
+    },
+    "navigation": {
+        "home": "หน้าแรก",
+        "dashboard": "แดชบอร์ด",
+        "settings": "การตั้งค่า",
+        "help": "ช่วยเหลือ",
+        "docs": "เอกสาร",
+        "logout": "ออกจากระบบ"
+    },
+    "footer": {
+        "version": "เวอร์ชัน",
+        "copyright": "© {{year}} Blauweiss EDV e.U.",
+        "allRightsReserved": "สงวนลิขสิทธิ์"
+    }
+}
