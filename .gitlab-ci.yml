@@ -166,6 +166,7 @@ pages:
     # Use system pip3
     - which pip3 && pip3 --version
     - pip3 install --user mkdocs mkdocs-material mkdocs-jupyter pymdown-extensions
+    - export PATH="$HOME/.local/bin:$HOME/Library/Python/3.13/bin:$PATH"
     - mkdocs build --site-dir public
     # Copy static HTML files (portal, i18n)
     - mkdir -p public/js public/locales
