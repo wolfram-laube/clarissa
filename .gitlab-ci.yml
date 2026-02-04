@@ -162,11 +162,13 @@ pages:
   tags:
     - shell-any
   script:
-    - python3 -m pip install --user mkdocs mkdocs-material mkdocs-jupyter pymdown-extensions
+    # Install mkdocs with all dependencies
+    - python3 -m pip install --user mkdocs mkdocs-material mkdocs-jupyter pymdown-extensions jupyter_contrib_nbextensions nbconvert
     - python3 -m mkdocs build --site-dir public
     # Copy static HTML files that aren't part of mkdocs
-    - cp -r docs/js public/js/ 2>/dev/null || true
-    - cp -r docs/locales public/locales/ 2>/dev/null || true
+    - mkdir -p public/js public/locales
+    - cp -r docs/js/* public/js/ 2>/dev/null || true
+    - cp -r docs/locales/* public/locales/ 2>/dev/null || true
     - cp docs/portal.html public/portal.html 2>/dev/null || true
   artifacts:
     paths:
