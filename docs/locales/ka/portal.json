@@ -1,0 +1,117 @@
+{
+    "header": {
+        "title": "Blauweiss ოპერაციების პორტალი",
+        "subtitle": "ცენტრალური მართვა განაცხადებისთვის, CRM, ბილინგისა და ინფრასტრუქტურისთვის"
+    },
+    "quickLinks": {
+        "crmBoard": "CRM დაფა",
+        "hotLeads": "ცხელი ლიდები",
+        "pipelines": "პაიპლაინები",
+        "schedules": "გრაფიკები",
+        "githubMirror": "GitHub სარკე",
+        "crmDocs": "CRM დოკუმენტაცია"
+    },
+    "stats": {
+        "crmIssues": "CRM საკითხები",
+        "hotLeads": "ცხელი ლიდები",
+        "activePipeline": "აქტიური პაიპლაინი",
+        "conversion": "კონვერსია"
+    },
+    "sections": {
+        "applications": "განაცხადების მართვა",
+        "crm": "CRM და ხარისხის უზრუნველყოფა",
+        "billing": "ბილინგი და დროის აღრიცხვა",
+        "infrastructure": "განვითარების გარემოები",
+        "docs": "დოკუმენტაცია და დახმარება"
+    },
+    "applications": {
+        "crawler": {
+            "title": "განაცხადების კრაულერი",
+            "description": "ახალი პროექტების კრაულინგი freelancermap.de-დან. საკვანძო სიტყვები: DevOps, Python, AI, Kubernetes.",
+            "start": "კრაულინგის დაწყება"
+        },
+        "matcher": {
+            "title": "განაცხადების მეტჩერი",
+            "description": "დაკრაულებული პროექტების შეჯერება პროფილებთან (Wolfram, Ian, Michael, გუნდი).",
+            "start": "მეტჩინგის დაწყება"
+        },
+        "drafts": {
+            "title": "Gmail დრაფტერი",
+            "description": "Gmail დრაფტების შექმნა საუკეთესო მეტჩებისთვის პერსონალიზებული წერილებით.",
+            "start": "დრაფტების შექმნა"
+        },
+        "fullPipeline": {
+            "title": "სრული პაიპლაინი",
+            "description": "სრული პაიპლაინი: კრაული → მეტჩი → QA → დრაფტები. ყოველდღე ორშ-პარ 08:00.",
+            "start": "სრული პაიპლაინი",
+            "dryRun": "ტესტური გაშვება"
+        }
+    },
+    "crm": {
+        "board": {
+            "title": "CRM დაფა",
+            "description": "კანბან დაფა 185 საკითხით. 8 სტატუს სვეტი ახლიდან მიღებულამდე.",
+            "open": "დაფის გახსნა",
+            "newIssue": "ახალი საკითხი"
+        },
+        "integrity": {
+            "title": "CRM მთლიანობის შემოწმება",
+            "description": "ლეიბლების თანმიმდევრულობის, მოჩვენებების აღმოჩენის, ძაბრის ჯანმრთელობის შემოწმება. ყოველკვირეულად ორშ 07:00.",
+            "start": "შემოწმების დაწყება",
+            "lastReport": "ბოლო ანგარიში"
+        }
+    },
+    "billing": {
+        "timesheet": {
+            "title": "დროის ცხრილის გენერატორი",
+            "description": "დროის ცხრილების გენერირება კალენდრის მოვლენებიდან. ყოველთვიურად 1-ში 06:00.",
+            "trigger": "ბილინგის ტრიგერი",
+            "drive": "Google Drive"
+        },
+        "invoice": {
+            "title": "ინვოისის გენერირება",
+            "description": "PDF ინვოისების გენერირება დროის ცხრილებიდან და ელ-ფოსტით გაგზავნა.",
+            "create": "ინვოისის შექმნა"
+        }
+    },
+    "infrastructure": {
+        "linux": {
+            "title": "Linux Runner (Yoga)",
+            "description": "Docker + Shell Runner Linux Yoga-ზე. მთავარი CI/CD რანერი."
+        },
+        "mac": {
+            "title": "Mac Runner (Mac2)",
+            "description": "Docker + Shell Runner Mac Mini M2-ზე. სარეზერვო რანერი."
+        },
+        "gcp": {
+            "title": "GCP VM",
+            "description": "Google Cloud VM ბენჩმარკებისა და მძიმე დატვირთვებისთვის."
+        }
+    },
+    "docs": {
+        "manual": {
+            "title": "მომხმარებლის სახელმძღვანელო",
+            "description": "ნაბიჯ-ნაბიჯ სახელმძღვანელო პორტალის ყველა ფუნქციისთვის.",
+            "quickStart": "სწრაფი დაწყება",
+            "allDocs": "ყველა დოკუმენტი"
+        },
+        "api": {
+            "title": "API და ინტეგრაცია",
+            "description": "GitLab API, პაიპლაინის ტრიგერები, ვებჰუკები.",
+            "apiDocs": "API დოკუმენტაცია",
+            "cicdSettings": "CI/CD პარამეტრები"
+        }
+    },
+    "output": {
+        "triggering": "{{action}}-ის ტრიგერი...",
+        "pipelineStarted": "პაიპლაინი #{{id}} დაიწყო!",
+        "openPipeline": "პაიპლაინის გახსნა",
+        "error": "შეცდომა: {{message}}",
+        "networkError": "ქსელის შეცდომა: {{message}}",
+        "manualTip": "რჩევა: ხელით ტრიგერი GitLab UI-დან ან CLI-დან"
+    },
+    "footer": {
+        "title": "Blauweiss EDV e.U. ოპერაციების პორტალი",
+        "version": "v1.0"
+    }
+}
