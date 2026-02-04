@@ -1,0 +1,117 @@
+{
+    "header": {
+        "title": "Blauweiss Operations Portal",
+        "subtitle": "Central control for applications, CRM, billing & infrastructure"
+    },
+    "quickLinks": {
+        "crmBoard": "CRM Board",
+        "hotLeads": "Hot Leads",
+        "pipelines": "Pipelines",
+        "schedules": "Schedules",
+        "githubMirror": "GitHub Mirror",
+        "crmDocs": "CRM Docs"
+    },
+    "stats": {
+        "crmIssues": "CRM Issues",
+        "hotLeads": "Hot Leads",
+        "activePipeline": "Active Pipeline",
+        "conversion": "Conversion"
+    },
+    "sections": {
+        "applications": "Application Management",
+        "crm": "CRM & Quality Assurance",
+        "billing": "Billing & Time Tracking",
+        "infrastructure": "Development Environments",
+        "docs": "Documentation & Help"
+    },
+    "applications": {
+        "crawler": {
+            "title": "Applications Crawler",
+            "description": "Crawls freelancermap.de for new projects. Keywords: DevOps, Python, AI, Kubernetes.",
+            "start": "Start Crawl"
+        },
+        "matcher": {
+            "title": "Applications Matcher",
+            "description": "Matches crawled projects against profiles (Wolfram, Ian, Michael, Team).",
+            "start": "Start Match"
+        },
+        "drafts": {
+            "title": "Gmail Drafter",
+            "description": "Creates Gmail drafts for top matches with personalized cover letters.",
+            "start": "Create Drafts"
+        },
+        "fullPipeline": {
+            "title": "Full Pipeline",
+            "description": "Complete pipeline: Crawl → Match → QA → Drafts. Daily Mon-Fri 08:00.",
+            "start": "Full Pipeline",
+            "dryRun": "Dry Run"
+        }
+    },
+    "crm": {
+        "board": {
+            "title": "CRM Board",
+            "description": "Kanban board with 185 issues. 8 status columns from New to Accepted.",
+            "open": "Open Board",
+            "newIssue": "New Issue"
+        },
+        "integrity": {
+            "title": "CRM Integrity Check",
+            "description": "Checks label consistency, ghost detection, funnel health. Weekly Mon 07:00.",
+            "start": "Start Check",
+            "lastReport": "Last Report"
+        }
+    },
+    "billing": {
+        "timesheet": {
+            "title": "Timesheet Generator",
+            "description": "Generates timesheets from calendar events. Monthly on the 1st at 06:00.",
+            "trigger": "Billing Trigger",
+            "drive": "Google Drive"
+        },
+        "invoice": {
+            "title": "Invoice Generation",
+            "description": "Generate PDF invoices from timesheets and send via email.",
+            "create": "Create Invoice"
+        }
+    },
+    "infrastructure": {
+        "linux": {
+            "title": "Linux Runner (Yoga)",
+            "description": "Docker + Shell Runner on Linux Yoga. Primary CI/CD Runner."
+        },
+        "mac": {
+            "title": "Mac Runner (Mac2)",
+            "description": "Docker + Shell Runner on Mac Mini M2. Fallback Runner."
+        },
+        "gcp": {
+            "title": "GCP VM",
+            "description": "Google Cloud VM for benchmarks and heavy workloads."
+        }
+    },
+    "docs": {
+        "manual": {
+            "title": "User Manual",
+            "description": "Step-by-step guide for all portal functions.",
+            "quickStart": "Quick Start",
+            "allDocs": "All Docs"
+        },
+        "api": {
+            "title": "API & Integration",
+            "description": "GitLab API, Pipeline Triggers, Webhooks.",
+            "apiDocs": "API Docs",
+            "cicdSettings": "CI/CD Settings"
+        }
+    },
+    "output": {
+        "triggering": "Triggering {{action}}...",
+        "pipelineStarted": "Pipeline #{{id}} started!",
+        "openPipeline": "Open Pipeline",
+        "error": "Error: {{message}}",
+        "networkError": "Network Error: {{message}}",
+        "manualTip": "Tip: Trigger manually via GitLab UI or CLI"
+    },
+    "footer": {
+        "title": "Blauweiss EDV e.U. Operations Portal",
+        "version": "v1.0"
+    }
+}
