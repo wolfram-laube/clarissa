@@ -163,9 +163,9 @@ pages:
     - shell-any
   script:
     # Use Anaconda pip on heimdall
-    - export PATH="/home/wolfram_e_laube/anaconda3/bin:$PATH"
-    - which pip && pip --version
-    - pip install mkdocs mkdocs-material pymdown-extensions
+    # Use system pip3
+    - which pip3 && pip3 --version
+    - pip3 install --user mkdocs mkdocs-material pymdown-extensions
     - mkdocs build --site-dir public
     # Copy static HTML files (portal, i18n)
     - mkdir -p public/js public/locales
