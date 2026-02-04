@@ -20,6 +20,22 @@ It is **explicitly documented and versioned**.
 
 ---
 
+## 🎯 Operations Portal
+
+**[→ Operations Portal](https://irena-40cc50.gitlab.io/portal.html)** | 🇦🇹 🇺🇸 🇯🇵 🇨🇳 🇹🇭 🇬🇪 🇮🇳
+
+Zentrale Steuerung für Bewerbungen, CRM, Billing & Infrastruktur.
+
+| Feature | Description |
+|---------|-------------|
+| 🔍 Applications Crawler | Crawlt freelancermap.de nach Projekten |
+| 🎯 Applications Matcher | Matched Projekte gegen Profile |
+| ✉️ Gmail Drafter | Erstellt personalisierte Bewerbungs-Drafts |
+| 📊 CRM Board | GitLab Issues-basiertes CRM |
+| 🖥️ Infrastructure | Runner & GCP VM Control |
+
+---
+
 ## 📚 Documentation
 
 **[→ Full Documentation (GitLab Pages)](https://irena-40cc50.gitlab.io/)**
