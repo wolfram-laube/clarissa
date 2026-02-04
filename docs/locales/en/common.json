@@ -1,0 +1,64 @@
+{
+    "actions": {
+        "start": "Start",
+        "stop": "Stop",
+        "status": "Status",
+        "configure": "Configure",
+        "open": "Open",
+        "new": "New",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "refresh": "Refresh",
+        "close": "Close",
+        "confirm": "Confirm",
+        "back": "Back",
+        "next": "Next",
+        "search": "Search",
+        "filter": "Filter",
+        "export": "Export",
+        "import": "Import"
+    },
+    "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "pending": "Pending",
+        "completed": "Completed",
+        "error": "Error",
+        "warning": "Warning",
+        "success": "Success",
+        "loading": "Loading...",
+        "ready": "Ready"
+    },
+    "time": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "tomorrow": "Tomorrow",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+    },
+    "errors": {
+        "networkError": "Network Error",
+        "serverError": "Server Error",
+        "notFound": "Not Found",
+        "unauthorized": "Unauthorized",
+        "forbidden": "Access Denied",
+        "generic": "An error occurred"
+    },
+    "navigation": {
+        "home": "Home",
+        "dashboard": "Dashboard",
+        "settings": "Settings",
+        "help": "Help",
+        "docs": "Documentation",
+        "logout": "Logout"
+    },
+    "footer": {
+        "version": "Version",
+        "copyright": "© {{year}} Blauweiss EDV e.U.",
+        "allRightsReserved": "All rights reserved"
+    }
+}
