@@ -159,23 +159,20 @@ stages:
 # -----------------------------------------------------------------------------
 pages:
   stage: deploy
-  tags:
-    - mac-shell
+  image: python:3.11-slim
   script:
-    # Install pip if needed, then mkdocs with all dependencies
-    - pip3 install --user mkdocs mkdocs-material pymdown-extensions || pip install --user mkdocs mkdocs-material pymdown-extensions
-    - export PATH="$HOME/.local/bin:$PATH"
-    - mkdocs build --site-dir public || python3 -m mkdocs build --site-dir public
+    - pip install mkdocs mkdocs-material pymdown-extensions
+    - mkdocs build --site-dir public
     # Copy static HTML files (portal, i18n)
     - mkdir -p public/js public/locales
     - cp -r docs/js/* public/js/ 2>/dev/null || true
     - cp -r docs/locales/* public/locales/ 2>/dev/null || true
     - cp docs/portal.html public/portal.html 2>/dev/null || true
-    - ls -la public/
+    - echo "=== Portal files ===" && ls -la public/portal.html public/js/ public/locales/
   artifacts:
     paths:
       - public
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: on_success
-  needs: []  # Run independently of other jobs
+  needs: []
