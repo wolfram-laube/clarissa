@@ -56,16 +56,25 @@ async function loadTranslations() {
     const namespaces = ['common', 'portal'];
     const langs = Object.keys(SUPPORTED_LANGUAGES);
     
+    // Get base URL for fetching locales
+    const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+    console.log('[i18n] Base URL:', baseUrl);
+    
     for (const lang of langs) {
         resources[lang] = {};
         for (const ns of namespaces) {
             try {
-                const response = await fetch(`locales/${lang}/${ns}.json`);
+                const url = `${baseUrl}locales/${lang}/${ns}.json`;
+                console.log('[i18n] Fetching:', url);
+                const response = await fetch(url);
                 if (response.ok) {
                     resources[lang][ns] = await response.json();
+                    console.log(`[i18n] Loaded ${lang}/${ns}`);
+                } else {
+                    console.warn(`[i18n] ${lang}/${ns}: ${response.status}`);
                 }
             } catch (e) {
-                console.warn(`Failed to load ${lang}/${ns}.json:`, e);
+                console.warn(`[i18n] Failed to load ${lang}/${ns}.json:`, e);
             }
         }
     }
@@ -75,9 +84,22 @@ async function loadTranslations() {
  * Initialize i18next
  */
 async function initI18n() {
-    await loadTranslations();
+    console.log('[i18n] Starting initialization...');
+    
+    try {
+        await loadTranslations();
+        console.log('[i18n] Translations loaded:', Object.keys(resources));
+    } catch (e) {
+        console.error('[i18n] Failed to load translations:', e);
+    }
     
     const lng = detectLanguage();
+    console.log('[i18n] Detected language:', lng);
+    
+    if (typeof i18next === 'undefined') {
+        console.error('[i18n] i18next not loaded! Check CDN.');
+        return null;
+    }
     
     await i18next.init({
         lng: lng,
