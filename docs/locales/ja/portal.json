@@ -1,0 +1,117 @@
+{
+    "header": {
+        "title": "Blauweiss オペレーションポータル",
+        "subtitle": "応募、CRM、請求、インフラの中央管理システム"
+    },
+    "quickLinks": {
+        "crmBoard": "CRMボード",
+        "hotLeads": "ホットリード",
+        "pipelines": "パイプライン",
+        "schedules": "スケジュール",
+        "githubMirror": "GitHub ミラー",
+        "crmDocs": "CRM ドキュメント"
+    },
+    "stats": {
+        "crmIssues": "CRM課題",
+        "hotLeads": "ホットリード",
+        "activePipeline": "アクティブパイプライン",
+        "conversion": "コンバージョン"
+    },
+    "sections": {
+        "applications": "応募管理",
+        "crm": "CRM & 品質保証",
+        "billing": "請求 & 勤怠管理",
+        "infrastructure": "開発環境",
+        "docs": "ドキュメント & ヘルプ"
+    },
+    "applications": {
+        "crawler": {
+            "title": "応募クローラー",
+            "description": "freelancermap.deから新規プロジェクトをクロール。キーワード: DevOps、Python、AI、Kubernetes。",
+            "start": "クロール開始"
+        },
+        "matcher": {
+            "title": "応募マッチャー",
+            "description": "クロールしたプロジェクトをプロファイル（Wolfram、Ian、Michael、チーム）とマッチング。",
+            "start": "マッチング開始"
+        },
+        "drafts": {
+            "title": "Gmail下書き作成",
+            "description": "トップマッチ用のパーソナライズされたカバーレターでGmail下書きを作成。",
+            "start": "下書き作成"
+        },
+        "fullPipeline": {
+            "title": "フルパイプライン",
+            "description": "完全パイプライン: クロール → マッチ → QA → 下書き。月〜金 08:00 毎日実行。",
+            "start": "フルパイプライン",
+            "dryRun": "ドライラン"
+        }
+    },
+    "crm": {
+        "board": {
+            "title": "CRMボード",
+            "description": "185件の課題を持つカンバンボード。新規から承諾まで8つのステータス列。",
+            "open": "ボードを開く",
+            "newIssue": "新規課題"
+        },
+        "integrity": {
+            "title": "CRM整合性チェック",
+            "description": "ラベルの一貫性、ゴースト検出、ファネルの健全性をチェック。毎週月曜 07:00。",
+            "start": "チェック開始",
+            "lastReport": "最終レポート"
+        }
+    },
+    "billing": {
+        "timesheet": {
+            "title": "タイムシート生成",
+            "description": "カレンダーイベントからタイムシートを生成。毎月1日 06:00。",
+            "trigger": "請求トリガー",
+            "drive": "Google Drive"
+        },
+        "invoice": {
+            "title": "請求書作成",
+            "description": "タイムシートからPDF請求書を生成し、メールで送信。",
+            "create": "請求書作成"
+        }
+    },
+    "infrastructure": {
+        "linux": {
+            "title": "Linux Runner (Yoga)",
+            "description": "Linux Yoga上のDocker + Shell Runner。プライマリCI/CDランナー。"
+        },
+        "mac": {
+            "title": "Mac Runner (Mac2)",
+            "description": "Mac Mini M2上のDocker + Shell Runner。フォールバックランナー。"
+        },
+        "gcp": {
+            "title": "GCP VM",
+            "description": "ベンチマークとヘビーワークロード用のGoogle Cloud VM。"
+        }
+    },
+    "docs": {
+        "manual": {
+            "title": "ユーザーマニュアル",
+            "description": "すべてのポータル機能のステップバイステップガイド。",
+            "quickStart": "クイックスタート",
+            "allDocs": "全ドキュメント"
+        },
+        "api": {
+            "title": "API & インテグレーション",
+            "description": "GitLab API、パイプライントリガー、Webhook。",
+            "apiDocs": "APIドキュメント",
+            "cicdSettings": "CI/CD設定"
+        }
+    },
+    "output": {
+        "triggering": "{{action}}をトリガー中...",
+        "pipelineStarted": "パイプライン #{{id}} が開始されました！",
+        "openPipeline": "パイプラインを開く",
+        "error": "エラー: {{message}}",
+        "networkError": "ネットワークエラー: {{message}}",
+        "manualTip": "ヒント: GitLab UIまたはCLIから手動でトリガーできます"
+    },
+    "footer": {
+        "title": "Blauweiss EDV e.U. オペレーションポータル",
+        "version": "v1.0"
+    }
+}
