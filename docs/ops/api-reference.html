@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference - Blauweiss Operations</title>
+    <style>
+        :root {
+            --bg: #0f1419;
+            --surface: #1a1f2e;
+            --text: #e6e6e6;
+            --subtext: #8b949e;
+            --accent: #7c3aed;
+            --blue: #58a6ff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 { color: var(--accent); margin-bottom: 1rem; }
+        h2 { color: var(--blue); margin: 1.5rem 0 0.5rem; }
+        a { color: var(--blue); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #333; }
+        th { color: var(--subtext); }
+        code { background: var(--surface); padding: 0.2rem 0.4rem; border-radius: 4px; }
+        pre { background: var(--surface); padding: 1rem; border-radius: 8px; overflow-x: auto; margin: 1rem 0; }
+        .back { margin-bottom: 2rem; }
+        .back a { 
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--surface);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="back"><a href="portal.html">← Portal</a></div>
+    
+    <h1>🔗 API Reference</h1>
+    <h2>GitLab CI Trigger API</h2>
+    <p>Das Portal nutzt die GitLab CI Trigger API um Pipelines zu starten.</p>
+    
+    <h2>Endpoint</h2>
+    <pre>POST https://gitlab.com/api/v4/projects/{project_id}/trigger/pipeline</pre>
+    
+    <h2>Parameter</h2>
+    <table>
+        <tr><th>Parameter</th><th>Beschreibung</th></tr>
+        <tr><td><code>token</code></td><td>CI Trigger Token</td></tr>
+        <tr><td><code>ref</code></td><td>Branch (default: main)</td></tr>
+        <tr><td><code>variables[KEY]</code></td><td>Pipeline-Variablen</td></tr>
+    </table>
+    
+    <h2>Beispiel</h2>
+    <pre>curl -X POST \
+  -F token=$TRIGGER_TOKEN \
+  -F ref=main \
+  -F "variables[PIPELINE_TYPE]=crawl" \
+  https://gitlab.com/api/v4/projects/77260390/trigger/pipeline</pre>
+
+</body>
+</html>
