@@ -134,6 +134,7 @@ nav:
         - ADR-026 Testing Strategy: architecture/adr/ADR-026-testing-strategy.md
         - ADR-027 Bidirectional Sync: architecture/adr/ADR-027-bidirectional-sync-strategy.md
         - ADR-028 Voice Input Architecture 🎤: architecture/adr/ADR-028-voice-input-architecture.md
+        - ADR-031 Portal Location Strategy: architecture/adr/ADR-031-portal-location-strategy.md
     - "📄 Publications":
       - Overview: publications/index.md
       - SPE Europe 2026: publications/spe-europe-2026/index.md
