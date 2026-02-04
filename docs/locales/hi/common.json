@@ -1,0 +1,64 @@
+{
+    "actions": {
+        "start": "शुरू करें",
+        "stop": "रोकें",
+        "status": "स्थिति",
+        "configure": "कॉन्फ़िगर करें",
+        "open": "खोलें",
+        "new": "नया",
+        "save": "सेव करें",
+        "cancel": "रद्द करें",
+        "delete": "हटाएं",
+        "edit": "संपादित करें",
+        "refresh": "रिफ्रेश करें",
+        "close": "बंद करें",
+        "confirm": "पुष्टि करें",
+        "back": "वापस",
+        "next": "अगला",
+        "search": "खोजें",
+        "filter": "फ़िल्टर",
+        "export": "निर्यात करें",
+        "import": "आयात करें"
+    },
+    "status": {
+        "active": "सक्रिय",
+        "inactive": "निष्क्रिय",
+        "pending": "लंबित",
+        "completed": "पूर्ण",
+        "error": "त्रुटि",
+        "warning": "चेतावनी",
+        "success": "सफलता",
+        "loading": "लोड हो रहा है...",
+        "ready": "तैयार"
+    },
+    "time": {
+        "today": "आज",
+        "yesterday": "कल",
+        "tomorrow": "कल",
+        "daily": "दैनिक",
+        "weekly": "साप्ताहिक",
+        "monthly": "मासिक",
+        "yearly": "वार्षिक"
+    },
+    "errors": {
+        "networkError": "नेटवर्क त्रुटि",
+        "serverError": "सर्वर त्रुटि",
+        "notFound": "नहीं मिला",
+        "unauthorized": "अनधिकृत",
+        "forbidden": "पहुंच अस्वीकृत",
+        "generic": "एक त्रुटि हुई"
+    },
+    "navigation": {
+        "home": "होम",
+        "dashboard": "डैशबोर्ड",
+        "settings": "सेटिंग्स",
+        "help": "मदद",
+        "docs": "दस्तावेज़",
+        "logout": "लॉग आउट"
+    },
+    "footer": {
+        "version": "संस्करण",
+        "copyright": "© {{year}} Blauweiss EDV e.U.",
+        "allRightsReserved": "सर्वाधिकार सुरक्षित"
+    }
+}
