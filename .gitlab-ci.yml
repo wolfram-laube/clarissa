@@ -174,5 +174,5 @@ pages:
       - public
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
-    - when: never
+      when: on_success
+  needs: []  # Run independently of other jobs
