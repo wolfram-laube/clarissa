@@ -1,0 +1,117 @@
+{
+    "header": {
+        "title": "Blauweiss Operations Portal",
+        "subtitle": "Zentrale Steuerung für Bewerbungen, CRM, Billing & Infrastruktur"
+    },
+    "quickLinks": {
+        "crmBoard": "CRM Board",
+        "hotLeads": "Hot Leads",
+        "pipelines": "Pipelines",
+        "schedules": "Schedules",
+        "githubMirror": "GitHub Mirror",
+        "crmDocs": "CRM Docs"
+    },
+    "stats": {
+        "crmIssues": "CRM Issues",
+        "hotLeads": "Hot Leads",
+        "activePipeline": "Aktive Pipeline",
+        "conversion": "Conversion"
+    },
+    "sections": {
+        "applications": "Bewerbungs-Management",
+        "crm": "CRM & Qualitätssicherung",
+        "billing": "Billing & Zeiterfassung",
+        "infrastructure": "Entwicklungsumgebungen",
+        "docs": "Dokumentation & Hilfe"
+    },
+    "applications": {
+        "crawler": {
+            "title": "Applications Crawler",
+            "description": "Crawlt freelancermap.de nach neuen Projekten. Keywords: DevOps, Python, AI, Kubernetes.",
+            "start": "Crawl starten"
+        },
+        "matcher": {
+            "title": "Applications Matcher",
+            "description": "Matched gecrawlte Projekte gegen Profile (Wolfram, Ian, Michael, Team).",
+            "start": "Match starten"
+        },
+        "drafts": {
+            "title": "Gmail Drafter",
+            "description": "Erstellt Gmail-Entwürfe für Top-Matches mit personalisierten Anschreiben.",
+            "start": "Drafts erstellen"
+        },
+        "fullPipeline": {
+            "title": "Full Pipeline",
+            "description": "Komplette Pipeline: Crawl → Match → QA → Drafts. Täglich Mo-Fr 08:00.",
+            "start": "Volle Pipeline",
+            "dryRun": "Dry Run"
+        }
+    },
+    "crm": {
+        "board": {
+            "title": "CRM Board",
+            "description": "Kanban-Board mit 185 Issues. 8 Status-Spalten von Neu bis Zusage.",
+            "open": "Board öffnen",
+            "newIssue": "Neues Issue"
+        },
+        "integrity": {
+            "title": "CRM Integrity Check",
+            "description": "Prüft Label-Konsistenz, Ghost-Detection, Funnel-Health. Weekly Mo 07:00.",
+            "start": "Check starten",
+            "lastReport": "Letzter Report"
+        }
+    },
+    "billing": {
+        "timesheet": {
+            "title": "Timesheet Generator",
+            "description": "Generiert Timesheets aus Kalender-Events. Monatlich am 1. um 06:00.",
+            "trigger": "Billing Trigger",
+            "drive": "Google Drive"
+        },
+        "invoice": {
+            "title": "Rechnungserstellung",
+            "description": "PDF-Rechnungen aus Timesheets generieren und per E-Mail versenden.",
+            "create": "Rechnung erstellen"
+        }
+    },
+    "infrastructure": {
+        "linux": {
+            "title": "Linux Runner (Yoga)",
+            "description": "Docker + Shell Runner auf Linux Yoga. Primary CI/CD Runner."
+        },
+        "mac": {
+            "title": "Mac Runner (Mac2)",
+            "description": "Docker + Shell Runner auf Mac Mini M2. Fallback Runner."
+        },
+        "gcp": {
+            "title": "GCP VM",
+            "description": "Google Cloud VM für Benchmarks und Heavy Workloads."
+        }
+    },
+    "docs": {
+        "manual": {
+            "title": "Bedienungsanleitung",
+            "description": "Schritt-für-Schritt Anleitung für alle Portal-Funktionen.",
+            "quickStart": "Quick Start",
+            "allDocs": "Alle Docs"
+        },
+        "api": {
+            "title": "API & Integration",
+            "description": "GitLab API, Pipeline Triggers, Webhooks.",
+            "apiDocs": "API Docs",
+            "cicdSettings": "CI/CD Settings"
+        }
+    },
+    "output": {
+        "triggering": "Triggering {{action}}...",
+        "pipelineStarted": "Pipeline #{{id}} gestartet!",
+        "openPipeline": "Pipeline öffnen",
+        "error": "Error: {{message}}",
+        "networkError": "Network Error: {{message}}",
+        "manualTip": "Tipp: Manuell triggern via GitLab UI oder CLI"
+    },
+    "footer": {
+        "title": "Blauweiss EDV e.U. Operations Portal",
+        "version": "v1.0"
+    }
+}
