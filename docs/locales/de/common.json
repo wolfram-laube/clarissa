@@ -1,0 +1,64 @@
+{
+    "actions": {
+        "start": "Starten",
+        "stop": "Stoppen",
+        "status": "Status",
+        "configure": "Konfigurieren",
+        "open": "Öffnen",
+        "new": "Neu",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "delete": "Löschen",
+        "edit": "Bearbeiten",
+        "refresh": "Aktualisieren",
+        "close": "Schließen",
+        "confirm": "Bestätigen",
+        "back": "Zurück",
+        "next": "Weiter",
+        "search": "Suchen",
+        "filter": "Filtern",
+        "export": "Exportieren",
+        "import": "Importieren"
+    },
+    "status": {
+        "active": "Aktiv",
+        "inactive": "Inaktiv",
+        "pending": "Ausstehend",
+        "completed": "Abgeschlossen",
+        "error": "Fehler",
+        "warning": "Warnung",
+        "success": "Erfolg",
+        "loading": "Lädt...",
+        "ready": "Bereit"
+    },
+    "time": {
+        "today": "Heute",
+        "yesterday": "Gestern",
+        "tomorrow": "Morgen",
+        "daily": "Täglich",
+        "weekly": "Wöchentlich",
+        "monthly": "Monatlich",
+        "yearly": "Jährlich"
+    },
+    "errors": {
+        "networkError": "Netzwerkfehler",
+        "serverError": "Serverfehler",
+        "notFound": "Nicht gefunden",
+        "unauthorized": "Nicht autorisiert",
+        "forbidden": "Zugriff verweigert",
+        "generic": "Ein Fehler ist aufgetreten"
+    },
+    "navigation": {
+        "home": "Startseite",
+        "dashboard": "Dashboard",
+        "settings": "Einstellungen",
+        "help": "Hilfe",
+        "docs": "Dokumentation",
+        "logout": "Abmelden"
+    },
+    "footer": {
+        "version": "Version",
+        "copyright": "© {{year}} Blauweiss EDV e.U.",
+        "allRightsReserved": "Alle Rechte vorbehalten"
+    }
+}
