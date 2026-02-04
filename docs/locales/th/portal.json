@@ -1,0 +1,117 @@
+{
+    "header": {
+        "title": "พอร์ทัลปฏิบัติการ Blauweiss",
+        "subtitle": "ศูนย์ควบคุมสำหรับใบสมัคร, CRM, การเรียกเก็บเงิน และโครงสร้างพื้นฐาน"
+    },
+    "quickLinks": {
+        "crmBoard": "บอร์ด CRM",
+        "hotLeads": "ลีดร้อน",
+        "pipelines": "ไปป์ไลน์",
+        "schedules": "กำหนดการ",
+        "githubMirror": "มิเรอร์ GitHub",
+        "crmDocs": "เอกสาร CRM"
+    },
+    "stats": {
+        "crmIssues": "ปัญหา CRM",
+        "hotLeads": "ลีดร้อน",
+        "activePipeline": "ไปป์ไลน์ที่ใช้งาน",
+        "conversion": "อัตราการแปลง"
+    },
+    "sections": {
+        "applications": "การจัดการใบสมัคร",
+        "crm": "CRM และการประกันคุณภาพ",
+        "billing": "การเรียกเก็บเงินและการติดตามเวลา",
+        "infrastructure": "สภาพแวดล้อมการพัฒนา",
+        "docs": "เอกสารและความช่วยเหลือ"
+    },
+    "applications": {
+        "crawler": {
+            "title": "ตัวรวบรวมใบสมัคร",
+            "description": "รวบรวมโครงการใหม่จาก freelancermap.de คีย์เวิร์ด: DevOps, Python, AI, Kubernetes",
+            "start": "เริ่มรวบรวม"
+        },
+        "matcher": {
+            "title": "ตัวจับคู่ใบสมัคร",
+            "description": "จับคู่โครงการที่รวบรวมกับโปรไฟล์ (Wolfram, Ian, Michael, ทีม)",
+            "start": "เริ่มจับคู่"
+        },
+        "drafts": {
+            "title": "ร่าง Gmail",
+            "description": "สร้างร่าง Gmail สำหรับการจับคู่ที่ดีที่สุดพร้อมจดหมายสมัครงานส่วนบุคคล",
+            "start": "สร้างร่าง"
+        },
+        "fullPipeline": {
+            "title": "ไปป์ไลน์เต็มรูปแบบ",
+            "description": "ไปป์ไลน์เต็มรูปแบบ: รวบรวม → จับคู่ → QA → ร่าง ทุกวันจันทร์-ศุกร์ 08:00",
+            "start": "ไปป์ไลน์เต็ม",
+            "dryRun": "ทดสอบ"
+        }
+    },
+    "crm": {
+        "board": {
+            "title": "บอร์ด CRM",
+            "description": "บอร์ดคัมบังมี 185 ปัญหา 8 คอลัมน์สถานะจากใหม่ถึงยอมรับ",
+            "open": "เปิดบอร์ด",
+            "newIssue": "ปัญหาใหม่"
+        },
+        "integrity": {
+            "title": "ตรวจสอบความสมบูรณ์ CRM",
+            "description": "ตรวจสอบความสอดคล้องของป้ายกำกับ การตรวจจับผี สุขภาพช่องทาง ทุกวันจันทร์ 07:00",
+            "start": "เริ่มตรวจสอบ",
+            "lastReport": "รายงานล่าสุด"
+        }
+    },
+    "billing": {
+        "timesheet": {
+            "title": "ตัวสร้างใบลงเวลา",
+            "description": "สร้างใบลงเวลาจากกิจกรรมปฏิทิน ทุกวันที่ 1 ของเดือน 06:00",
+            "trigger": "ทริกเกอร์การเรียกเก็บเงิน",
+            "drive": "Google Drive"
+        },
+        "invoice": {
+            "title": "การสร้างใบแจ้งหนี้",
+            "description": "สร้างใบแจ้งหนี้ PDF จากใบลงเวลาและส่งทางอีเมล",
+            "create": "สร้างใบแจ้งหนี้"
+        }
+    },
+    "infrastructure": {
+        "linux": {
+            "title": "Linux Runner (Yoga)",
+            "description": "Docker + Shell Runner บน Linux Yoga รันเนอร์ CI/CD หลัก"
+        },
+        "mac": {
+            "title": "Mac Runner (Mac2)",
+            "description": "Docker + Shell Runner บน Mac Mini M2 รันเนอร์สำรอง"
+        },
+        "gcp": {
+            "title": "GCP VM",
+            "description": "Google Cloud VM สำหรับการทดสอบประสิทธิภาพและงานหนัก"
+        }
+    },
+    "docs": {
+        "manual": {
+            "title": "คู่มือผู้ใช้",
+            "description": "คำแนะนำทีละขั้นตอนสำหรับฟังก์ชันพอร์ทัลทั้งหมด",
+            "quickStart": "เริ่มต้นอย่างรวดเร็ว",
+            "allDocs": "เอกสารทั้งหมด"
+        },
+        "api": {
+            "title": "API และการรวมระบบ",
+            "description": "GitLab API, ทริกเกอร์ไปป์ไลน์, Webhook",
+            "apiDocs": "เอกสาร API",
+            "cicdSettings": "การตั้งค่า CI/CD"
+        }
+    },
+    "output": {
+        "triggering": "กำลังทริกเกอร์ {{action}}...",
+        "pipelineStarted": "ไปป์ไลน์ #{{id}} เริ่มแล้ว!",
+        "openPipeline": "เปิดไปป์ไลน์",
+        "error": "ข้อผิดพลาด: {{message}}",
+        "networkError": "ข้อผิดพลาดเครือข่าย: {{message}}",
+        "manualTip": "เคล็ดลับ: ทริกเกอร์ด้วยตนเองผ่าน GitLab UI หรือ CLI"
+    },
+    "footer": {
+        "title": "พอร์ทัลปฏิบัติการ Blauweiss EDV e.U.",
+        "version": "v1.0"
+    }
+}
