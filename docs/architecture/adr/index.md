@@ -54,6 +54,7 @@ ADRs document significant architectural decisions, their rationale, and conseque
 | [026](ADR-026-testing-strategy.md) | Testing Strategy | Accepted |
 | [027](ADR-027-bidirectional-sync-strategy.md) | Bidirectional Repo Sync | Accepted |
 | [028](ADR-028-voice-input-architecture.md) | 🎤 Voice Input Architecture | Accepted |
+| [031](ADR-031-portal-location-strategy.md) | Portal Location Strategy | Accepted |
 
 ### Superseded
 | ADR | Title | Status | Superseded By |
