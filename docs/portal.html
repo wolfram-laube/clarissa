@@ -263,8 +263,8 @@
             <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/ops/crm/-/issues?label_name[]=hot-lead" target="_blank">🔥 <span data-i18n="quickLinks.hotLeads">Hot Leads</span></a>
             <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/pipelines" target="_blank">🔄 <span data-i18n="quickLinks.pipelines">Pipelines</span></a>
             <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/pipeline_schedules" target="_blank">📅 <span data-i18n="quickLinks.schedules">Schedules</span></a>
-            <a href="https://github.com/wolfram-laube/clarissa" target="_blank">🐙 <span data-i18n="quickLinks.githubMirror">GitHub Mirror</span></a>
-            <a href="ops/crm/" target="_blank">📖 <span data-i18n="quickLinks.crmDocs">CRM Docs</span></a>
+            <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa" target="_blank">🐙 <span data-i18n="quickLinks.githubMirror">GitHub Mirror</span></a>
+            <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/blob/main/docs/ops/crm.md" target="_blank" target="_blank">📖 <span data-i18n="quickLinks.crmDocs">CRM Docs</span></a>
         </div>
         
         <div class="stats-row" id="stats">
@@ -294,7 +294,7 @@
                 <p data-i18n="applications.crawler.description">Crawlt freelancermap.de nach neuen Projekten. Keywords: DevOps, Python, AI, Kubernetes.</p>
                 <div class="btn-group">
                     <button class="btn btn-primary" onclick="triggerPipeline('APPLICATIONS_CRAWL')">▶️ <span data-i18n="applications.crawler.start">Crawl starten</span></button>
-                    <a href="triggers/applications-crawl.html" class="btn btn-secondary">⚙️ <span data-i18n="common:actions.configure">Konfigurieren</span></a>
+                    <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/pipeline_schedules" target="_blank" class="btn btn-secondary">⚙️ <span data-i18n="common:actions.configure">Konfigurieren</span></a>
                 </div>
             </div>
             
@@ -303,7 +303,7 @@
                 <p data-i18n="applications.matcher.description">Matched gecrawlte Projekte gegen Profile (Wolfram, Ian, Michael, Team).</p>
                 <div class="btn-group">
                     <button class="btn btn-primary" onclick="triggerPipeline('APPLICATIONS_MATCH')">▶️ <span data-i18n="applications.matcher.start">Match starten</span></button>
-                    <a href="triggers/applications-match.html" class="btn btn-secondary">⚙️ <span data-i18n="common:actions.configure">Konfigurieren</span></a>
+                    <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/pipeline_schedules" target="_blank" class="btn btn-secondary">⚙️ <span data-i18n="common:actions.configure">Konfigurieren</span></a>
                 </div>
             </div>
             
@@ -312,7 +312,7 @@
                 <p data-i18n="applications.drafts.description">Erstellt Gmail-Entwürfe für Top-Matches mit personalisierten Anschreiben.</p>
                 <div class="btn-group">
                     <button class="btn btn-primary" onclick="triggerPipeline('APPLICATIONS_DRAFTS')">▶️ <span data-i18n="applications.drafts.start">Drafts erstellen</span></button>
-                    <a href="triggers/applications-drafts.html" class="btn btn-secondary">⚙️ <span data-i18n="common:actions.configure">Konfigurieren</span></a>
+                    <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/pipeline_schedules" target="_blank" class="btn btn-secondary">⚙️ <span data-i18n="common:actions.configure">Konfigurieren</span></a>
                 </div>
             </div>
             
@@ -343,7 +343,7 @@
                 <p data-i18n="crm.integrity.description">Prüft Label-Konsistenz, Ghost-Detection, Funnel-Health. Weekly Mo 07:00.</p>
                 <div class="btn-group">
                     <button class="btn btn-primary" onclick="triggerPipeline('CRM_QA')">▶️ <span data-i18n="crm.integrity.start">Check starten</span></button>
-                    <a href="triggers/crm-integrity.html" class="btn btn-secondary">📊 <span data-i18n="crm.integrity.lastReport">Letzter Report</span></a>
+                    <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/pipeline_schedules" target="_blank" class="btn btn-secondary">📊 <span data-i18n="crm.integrity.lastReport">Letzter Report</span></a>
                 </div>
             </div>
         </div>
@@ -355,7 +355,7 @@
                 <h2><span class="icon" style="background: linear-gradient(135deg, #00b894, #55efc4);">📝</span> <span data-i18n="billing.timesheet.title">Timesheet Generator</span></h2>
                 <p data-i18n="billing.timesheet.description">Generiert Timesheets aus Kalender-Events. Monatlich am 1. um 06:00.</p>
                 <div class="btn-group">
-                    <a href="billing-trigger.html" class="btn btn-primary">▶️ <span data-i18n="billing.timesheet.trigger">Billing Trigger</span></a>
+                    <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/pipeline_schedules" target="_blank" class="btn btn-primary">▶️ <span data-i18n="billing.timesheet.trigger">Billing Trigger</span></a>
                     <a href="https://drive.google.com/drive/folders/1-blauweiss-billing" class="btn btn-secondary" target="_blank">📁 <span data-i18n="billing.timesheet.drive">Google Drive</span></a>
                 </div>
             </div>
@@ -365,7 +365,7 @@
                 <p data-i18n="billing.invoice.description">PDF-Rechnungen aus Timesheets generieren und per E-Mail versenden.</p>
                 <div class="btn-group">
                     <button class="btn btn-primary" onclick="triggerPipeline('BILLING_INVOICE')">▶️ <span data-i18n="billing.invoice.create">Rechnung erstellen</span></button>
-                    <a href="triggers/billing.html" class="btn btn-secondary">⚙️ <span data-i18n="common:actions.configure">Konfigurieren</span></a>
+                    <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/pipeline_schedules" target="_blank" class="btn btn-secondary">⚙️ <span data-i18n="common:actions.configure">Konfigurieren</span></a>
                 </div>
             </div>
         </div>
@@ -411,8 +411,8 @@
                 <h2><span class="icon" style="background: linear-gradient(135deg, #fd79a8, #e84393);">📖</span> <span data-i18n="docs.manual.title">Bedienungsanleitung</span></h2>
                 <p data-i18n="docs.manual.description">Schritt-für-Schritt Anleitung für alle Portal-Funktionen.</p>
                 <div class="btn-group">
-                    <a href="ops/quickstart.html" class="btn btn-primary">📖 <span data-i18n="docs.manual.quickStart">Quick Start</span></a>
-                    <a href="ops/" class="btn btn-secondary">📚 <span data-i18n="docs.manual.allDocs">Alle Docs</span></a>
+                    <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/blob/main/docs/ops/quickstart.md" target="_blank" class="btn btn-primary">📖 <span data-i18n="docs.manual.quickStart">Quick Start</span></a>
+                    <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/blob/main/docs/ops" target="_blank" class="btn btn-secondary">📚 <span data-i18n="docs.manual.allDocs">Alle Docs</span></a>
                 </div>
             </div>
             
@@ -420,7 +420,7 @@
                 <h2><span class="icon" style="background: linear-gradient(135deg, #00cec9, #81ecec);">🔗</span> <span data-i18n="docs.api.title">API & Integration</span></h2>
                 <p data-i18n="docs.api.description">GitLab API, Pipeline Triggers, Webhooks.</p>
                 <div class="btn-group">
-                    <a href="ops/api-reference.html" class="btn btn-primary">📖 <span data-i18n="docs.api.apiDocs">API Docs</span></a>
+                    <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/blob/main/docs/ops/api-reference.md" target="_blank" class="btn btn-primary">📖 <span data-i18n="docs.api.apiDocs">API Docs</span></a>
                     <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/settings/ci_cd" class="btn btn-secondary" target="_blank">⚙️ <span data-i18n="docs.api.cicdSettings">CI/CD Settings</span></a>
                 </div>
             </div>
@@ -432,8 +432,8 @@
             <p data-i18n="footer.title">Blauweiss EDV e.U. Operations Portal v1.0</p>
             <p>
                 <a href="https://gitlab.com/wolfram_laube/blauweiss_llc" target="_blank">GitLab</a> · 
-                <a href="https://github.com/wolfram-laube/clarissa" target="_blank">GitHub</a> · 
-                <a href="ops/crm.html">CRM Docs</a>
+                <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa" target="_blank">GitHub</a> · 
+                <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/blob/main/docs/ops/crm.md" target="_blank">CRM Docs</a>
             </p>
         </footer>
     </div>
