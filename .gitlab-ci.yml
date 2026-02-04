@@ -152,3 +152,27 @@ stages:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
     - when: never
+
+
+# -----------------------------------------------------------------------------
+# PAGES: GitLab Pages Deployment
+# -----------------------------------------------------------------------------
+pages:
+  stage: deploy
+  image: python:3.11-slim
+  tags:
+    - docker-any
+  script:
+    - pip install mkdocs mkdocs-material mkdocs-jupyter pymdown-extensions
+    - mkdocs build --site-dir public
+    # Copy static HTML files that aren't part of mkdocs
+    - cp -r docs/js public/js/ 2>/dev/null || true
+    - cp -r docs/locales public/locales/ 2>/dev/null || true
+    - cp docs/portal.html public/portal.html 2>/dev/null || true
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
+    - when: never
