@@ -1,0 +1,117 @@
+{
+    "header": {
+        "title": "Blauweiss ऑपरेशंस पोर्टल",
+        "subtitle": "आवेदन, CRM, बिलिंग और इंफ्रास्ट्रक्चर के लिए केंद्रीय नियंत्रण"
+    },
+    "quickLinks": {
+        "crmBoard": "CRM बोर्ड",
+        "hotLeads": "हॉट लीड्स",
+        "pipelines": "पाइपलाइन",
+        "schedules": "शेड्यूल",
+        "githubMirror": "GitHub मिरर",
+        "crmDocs": "CRM डॉक्स"
+    },
+    "stats": {
+        "crmIssues": "CRM इश्यूज",
+        "hotLeads": "हॉट लीड्स",
+        "activePipeline": "सक्रिय पाइपलाइन",
+        "conversion": "कन्वर्जन"
+    },
+    "sections": {
+        "applications": "आवेदन प्रबंधन",
+        "crm": "CRM और गुणवत्ता आश्वासन",
+        "billing": "बिलिंग और समय ट्रैकिंग",
+        "infrastructure": "विकास वातावरण",
+        "docs": "दस्तावेज़ और सहायता"
+    },
+    "applications": {
+        "crawler": {
+            "title": "एप्लिकेशन क्रॉलर",
+            "description": "freelancermap.de से नई परियोजनाओं को क्रॉल करता है। कीवर्ड: DevOps, Python, AI, Kubernetes।",
+            "start": "क्रॉल शुरू करें"
+        },
+        "matcher": {
+            "title": "एप्लिकेशन मैचर",
+            "description": "क्रॉल की गई परियोजनाओं को प्रोफाइल (Wolfram, Ian, Michael, टीम) से मिलाता है।",
+            "start": "मैच शुरू करें"
+        },
+        "drafts": {
+            "title": "Gmail ड्राफ्टर",
+            "description": "व्यक्तिगत कवर लेटर के साथ टॉप मैच के लिए Gmail ड्राफ्ट बनाता है।",
+            "start": "ड्राफ्ट बनाएं"
+        },
+        "fullPipeline": {
+            "title": "पूर्ण पाइपलाइन",
+            "description": "पूर्ण पाइपलाइन: क्रॉल → मैच → QA → ड्राफ्ट। दैनिक सोम-शुक्र 08:00।",
+            "start": "पूर्ण पाइपलाइन",
+            "dryRun": "ड्राई रन"
+        }
+    },
+    "crm": {
+        "board": {
+            "title": "CRM बोर्ड",
+            "description": "185 इश्यूज के साथ कानबन बोर्ड। नए से स्वीकृत तक 8 स्थिति कॉलम।",
+            "open": "बोर्ड खोलें",
+            "newIssue": "नया इश्यू"
+        },
+        "integrity": {
+            "title": "CRM इंटीग्रिटी चेक",
+            "description": "लेबल संगतता, घोस्ट डिटेक्शन, फ़नल हेल्थ की जाँच। साप्ताहिक सोम 07:00।",
+            "start": "चेक शुरू करें",
+            "lastReport": "अंतिम रिपोर्ट"
+        }
+    },
+    "billing": {
+        "timesheet": {
+            "title": "टाइमशीट जेनरेटर",
+            "description": "कैलेंडर इवेंट्स से टाइमशीट जेनरेट करता है। मासिक 1 तारीख को 06:00।",
+            "trigger": "बिलिंग ट्रिगर",
+            "drive": "Google Drive"
+        },
+        "invoice": {
+            "title": "इनवॉइस जनरेशन",
+            "description": "टाइमशीट से PDF इनवॉइस जेनरेट करें और ईमेल से भेजें।",
+            "create": "इनवॉइस बनाएं"
+        }
+    },
+    "infrastructure": {
+        "linux": {
+            "title": "Linux Runner (Yoga)",
+            "description": "Linux Yoga पर Docker + Shell Runner। प्राइमरी CI/CD रनर।"
+        },
+        "mac": {
+            "title": "Mac Runner (Mac2)",
+            "description": "Mac Mini M2 पर Docker + Shell Runner। फ़ॉलबैक रनर।"
+        },
+        "gcp": {
+            "title": "GCP VM",
+            "description": "बेंचमार्क और भारी वर्कलोड के लिए Google Cloud VM।"
+        }
+    },
+    "docs": {
+        "manual": {
+            "title": "उपयोगकर्ता मैनुअल",
+            "description": "सभी पोर्टल फ़ंक्शन के लिए चरण-दर-चरण गाइड।",
+            "quickStart": "क्विक स्टार्ट",
+            "allDocs": "सभी डॉक्स"
+        },
+        "api": {
+            "title": "API और इंटीग्रेशन",
+            "description": "GitLab API, पाइपलाइन ट्रिगर, वेबहुक।",
+            "apiDocs": "API डॉक्स",
+            "cicdSettings": "CI/CD सेटिंग्स"
+        }
+    },
+    "output": {
+        "triggering": "{{action}} ट्रिगर हो रहा है...",
+        "pipelineStarted": "पाइपलाइन #{{id}} शुरू हुई!",
+        "openPipeline": "पाइपलाइन खोलें",
+        "error": "त्रुटि: {{message}}",
+        "networkError": "नेटवर्क त्रुटि: {{message}}",
+        "manualTip": "टिप: GitLab UI या CLI से मैन्युअली ट्रिगर करें"
+    },
+    "footer": {
+        "title": "Blauweiss EDV e.U. ऑपरेशंस पोर्टल",
+        "version": "v1.0"
+    }
+}
