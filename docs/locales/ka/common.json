@@ -1,0 +1,64 @@
+{
+    "actions": {
+        "start": "დაწყება",
+        "stop": "გაჩერება",
+        "status": "სტატუსი",
+        "configure": "კონფიგურაცია",
+        "open": "გახსნა",
+        "new": "ახალი",
+        "save": "შენახვა",
+        "cancel": "გაუქმება",
+        "delete": "წაშლა",
+        "edit": "რედაქტირება",
+        "refresh": "განახლება",
+        "close": "დახურვა",
+        "confirm": "დადასტურება",
+        "back": "უკან",
+        "next": "შემდეგი",
+        "search": "ძებნა",
+        "filter": "ფილტრი",
+        "export": "ექსპორტი",
+        "import": "იმპორტი"
+    },
+    "status": {
+        "active": "აქტიური",
+        "inactive": "არააქტიური",
+        "pending": "მოლოდინში",
+        "completed": "დასრულებული",
+        "error": "შეცდომა",
+        "warning": "გაფრთხილება",
+        "success": "წარმატება",
+        "loading": "იტვირთება...",
+        "ready": "მზად არის"
+    },
+    "time": {
+        "today": "დღეს",
+        "yesterday": "გუშინ",
+        "tomorrow": "ხვალ",
+        "daily": "ყოველდღე",
+        "weekly": "ყოველკვირეულად",
+        "monthly": "ყოველთვიურად",
+        "yearly": "ყოველწლიურად"
+    },
+    "errors": {
+        "networkError": "ქსელის შეცდომა",
+        "serverError": "სერვერის შეცდომა",
+        "notFound": "ვერ მოიძებნა",
+        "unauthorized": "არაავტორიზებული",
+        "forbidden": "წვდომა აკრძალულია",
+        "generic": "მოხდა შეცდომა"
+    },
+    "navigation": {
+        "home": "მთავარი",
+        "dashboard": "დაფა",
+        "settings": "პარამეტრები",
+        "help": "დახმარება",
+        "docs": "დოკუმენტაცია",
+        "logout": "გამოსვლა"
+    },
+    "footer": {
+        "version": "ვერსია",
+        "copyright": "© {{year}} Blauweiss EDV e.U.",
+        "allRightsReserved": "ყველა უფლება დაცულია"
+    }
+}
