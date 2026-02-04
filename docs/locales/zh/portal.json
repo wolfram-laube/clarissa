@@ -1,0 +1,117 @@
+{
+    "header": {
+        "title": "Blauweiss 运营门户",
+        "subtitle": "应聘、CRM、账单和基础设施的中央控制系统"
+    },
+    "quickLinks": {
+        "crmBoard": "CRM看板",
+        "hotLeads": "热门线索",
+        "pipelines": "流水线",
+        "schedules": "计划任务",
+        "githubMirror": "GitHub镜像",
+        "crmDocs": "CRM文档"
+    },
+    "stats": {
+        "crmIssues": "CRM问题",
+        "hotLeads": "热门线索",
+        "activePipeline": "活跃流水线",
+        "conversion": "转化率"
+    },
+    "sections": {
+        "applications": "应聘管理",
+        "crm": "CRM与质量保证",
+        "billing": "账单与工时管理",
+        "infrastructure": "开发环境",
+        "docs": "文档与帮助"
+    },
+    "applications": {
+        "crawler": {
+            "title": "应聘爬虫",
+            "description": "从freelancermap.de爬取新项目。关键词：DevOps、Python、AI、Kubernetes。",
+            "start": "开始爬取"
+        },
+        "matcher": {
+            "title": "应聘匹配器",
+            "description": "将爬取的项目与个人资料（Wolfram、Ian、Michael、团队）进行匹配。",
+            "start": "开始匹配"
+        },
+        "drafts": {
+            "title": "Gmail草稿生成",
+            "description": "为最佳匹配创建个性化求职信的Gmail草稿。",
+            "start": "创建草稿"
+        },
+        "fullPipeline": {
+            "title": "完整流水线",
+            "description": "完整流水线：爬取 → 匹配 → QA → 草稿。每日周一至周五08:00执行。",
+            "start": "完整流水线",
+            "dryRun": "试运行"
+        }
+    },
+    "crm": {
+        "board": {
+            "title": "CRM看板",
+            "description": "包含185个问题的看板。从新建到接受共8个状态列。",
+            "open": "打开看板",
+            "newIssue": "新建问题"
+        },
+        "integrity": {
+            "title": "CRM完整性检查",
+            "description": "检查标签一致性、幽灵检测、漏斗健康度。每周一07:00执行。",
+            "start": "开始检查",
+            "lastReport": "最新报告"
+        }
+    },
+    "billing": {
+        "timesheet": {
+            "title": "工时表生成",
+            "description": "从日历事件生成工时表。每月1日06:00执行。",
+            "trigger": "账单触发",
+            "drive": "Google Drive"
+        },
+        "invoice": {
+            "title": "发票生成",
+            "description": "从工时表生成PDF发票并通过电子邮件发送。",
+            "create": "创建发票"
+        }
+    },
+    "infrastructure": {
+        "linux": {
+            "title": "Linux Runner (Yoga)",
+            "description": "Linux Yoga上的Docker + Shell Runner。主要CI/CD运行器。"
+        },
+        "mac": {
+            "title": "Mac Runner (Mac2)",
+            "description": "Mac Mini M2上的Docker + Shell Runner。备用运行器。"
+        },
+        "gcp": {
+            "title": "GCP虚拟机",
+            "description": "用于基准测试和重负载工作的Google Cloud虚拟机。"
+        }
+    },
+    "docs": {
+        "manual": {
+            "title": "用户手册",
+            "description": "所有门户功能的分步指南。",
+            "quickStart": "快速入门",
+            "allDocs": "所有文档"
+        },
+        "api": {
+            "title": "API与集成",
+            "description": "GitLab API、流水线触发器、Webhook。",
+            "apiDocs": "API文档",
+            "cicdSettings": "CI/CD设置"
+        }
+    },
+    "output": {
+        "triggering": "正在触发 {{action}}...",
+        "pipelineStarted": "流水线 #{{id}} 已启动！",
+        "openPipeline": "打开流水线",
+        "error": "错误：{{message}}",
+        "networkError": "网络错误：{{message}}",
+        "manualTip": "提示：可通过GitLab UI或CLI手动触发"
+    },
+    "footer": {
+        "title": "Blauweiss EDV e.U. 运营门户",
+        "version": "v1.0"
+    }
+}
