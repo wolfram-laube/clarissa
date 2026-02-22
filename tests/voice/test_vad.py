@@ -9,7 +9,7 @@ import numpy as np
 import io
 import wave
 
-from clarissa.voice.audio_capture import (
+from clarissa.voice.capture import (
     AudioCapture,
     AudioConfig,
     AudioChunk,

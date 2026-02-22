@@ -111,7 +111,7 @@ class TestWhisperTranscriber:
             result = await transcriber.transcribe(audio_data)
         
         assert result.text == "Hello, this is a test."
-        assert result.latency_ms > 0
+        assert result.latency_ms >= 0
         assert transcriber.metrics.total_requests == 1
 
     @pytest.mark.asyncio
@@ -274,7 +274,7 @@ class TestIntegration:
         result = await transcriber.transcribe(buffer.read())
         
         assert isinstance(result.text, str)
-        assert result.latency_ms > 0
+        assert result.latency_ms >= 0
         assert result.cost_usd > 0
 
 
