@@ -20,6 +20,7 @@ from .models import (
     Phase,
 )
 from .backends import SimulatorBackend, register_backend, get_backend, list_backends
+from .deck_generator import generate_deck, write_deck
 
 __all__ = [
     # Models
@@ -28,4 +29,6 @@ __all__ = [
     "SimMetadata", "SimStatus", "WellType", "Phase",
     # Backend system
     "SimulatorBackend", "register_backend", "get_backend", "list_backends",
+    # Deck generator
+    "generate_deck", "write_deck",
 ]
