@@ -1,13 +1,14 @@
 # ADR-040: Platform Adapter Layer (PAL) — Pluggable Backend Architecture
 
-| Status | **Accepted** |
-|--------|-------------|
+| Status | **Accepted — Implemented** |
+|--------|----------------|
 | Date | 2026-02-22 |
+| Updated | 2026-02-22 (v2: independent modules, thin SDK) |
 | Authors | Wolfram Laube |
 | Supersedes | — |
 | Related | ADR-024 (Core Architecture), ADR-038 (Sim-Engine), ADR-011 (OPM Flow) |
 | Epic | #161 (CLARISSA Real Reservoir Simulation Engine) |
-| Issues | #162, #163, #164, #165, #166, #172 |
+| Issues | #162, #163, #164, #165, #166, #167, #172 |
 
 ---
 
@@ -89,8 +90,8 @@ class PlatformAdapter(ABC):
 ```
 PlatformAdapter (ABC)
 ├── SimulatorBackend (ABC)          adapter_type = "simulator"
-│   ├── OPMBackend                  name = "opm"        ✅ Phase A
-│   ├── MRSTBackend                 name = "mrst"       🔲 Phase B (#166)
+│   ├── OPMBackend                  name = "opm"        ✅ Implemented
+│   ├── MRSTBackend                 name = "mrst"       ✅ Implemented
 │   └── MockBackend                 name = "mock"       ✅ Testing
 │
 ├── EvidenceProvider (ABC)          adapter_type = "evidence"
@@ -190,24 +191,103 @@ provisioning backend.
 
 ```
 src/clarissa/
-├── pal/                          # Platform Adapter Layer (generic)
-│   ├── __init__.py               # Exports: PlatformAdapter, AdapterRegistry
-│   ├── base.py                   # PlatformAdapter ABC
-│   └── registry.py               # AdapterRegistry
+├── pal/                              # Platform Adapter Layer (generic)
+│   ├── __init__.py                   # Exports: PlatformAdapter, AdapterRegistry
+│   ├── base.py                       # PlatformAdapter ABC
+│   └── registry.py                   # AdapterRegistry
 │
-└── sim_engine/                   # Simulator-specific PAL specialization
-    ├── __init__.py               # Public API
-    ├── models.py                 # SimRequest, UnifiedResult, etc.
-    ├── deck_generator.py         # Eclipse .DATA generation
-    ├── sim_api.py                # FastAPI service
-    ├── Dockerfile                # OPM Flow container
-    └── backends/
-        ├── __init__.py           # Exports + registry functions
-        ├── base.py               # SimulatorBackend(PlatformAdapter)
-        ├── registry.py           # Simulator-specific registry wrapper
-        ├── opm_backend.py        # OPM Flow implementation
-        └── mrst_backend.py       # MRST/Octave implementation (Phase B)
+└── sim_engine/                       # Simulator-specific PAL specialization
+    ├── __init__.py                   # Public API + convenience imports
+    ├── models.py                     # SimRequest, UnifiedResult (CONTRACT SURFACE)
+    │
+    ├── backends/                     # PAL adapter implementations
+    │   ├── __init__.py               # Exports + registry functions
+    │   ├── base.py                   # SimulatorBackend(PlatformAdapter) ABC
+    │   ├── registry.py               # Simulator-specific registry wrapper
+    │   ├── opm_backend.py            # OPM Flow implementation      ✅
+    │   └── mrst_backend.py           # MRST/Octave implementation   ✅
+    │
+    ├── comparison.py                 # Cross-result comparison (NRMSE, MAE, R²)
+    ├── deck_parser.py                # Eclipse .DATA → SimRequest
+    ├── deck_generator.py             # SimRequest → Eclipse .DATA
+    ├── eclipse_reader.py             # .SMSPEC/.UNRST → UnifiedResult
+    ├── mrst_script_generator.py      # SimRequest → MRST .m scripts
+    │
+    ├── sim_api.py                    # FastAPI service (uses registry directly)
+    ├── engine.py                     # Thin SDK wrapper (notebooks only)
+    └── Dockerfile                    # OPM Flow container (planned)
 ```
+
+### 7. Independent Modules — No God Class
+
+**Critical architectural principle from ICE v2.1:** the system is composed
+of independent modules connected through Pydantic models, not a central
+orchestrator class. Each module has exactly one responsibility:
+
+```
+PAL AdapterRegistry (singleton)
+     │
+     ├── sim_api.py            → registry.get("simulator", name) → backend.run()
+     │                           ONE JOB: HTTP gateway for simulation jobs
+     │
+     ├── comparison.py         → compare(UnifiedResult, UnifiedResult)
+     │                           ONE JOB: metric computation (NRMSE, MAE, R²)
+     │
+     ├── deck_parser.py        → parse_deck_file(path) → SimRequest
+     │                           ONE JOB: Eclipse .DATA → model
+     │
+     ├── eclipse_reader.py     → read_eclipse_output(path) → UnifiedResult
+     │                           ONE JOB: binary output → model
+     │
+     ├── deck_generator.py     → generate_deck(SimRequest) → str
+     │                           ONE JOB: model → Eclipse .DATA
+     │
+     └── mrst_script_generator → generate_mrst_script(SimRequest) → str
+                                  ONE JOB: model → Octave .m script
+```
+
+**Module coupling rules:**
+- Modules depend on `models.py` (`SimRequest`, `UnifiedResult`) — nothing else
+- No module imports another module
+- No module imports `SimEngine`
+- `sim_api.py` uses the PAL Registry directly, not through any wrapper
+- New modules add capabilities without modifying existing ones
+
+**The Pydantic models ARE the abstraction layer.** `SimRequest` and
+`UnifiedResult` are the contracts. Any code that produces or consumes
+these models is automatically PAL-compatible.
+
+### 8. SimEngine — Thin SDK (Not Architectural Core)
+
+`SimEngine` exists as a convenience wrapper for notebooks and REPL sessions.
+It is **not** part of the architecture — it is syntactic sugar.
+
+```python
+# Notebook convenience:
+engine = SimEngine()
+result = engine.run(request, backend="opm")
+report = engine.compare(result_a, result_b)
+
+# Production code — use modules directly:
+backend = get_backend("opm")
+errors = backend.validate(request)
+raw = backend.run(request, work_dir)
+result = backend.parse_result(raw, request)
+report = compare(result_a, result_b)
+```
+
+**SimEngine constraints:**
+- Holds NO state beyond a reference to the PAL `AdapterRegistry`
+- Contains NO business logic — every method delegates to an independent module
+- Is NOT used by `sim_api.py` or any other service
+- May be deleted without architectural impact
+
+**Anti-pattern avoided:** An early design had SimEngine as a 350 LOC god
+class with its own `_backends: dict` (bypassing PAL), error-swallowing
+run() methods, and seven distinct responsibilities. This was refactored to
+the current thin delegation pattern. In ICE v2.1, there was no
+`InfrastructureEngine` god class either — services consumed adapters through
+the registry directly. CLARISSA follows the same principle.
 
 ---
 
@@ -254,10 +334,28 @@ src/clarissa/
 | Criterion | Status |
 |-----------|--------|
 | ICE v2.1 §3.2.12 alignment | ✅ Same patterns, same architect |
+| Single Registry (no parallel state) | ✅ SimEngine._backends=0, delegates to PAL |
+| Independent Modules (no god class) | ✅ 5 modules, 1-2 cross-imports (models only) |
+| sim_api uses registry directly | ✅ 0 SimEngine refs in sim_api.py |
 | ADR-024 Core Architecture | ✅ PAL is the "Simulator-Agnostic" layer |
 | ADR-038 Sim-Engine | ✅ SimulatorBackend extends PlatformAdapter |
-| GOV-001 test coverage | ✅ 90+ sim_engine tests, PAL tests in contracts |
-| Pydantic models | ✅ SimRequest, UnifiedResult fully typed |
+| GOV-001 test coverage | ✅ 574 tests passing, 0 failed |
+| Pydantic models as contract | ✅ SimRequest, UnifiedResult fully typed |
+
+### Implementation Status
+
+| Component | Module | Tests | MR |
+|-----------|--------|-------|----|
+| PAL ABC + Registry | `pal/` | 33+31 | !131, !90 |
+| SimulatorBackend ABC | `backends/base.py` | 31 | !90 |
+| OPM Flow Backend | `backends/opm_backend.py` | 67 | !91, !93 |
+| MRST Backend | `backends/mrst_backend.py` | 67 | !95 |
+| Deck Parser | `deck_parser.py` | 57 | !96 |
+| Deck Generator | `deck_generator.py` | 38 | !91 |
+| Eclipse Reader | `eclipse_reader.py` | 37 | !98 |
+| Comparison Engine | `comparison.py` | 58 | !97 |
+| SimEngine (thin SDK) | `engine.py` | 26 | !99 |
+| Sim-Engine API | `sim_api.py` | 31 | !90 |
 
 ---
 
@@ -267,4 +365,11 @@ src/clarissa/
 - ADR-024: CLARISSA Core System Architecture
 - ADR-038: Sim-Engine Architecture
 - Epic #161: CLARISSA Real Reservoir Simulation Engine
+- Issue #162: SimulatorBackend ABC
+- Issue #163: OPM Flow Backend
+- Issue #164: Deck Generator
+- Issue #165: Sim-Engine API
+- Issue #166: MRST Backend
+- Issue #167: Comparison Engine
 - Issue #172: PAL — Platform Adapter Layer
+- MR !95–!99: Phase A Implementation (MRST, Data Integration, Comparison, Eclipse Reader, SimEngine SDK)
