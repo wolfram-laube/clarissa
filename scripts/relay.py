@@ -41,10 +41,7 @@ from pathlib import Path
 
 # Configuration
 GITLAB_PROJECT_ID = "77260390"
-GITLAB_TOKEN = os.environ.get(
-    "GITLAB_TOKEN",
-    "glpat-B2kbE0n56oTpioepn5ZT-W86MQp1OnN4Y3gK.01.1007svpwt"
-)
+GITLAB_TOKEN = os.environ.get("GITLAB_TOKEN", "")
 
 # Knowledge base files in GitLab
 KNOWLEDGE_FILES = [
