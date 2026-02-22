@@ -299,17 +299,23 @@ class SimpleVAD:
         # Calculate energy
         samples_float = samples.astype(np.float32)
         rms = np.sqrt(np.mean(samples_float ** 2))
-        energy_db = 20 * np.log10(max(rms, 1) / 32768.0)
+        energy_db = 20 * np.log10(max(float(rms), 1) / 32768.0)
         
         # Calculate zero-crossing rate
         signs = np.sign(samples_float)
-        zcr = np.mean(np.abs(np.diff(signs))) / 2
+        zcr = float(np.mean(np.abs(np.diff(signs))) / 2)
         
         # Speech typically has moderate energy and ZCR
         energy_ok = energy_db > self.energy_threshold_db
         zcr_ok = zcr > self.zcr_threshold and zcr < 0.5
         
-        is_speech = energy_ok and zcr_ok
-        confidence = 0.8 if is_speech else 0.2
+        # Energy alone is a strong indicator; ZCR boosts confidence
+        is_speech = bool(energy_ok)
+        if energy_ok and zcr_ok:
+            confidence = 0.9
+        elif energy_ok:
+            confidence = 0.6
+        else:
+            confidence = 0.1
         
         return is_speech, confidence
