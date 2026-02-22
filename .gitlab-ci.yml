@@ -168,6 +168,7 @@ pages:
     - cp -r docs/js/* public/js/
     - cp -r docs/locales/* public/locales/
     - cp -r docs/ops public/ops
+    - mkdir -p public/viewer && cp docs/viewer/*.html public/viewer/
     - cp docs/ops/i18n.md public/ops/ 2>/dev/null || echo "ops/i18n.md not found"
     - cp docs/index.md public/ 2>/dev/null || echo "No index.md"
     # Create simple index.html redirect to portal
