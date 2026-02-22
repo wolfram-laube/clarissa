@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLARISSA · SPE Benchmark Suite</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0e1a;--surface:#111827;--s2:#1a2235;--s3:#232d42;--border:#2a3654;--text:#e2e8f0;--dim:#8b99b3;--muted:#556278;--accent:#22d3ee;--opm:#10b981;--mrst:#f59e0b;--danger:#ef4444;--oil:#b45309;--water:#2563eb;--gas:#dc2626;--pres:#7c3aed;--perm:#06b6d4;--poro:#8b5cf6;--r:10px;--f:'DM Sans',system-ui,sans-serif;--m:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--f);line-height:1.5;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 15%,rgba(34,211,238,.04) 0%,transparent 50%),radial-gradient(ellipse at 85% 85%,rgba(16,185,129,.03) 0%,transparent 50%);pointer-events:none;z-index:0}
+.app{position:relative;z-index:1;min-height:100vh}
+
+/* Header */
+header{padding:1rem 2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1.2rem;background:var(--surface);flex-wrap:wrap}
+header .logo{font-family:var(--m);font-weight:600;font-size:.72rem;color:var(--accent);letter-spacing:.15em;text-transform:uppercase}
+header h1{font-size:1rem;font-weight:500}
+header .meta{margin-left:auto;font-family:var(--m);font-size:.68rem;color:var(--dim)}
+
+/* Deck Selector */
+.deck-bar{padding:.75rem 2rem;background:linear-gradient(135deg,var(--s2),var(--s3));border-bottom:1px solid var(--border);display:flex;gap:.5rem;flex-wrap:wrap}
+.deck-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--r);padding:.6rem 1rem;cursor:pointer;transition:all .2s;min-width:180px;flex:1}
+.deck-card:hover{border-color:var(--dim)}
+.deck-card.active{border-color:var(--accent);background:rgba(34,211,238,.06)}
+.deck-card .dc-name{font-family:var(--m);font-size:.78rem;font-weight:600;color:var(--accent)}
+.deck-card .dc-grid{font-family:var(--m);font-size:.62rem;color:var(--dim);margin-top:.15rem}
+.deck-card .dc-desc{font-size:.65rem;color:var(--muted);margin-top:.2rem;line-height:1.3}
+
+/* Controls */
+.controls{padding:.7rem 2rem;background:var(--s2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1.3rem;flex-wrap:wrap}
+.cg{display:flex;align-items:center;gap:.35rem}
+.cg label{font-size:.65rem;font-family:var(--m);color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+.bg{display:flex;gap:1px}
+.b{background:var(--s3);border:1px solid var(--border);color:var(--dim);padding:.22rem .5rem;cursor:pointer;font-family:var(--m);font-size:.65rem;transition:all .15s;white-space:nowrap}
+.b:first-child{border-radius:6px 0 0 6px}.b:last-child{border-radius:0 6px 6px 0}.b:only-child{border-radius:6px}
+.b.act,.b:hover{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.b.sact{background:var(--perm);color:var(--bg);border-color:var(--perm)}
+input[type=range]{-webkit-appearance:none;width:200px;height:5px;background:var(--border);border-radius:3px;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--accent);border-radius:50%;cursor:pointer}
+.td{font-family:var(--m);font-size:.8rem;color:var(--accent);min-width:100px}
+
+/* Metrics */
+.mrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:.5rem;padding:.7rem 2rem;background:var(--surface);border-bottom:1px solid var(--border)}
+.mc{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:.5rem .7rem}
+.mc .ml{font-family:var(--m);font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+.mc .mv{font-family:var(--m);font-size:1.2rem;font-weight:600;margin-top:.1rem}
+.mc .ms{font-size:.63rem;color:var(--dim);margin-top:.08rem}
+.exc{color:var(--opm)}.gd{color:var(--accent)}.wrn{color:var(--mrst)}.bad{color:var(--danger)}
+
+/* Grid panels */
+.mgrid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:380px;gap:1px;background:var(--border)}
+.pnl{background:var(--surface);padding:.7rem 1rem;position:relative}
+.pt{font-family:var(--m);font-size:.62rem;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem;display:flex;align-items:center;gap:.35rem}
+.pt .dot{width:6px;height:6px;border-radius:50%}
+.cw{width:100%;height:calc(100% - 1.5rem);position:relative;cursor:grab}
+.cw canvas{display:block;width:100%!important;height:100%!important}
+.cw:active{cursor:grabbing}
+.cleg{position:absolute;top:2rem;right:.5rem;background:rgba(17,24,39,.9);border:1px solid var(--border);border-radius:8px;padding:.4rem;z-index:10}
+.lg{width:12px;height:90px;border-radius:3px;margin:0 auto}
+.ll{font-family:var(--m);font-size:.55rem;color:var(--dim);text-align:center}
+.lt{font-family:var(--m);font-size:.55rem;color:var(--dim);text-align:center;margin-bottom:.2rem;letter-spacing:.04em}
+
+/* Charts */
+.crow{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.cpnl{background:var(--surface);padding:.7rem 1rem;min-height:280px}
+
+footer{padding:.7rem 2rem;border-top:1px solid var(--border);background:var(--surface);font-family:var(--m);font-size:.6rem;color:var(--muted);display:flex;justify-content:space-between}
+@media(max-width:960px){.mgrid,.crow{grid-template-columns:1fr}.deck-bar{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <span class="logo">CLARISSA</span>
+  <h1>SPE Benchmark Suite · Cross-Validation Viewer</h1>
+  <span class="meta" id="hdr-meta"></span>
+</header>
+
+<div class="deck-bar" id="deck-bar"></div>
+
+<div class="controls">
+  <div class="cg"><label>Dynamic</label><div class="bg" id="dyn-btns">
+    <button class="b act" data-p="pressure">Pressure</button>
+    <button class="b" data-p="saturation_oil">S<sub>o</sub></button>
+    <button class="b" data-p="saturation_water">S<sub>w</sub></button>
+    <button class="b" data-p="saturation_gas">S<sub>g</sub></button>
+  </div></div>
+  <div class="cg"><label>Static</label><div class="bg" id="sta-btns">
+    <button class="b" data-p="permx">Perm</button>
+    <button class="b" data-p="poro">φ</button>
+  </div></div>
+  <div class="cg"><label>Time</label>
+    <input type="range" id="ts-sl" min="0" max="24" value="0">
+    <span class="td" id="ts-disp">Day 0</span>
+  </div>
+  <div class="cg"><label>Layer</label><div class="bg" id="lay-btns"></div></div>
+  <div class="cg"><button class="b" id="btn-play" style="border-radius:6px">▶ Play</button></div>
+</div>
+
+<div class="mrow" id="mrow"></div>
+
+<div class="mgrid">
+  <div class="pnl"><div class="pt"><span class="dot" style="background:var(--opm)"></span>OPM Flow</div>
+    <div class="cw" id="cv-opm"><div class="cleg" id="leg-opm"></div></div></div>
+  <div class="pnl"><div class="pt"><span class="dot" style="background:var(--mrst)"></span>MRST Octave</div>
+    <div class="cw" id="cv-mrst"><div class="cleg" id="leg-mrst"></div></div></div>
+</div>
+
+<div class="crow">
+  <div class="cpnl"><div class="pt"><span class="dot" style="background:var(--oil)"></span>Production — Oil Rate & BHP</div><div id="ch-prod" style="height:260px"></div></div>
+  <div class="cpnl"><div class="pt"><span class="dot" style="background:var(--water)"></span>Water Production & Cut</div><div id="ch-water" style="height:260px"></div></div>
+</div>
+<div class="crow">
+  <div class="cpnl"><div class="pt"><span class="dot" style="background:var(--pres)"></span>NRMSE per Timestep</div><div id="ch-nrmse" style="height:260px"></div></div>
+  <div class="cpnl"><div class="pt"><span class="dot" style="background:var(--accent)"></span>Distribution Histogram</div><div id="ch-hist" style="height:260px"></div></div>
+</div>
+
+<footer>
+  <span>CLARISSA Sim-Engine · ADR-040 · PAL Architecture · ICE v2.1</span>
+  <span id="ft-info"></span>
+</footer>
+</div>
+
+<script id="data-script"></script>
+<script>
+// ═══════ DATA ═══════
+let DATA=null, BM=null, curBM='SPE1', curTs=0, curProp='pressure', isStatic=false, playInt=null, rOPM=null, rMRST=null;
+async function loadData(){
+  try{const r=await fetch('spe_benchmarks.json');if(r.ok){DATA=await r.json();return}}catch(e){}
+  if(typeof SPE_DATA!=='undefined'){DATA=SPE_DATA}
+}
+
+// ═══════ COLORMAPS ═══════
+const CM={
+  pressure:{stops:[[0,[20,0,80]],[.3,[65,25,160]],[.5,[120,60,200]],[.75,[190,130,220]],[1,[245,210,245]]],l:'Pressure [bar]'},
+  saturation_oil:{stops:[[0,[15,15,15]],[.25,[80,50,8]],[.5,[150,90,15]],[.75,[200,130,25]],[1,[245,185,50]]],l:'S_oil'},
+  saturation_water:{stops:[[0,[8,15,35]],[.25,[15,40,110]],[.5,[30,80,180]],[.75,[70,135,225]],[1,[140,200,255]]],l:'S_water'},
+  saturation_gas:{stops:[[0,[15,15,15]],[.25,[110,25,20]],[.5,[185,45,30]],[.75,[230,90,40]],[1,[255,165,60]]],l:'S_gas'},
+  permx:{stops:[[0,[10,30,50]],[.3,[15,100,130]],[.6,[30,180,190]],[1,[100,240,255]]],l:'Perm [mD]'},
+  poro:{stops:[[0,[25,10,60]],[.3,[70,30,140]],[.6,[130,70,200]],[1,[200,140,255]]],l:'Porosity'},
+};
+function scm(cm,t){t=Math.max(0,Math.min(1,t));const s=cm.stops;for(let i=0;i<s.length-1;i++)if(t>=s[i][0]&&t<=s[i+1][0]){const f=(t-s[i][0])/(s[i+1][0]-s[i][0]),a=s[i][1],b=s[i+1][1];return[Math.round(a[0]+f*(b[0]-a[0])),Math.round(a[1]+f*(b[1]-a[1])),Math.round(a[2]+f*(b[2]-a[2]))]}return s[s.length-1][1]}
+function gcss(cm){return`linear-gradient(to top,${cm.stops.map(s=>`rgb(${s[1].join(',')})`).join(',')})`}
+
+// ═══════ THREE.JS RENDERER ═══════
+class GR{
+  constructor(cid,bk){
+    this.el=document.getElementById(cid);this.bk=bk;this.ms=[];this.wms=[];this.lyr='all';
+    this.sc=new THREE.Scene();this.sc.background=new THREE.Color(0x0a0e1a);
+    const w=this.el.clientWidth||500,h=this.el.clientHeight||340;
+    this.cam=new THREE.PerspectiveCamera(38,w/h,.1,2000);
+    this.ren=new THREE.WebGLRenderer({antialias:true,alpha:true});
+    this.ren.setSize(w,h);this.ren.setPixelRatio(Math.min(window.devicePixelRatio,2));
+    this.el.insertBefore(this.ren.domElement,this.el.firstChild);
+    this.sc.add(new THREE.AmbientLight(0xffffff,.5));
+    const d=new THREE.DirectionalLight(0xffffff,.8);d.position.set(15,20,10);this.sc.add(d);
+    this._anim();
+  }
+  build(g){
+    // Clear old
+    this.ms.forEach(m=>{this.sc.remove(m);m.geometry.dispose();m.material.dispose()});
+    this.wms.forEach(m=>{this.sc.remove(m);m.geometry.dispose();m.material.dispose()});
+    this.ms=[];this.wms=[];
+
+    const nx=g.nx,ny=g.ny,nz=g.nz;
+    // Adaptive cell size: normalize so longest axis ~12 units
+    const maxDim=Math.max(nx,ny,nz*3);
+    const sXY=12/maxDim, sZ=sXY*2.5, gap=sXY*.08;
+    const cx=nx*sXY/2, cy=nz*sZ/2, cz=ny*sXY/2;
+
+    for(let k=0;k<nz;k++)for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){
+      const geo=new THREE.BoxGeometry(sXY-gap,sZ-gap,sXY-gap);
+      const mat=new THREE.MeshPhongMaterial({color:0x444,transparent:true,opacity:.92});
+      const m=new THREE.Mesh(geo,mat);
+      m.position.set(i*sXY-cx,-k*sZ+cy,j*sXY-cz);
+      m.userData={i,j,k,idx:k*nx*ny+j*nx+i};
+      this.sc.add(m);this.ms.push(m);
+    }
+
+    // Wells
+    const wh=nz*sZ*1.2;
+    const wGeo=new THREE.CylinderGeometry(sXY*.2,sXY*.2,wh,6);
+    for(const[wn,wp] of Object.entries(g.well_positions||{})){
+      const isInj=wn.includes('INJ')||wn.includes('RCH');
+      const col=isInj?0x22d3ee:0xef4444;
+      const mat=new THREE.MeshPhongMaterial({color:col,emissive:col,emissiveIntensity:.4});
+      const m=new THREE.Mesh(wGeo.clone(),mat);
+      m.position.set(wp.i*sXY-cx,0,wp.j*sXY-cz);
+      this.sc.add(m);this.wms.push(m);
+    }
+
+    // Camera
+    this._orbit(cx,cy,cz,maxDim);
+  }
+  colorDyn(ti,p){const v=BM[this.bk].timesteps[ti].cells[p];return this._col(v,p)}
+  colorSta(p){return this._col(BM.grid[p],p)}
+  _col(vals,p){
+    const cm=CM[p];let mn=Infinity,mx=-Infinity;
+    for(const v of vals){mn=Math.min(mn,v);mx=Math.max(mx,v)}
+    for(let i=0;i<this.ms.length;i++){
+      const m=this.ms[i],v=vals[i]||0;
+      const t=mx>mn?(v-mn)/(mx-mn):.5;
+      const[r,g,b]=scm(cm,t);m.material.color.setRGB(r/255,g/255,b/255);
+      m.visible=(this.lyr==='all')||(m.userData.k===parseInt(this.lyr));
+    }
+    return{vmin:mn,vmax:mx};
+  }
+  setLyr(l){this.lyr=l}
+  resize(){const w=this.el.clientWidth,h=this.el.clientHeight;this.cam.aspect=w/h;this.cam.updateProjectionMatrix();this.ren.setSize(w,h)}
+  _orbit(cx,cy,cz,sz){
+    let drag=false,px=0,py=0,theta=Math.PI/4,phi=Math.PI/4,radius=sz*1.1;
+    const tgt=new THREE.Vector3(0,0,0);
+    const upd=()=>{this.cam.position.set(tgt.x+radius*Math.sin(phi)*Math.cos(theta),tgt.y+radius*Math.cos(phi),tgt.z+radius*Math.sin(phi)*Math.sin(theta));this.cam.lookAt(tgt)};upd();
+    const c=this.el;
+    c.onmousedown=e=>{drag=true;px=e.clientX;py=e.clientY};
+    window.addEventListener('mouseup',()=>drag=false);
+    window.addEventListener('mousemove',e=>{if(!drag)return;theta+=(e.clientX-px)*.008;phi=Math.max(.2,Math.min(Math.PI-.2,phi-(e.clientY-py)*.008));px=e.clientX;py=e.clientY;upd()});
+    c.addEventListener('wheel',e=>{radius=Math.max(sz*.3,Math.min(sz*4,radius+e.deltaY*.03));upd();e.preventDefault()},{passive:false});
+    c.addEventListener('touchstart',e=>{if(e.touches.length===1){drag=true;px=e.touches[0].clientX;py=e.touches[0].clientY}});
+    c.addEventListener('touchmove',e=>{if(!drag||e.touches.length!==1)return;theta+=(e.touches[0].clientX-px)*.008;phi=Math.max(.2,Math.min(Math.PI-.2,phi-(e.touches[0].clientY-py)*.008));px=e.touches[0].clientX;py=e.touches[0].clientY;upd();e.preventDefault()},{passive:false});
+    c.addEventListener('touchend',()=>drag=false);
+  }
+  _anim(){requestAnimationFrame(()=>this._anim());this.ren.render(this.sc,this.cam)}
+}
+
+// ═══════ METRICS ═══════
+function metrics(ti,p){
+  const a=BM.opm.timesteps[ti].cells[p],b=BM.mrst.timesteps[ti].cells[p],n=a.length;
+  let sse=0,sae=0,mxE=0,mxI=0,sA=0,sB=0;
+  for(let i=0;i<n;i++){const d=a[i]-b[i];sse+=d*d;const ad=Math.abs(d);sae+=ad;if(ad>mxE){mxE=ad;mxI=i}sA+=a[i];sB+=b[i]}
+  const mA=sA/n,mB=sB/n,rmse=Math.sqrt(sse/n);
+  let vmn=Infinity,vmx=-Infinity;for(const v of a){vmn=Math.min(vmn,v);vmx=Math.max(vmx,v)}
+  const rng=vmx-vmn,nrmse=rng>0?rmse/rng:0,mae=sae/n;
+  let sT=0,sR=0;for(let i=0;i<n;i++){sT+=(a[i]-mA)**2;sR+=(a[i]-b[i])**2}
+  return{nrmse,mae,maxErr:mxE,maxIdx:mxI,r2:sT>0?1-sR/sT:1,meanA:mA,meanB:mB};
+}
+
+function renderM(info){
+  const el=document.getElementById('mrow');
+  if(info.s){
+    const v=BM.grid[info.p],u=[...new Set(v.map(x=>+x.toFixed(2)))].sort((a,b)=>a-b);
+    el.innerHTML=`
+      <div class="mc"><div class="ml">Property</div><div class="mv" style="color:var(--perm)">${CM[info.p].l}</div><div class="ms">Static</div></div>
+      <div class="mc"><div class="ml">Min</div><div class="mv">${Math.min(...v).toFixed(2)}</div></div>
+      <div class="mc"><div class="ml">Max</div><div class="mv">${Math.max(...v).toFixed(2)}</div></div>
+      <div class="mc"><div class="ml">Mean</div><div class="mv">${(v.reduce((s,x)=>s+x,0)/v.length).toFixed(3)}</div></div>
+      <div class="mc"><div class="ml">Unique</div><div class="mv">${u.length}</div><div class="ms">${u.length<=6?u.join(', '):'heterogeneous'}</div></div>`;
+    return;
+  }
+  const m=info.m;
+  const nc=m.nrmse<.01?'exc':m.nrmse<.05?'gd':m.nrmse<.1?'wrn':'bad';
+  const rc=m.r2>.99?'exc':m.r2>.95?'gd':m.r2>.9?'wrn':'bad';
+  const ql=m.nrmse<.01?'EXCELLENT':m.nrmse<.05?'GOOD':m.nrmse<.1?'ACCEPTABLE':'POOR';
+  el.innerHTML=`
+    <div class="mc"><div class="ml">Match</div><div class="mv ${nc}">${ql}</div><div class="ms">OPM ↔ MRST</div></div>
+    <div class="mc"><div class="ml">NRMSE</div><div class="mv ${nc}">${(m.nrmse*100).toFixed(2)}%</div></div>
+    <div class="mc"><div class="ml">R²</div><div class="mv ${rc}">${m.r2.toFixed(4)}</div></div>
+    <div class="mc"><div class="ml">MAE</div><div class="mv">${m.mae.toFixed(3)}</div></div>
+    <div class="mc"><div class="ml">Max Err</div><div class="mv">${m.maxErr.toFixed(3)}</div><div class="ms">Cell #${m.maxIdx}</div></div>
+    <div class="mc"><div class="ml">Mean</div><div class="mv" style="font-size:.85rem"><span style="color:var(--opm)">${m.meanA.toFixed(1)}</span>/<span style="color:var(--mrst)">${m.meanB.toFixed(1)}</span></div></div>`;
+}
+
+// ═══════ PLOTLY ═══════
+const PL={paper_bgcolor:'#111827',plot_bgcolor:'#111827',font:{family:'JetBrains Mono,monospace',size:9,color:'#8b99b3'},margin:{l:50,r:50,t:6,b:35},legend:{x:.01,y:.98,bgcolor:'rgba(17,24,39,.85)',bordercolor:'#2a3654',borderwidth:1,font:{size:8}},xaxis:{gridcolor:'#1a2235'},yaxis:{gridcolor:'#1a2235'}};
+
+function buildCharts(){
+  const oT=BM.opm.timesteps,mT=BM.mrst.timesteps,d=oT.map(t=>t.time_days);
+  // Get first producer
+  const pw=oT[0].wells.find(w=>w.oil_rate_m3_day>0)?.well_name||oT[0].wells[0]?.well_name;
+  const getW=(ts,nm)=>ts.wells.find(w=>w.well_name===nm)||ts.wells[0]||{};
+
+  // Production
+  Plotly.newPlot('ch-prod',[
+    {x:d,y:oT.map(t=>getW(t,pw).oil_rate_m3_day),name:'OPM Oil',line:{color:'#10b981',width:2}},
+    {x:d,y:mT.map(t=>getW(t,pw).oil_rate_m3_day),name:'MRST Oil',line:{color:'#f59e0b',width:2,dash:'dot'}},
+    {x:d,y:oT.map(t=>getW(t,pw).bhp_bar),name:'OPM BHP',line:{color:'#10b981',width:1},yaxis:'y2',opacity:.5},
+    {x:d,y:mT.map(t=>getW(t,pw).bhp_bar),name:'MRST BHP',line:{color:'#f59e0b',width:1,dash:'dot'},yaxis:'y2',opacity:.5},
+  ],{...PL,yaxis:{...PL.yaxis,title:{text:'Oil [m³/d]'}},yaxis2:{gridcolor:'#1a2235',overlaying:'y',side:'right',title:{text:'BHP [bar]'},showgrid:false}},{responsive:true,displayModeBar:false});
+
+  // Water
+  Plotly.newPlot('ch-water',[
+    {x:d,y:oT.map(t=>getW(t,pw).water_rate_m3_day),name:'OPM Qw',line:{color:'#2563eb',width:2},fill:'tozeroy',fillcolor:'rgba(37,99,235,.08)'},
+    {x:d,y:mT.map(t=>getW(t,pw).water_rate_m3_day),name:'MRST Qw',line:{color:'#f59e0b',width:2,dash:'dot'}},
+  ],{...PL,yaxis:{...PL.yaxis,title:{text:'Water [m³/d]'}}},{responsive:true,displayModeBar:false});
+
+  // NRMSE
+  const props=['pressure','saturation_oil','saturation_water','saturation_gas'];
+  const cols=['#7c3aed','#b45309','#2563eb','#dc2626'],nms=['P','Sₒ','Sw','Sg'];
+  Plotly.newPlot('ch-nrmse',props.map((p,i)=>({
+    x:d,y:d.map((_,ti)=>metrics(ti,p).nrmse*100),name:nms[i],line:{color:cols[i],width:2}
+  })),{...PL,yaxis:{...PL.yaxis,title:{text:'NRMSE [%]'}}},{responsive:true,displayModeBar:false});
+}
+
+function buildHist(ti,p){
+  const a=BM.opm.timesteps[ti].cells[p],b=BM.mrst.timesteps[ti].cells[p];
+  Plotly.newPlot('ch-hist',[
+    {x:Array.from(a),name:'OPM',type:'histogram',opacity:.7,marker:{color:'#10b981'},nbinsx:25},
+    {x:Array.from(b),name:'MRST',type:'histogram',opacity:.7,marker:{color:'#f59e0b'},nbinsx:25},
+  ],{...PL,barmode:'overlay',xaxis:{...PL.xaxis,title:{text:CM[p].l}},yaxis:{...PL.yaxis,title:{text:'Cells'}}},{responsive:true,displayModeBar:false});
+}
+
+// ═══════ LEGEND ═══════
+function uLeg(id,p,mn,mx){
+  document.getElementById(id).innerHTML=`<div class="lt">${CM[p].l}</div><div class="ll">${mx.toFixed(1)}</div><div class="lg" style="background:${gcss(CM[p])}"></div><div class="ll">${mn.toFixed(1)}</div>`;
+}
+
+// ═══════ UPDATE ═══════
+function update(){
+  let mn,mx;
+  if(isStatic){
+    const a=rOPM.colorSta(curProp),b=rMRST.colorSta(curProp);
+    mn=Math.min(a.vmin,b.vmin);mx=Math.max(a.vmax,b.vmax);
+    renderM({s:true,p:curProp});
+  }else{
+    const a=rOPM.colorDyn(curTs,curProp),b=rMRST.colorDyn(curTs,curProp);
+    mn=Math.min(a.vmin,b.vmin);mx=Math.max(a.vmax,b.vmax);
+    renderM({s:false,m:metrics(curTs,curProp)});
+    buildHist(curTs,curProp);
+  }
+  uLeg('leg-opm',curProp,mn,mx);uLeg('leg-mrst',curProp,mn,mx);
+  const d=BM.opm.timesteps[curTs].time_days;
+  document.getElementById('ts-disp').textContent=`Day ${d} (${(d/365.25).toFixed(1)}y)`;
+}
+
+// ═══════ SWITCH BENCHMARK ═══════
+function switchBM(id){
+  curBM=id;BM=DATA.benchmarks[id];curTs=0;isStatic=false;
+  // Reset prop buttons
+  document.querySelectorAll('#dyn-btns .b,#sta-btns .b').forEach(b=>b.classList.remove('act','sact'));
+  document.querySelector('#dyn-btns .b').classList.add('act');
+  curProp='pressure';
+
+  // Update deck cards
+  document.querySelectorAll('.deck-card').forEach(c=>c.classList.toggle('active',c.dataset.id===id));
+
+  // Header
+  const info=DATA.index.find(x=>x.id===id);
+  document.getElementById('hdr-meta').textContent=`${info.grid} · ${info.cells} cells · ${info.wells} wells · ${info.years}`;
+
+  // Slider
+  const sl=document.getElementById('ts-sl');
+  sl.max=BM.opm.timesteps.length-1;sl.value=0;
+
+  // Layer buttons
+  const nz=BM.grid.nz;
+  const lb=document.getElementById('lay-btns');
+  lb.innerHTML=`<button class="b act" data-l="all">All</button>`;
+  for(let k=0;k<Math.min(nz,15);k++)lb.innerHTML+=`<button class="b" data-l="${k}">K=${k+1}</button>`;
+  lb.querySelectorAll('.b').forEach(btn=>btn.addEventListener('click',()=>{
+    lb.querySelectorAll('.b').forEach(b=>b.classList.remove('act'));btn.classList.add('act');
+    rOPM.setLyr(btn.dataset.l);rMRST.setLyr(btn.dataset.l);update();
+  }));
+
+  // Rebuild 3D
+  rOPM.build(BM.grid);rMRST.build(BM.grid);
+
+  // Charts
+  buildCharts();
+  update();
+
+  document.getElementById('ft-info').textContent=`${info.name} · ${info.description}`;
+}
+
+// ═══════ INIT ═══════
+async function init(){
+  await loadData();
+  if(!DATA){document.body.innerHTML='<p style="padding:3rem;color:#ef4444;font-family:monospace">No data. Place spe_benchmarks.json next to this file.</p>';return}
+
+  // Deck cards
+  const bar=document.getElementById('deck-bar');
+  DATA.index.forEach(bm=>{
+    const c=document.createElement('div');c.className='deck-card';c.dataset.id=bm.id;
+    c.innerHTML=`<div class="dc-name">${bm.id}</div><div class="dc-grid">${bm.grid} · ${bm.cells} cells · ${bm.wells} wells</div><div class="dc-desc">${bm.description}</div>`;
+    c.addEventListener('click',()=>switchBM(bm.id));
+    bar.appendChild(c);
+  });
+
+  // Controls
+  document.getElementById('ts-sl').addEventListener('input',e=>{curTs=+e.target.value;update()});
+  document.querySelectorAll('#dyn-btns .b').forEach(btn=>btn.addEventListener('click',()=>{
+    document.querySelectorAll('#dyn-btns .b,#sta-btns .b').forEach(b=>b.classList.remove('act','sact'));
+    btn.classList.add('act');curProp=btn.dataset.p;isStatic=false;update();
+  }));
+  document.querySelectorAll('#sta-btns .b').forEach(btn=>btn.addEventListener('click',()=>{
+    document.querySelectorAll('#dyn-btns .b,#sta-btns .b').forEach(b=>b.classList.remove('act','sact'));
+    btn.classList.add('sact');curProp=btn.dataset.p;isStatic=true;update();
+  }));
+  document.getElementById('btn-play').addEventListener('click',()=>{
+    const b=document.getElementById('btn-play');
+    if(playInt){clearInterval(playInt);playInt=null;b.textContent='▶ Play';b.classList.remove('act')}
+    else{b.textContent='⏹ Stop';b.classList.add('act');playInt=setInterval(()=>{
+      curTs=(curTs+1)%BM.opm.timesteps.length;document.getElementById('ts-sl').value=curTs;update()
+    },700)}
+  });
+
+  // Renderers
+  rOPM=new GR('cv-opm','opm');rMRST=new GR('cv-mrst','mrst');
+  window.addEventListener('resize',()=>{rOPM.resize();rMRST.resize()});
+
+  // Default: SPE1
+  switchBM('SPE1');
+}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLARISSA · Simulation Viewer</title>
+<style>
+body{font-family:'DM Sans',system-ui;background:#0a0e1a;color:#e2e8f0;margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh}
+.card{background:#111827;border:1px solid #2a3654;border-radius:16px;padding:2.5rem;max-width:500px;text-align:center}
+h1{font-size:1.6rem;margin-bottom:.5rem}
+.logo{font-family:'JetBrains Mono',monospace;color:#22d3ee;letter-spacing:.15em;font-size:.8rem;margin-bottom:1rem}
+p{color:#8b99b3;margin:.8rem 0;font-size:.9rem;line-height:1.6}
+a{color:#22d3ee;text-decoration:none;display:inline-block;margin:.5rem;padding:.6rem 1.4rem;border:1px solid #22d3ee;border-radius:8px;transition:all .2s}
+a:hover{background:#22d3ee;color:#0a0e1a}
+.note{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#556278;margin-top:1.5rem}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">CLARISSA SIM-ENGINE</div>
+  <h1>SPE Benchmark Viewer</h1>
+  <p>Interactive 3D visualization for SPE cross-validation results.<br>
+  OPM Flow vs MRST Octave comparison across 4 SPE benchmarks.</p>
+  <a href="spe-viewer.html">Open Viewer (Synthetic Data)</a>
+  <p class="note">ADR-040 · PAL Architecture · ICE v2.1<br>
+  Place spe_benchmarks.json from Nordic VM next to viewer for real data.</p>
+</div>
+</body>
+</html>
