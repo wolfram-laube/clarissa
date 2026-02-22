@@ -7,6 +7,9 @@ name = "clarissa"
 version = "0.1.0"
 description = "CLARISSA unified prototype (code + ADR-governed architecture)"
 requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -18,4 +21,5 @@ where = ["src"]
 testpaths = ["tests"]
 
 [project.optional-dependencies]
-dev = ["pytest>=7", "ruff>=0.6"]
+dev = ["pytest>=7", "ruff>=0.6", "httpx>=0.25"]
+sim = ["fastapi>=0.100", "uvicorn[standard]>=0.30", "opm>=2025.10"]
