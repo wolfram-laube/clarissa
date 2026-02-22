@@ -1,0 +1,286 @@
+-- =========================================================================
+-- WATERSHED AQUIFER -- Groundwater flow through a tilted shallow aquifer
+-- =========================================================================
+--
+-- A 1km x 1km watershed with:
+--   - Tilted aquifer (hilltop south, valley north, 3% grade)
+--   - Rainfall recharge at the hilltop (4 injection wells)
+--   - Natural spring discharge in the valley (2 BHP-controlled wells)
+--   - Pumping well introduced at year 3 to show drawdown
+--
+-- Phases: OIL + WATER (oil is an immobile dummy; grid is 100% water)
+-- Units:  METRIC
+-- Grid:   20 x 20 x 3 = 1,200 cells
+--
+-- =========================================================================
+
+RUNSPEC
+-- =========================================================================
+
+TITLE
+   Watershed Aquifer -- Groundwater recharge and spring discharge demo
+
+DIMENS
+-- NX  NY  NZ
+   20  20  3 /
+
+EQLDIMS
+/
+
+TABDIMS
+/
+
+OIL
+WATER
+
+METRIC
+
+START
+   1 'JAN' 2025 /
+
+WELLDIMS
+-- max_wells  max_compl  max_groups  max_wells_per_group
+   8          3          2           8 /
+
+UNIFOUT
+
+GRID
+-- =========================================================================
+
+INIT
+
+DX
+-- All 1200 cells are 50m in the x-direction
+   1200*50 /
+
+DY
+-- All 1200 cells are 50m in the y-direction
+   1200*50 /
+
+DZ
+-- Layer 1 (soil/weathered zone):  5m thick
+-- Layer 2 (main aquifer):        10m thick
+-- Layer 3 (bedrock):              5m thick
+   400*5  400*10  400*5 /
+
+TOPS
+-- Depth to top of layer 1 for each cell (400 values, layer 1 only).
+-- Tilted south-to-north: hilltop at J=1 (5m), valley at J=20 (35m).
+-- 30m drop over 1000m = 3% grade. Constant across columns (I-direction).
+-- Row J=1  (hilltop, south)
+   20*5.00
+-- Row J=2
+   20*6.58
+-- Row J=3
+   20*8.16
+-- Row J=4
+   20*9.74
+-- Row J=5
+   20*11.32
+-- Row J=6
+   20*12.89
+-- Row J=7
+   20*14.47
+-- Row J=8
+   20*16.05
+-- Row J=9
+   20*17.63
+-- Row J=10
+   20*19.21
+-- Row J=11
+   20*20.79
+-- Row J=12
+   20*22.37
+-- Row J=13
+   20*23.95
+-- Row J=14
+   20*25.53
+-- Row J=15 (alluvial valley begins)
+   20*27.11
+-- Row J=16
+   20*28.68
+-- Row J=17
+   20*30.26
+-- Row J=18
+   20*31.84
+-- Row J=19
+   20*33.42
+-- Row J=20 (valley floor, north)
+   20*35.00 /
+
+PORO
+-- Layer 1 (soil/weathered zone): high porosity
+   400*0.30
+-- Layer 2 (main aquifer): moderate porosity
+   400*0.25
+-- Layer 3 (bedrock): low porosity
+   400*0.15 /
+
+PERMX
+-- Horizontal permeability in mD.
+-- Rows J=15-20 (valley) have 3x enhancement for alluvial deposits.
+-- Layer 1: base 500 mD, alluvial 1500 mD
+   280*500   120*1500
+-- Layer 2: base 1000 mD, alluvial 3000 mD
+   280*1000  120*3000
+-- Layer 3: base 100 mD, alluvial 300 mD
+   280*100   120*300 /
+
+PERMY
+-- Same as PERMX (isotropic horizontal)
+   280*500   120*1500
+   280*1000  120*3000
+   280*100   120*300 /
+
+PERMZ
+-- Vertical permeability = 10% of horizontal (Kv/Kh = 0.1)
+   280*50    120*150
+   280*100   120*300
+   280*10    120*30 /
+
+PROPS
+-- =========================================================================
+
+PVTW
+-- Pref(barsa)  Bw(rm3/sm3)  Cw(1/barsa)  Visc_w(cP)  Viscosibility
+-- Fresh water at shallow conditions (~20C)
+   1.01325      1.0          4.5E-5       1.0          0.0 /
+
+ROCK
+-- Pref(barsa)  Cr(1/barsa)
+-- Unconsolidated sediment compressibility
+   1.01325      4.35E-5 /
+
+DENSITY
+-- Oil(kg/m3)  Water(kg/m3)
+   800.0       1000.0 /
+
+PVDO
+-- Dummy dead oil -- extremely viscous so it never flows
+-- P(barsa)   Bo(rm3/sm3)   Visc_o(cP)
+   1.0        1.001         1000.0
+   100.0      1.000         1000.0 /
+
+SWOF
+-- Custom table for groundwater: water flows freely at high saturation.
+-- (The SPE1 SWOF has krw ~ 1E-5 which would block all flow.)
+-- Sw      Krw     Kro     Pcow(barsa)
+   0.0     0.0     1.0     0.0
+   0.1     0.1     0.9     0.0
+   0.2     0.2     0.7     0.0
+   0.3     0.3     0.5     0.0
+   0.4     0.4     0.3     0.0
+   0.5     0.5     0.15    0.0
+   0.6     0.6     0.05    0.0
+   0.7     0.7     0.01    0.0
+   0.8     0.8     0.001   0.0
+   0.9     0.9     0.0     0.0
+   1.0     1.0     0.0     0.0 /
+
+SOLUTION
+-- =========================================================================
+
+EQUIL
+-- Datum(m)  Pdat(barsa)  WOC(m)  Pcow  GOC  Pcog  Rsvd  Rvvd  N
+-- WOC at 0m (above grid) so the entire aquifer is water-saturated.
+-- Datum pressure: hydrostatic at 20m = 1.01 + 1000*9.81*20/1E5 = 2.97 barsa
+   20.0      2.97         0.0     0.0   0.0  0.0   0     0     0 /
+
+SUMMARY
+-- =========================================================================
+
+-- Field water balance (main groundwater outputs)
+FWPR
+FWPT
+FWIR
+FWIT
+FPR
+
+-- Field oil (will be ~zero; included for notebook compatibility)
+FOPR
+FOPT
+
+-- Water cut (should be 1.0 always)
+FWCT
+
+-- Per-well water rates and pressures
+WWPR
+/
+WWPT
+/
+WWIR
+/
+WWIT
+/
+WBHP
+/
+
+-- Block pressures at monitoring points (layer 2, main aquifer)
+BPR
+-- Near recharge zone (hilltop)
+5   5   2 /
+-- Mid-slope (pumping well location)
+10  10  2 /
+-- Near springs (valley)
+15  18  2 /
+-- Control point (away from pumping well)
+5   15  2 /
+/
+
+SCHEDULE
+-- =========================================================================
+
+RPTSCHED
+   'PRES' 'SWAT' 'WELLS' /
+
+RPTRST
+   'BASIC=1' /
+
+-- =========================================================================
+-- PHASE 1: Natural flow (Years 1-2)
+-- Rainfall recharge at hilltop, natural spring discharge in valley
+-- =========================================================================
+
+WELSPECS
+-- Name      Group         I   J   Datum  Phase
+   'RCH1'   'RECHARGE'    3   2   1*     'WATER' /
+   'RCH2'   'RECHARGE'    10  2   1*     'WATER' /
+   'RCH3'   'RECHARGE'    14  3   1*     'WATER' /
+   'RCH4'   'RECHARGE'    18  2   1*     'WATER' /
+   'SPR1'   'DISCHARGE'   5   19  1*     'WATER' /
+   'SPR2'   'DISCHARGE'   16  19  1*     'WATER' /
+/
+
+COMPDAT
+-- Name    I   J   K1  K2  Flag    Sat  CF    Diam
+-- Recharge wells: layer 1 only (rainfall infiltrates at surface)
+   'RCH1'  3   2   1   1   'OPEN'  1*   1*    0.30 /
+   'RCH2'  10  2   1   1   'OPEN'  1*   1*    0.30 /
+   'RCH3'  14  3   1   1   'OPEN'  1*   1*    0.30 /
+   'RCH4'  18  2   1   1   'OPEN'  1*   1*    0.30 /
+-- Spring wells: layers 2-3 (aquifer and bedrock discharge)
+   'SPR1'  5   19  2   3   'OPEN'  1*   1*    0.30 /
+   'SPR2'  16  19  2   3   'OPEN'  1*   1*    0.30 /
+/
+
+WCONINJE
+-- Name    Type     Flag    Ctrl    Rate(sm3/d)  Resv  BHPmax(barsa)
+-- Total recharge = 220 sm3/day (~80 mm/year over 1 km2)
+   'RCH1'  'WATER'  'OPEN'  'RATE'  55.0        1*    50.0 /
+   'RCH2'  'WATER'  'OPEN'  'RATE'  55.0        1*    50.0 /
+   'RCH3'  'WATER'  'OPEN'  'RATE'  55.0        1*    50.0 /
+   'RCH4'  'WATER'  'OPEN'  'RATE'  55.0        1*    50.0 /
+/
+
+WCONPROD
+-- Name    Flag    Ctrl   Orat  Wrat  Grat  Lrat  Resv  BHPmin(barsa)
+-- Springs discharge naturally when aquifer pressure > BHP limit
+   'SPR1'  'OPEN'  'BHP'  1*    1*    1*    1*    1*    2.50 /
+   'SPR2'  'OPEN'  'BHP'  1*    1*    1*    1*    1*    2.50 /
+/
+
+-- 1 month demo run
+TSTEP
+   31 /
+
+END
