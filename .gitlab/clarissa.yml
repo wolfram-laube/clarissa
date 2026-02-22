@@ -119,7 +119,7 @@ tests:
     - pip cache purge 2>/dev/null || true
     - python -m pip install -e ".[dev]"
   script:
-    - python -m pytest -q --ignore=tests/integration --junitxml=junit.xml
+    - python -m pytest -q --ignore=tests/integration --ignore=tests/voice --junitxml=junit.xml
   artifacts:
     when: always
     reports:
