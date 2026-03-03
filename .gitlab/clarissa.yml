@@ -415,6 +415,7 @@ rerun_all_tests:
   SIM_SERVICE_NAME: clarissa-sim-engine
   SIM_GITLAB_IMAGE: ${CI_REGISTRY_IMAGE}/${SIM_SERVICE_NAME}
   SIM_GCP_IMAGE: europe-north1-docker.pkg.dev/${GCP_PROJECT}/blauweiss/${SIM_SERVICE_NAME}
+  OPM_BASE_IMAGE: ${CI_REGISTRY_IMAGE}/opm-base:latest
 
 .sim_engine_rules: &sim_engine_rules
   rules:
@@ -429,6 +430,37 @@ rerun_all_tests:
       when: manual
       allow_failure: true
     - when: never
+
+
+build_opm_base:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.19.2-debug
+    entrypoint: [""]
+  tags:
+    - docker-any
+  timeout: 2h
+  variables:
+    <<: *sim_engine_vars
+  rules:
+    - if: '$BUILD_OPM_BASE == "true"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
+    - when: never
+  script:
+    - mkdir -p /kaniko/.docker
+    - AUTH=$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')
+    - |
+      cat > /kaniko/.docker/config.json << EOF
+      {"auths":{"${CI_REGISTRY}":{"auth":"${AUTH}"}}}
+      EOF
+    - /kaniko/executor
+        --context="${CI_PROJECT_DIR}/src/clarissa/sim_engine"
+        --dockerfile="${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile.opm-base"
+        --destination="${OPM_BASE_IMAGE}"
+        --cache=false
+        --single-snapshot
 
 build_sim_engine:
   stage: build
@@ -452,6 +484,7 @@ build_sim_engine:
         --dockerfile="${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile"
         --destination="${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}"
         --destination="${SIM_GITLAB_IMAGE}:latest"
+        --build-arg="OPM_BASE_IMAGE=${OPM_BASE_IMAGE}"
         --cache=true
 
 copy_sim_engine:
