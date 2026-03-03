@@ -13,12 +13,22 @@ FROM ${OPM_BASE_IMAGE}
 
 ENV PORT=8080
 
-# OPM Flow uses MPI — these vars allow single-process mode in sandboxed
-# environments (Cloud Run, rootless Docker) where PMIx cannot bind.
+# ── MPI/ORTE fix for Cloud Run (gVisor sandbox) ──────────────────────────
+# gVisor blocks orted daemon spawn. We neutralize ORTE completely:
+# 1. Redirect orted to /bin/true (immediate success, no daemon)
+# 2. Set MCA vars to prevent socket binding attempts
+ENV OMPI_MCA_orte_launch_agent=/bin/true
+ENV OMPI_MCA_btl=self
 ENV OMPI_MCA_btl_vader_single_copy_mechanism=none
-ENV OMPI_MCA_btl=self,tcp
+ENV OMPI_MCA_oob=tcp
+ENV OMPI_MCA_oob_tcp_if_include=lo
+ENV OMPI_MCA_orte_tmpdir_base=/tmp
+ENV OMPI_MCA_shmem_posix_posix_shmdir=/tmp
 ENV PMIX_MCA_gds=hash
+ENV PMIX_MCA_ptl=tcp
 ENV OMPI_MCA_rmaps_base_oversubscribe=1
+ENV OMPI_ALLOW_RUN_AS_ROOT=1
+ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
 WORKDIR /app
 
