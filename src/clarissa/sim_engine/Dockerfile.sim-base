@@ -1,0 +1,55 @@
+# =============================================================================
+# CLARISSA Sim-Engine Base Image
+# Ubuntu 24.04 + OPM Flow + GNU Octave + MRST + Python Runtime
+# =============================================================================
+# Built ONCE, cached in registry. Rebuild only on OPM/MRST/Ubuntu upgrades.
+# Replaces Dockerfile.opm-base — now symmetric: both backends in one image.
+#
+# Issue #117 | Epic #110 | ADR-038
+# =============================================================================
+
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV PYTHONUNBUFFERED=1
+
+# ── System packages: OPM Flow + GNU Octave ───────────────────────────────
+RUN apt-get update && apt-get install -y \
+    software-properties-common curl \
+    && add-apt-repository ppa:opm/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libopm-simulators-bin \
+        octave \
+        octave-io \
+        python3 \
+        python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── MRST installation (from GitHub mirror) ───────────────────────────────
+ENV MRST_DIR=/opt/mrst
+RUN mkdir -p ${MRST_DIR} \
+    && curl -sL https://github.com/SINTEF-AppliedCompSci/MRST/archive/refs/tags/v2024.11.tar.gz \
+       | tar xz -C ${MRST_DIR} --strip-components=1 \
+    && echo "addpath(genpath('${MRST_DIR}'));" > /etc/octave.conf \
+    && echo "MRST installed: $(ls ${MRST_DIR}/ | head -5)"
+
+# Validate Octave + MRST path
+RUN octave --no-gui --eval "addpath(genpath('${MRST_DIR}')); disp('MRST OK')"
+
+# ── Python dependencies ──────────────────────────────────────────────────
+RUN pip install --break-system-packages --no-cache-dir \
+    fastapi "uvicorn[standard]" pydantic python-multipart \
+    opm numpy httpx scipy
+
+# ── Verify both backends ─────────────────────────────────────────────────
+RUN flow --version
+RUN octave --no-gui --version | head -1
+
+RUN useradd -m -s /bin/bash simuser
+
+LABEL maintainer="wolfram.laube@blauweiss-edv.at"
+LABEL description="Combined OPM Flow + MRST base image for CLARISSA Sim-Engine"
+LABEL opm.version="2025.10"
+LABEL mrst.version="2024.11"

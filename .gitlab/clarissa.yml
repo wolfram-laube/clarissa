@@ -407,7 +407,10 @@ rerun_all_tests:
 
 # --- Sim-Engine Cloud Run Deployment ---
 # Issue #112 | Epic #110 | ADR-038, ADR-040
-# Pipeline: build → copy → deploy (same pattern as Dialectic Bridge)
+# ── Sim-Engine Pipeline ──────────────────────────────────────────────────
+# Pipeline: build_sim_base (manual) → build_sim_engine → deploy_sim_engine
+# No more skopeo copy — Kaniko dual-push to GitLab + GCP Artifact Registry.
+# Issue #117 | Epic #110
 
 .sim_engine_vars: &sim_engine_vars
   GCP_PROJECT: myk8sproject-207017
@@ -415,7 +418,7 @@ rerun_all_tests:
   SIM_SERVICE_NAME: clarissa-sim-engine
   SIM_GITLAB_IMAGE: ${CI_REGISTRY_IMAGE}/${SIM_SERVICE_NAME}
   SIM_GCP_IMAGE: europe-north1-docker.pkg.dev/${GCP_PROJECT}/blauweiss/${SIM_SERVICE_NAME}
-  OPM_BASE_IMAGE: ${CI_REGISTRY_IMAGE}/opm-base:latest
+  SIM_BASE_IMAGE: ${CI_REGISTRY_IMAGE}/sim-base:latest
 
 .sim_engine_rules: &sim_engine_rules
   rules:
@@ -432,7 +435,7 @@ rerun_all_tests:
     - when: never
 
 
-build_opm_base:
+build_sim_base:
   stage: build
   image:
     name: gcr.io/kaniko-project/executor:v1.19.2-debug
@@ -443,7 +446,7 @@ build_opm_base:
   variables:
     <<: *sim_engine_vars
   rules:
-    - if: '$BUILD_OPM_BASE == "true"'
+    - if: '$BUILD_SIM_BASE == "true"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: manual
       allow_failure: true
@@ -457,8 +460,8 @@ build_opm_base:
       EOF
     - /kaniko/executor
         --context="${CI_PROJECT_DIR}/src/clarissa/sim_engine"
-        --dockerfile="${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile.opm-base"
-        --destination="${OPM_BASE_IMAGE}"
+        --dockerfile="${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile.sim-base"
+        --destination="${SIM_BASE_IMAGE}"
         --cache=false
         --single-snapshot
 
@@ -472,44 +475,30 @@ build_sim_engine:
   variables:
     <<: *sim_engine_vars
   <<: *sim_engine_rules
-  script:
+  before_script:
+    # Kaniko auth for both registries:
+    # - GitLab: CI_REGISTRY_USER/PASSWORD (built-in)
+    # - GCP AR: service account key via GOOGLE_APPLICATION_CREDENTIALS
     - mkdir -p /kaniko/.docker
-    - AUTH=$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')
+    - GL_AUTH=$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')
+    - echo "$GCP_SERVICE_ACCOUNT_KEY" > /kaniko/gcp-key.json
+    - export GOOGLE_APPLICATION_CREDENTIALS=/kaniko/gcp-key.json
     - |
       cat > /kaniko/.docker/config.json << EOF
-      {"auths":{"${CI_REGISTRY}":{"auth":"${AUTH}"}}}
+      {"auths":{"${CI_REGISTRY}":{"auth":"${GL_AUTH}"}},"credHelpers":{"europe-north1-docker.pkg.dev":"gcloud"}}
       EOF
+  script:
     - /kaniko/executor
         --context="${CI_PROJECT_DIR}"
         --dockerfile="${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile"
         --destination="${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}"
         --destination="${SIM_GITLAB_IMAGE}:latest"
-        --build-arg="OPM_BASE_IMAGE=${OPM_BASE_IMAGE}"
+        --destination="${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        --destination="${SIM_GCP_IMAGE}:latest"
+        --build-arg="SIM_BASE_IMAGE=${SIM_BASE_IMAGE}"
         --cache=true
 
-copy_sim_engine:
-  stage: build
-  image: google/cloud-sdk:slim
-  tags:
-    - docker-any
-  needs:
-    - build_sim_engine
-  variables:
-    <<: *sim_engine_vars
-  <<: *sim_engine_rules
-  script:
-    - echo "$GCP_SERVICE_ACCOUNT_KEY" > /tmp/gcp-key.json
-    - gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
-    - gcloud auth configure-docker europe-north1-docker.pkg.dev --quiet
-    - apt-get update && apt-get install -y skopeo
-    - skopeo copy
-        --src-creds="${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}"
-        docker://${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}
-        docker://${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA}
-    - skopeo copy
-        --src-creds="${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}"
-        docker://${SIM_GITLAB_IMAGE}:latest
-        docker://${SIM_GCP_IMAGE}:latest
+# NOTE: copy_sim_engine REMOVED — Kaniko dual-push eliminates skopeo copy
 
 deploy_sim_engine:
   stage: deploy
@@ -517,7 +506,7 @@ deploy_sim_engine:
   tags:
     - docker-any
   needs:
-    - copy_sim_engine
+    - build_sim_engine
   variables:
     <<: *sim_engine_vars
   <<: *sim_engine_rules
@@ -530,7 +519,6 @@ deploy_sim_engine:
         --image=${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA} \
         --region=${GCP_REGION} \
         --platform=managed \
-        --execution-environment=gen2 \
         --allow-unauthenticated \
         --memory=2Gi \
         --cpu=2 \
@@ -538,7 +526,7 @@ deploy_sim_engine:
         --concurrency=5 \
         --min-instances=0 \
         --max-instances=3 \
-        --set-env-vars="MAX_CONCURRENT_JOBS=3,CORS_ORIGINS=*,GCS_BUCKET=${SIM_GCS_BUCKET:-blauweiss-sim-workspaces}" \
+        --set-env-vars="MAX_CONCURRENT_JOBS=3,CORS_ORIGINS=*,MRST_DIR=/opt/mrst,GCS_BUCKET=${SIM_GCS_BUCKET:-blauweiss-sim-workspaces}" \
         --service-account=${GCP_SERVICE_ACCOUNT:-gitlab-runner-controller@myk8sproject-207017.iam.gserviceaccount.com} \
         --port=8080
     - |
