@@ -45,14 +45,31 @@ from contextlib import asynccontextmanager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Register available backends on startup."""
+    from clarissa.sim_engine.backends.registry import register_backend
+
+    # OPM Flow
     try:
         from clarissa.sim_engine.backends.opm_backend import OPMBackend
         backend = OPMBackend()
-        from clarissa.sim_engine.backends.registry import register_backend
-        register_backend(backend)
-        logger.info(f"OPM backend registered (version: {backend.version})")
+        if backend.health_check():
+            register_backend(backend)
+            logger.info(f"OPM backend registered (version: {backend.version})")
+        else:
+            logger.warning("OPM backend: flow binary not found — skipped")
     except Exception as e:
         logger.warning(f"OPM backend not available: {e}")
+
+    # MRST (Octave)
+    try:
+        from clarissa.sim_engine.backends.mrst_backend import MRSTBackend
+        mrst = MRSTBackend()
+        if mrst.health_check():
+            register_backend(mrst)
+            logger.info(f"MRST backend registered (version: {mrst.version})")
+        else:
+            logger.warning("MRST backend: octave not found — skipped")
+    except Exception as e:
+        logger.warning(f"MRST backend not available: {e}")
 
     backends = list_backends()
     logger.info(f"Sim-Engine started. Available backends: {backends}")

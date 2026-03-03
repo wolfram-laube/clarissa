@@ -1,15 +1,15 @@
 # =============================================================================
-# CLARISSA Sim-Engine API — Thin app layer on pre-built OPM base
+# CLARISSA Sim-Engine API — Thin app layer on pre-built sim-base
 # =============================================================================
-# Base image (opm-base) has: Ubuntu 24.04, OPM Flow, Python, FastAPI, etc.
+# Base image (sim-base) has: Ubuntu 24.04, OPM Flow, Octave, MRST, Python
 # This Dockerfile ONLY copies application code => fast builds (~10s)
 #
-# Base image: see Dockerfile.opm-base (manual/rare rebuild)
-# Issue #112 | Epic #110 | ADR-038
+# Base image: see Dockerfile.sim-base (manual/rare rebuild)
+# Issue #117 | Epic #110 | ADR-038
 # =============================================================================
 
-ARG OPM_BASE_IMAGE=registry.gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/opm-base:latest
-FROM ${OPM_BASE_IMAGE}
+ARG SIM_BASE_IMAGE=registry.gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/sim-base:latest
+FROM ${SIM_BASE_IMAGE}
 
 ENV PORT=8080
 
@@ -35,8 +35,9 @@ WORKDIR /app
 # Copy ONLY application code (the expensive stuff is in base image)
 COPY src/clarissa/ /app/clarissa/
 
-# Verify flow still works
+# Verify both backends still work
 RUN flow --version || echo "WARNING: flow binary not in PATH"
+RUN octave --no-gui --version | head -1 || echo "WARNING: octave not in PATH"
 
 USER simuser
 
