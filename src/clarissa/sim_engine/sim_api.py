@@ -85,6 +85,7 @@ class JobState(BaseModel):
     request: SimRequest
     result: Optional[UnifiedResult] = None
     error: Optional[str] = None
+    logs: Optional[dict[str, Any]] = None  # raw stdout/stderr/errors from backend
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     updated_at: str = ""
 
@@ -175,6 +176,16 @@ def _run_simulation(job_id: str) -> None:
             job.result = result
             job.status = result.status
             job.progress = 100
+
+            # Store raw logs for debugging
+            job.logs = {
+                "stdout": raw.get("stdout", "")[-3000:],
+                "stderr": raw.get("stderr", "")[-3000:],
+                "errors": raw.get("errors", []),
+                "exit_code": raw.get("exit_code"),
+                "output_files": list(raw.get("output_files", {}).keys()),
+                "wall_time_seconds": raw.get("wall_time_seconds", 0),
+            }
 
             # Surface error details if simulation failed
             if result.status == SimStatus.FAILED:
@@ -407,10 +418,10 @@ async def get_result(job_id: str) -> dict[str, Any]:
         )
 
     if job.status == SimStatus.FAILED:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Simulation failed: {job.error}",
-        )
+        detail = f"Simulation failed: {job.error}"
+        if job.logs:
+            detail += f" | exit_code={job.logs.get('exit_code')} | errors={job.logs.get('errors', [])}"
+        raise HTTPException(status_code=500, detail=detail)
 
     if not job.result:
         raise HTTPException(status_code=500, detail="Result not available")
@@ -418,11 +429,40 @@ async def get_result(job_id: str) -> dict[str, Any]:
     return job.result.model_dump()
 
 
+
+@app.get("/sim/{job_id}/logs")
+async def get_logs(job_id: str) -> dict[str, Any]:
+    """Get raw simulation logs for debugging.
+
+    Returns stdout, stderr, errors, exit code from OPM Flow.
+    Available regardless of job status.
+    """
+    job = _jobs.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found")
+
+    return {
+        "job_id": job.job_id,
+        "status": job.status.value,
+        "error": job.error,
+        "logs": job.logs or {"message": "No logs yet (job still running or logs not captured)"},
+    }
+
+
 @app.get("/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
     """Engine health check — shows available backends and capacity."""
     backends = list_backends()
     active = sum(1 for j in _jobs.values() if j.status == SimStatus.RUNNING)
+
+    # Get backend versions
+    backend_versions = {}
+    for b in backends:
+        try:
+            be = get_backend(b)
+            backend_versions[b] = be.version
+        except Exception:
+            backend_versions[b] = "unknown"
 
     return HealthResponse(
         status="healthy" if backends else "degraded",
