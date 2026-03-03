@@ -248,14 +248,31 @@ class OPMBackend(SimulatorBackend):
         if prt_path.exists():
             prt_text = prt_path.read_text(errors="replace")
             if "Error" in prt_text or "ERROR" in prt_text:
+                # OPM parameter names contain "Error" (e.g. ContinueOnConvergenceError,
+                # NewtonMaxError, MaxError) — exclude these false positives.
+                false_positives = {"convergenceerror", "maxerror", "error summary"}
                 for line in prt_text.splitlines():
-                    if "error" in line.lower() and len(line.strip()) < 200:
-                        errors.append(line.strip())
+                    stripped = line.strip()
+                    low = stripped.lower()
+                    if len(stripped) > 200:
+                        continue
+                    if "error" not in low:
+                        continue
+                    # Skip OPM config parameter lines (key=value patterns)
+                    if "error=" in low or "error\"" in low:
+                        continue
+                    # Skip "Error summary:" and "Errors   0" lines
+                    if low.startswith("error summary") or low.startswith("errors") and "0" in low:
+                        continue
+                    errors.append(stripped)
 
         if on_progress:
             on_progress(90)
 
-        converged = result.returncode == 0 and "UNRST" in output_files
+        # Converged if exit code 0 and at least summary or restart output exists.
+        # UNRST requires explicit RPTRST keyword; SMSPEC is always written.
+        has_output = bool(output_files.keys() & {"UNRST", "SMSPEC", "EGRID"})
+        converged = result.returncode == 0 and has_output
 
         return {
             "case_name": case_name,
