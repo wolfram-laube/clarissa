@@ -530,6 +530,7 @@ deploy_sim_engine:
         --image=${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA} \
         --region=${GCP_REGION} \
         --platform=managed \
+        --execution-environment=gen2 \
         --allow-unauthenticated \
         --memory=2Gi \
         --cpu=2 \
