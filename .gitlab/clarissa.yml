@@ -402,8 +402,126 @@ rerun_all_tests:
       - junit_manual.xml
 
 # -----------------------------------------------------------------------------
-# DEPLOY STAGE: LLM Sync, Relay
+# DEPLOY STAGE: LLM Sync, Relay, Sim-Engine Cloud Run
 # -----------------------------------------------------------------------------
+
+# --- Sim-Engine Cloud Run Deployment ---
+# Issue #112 | Epic #110 | ADR-038, ADR-040
+# Pipeline: build → copy → deploy (same pattern as Dialectic Bridge)
+
+.sim_engine_vars: &sim_engine_vars
+  GCP_PROJECT: myk8sproject-207017
+  GCP_REGION: europe-north1
+  SIM_SERVICE_NAME: clarissa-sim-engine
+  SIM_GITLAB_IMAGE: ${CI_REGISTRY_IMAGE}/${SIM_SERVICE_NAME}
+  SIM_GCP_IMAGE: europe-north1-docker.pkg.dev/${GCP_PROJECT}/blauweiss/${SIM_SERVICE_NAME}
+
+.sim_engine_rules: &sim_engine_rules
+  rules:
+    - if: '$DEPLOY_SIM == "true"'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - src/clarissa/sim_engine/**/*
+        - src/clarissa/pal/**/*
+        - src/clarissa/parsers/**/*
+      when: manual
+      allow_failure: true
+    - when: never
+
+build_sim_engine:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.19.2-debug
+    entrypoint: [""]
+  tags:
+    - docker-any
+  needs:
+    - job: tests
+      artifacts: false
+  variables:
+    <<: *sim_engine_vars
+  <<: *sim_engine_rules
+  script:
+    - mkdir -p /kaniko/.docker
+    - AUTH=$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')
+    - |
+      cat > /kaniko/.docker/config.json << EOF
+      {"auths":{"${CI_REGISTRY}":{"auth":"${AUTH}"}}}
+      EOF
+    - /kaniko/executor
+        --context="${CI_PROJECT_DIR}"
+        --dockerfile="${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile"
+        --destination="${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        --destination="${SIM_GITLAB_IMAGE}:latest"
+        --cache=true
+
+copy_sim_engine:
+  stage: build
+  image: google/cloud-sdk:slim
+  tags:
+    - docker-any
+  needs:
+    - build_sim_engine
+  variables:
+    <<: *sim_engine_vars
+  <<: *sim_engine_rules
+  script:
+    - echo "$GCP_SERVICE_ACCOUNT_KEY" > /tmp/gcp-key.json
+    - gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
+    - gcloud auth configure-docker europe-north1-docker.pkg.dev --quiet
+    - apt-get update && apt-get install -y skopeo
+    - skopeo copy
+        --src-creds="${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}"
+        docker://${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}
+        docker://${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA}
+    - skopeo copy
+        --src-creds="${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}"
+        docker://${SIM_GITLAB_IMAGE}:latest
+        docker://${SIM_GCP_IMAGE}:latest
+
+deploy_sim_engine:
+  stage: deploy
+  image: google/cloud-sdk:slim
+  tags:
+    - docker-any
+  needs:
+    - copy_sim_engine
+  variables:
+    <<: *sim_engine_vars
+  <<: *sim_engine_rules
+  script:
+    - echo "$GCP_SERVICE_ACCOUNT_KEY" > /tmp/gcp-key.json
+    - gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
+    - gcloud config set project ${GCP_PROJECT}
+    - |
+      gcloud run deploy ${SIM_SERVICE_NAME} \
+        --image=${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA} \
+        --region=${GCP_REGION} \
+        --platform=managed \
+        --allow-unauthenticated \
+        --memory=2Gi \
+        --cpu=2 \
+        --timeout=900 \
+        --concurrency=5 \
+        --min-instances=0 \
+        --max-instances=3 \
+        --set-env-vars="MAX_CONCURRENT_JOBS=3,CORS_ORIGINS=*,GCS_BUCKET=${SIM_GCS_BUCKET:-blauweiss-sim-workspaces}" \
+        --service-account=${GCP_SERVICE_ACCOUNT:-gitlab-runner-controller@myk8sproject-207017.iam.gserviceaccount.com} \
+        --port=8080
+    - |
+      URL=$(gcloud run services describe ${SIM_SERVICE_NAME} --region=${GCP_REGION} --format='value(status.url)')
+      echo "✅ Sim-Engine deployed: ${URL}"
+      echo "SIM_ENGINE_URL=${URL}" >> deploy.env
+    - |
+      echo "Health check..."
+      sleep 10
+      curl -sf "${URL}/health" | python3 -m json.tool || echo "⚠️ Cold start — may need a minute"
+  artifacts:
+    reports:
+      dotenv: deploy.env
+
 llm_sync_package:
   stage: deploy
   image: python:3.11
