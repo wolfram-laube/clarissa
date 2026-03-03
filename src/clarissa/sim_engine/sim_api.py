@@ -176,6 +176,15 @@ def _run_simulation(job_id: str) -> None:
             job.status = result.status
             job.progress = 100
 
+            # Surface error details if simulation failed
+            if result.status == SimStatus.FAILED:
+                error_parts = []
+                if raw.get("errors"):
+                    error_parts.extend(raw["errors"][:5])
+                if raw.get("stderr"):
+                    error_parts.append(raw["stderr"][-500:])
+                job.error = "; ".join(error_parts) if error_parts else "Simulation failed (no output)"
+
     except Exception as e:
         logger.exception(f"Job {job_id} failed: {e}")
         job.status = SimStatus.FAILED
@@ -305,6 +314,7 @@ async def upload_deck(
         sim_request.backend = simulator
         sim_request.metadata["source"] = "upload"
         sim_request.metadata["filename"] = file.filename or "unknown.DATA"
+        sim_request.metadata["_raw_deck"] = deck_text  # Preserve original for direct execution
     except Exception as e:
         logger.error(f"Deck parse failed: {e}")
         raise HTTPException(

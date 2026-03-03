@@ -165,7 +165,6 @@ class OPMBackend(SimulatorBackend):
             RuntimeError: If flow binary not found or simulation fails.
         """
         from .registry import register_backend  # Avoid circular at import time
-        from clarissa.sim_engine.deck_generator import generate_deck, write_deck
 
         work_path = Path(work_dir)
         work_path.mkdir(parents=True, exist_ok=True)
@@ -173,11 +172,17 @@ class OPMBackend(SimulatorBackend):
         if on_progress:
             on_progress(0)
 
-        # Step 1: Generate deck
+        # Step 1: Write deck (use original upload if available, else generate)
         case_name = "CLARISSA_SIM"
         deck_path = str(work_path / f"{case_name}.DATA")
-        write_deck(request, deck_path)
-        logger.info(f"Deck written to {deck_path}")
+        raw_deck = request.metadata.get("_raw_deck")
+        if raw_deck:
+            Path(deck_path).write_text(raw_deck)
+            logger.info(f"Using original uploaded deck at {deck_path}")
+        else:
+            from clarissa.sim_engine.deck_generator import generate_deck, write_deck
+            write_deck(request, deck_path)
+            logger.info(f"Generated deck written to {deck_path}")
 
         if on_progress:
             on_progress(10)
