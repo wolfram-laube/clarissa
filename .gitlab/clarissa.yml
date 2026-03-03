@@ -437,9 +437,6 @@ build_sim_engine:
     entrypoint: [""]
   tags:
     - docker-any
-  needs:
-    - job: tests
-      artifacts: false
   variables:
     <<: *sim_engine_vars
   <<: *sim_engine_rules
