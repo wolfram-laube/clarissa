@@ -30,7 +30,7 @@ RUN apt-get update && apt-get install -y \
 # ── MRST installation (from GitHub mirror) ───────────────────────────────
 ENV MRST_DIR=/opt/mrst
 RUN mkdir -p ${MRST_DIR} \
-    && curl -sL https://github.com/SINTEF-AppliedCompSci/MRST/archive/refs/tags/v2024.11.tar.gz \
+    && curl -sL https://github.com/SINTEF-AppliedCompSci/MRST/archive/refs/tags/2025b.tar.gz \
        | tar xz -C ${MRST_DIR} --strip-components=1 \
     && echo "addpath(genpath('${MRST_DIR}'));" > /etc/octave.conf \
     && echo "MRST installed: $(ls ${MRST_DIR}/ | head -5)"
@@ -52,4 +52,4 @@ RUN useradd -m -s /bin/bash simuser
 LABEL maintainer="wolfram.laube@blauweiss-edv.at"
 LABEL description="Combined OPM Flow + MRST base image for CLARISSA Sim-Engine"
 LABEL opm.version="2025.10"
-LABEL mrst.version="2024.11"
+LABEL mrst.version="2025b"
