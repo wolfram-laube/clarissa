@@ -5,13 +5,14 @@ and retrieving results. Uses the same async job pattern as the
 Dialectic Engine service.
 
 Endpoints:
-    POST /sim/run           → Submit simulation job
+    POST /sim/run           → Submit simulation job (JSON SimRequest)
+    POST /sim/upload        → Upload .DATA file → parse → simulate
     GET  /sim/{job_id}      → Poll status + progress
     GET  /sim/{id}/result   → Full UnifiedResult JSON
     GET  /sim/compare/{a}/{b} → Delta analysis (future)
     GET  /health            → Engine status + available backends
 
-Issue #165 | Epic #161 | ADR-038
+Issue #165, #111 | Epic #110, #161 | ADR-038, ADR-040
 """
 from __future__ import annotations
 
@@ -24,7 +25,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, File, HTTPException, BackgroundTasks, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -116,6 +117,17 @@ class HealthResponse(BaseModel):
     active_jobs: int
     max_jobs: int
     version: str
+
+
+class UploadResponse(BaseModel):
+    job_id: str
+    status: SimStatus
+    message: str
+    parsed_grid: dict[str, Any] = {}
+
+
+# Upload size limit (bytes)
+_MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_MB", "10")) * 1024 * 1024
 
 
 # ─── Background Worker ───────────────────────────────────────────────────
@@ -234,6 +246,120 @@ async def submit_simulation(
         job_id=job_id,
         status=SimStatus.PENDING,
         message=f"Simulation queued on '{request.backend}' backend",
+    )
+
+
+@app.post("/sim/upload", response_model=UploadResponse)
+async def upload_deck(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(..., description="Eclipse .DATA deck file"),
+    simulator: str = Query("opm", description="Backend: opm, mrst, or both"),
+) -> UploadResponse:
+    """Upload an Eclipse .DATA file and run simulation.
+
+    Parses the deck, converts to SimRequest, and queues a simulation job.
+    Use GET /sim/{job_id} to poll status.
+
+    Issue #111 | Epic #110
+    """
+    # Validate filename
+    if file.filename and not file.filename.upper().endswith(".DATA"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Expected .DATA file, got '{file.filename}'",
+        )
+
+    # Read content with size limit
+    content = await file.read()
+    if len(content) > _MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File too large ({len(content)} bytes). Max: {_MAX_UPLOAD_BYTES} bytes.",
+        )
+
+    if not content.strip():
+        raise HTTPException(status_code=400, detail="Empty file")
+
+    # Decode
+    try:
+        deck_text = content.decode("utf-8")
+    except UnicodeDecodeError:
+        try:
+            deck_text = content.decode("latin-1")
+        except Exception:
+            raise HTTPException(status_code=400, detail="Cannot decode file (expected UTF-8 or Latin-1)")
+
+    # Basic validation: must contain RUNSPEC
+    if "RUNSPEC" not in deck_text.upper():
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid deck: RUNSPEC section not found",
+        )
+
+    # Parse deck → SimRequest
+    try:
+        from clarissa.sim_engine.deck_parser import parse_deck, deck_to_sim_request
+
+        parsed = parse_deck(deck_text)
+        sim_request = deck_to_sim_request(parsed)
+        sim_request.backend = simulator
+        sim_request.metadata["source"] = "upload"
+        sim_request.metadata["filename"] = file.filename or "unknown.DATA"
+    except Exception as e:
+        logger.error(f"Deck parse failed: {e}")
+        raise HTTPException(
+            status_code=422,
+            detail=f"Deck parsing failed: {str(e)[:200]}",
+        )
+
+    # Check capacity
+    active = sum(1 for j in _jobs.values() if j.status == SimStatus.RUNNING)
+    if active >= _MAX_JOBS:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Too many active jobs ({active}/{_MAX_JOBS}). Try again later.",
+        )
+
+    # Check backend
+    available = list_backends()
+    if simulator not in available:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Backend '{simulator}' not available. Available: {available}",
+        )
+
+    # Create job
+    job_id = f"sim-{uuid.uuid4().hex[:12]}"
+    job = JobState(job_id=job_id, request=sim_request)
+    _jobs[job_id] = job
+
+    # Queue background work
+    background_tasks.add_task(_run_simulation, job_id)
+
+    grid_info = {
+        "nx": sim_request.grid.nx,
+        "ny": sim_request.grid.ny,
+        "nz": sim_request.grid.nz,
+        "total_cells": sim_request.grid.total_cells,
+        "wells": len(sim_request.wells),
+        "title": sim_request.title,
+    }
+
+    logger.info(
+        f"Upload: {file.filename} → job {job_id} "
+        f"({grid_info['nx']}×{grid_info['ny']}×{grid_info['nz']}, "
+        f"{grid_info['wells']} wells, backend={simulator})"
+    )
+
+    return UploadResponse(
+        job_id=job_id,
+        status=SimStatus.PENDING,
+        message=(
+            f"Deck '{file.filename}' parsed: "
+            f"{grid_info['nx']}×{grid_info['ny']}×{grid_info['nz']} grid, "
+            f"{grid_info['wells']} wells. Simulation queued on '{simulator}'."
+        ),
+        parsed_grid=grid_info,
     )
 
 
