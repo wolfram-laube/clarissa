@@ -1,0 +1,35 @@
+# =============================================================================
+# OPM Flow Base Image
+# Ubuntu 24.04 + OPM Flow + Python Runtime
+# =============================================================================
+# Built ONCE, cached in registry. Rebuild only on OPM/Ubuntu upgrades.
+# Issue #112 | Epic #110 | ADR-038
+# =============================================================================
+
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    && add-apt-repository ppa:opm/ppa \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libopm-simulators-bin \
+        python3 \
+        python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --break-system-packages --no-cache-dir \
+    fastapi "uvicorn[standard]" pydantic python-multipart \
+    opm==2025.10 numpy httpx
+
+RUN flow --version
+
+RUN useradd -m -s /bin/bash simuser
+
+LABEL maintainer="wolfram.laube@blauweiss-edv.at"
+LABEL description="OPM Flow base image for CLARISSA Sim-Engine"
+LABEL opm.version="2025.10"
