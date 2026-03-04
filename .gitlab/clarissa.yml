@@ -568,6 +568,7 @@ relay:clarissa:
   image: python:3.11-slim
   tags:
     - docker-any
+  allow_failure: true
   rules:
     - changes:
         - handoffs/handoff_to_clarissa.md
@@ -596,5 +597,6 @@ relay:clarissa:
   variables:
     OPENAI_API_KEY: ${OPENAI_API_KEY}
     GITLAB_TOKEN: ${GITLAB_TOKEN}
+
 
 
