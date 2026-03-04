@@ -593,4 +593,3 @@ relay:clarissa:
   variables:
     OPENAI_API_KEY: ${OPENAI_API_KEY}
     GITLAB_TOKEN: ${GITLAB_TOKEN}
-    GITLAB_TOKEN: ${GITLAB_TOKEN}
