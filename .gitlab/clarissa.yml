@@ -409,7 +409,7 @@ rerun_all_tests:
 # Issue #112 | Epic #110 | ADR-038, ADR-040
 # ── Sim-Engine Pipeline ──────────────────────────────────────────────────
 # Pipeline: build_sim_base (manual) → build_sim_engine → deploy_sim_engine
-# No more skopeo copy — Kaniko dual-push to GitLab + GCP Artifact Registry.
+# Uses native docker build on Nordic Shell Runner. Issue #120.
 # Issue #117 | Epic #110
 
 .sim_engine_vars: &sim_engine_vars
@@ -464,34 +464,27 @@ build_sim_base:
 
 build_sim_engine:
   stage: build
-  image:
-    name: gcr.io/kaniko-project/executor:v1.19.2-debug
-    entrypoint: [""]
   tags:
-    - docker-any
+    - nordic-shell  # Native docker, datacenter upload speed
   variables:
     <<: *sim_engine_vars
   <<: *sim_engine_rules
   before_script:
-    # Kaniko auth for both registries:
-    # - GitLab: CI_REGISTRY_USER/PASSWORD (built-in)
-    # GitLab registry only — GCP AR dual-push removed (docker-credential-gcloud not in Kaniko)
-    - mkdir -p /kaniko/.docker
-    - GL_AUTH=$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')
-    - |
-      cat > /kaniko/.docker/config.json << EOF
-      {"auths":{"${CI_REGISTRY}":{"auth":"${GL_AUTH}"}}}
-      EOF
+    - docker info
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
   script:
-    - /kaniko/executor
-        --context="${CI_PROJECT_DIR}"
-        --dockerfile="${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile"
-        --destination="${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}"
-        --destination="${SIM_GITLAB_IMAGE}:latest"
-        --build-arg="SIM_BASE_IMAGE=${SIM_BASE_IMAGE}"
-        --cache=true
+    - |
+      docker build \
+        -t "${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}" \
+        -t "${SIM_GITLAB_IMAGE}:latest" \
+        --build-arg="SIM_BASE_IMAGE=${SIM_BASE_IMAGE}" \
+        -f src/clarissa/sim_engine/Dockerfile \
+        src/clarissa/sim_engine/
+    - docker push "${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+    - docker push "${SIM_GITLAB_IMAGE}:latest"
+    - echo "✅ sim-engine pushed: ${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}"
 
-# NOTE: copy_sim_engine REMOVED — Kaniko dual-push eliminates skopeo copy
+# NOTE: copy_sim_engine REMOVED — build_sim_engine pushes directly to GitLab registry
 
 deploy_sim_engine:
   stage: deploy
