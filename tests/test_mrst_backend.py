@@ -329,8 +329,7 @@ class TestMRSTBackendPALContract:
 
     def test_version_detected(self, backend):
         mock_result = MagicMock()
-        mock_result.stdout = "GNU Octave, version 8.4.0
-"
+        mock_result.stdout = "GNU Octave, version 8.4.0\n"
         with patch("subprocess.run", return_value=mock_result):
             assert "8.4.0" in backend.version
 
