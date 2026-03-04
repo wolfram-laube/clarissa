@@ -99,9 +99,24 @@ def _mrst_startup() -> str:
     """MRST module loading."""
     return textwrap.dedent("""\
         %% ─── MRST Startup ───────────────────────────────────────────
-        % Ensure MRST is on the path
+        % Add MRST to path from environment or common locations
         if exist('mrstPath', 'file') == 0
-            error('MRST not found. Set MRST_DIR or add to Octave path.');
+            mrst_dir = getenv('MRST_DIR');
+            if isempty(mrst_dir)
+                % Try common install locations
+                for d = {'/opt/mrst', '/usr/local/mrst', '/home/simuser/mrst'}
+                    if exist(d{1}, 'dir')
+                        mrst_dir = d{1};
+                        break;
+                    end
+                end
+            end
+            if ~isempty(mrst_dir) && exist(mrst_dir, 'dir')
+                fprintf('Adding MRST from: %s\\n', mrst_dir);
+                addpath(genpath(mrst_dir));
+            else
+                error('MRST not found. Set MRST_DIR or add to Octave path.');
+            end
         end
         mrstModule add ad-blackoil ad-core ad-props mrst-autodiff deckformat
     """)
