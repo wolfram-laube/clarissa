@@ -452,14 +452,11 @@ rerun_all_tests:
 
 build_sim_base:
   stage: build
-  <<: *dind_docker
   tags:
-    - nordic  # → nordic-shell when Shell runner available
+    - shell-any  # Shell runner with native Docker
   timeout: 1h
   variables:
     <<: *sim_engine_vars
-    DOCKER_TLS_CERTDIR: ""
-    DOCKER_HOST: tcp://docker:2375
   rules:
     - if: '$BUILD_SIM_BASE == "true"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
@@ -477,13 +474,10 @@ build_sim_base:
 
 build_sim_engine:
   stage: build
-  <<: *dind_docker
   tags:
-    - nordic  # → nordic-shell when Shell runner available
+    - shell-any  # Shell runner with native Docker (Mac/Yoga/Nordic)
   variables:
     <<: *sim_engine_vars
-    DOCKER_TLS_CERTDIR: ""
-    DOCKER_HOST: tcp://docker:2375
   <<: *sim_engine_rules
   script:
     # Auth: GitLab + GCP registries
