@@ -441,8 +441,8 @@ build_sim_base:
     name: gcr.io/kaniko-project/executor:v1.19.2-debug
     entrypoint: [""]
   tags:
-    - docker-any
-  timeout: 2h
+    - nordic  # Datacenter upload speed — base image is 4-5 GB
+  timeout: 1h
   variables:
     <<: *sim_engine_vars
   rules:
