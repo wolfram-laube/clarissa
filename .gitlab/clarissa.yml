@@ -478,7 +478,7 @@ build_sim_engine:
     # - GCP AR: service account key via GOOGLE_APPLICATION_CREDENTIALS
     - mkdir -p /kaniko/.docker
     - GL_AUTH=$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')
-    - echo "$GCP_SERVICE_ACCOUNT_KEY" > /kaniko/gcp-key.json
+    - echo "$GOOGLE_CREDENTIALS" > /kaniko/gcp-key.json
     - export GOOGLE_APPLICATION_CREDENTIALS=/kaniko/gcp-key.json
     - |
       cat > /kaniko/.docker/config.json << EOF
@@ -508,7 +508,7 @@ deploy_sim_engine:
     <<: *sim_engine_vars
   <<: *sim_engine_rules
   script:
-    - echo "$GCP_SERVICE_ACCOUNT_KEY" > /tmp/gcp-key.json
+    - echo "$GOOGLE_CREDENTIALS" > /tmp/gcp-key.json
     - gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
     - gcloud config set project ${GCP_PROJECT}
     - |
@@ -600,4 +600,5 @@ relay:clarissa:
   variables:
     OPENAI_API_KEY: ${OPENAI_API_KEY}
     GITLAB_TOKEN: ${GITLAB_TOKEN}
+
 
