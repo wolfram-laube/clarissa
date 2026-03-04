@@ -22,7 +22,7 @@ build_opm_image:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     IMAGE_BASE: $CI_REGISTRY_IMAGE/opm-flow
   before_script:
-    - docker info
+    - until docker info; do echo "Waiting for docker..."; sleep 2; done
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
     - |
@@ -84,7 +84,7 @@ rebuild_opm_image:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     IMAGE_BASE: $CI_REGISTRY_IMAGE/opm-flow
   before_script:
-    - docker info
+    - until docker info; do echo "Waiting for docker..."; sleep 2; done
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
     - |
@@ -437,11 +437,10 @@ rerun_all_tests:
 
 build_sim_base:
   stage: build
-  image:
-    name: gcr.io/kaniko-project/executor:v1.19.2-debug
-    entrypoint: [""]
+  # Shell executor — runs directly on Nordic host, no container/dind needed.
+  # Docker is available natively on the host.
   tags:
-    - nordic  # Datacenter upload speed — base image is 4-5 GB
+    - nordic-shell
   timeout: 1h
   variables:
     <<: *sim_engine_vars
@@ -451,19 +450,17 @@ build_sim_base:
       when: manual
       allow_failure: true
     - when: never
+  before_script:
+    - docker info
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
-    - mkdir -p /kaniko/.docker
-    - AUTH=$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')
     - |
-      cat > /kaniko/.docker/config.json << EOF
-      {"auths":{"${CI_REGISTRY}":{"auth":"${AUTH}"}}}
-      EOF
-    - /kaniko/executor
-        --context="${CI_PROJECT_DIR}/src/clarissa/sim_engine"
-        --dockerfile="${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile.sim-base"
-        --destination="${SIM_BASE_IMAGE}"
-        --cache=false
-        --single-snapshot
+      docker build --no-cache \
+        -t ${SIM_BASE_IMAGE} \
+        -f ${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile.sim-base \
+        ${CI_PROJECT_DIR}/src/clarissa/sim_engine
+      docker push ${SIM_BASE_IMAGE}
+      echo "✅ Pushed: ${SIM_BASE_IMAGE}"
 
 build_sim_engine:
   stage: build
@@ -478,14 +475,12 @@ build_sim_engine:
   before_script:
     # Kaniko auth for both registries:
     # - GitLab: CI_REGISTRY_USER/PASSWORD (built-in)
-    # - GCP AR: service account key via GOOGLE_APPLICATION_CREDENTIALS
+    # GitLab registry only — GCP AR dual-push removed (docker-credential-gcloud not in Kaniko)
     - mkdir -p /kaniko/.docker
     - GL_AUTH=$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')
-    - echo "$GCP_SERVICE_ACCOUNT_KEY" > /kaniko/gcp-key.json
-    - export GOOGLE_APPLICATION_CREDENTIALS=/kaniko/gcp-key.json
     - |
       cat > /kaniko/.docker/config.json << EOF
-      {"auths":{"${CI_REGISTRY}":{"auth":"${GL_AUTH}"}},"credHelpers":{"europe-north1-docker.pkg.dev":"gcloud"}}
+      {"auths":{"${CI_REGISTRY}":{"auth":"${GL_AUTH}"}}}
       EOF
   script:
     - /kaniko/executor
@@ -493,8 +488,6 @@ build_sim_engine:
         --dockerfile="${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile"
         --destination="${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}"
         --destination="${SIM_GITLAB_IMAGE}:latest"
-        --destination="${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA}"
-        --destination="${SIM_GCP_IMAGE}:latest"
         --build-arg="SIM_BASE_IMAGE=${SIM_BASE_IMAGE}"
         --cache=true
 
@@ -502,18 +495,27 @@ build_sim_engine:
 
 deploy_sim_engine:
   stage: deploy
-  image: google/cloud-sdk:slim
+  # Shell runner: Docker available natively for registry-to-registry copy
   tags:
-    - docker-any
+    - nordic-shell
   needs:
     - build_sim_engine
   variables:
     <<: *sim_engine_vars
   <<: *sim_engine_rules
   script:
+    # GCP auth
     - echo "$GCP_SERVICE_ACCOUNT_KEY" > /tmp/gcp-key.json
     - gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
     - gcloud config set project ${GCP_PROJECT}
+    # Copy image: GitLab → GCP AR (Cloud Run requires GCR/AR)
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - gcloud auth configure-docker europe-north1-docker.pkg.dev --quiet
+    - docker pull ${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}
+    - docker tag ${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA} ${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA}
+    - docker tag ${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA} ${SIM_GCP_IMAGE}:latest
+    - docker push ${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${SIM_GCP_IMAGE}:latest
     - |
       gcloud run deploy ${SIM_SERVICE_NAME} \
         --image=${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA} \
@@ -575,6 +577,7 @@ relay:clarissa:
   image: python:3.11-slim
   tags:
     - docker-any
+  allow_failure: true
   rules:
     - changes:
         - handoffs/handoff_to_clarissa.md
@@ -603,3 +606,7 @@ relay:clarissa:
   variables:
     OPENAI_API_KEY: ${OPENAI_API_KEY}
     GITLAB_TOKEN: ${GITLAB_TOKEN}
+
+
+
+

@@ -16,7 +16,7 @@ ENV PYTHONUNBUFFERED=1
 
 # ── System packages: OPM Flow + GNU Octave ───────────────────────────────
 RUN apt-get update && apt-get install -y \
-    software-properties-common curl \
+    software-properties-common curl unzip \
     && add-apt-repository ppa:opm/ppa \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -27,16 +27,51 @@ RUN apt-get update && apt-get install -y \
         python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# ── MRST installation (from GitHub mirror) ───────────────────────────────
+# ── MRST installation ────────────────────────────────────────────────────
+# Version: 2021a (PINNED — do not upgrade without testing Issue #118)
+#
+# WHY 2021a and not latest (2025b):
+#   ad-core >=2019 uses StateFunctionGrouping OOP pattern which is
+#   incompatible with GNU Octave ("matrix cannot be indexed with .").
+#   MRST 2021a is the first officially Octave-verified release by SINTEF:
+#   AD solvers confirmed on Octave 6.x, no separate compat patches needed.
+#   Ref: https://www.sintef.no/projectweb/mrst/downloadable-resources/
+#
+# WHY GCS and not GitHub:
+#   MRST only migrated to GitHub with 2024b — pre-2024b has no GitHub tags.
+#   Source: gs://myk8sproject-207017-clarissa-assets/mrst/mrst-2021a.zip
+#   (uploaded 2026-03-04, downloaded from SINTEF previous-releases page)
+#
+# Alternative B considered (rejected):
+#   monkey-patch checkDependencies.m to override OOP property access.
+#   Rejected: fragile on MRST updates, multiple affected sites unclear.
+#
+# SPE5 note: compositional module present in 2021a but Octave compat
+#   unconfirmed — validate in E2E after base image build. If SPE5 fails:
+#   mark as OPM-only for cross-validation (Issue #118).
+#
+# To update MRST version:
+#   1. Upload new zip to GCS: gsutil cp mrst-XXXX.zip gs://myk8sproject-207017-clarissa-assets/mrst/
+#   2. Update MRST_VERSION below
+#   3. Re-run BUILD_SIM_BASE=true pipeline
+#   4. Re-run E2E tests for all 4 SPE benchmarks
+ENV MRST_VERSION=2021a
 ENV MRST_DIR=/opt/mrst
-RUN mkdir -p ${MRST_DIR} \
-    && curl -sL https://github.com/SINTEF-AppliedCompSci/MRST/archive/refs/tags/2025b.tar.gz \
-       | tar xz -C ${MRST_DIR} --strip-components=1 \
-    && echo "addpath(genpath('${MRST_DIR}'));" > /etc/octave.conf \
-    && echo "MRST installed: $(ls ${MRST_DIR}/ | head -5)"
 
-# Validate Octave + MRST path
-RUN octave --no-gui --eval "addpath(genpath('${MRST_DIR}')); disp('MRST OK')"
+RUN mkdir -p ${MRST_DIR} \
+    && curl -fsSL \
+       "https://storage.googleapis.com/myk8sproject-207017-clarissa-assets/mrst/mrst-${MRST_VERSION}.zip" \
+       -o /tmp/mrst.zip \
+    && unzip -q /tmp/mrst.zip -d /tmp/mrst-extract \
+    && mv /tmp/mrst-extract/mrst-${MRST_VERSION}/* ${MRST_DIR}/ \
+    && rm -rf /tmp/mrst.zip /tmp/mrst-extract \
+    && echo "MRST ${MRST_VERSION} installed: $(ls ${MRST_DIR}/ | head -5)"
+
+# Validate Octave + MRST startup
+RUN octave --no-gui --eval \
+    "addpath(genpath('${MRST_DIR}')); startup; disp('MRST OK')" \
+    || octave --no-gui --eval \
+    "addpath(genpath('${MRST_DIR}')); disp('MRST path OK (no startup.m)')"
 
 # ── Python dependencies ──────────────────────────────────────────────────
 RUN pip install --break-system-packages --no-cache-dir \
@@ -52,4 +87,4 @@ RUN useradd -m -s /bin/bash simuser
 LABEL maintainer="wolfram.laube@blauweiss-edv.at"
 LABEL description="Combined OPM Flow + MRST base image for CLARISSA Sim-Engine"
 LABEL opm.version="2025.10"
-LABEL mrst.version="2025b"
+LABEL mrst.version="2021a"
