@@ -441,7 +441,7 @@ build_sim_base:
     name: gcr.io/kaniko-project/executor:v1.19.2-debug
     entrypoint: [""]
   tags:
-    - nordic  # Datacenter upload speed — base image is 4-5 GB
+    - docker-any  # Needs Docker/Kaniko — Nordic Docker Runner has this tag
   timeout: 1h
   variables:
     <<: *sim_engine_vars
@@ -603,3 +603,4 @@ relay:clarissa:
   variables:
     OPENAI_API_KEY: ${OPENAI_API_KEY}
     GITLAB_TOKEN: ${GITLAB_TOKEN}
+
