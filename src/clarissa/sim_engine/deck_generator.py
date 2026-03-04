@@ -164,20 +164,35 @@ def _pvdo_table(fluid: "FluidProperties", p_ref_psi: float) -> str:
 def _pvto_table(fluid: "FluidProperties", p_ref_psi: float) -> str:
     """Live oil PVT table with dissolved gas (PVTO for DISGAS).
 
-    Format per row: Rs[scf/STB]  P_sat[psi]  Bo  Mu / (undersaturated continues without Rs)
-    Simplified 3-Rs table sufficient for synthetic cases.
+    OPM/Eclipse PVTO format rules:
+    - Each Rs row: Rs Psat Bo Mu, then undersaturated points (P > Psat) without Rs
+    - Each Rs block ends with /
+    - Entire keyword ends with additional /
+    - Min 2 pressure points per Rs block (saturated + ≥1 undersaturated)
     """
     bp_psi = _bar_to_psi(fluid.bubble_point_bar)
     mu = fluid.oil_viscosity_cp
+    p_high = p_ref_psi * 1.5
+
     rows = [
-        # Rs=0 (dead oil at low P)
-        f"   0.0   14.7        1.050   {mu:.4f} /",
-        # Rs at bubble point
-        f"   400.0 {bp_psi:.1f}  1.150   {mu * 0.85:.4f}",
-        f"         {p_ref_psi:.1f}  1.130   {mu * 0.90:.4f} /",
-        # Rs at high pressure (above bubble point)
-        f"   600.0 {p_ref_psi:.1f}  1.200   {mu * 0.80:.4f}",
-        f"         {p_ref_psi * 1.5:.1f}  1.180   {mu * 0.85:.4f} /",
+        "-- Rs[scf/STB]  P[psia]   Bo[RB/STB]  Mu[cP]",
+        # Rs=0: dead oil, valid from surface to above reservoir pressure
+        f"   0.001       14.7      1.050       {mu:.4f}",
+        f"               {bp_psi:.1f}    1.040       {mu * 1.05:.4f}",
+        f"               {p_ref_psi:.1f}    1.030       {mu * 1.10:.4f} /",
+        # Rs at ~half bubble point
+        f"   200.0       {bp_psi * 0.6:.1f}    1.100       {mu * 0.90:.4f}",
+        f"               {bp_psi:.1f}    1.090       {mu * 0.95:.4f}",
+        f"               {p_ref_psi:.1f}    1.070       {mu * 1.00:.4f} /",
+        # Rs at bubble point pressure
+        f"   400.0       {bp_psi:.1f}    1.150       {mu * 0.85:.4f}",
+        f"               {p_ref_psi:.1f}    1.130       {mu * 0.90:.4f}",
+        f"               {p_high:.1f}   1.100       {mu * 1.00:.4f} /",
+        # Rs above bubble point (high GOR)
+        f"   600.0       {p_ref_psi:.1f}    1.200       {mu * 0.80:.4f}",
+        f"               {p_high:.1f}   1.180       {mu * 0.85:.4f}",
+        f"               {p_high * 1.3:.1f}  1.150       {mu * 0.95:.4f} /",
+        "/",  # final PVTO keyword terminator
     ]
     return "\n        ".join(rows)
 
