@@ -149,7 +149,41 @@ def _grid_section(grid: GridParams) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _props_section(fluid: FluidProperties) -> str:
+def _pvdo_table(fluid: "FluidProperties", p_ref_psi: float) -> str:
+    """Dead oil PVT table (no dissolved gas)."""
+    bp_psi = _bar_to_psi(fluid.bubble_point_bar)
+    lines = [
+        f"   14.7       1.050   {fluid.oil_viscosity_cp:.4f}",
+        f"   {bp_psi:.1f}  1.040   {fluid.oil_viscosity_cp * 1.04:.4f}",
+        f"   {p_ref_psi:.1f}  1.020   {fluid.oil_viscosity_cp * 1.10:.4f}",
+        f"   {p_ref_psi * 1.5:.1f}  1.010   {fluid.oil_viscosity_cp * 1.20:.4f} /",
+    ]
+    return "\n        ".join(lines)
+
+
+def _pvto_table(fluid: "FluidProperties", p_ref_psi: float) -> str:
+    """Live oil PVT table with dissolved gas (PVTO for DISGAS).
+
+    Format per row: Rs[scf/STB]  P_sat[psi]  Bo  Mu / (undersaturated continues without Rs)
+    Simplified 3-Rs table sufficient for synthetic cases.
+    """
+    bp_psi = _bar_to_psi(fluid.bubble_point_bar)
+    mu = fluid.oil_viscosity_cp
+    rows = [
+        # Rs=0 (dead oil at low P)
+        f"   0.0   14.7        1.050   {mu:.4f} /",
+        # Rs at bubble point
+        f"   400.0 {bp_psi:.1f}  1.150   {mu * 0.85:.4f}",
+        f"         {p_ref_psi:.1f}  1.130   {mu * 0.90:.4f} /",
+        # Rs at high pressure (above bubble point)
+        f"   600.0 {p_ref_psi:.1f}  1.200   {mu * 0.80:.4f}",
+        f"         {p_ref_psi * 1.5:.1f}  1.180   {mu * 0.85:.4f} /",
+    ]
+    return "\n        ".join(rows)
+
+
+
+def _props_section(fluid: FluidProperties, has_gas: bool = False) -> str:
     """Generate PROPS section with PVT and relperm tables.
 
     Uses simplified Corey-type relative permeability and constant PVT.
@@ -179,16 +213,26 @@ def _props_section(fluid: FluidProperties) -> str:
         0.88    0.5000         0.0000         0.0
         1.00    1.0000         0.0000         0.0 /
 
+        {"SGOF" if has_gas else ""}
+        {"-- Sg      krg    kro    Pcog" if has_gas else ""}
+        {"0.00    0.000  1.000  0.0" if has_gas else ""}
+        {"0.05    0.005  0.800  0.0" if has_gas else ""}
+        {"0.10    0.013  0.600  0.0" if has_gas else ""}
+        {"0.20    0.040  0.400  0.0" if has_gas else ""}
+        {"0.30    0.100  0.200  0.0" if has_gas else ""}
+        {"0.40    0.200  0.080  0.0" if has_gas else ""}
+        {"0.50    0.350  0.020  0.0" if has_gas else ""}
+        {"0.60    0.540  0.004  0.0" if has_gas else ""}
+        {"0.70    0.740  0.000  0.0" if has_gas else ""}
+        {"0.78    1.000  0.000  0.0 /" if has_gas else ""}
+
         DENSITY
         -- Oil[lb/ft³]  Water[lb/ft³]  Gas[lb/ft³]
            {fluid.oil_density_kg_m3 * 0.0624279:.2f}  {fluid.water_density_kg_m3 * 0.0624279:.2f}  0.0533 /
 
-        PVDO
-        -- P[psi]     Bo      Viscosity[cP]
-           14.7       1.050   {fluid.oil_viscosity_cp:.4f}
-           {_bar_to_psi(fluid.bubble_point_bar):.1f}  1.040   {fluid.oil_viscosity_cp * 1.04:.4f}
-           {p_ref_psi:.1f}  1.020   {fluid.oil_viscosity_cp * 1.10:.4f}
-           {p_ref_psi * 1.5:.1f}  1.010   {fluid.oil_viscosity_cp * 1.20:.4f} /
+        {"PVTO" if has_gas else "PVDO"}
+        {"-- Rs[scf/STB]  P[psi]  Bo  Mu[cP]  (PVTO: live oil with dissolved gas)" if has_gas else "-- P[psi]  Bo  Mu[cP]  (PVDO: dead oil)"}
+        {_pvto_table(fluid, p_ref_psi) if has_gas else _pvdo_table(fluid, p_ref_psi)}
 
     """)
 
@@ -363,7 +407,9 @@ def generate_deck(request: SimRequest) -> str:
     sections = [
         _runspec_section(request),
         _grid_section(request.grid),
-        _props_section(request.fluid),
+        _props_section(request.fluid, has_gas=any(
+            Phase.GAS in w.phases for w in request.wells
+        )),
         _solution_section(request.grid, request.fluid),
         _summary_section(request.wells),
         _schedule_section(request.wells, request.grid, request.timesteps_days),

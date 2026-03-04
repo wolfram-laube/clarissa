@@ -479,7 +479,7 @@ build_sim_engine:
         -t ${SIM_GITLAB_IMAGE}:latest \
         --build-arg="SIM_BASE_IMAGE=${SIM_BASE_IMAGE}" \
         -f ${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile \
-        ${CI_PROJECT_DIR}/src/clarissa/sim_engine
+        ${CI_PROJECT_DIR}
       docker push ${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}
       docker push ${SIM_GITLAB_IMAGE}:latest
       echo "Pushed: ${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}" 

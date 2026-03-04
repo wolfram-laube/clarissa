@@ -497,3 +497,81 @@ class TestParserEdgeCases:
         deck.write_text("DIMENS\n  5 5 1 /\nINCLUDE\n  'nonexistent.inc' /\n")
         result = parse_deck_file(str(deck))
         assert result.nx == 5  # Rest of deck still parsed
+
+
+class TestDeckGeneratorPVT:
+    """Tests for PVDO vs PVTO selection in deck_generator (#123)."""
+
+    @pytest.fixture
+    def two_phase_request(self):
+        """Two-phase oil+water request — no gas, PVDO expected."""
+        return SimRequest(
+            grid=GridParams(nx=5, ny=5, nz=1),
+            wells=[
+                WellConfig(name="INJ", well_type=WellType.INJECTOR,
+                           i=0, j=0, k_top=0, k_bottom=0,
+                           rate_m3_day=50.0, phases=[Phase.WATER]),
+                WellConfig(name="PROD", well_type=WellType.PRODUCER,
+                           i=4, j=4, k_top=0, k_bottom=0,
+                           bhp_bar=150.0, phases=[Phase.OIL, Phase.WATER]),
+            ],
+            fluid=FluidProperties(
+                oil_density_kg_m3=820.0, water_density_kg_m3=1025.0,
+                oil_viscosity_cp=1.2, water_viscosity_cp=0.5,
+                initial_pressure_bar=200.0, bubble_point_bar=150.0,
+            ),
+            timesteps_days=[30, 90, 365],
+            title="2-phase test",
+            backend="opm",
+        )
+
+    @pytest.fixture
+    def three_phase_request(self):
+        """Three-phase oil+water+gas (SPE1-like) — DISGAS, PVTO expected."""
+        return SimRequest(
+            grid=GridParams(nx=10, ny=10, nz=3),
+            wells=[
+                WellConfig(name="INJ1", well_type=WellType.INJECTOR,
+                           i=0, j=0, k_top=0, k_bottom=2,
+                           rate_m3_day=159.0, phases=[Phase.GAS]),
+                WellConfig(name="PROD1", well_type=WellType.PRODUCER,
+                           i=9, j=9, k_top=0, k_bottom=2,
+                           bhp_bar=275.0, phases=[Phase.OIL, Phase.WATER, Phase.GAS]),
+            ],
+            fluid=FluidProperties(
+                oil_density_kg_m3=820.0, water_density_kg_m3=1025.0,
+                oil_viscosity_cp=1.2, water_viscosity_cp=0.5,
+                initial_pressure_bar=415.0, bubble_point_bar=330.0,
+            ),
+            timesteps_days=[30, 365, 1095],
+            title="SPE1 test",
+            backend="opm",
+        )
+
+    def test_two_phase_uses_pvdo(self, two_phase_request):
+        """Dead oil (no gas) → PVDO keyword."""
+        deck = generate_deck(two_phase_request)
+        assert "PVDO" in deck
+        assert "PVTO" not in deck
+
+    def test_three_phase_uses_pvto(self, three_phase_request):
+        """Live oil with DISGAS → PVTO keyword, not PVDO."""
+        deck = generate_deck(three_phase_request)
+        assert "PVTO" in deck
+        assert "PVDO" not in deck
+
+    def test_three_phase_has_disgas(self, three_phase_request):
+        """3-phase with gas → DISGAS in RUNSPEC."""
+        deck = generate_deck(three_phase_request)
+        assert "DISGAS" in deck
+
+    def test_three_phase_has_sgof(self, three_phase_request):
+        """3-phase with gas → SGOF relperm table present."""
+        deck = generate_deck(three_phase_request)
+        assert "SGOF" in deck
+
+    def test_two_phase_no_sgof(self, two_phase_request):
+        """2-phase (no gas) → no SGOF table."""
+        deck = generate_deck(two_phase_request)
+        assert "SGOF" not in deck
+
