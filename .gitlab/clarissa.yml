@@ -409,7 +409,13 @@ rerun_all_tests:
 # Issue #112 | Epic #110 | ADR-038, ADR-040
 # ── Sim-Engine Pipeline ──────────────────────────────────────────────────
 # Pipeline: build_sim_base (manual) → build_sim_engine → deploy_sim_engine
-# Uses native `docker build` on Shell runners (Kaniko removed — YAGNI).
+# Uses native `docker build` via DinD on Nordic (datacenter upload).
+#
+# ⚡ UPGRADE PATH: Register Shell runner on Nordic, then:
+#    1. Change tag `nordic` → `nordic-shell`
+#    2. Remove `image:` and `services:` blocks
+#    ssh nordic 'gitlab-runner register --executor shell --tag-list nordic-shell,docker-any'
+#
 # Issue #117 | Epic #110
 
 .sim_engine_vars: &sim_engine_vars
@@ -434,14 +440,26 @@ rerun_all_tests:
       allow_failure: true
     - when: never
 
+# DinD template — remove when switching to nordic-shell
+.dind_docker: &dind_docker
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
+
 
 build_sim_base:
   stage: build
+  <<: *dind_docker
   tags:
-    - nordic  # Shell runner — native docker, datacenter upload
+    - nordic  # → nordic-shell when Shell runner available
   timeout: 1h
   variables:
     <<: *sim_engine_vars
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
   rules:
     - if: '$BUILD_SIM_BASE == "true"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
@@ -455,14 +473,17 @@ build_sim_base:
         -f src/clarissa/sim_engine/Dockerfile.sim-base
         src/clarissa/sim_engine/
     - docker push "${SIM_BASE_IMAGE}"
-    - echo "✅ sim-base pushed — $(docker images ${SIM_BASE_IMAGE} --format '{{.Size}}')"
+    - echo "✅ sim-base pushed"
 
 build_sim_engine:
   stage: build
+  <<: *dind_docker
   tags:
-    - nordic  # Shell runner — native docker, dual-push
+    - nordic  # → nordic-shell when Shell runner available
   variables:
     <<: *sim_engine_vars
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
   <<: *sim_engine_rules
   script:
     # Auth: GitLab + GCP registries
