@@ -475,13 +475,12 @@ build_sim_engine:
   before_script:
     # Kaniko auth for both registries:
     # - GitLab: CI_REGISTRY_USER/PASSWORD (built-in)
-    # GCP AR auth: embed SA key directly as _json_key — no docker-credential-gcloud needed
+    # GitLab registry only — GCP AR dual-push removed (docker-credential-gcloud not in Kaniko)
     - mkdir -p /kaniko/.docker
     - GL_AUTH=$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')
-    - GCP_AUTH=$(printf "%s:%s" "_json_key" "${GOOGLE_CREDENTIALS}" | base64 | tr -d '\n')
     - |
       cat > /kaniko/.docker/config.json << EOF
-      {"auths":{"${CI_REGISTRY}":{"auth":"${GL_AUTH}"},"europe-north1-docker.pkg.dev":{"auth":"${GCP_AUTH}"}}}
+      {"auths":{"${CI_REGISTRY}":{"auth":"${GL_AUTH}"}}}
       EOF
   script:
     - /kaniko/executor
@@ -489,8 +488,6 @@ build_sim_engine:
         --dockerfile="${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile"
         --destination="${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}"
         --destination="${SIM_GITLAB_IMAGE}:latest"
-        --destination="${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA}"
-        --destination="${SIM_GCP_IMAGE}:latest"
         --build-arg="SIM_BASE_IMAGE=${SIM_BASE_IMAGE}"
         --cache=true
 
@@ -512,7 +509,7 @@ deploy_sim_engine:
     - gcloud config set project ${GCP_PROJECT}
     - |
       gcloud run deploy ${SIM_SERVICE_NAME} \
-        --image=${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA} \
+        --image=${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA} \
         --region=${GCP_REGION} \
         --platform=managed \
         --allow-unauthenticated \
