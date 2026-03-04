@@ -367,7 +367,9 @@ Examples:
         setup()
     elif args.process:
         HANDOFF_DIR.mkdir(exist_ok=True)
-        process_handoff(args.dry_run)
+        success = process_handoff(args.dry_run)
+        if not success:
+            sys.exit(0)  # No handoff found is not an error — exit cleanly
     elif args.watch:
         HANDOFF_DIR.mkdir(exist_ok=True)
         watch_mode(args.interval, args.dry_run)
