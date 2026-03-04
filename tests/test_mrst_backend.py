@@ -445,8 +445,7 @@ class TestMRSTBackendRun:
 
         mock_result = MagicMock()
         mock_result.returncode = 0
-        mock_result.stdout = "Simulation completed in 5.00 seconds
-"
+        mock_result.stdout = "Simulation completed in 5.00 seconds\n"
         mock_result.stderr = ""
 
         with patch("subprocess.run", return_value=mock_result):
