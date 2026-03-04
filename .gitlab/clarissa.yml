@@ -409,7 +409,7 @@ rerun_all_tests:
 # Issue #112 | Epic #110 | ADR-038, ADR-040
 # ── Sim-Engine Pipeline ──────────────────────────────────────────────────
 # Pipeline: build_sim_base (manual) → build_sim_engine → deploy_sim_engine
-# No more skopeo copy — Kaniko dual-push to GitLab + GCP Artifact Registry.
+# Uses native `docker build` on Shell runners (Kaniko removed — YAGNI).
 # Issue #117 | Epic #110
 
 .sim_engine_vars: &sim_engine_vars
@@ -437,11 +437,8 @@ rerun_all_tests:
 
 build_sim_base:
   stage: build
-  image:
-    name: gcr.io/kaniko-project/executor:v1.19.2-debug
-    entrypoint: [""]
   tags:
-    - nordic  # Datacenter upload speed — base image is 4-5 GB
+    - nordic  # Shell runner — native docker, datacenter upload
   timeout: 1h
   variables:
     <<: *sim_engine_vars
@@ -452,53 +449,44 @@ build_sim_base:
       allow_failure: true
     - when: never
   script:
-    - mkdir -p /kaniko/.docker
-    - AUTH=$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')
-    - |
-      cat > /kaniko/.docker/config.json << EOF
-      {"auths":{"${CI_REGISTRY}":{"auth":"${AUTH}"}}}
-      EOF
-    - /kaniko/executor
-        --context="${CI_PROJECT_DIR}/src/clarissa/sim_engine"
-        --dockerfile="${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile.sim-base"
-        --destination="${SIM_BASE_IMAGE}"
-        --cache=false
-        --single-snapshot
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - docker build
+        -t "${SIM_BASE_IMAGE}"
+        -f src/clarissa/sim_engine/Dockerfile.sim-base
+        src/clarissa/sim_engine/
+    - docker push "${SIM_BASE_IMAGE}"
+    - echo "✅ sim-base pushed — $(docker images ${SIM_BASE_IMAGE} --format '{{.Size}}')"
 
 build_sim_engine:
   stage: build
-  image:
-    name: gcr.io/kaniko-project/executor:v1.19.2-debug
-    entrypoint: [""]
   tags:
-    - docker-any
+    - nordic  # Shell runner — native docker, dual-push
   variables:
     <<: *sim_engine_vars
   <<: *sim_engine_rules
-  before_script:
-    # Kaniko auth for both registries:
-    # - GitLab: CI_REGISTRY_USER/PASSWORD (built-in)
-    # - GCP AR: service account key via GOOGLE_APPLICATION_CREDENTIALS
-    - mkdir -p /kaniko/.docker
-    - GL_AUTH=$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')
-    - echo "$GCP_SERVICE_ACCOUNT_KEY" > /kaniko/gcp-key.json
-    - export GOOGLE_APPLICATION_CREDENTIALS=/kaniko/gcp-key.json
-    - |
-      cat > /kaniko/.docker/config.json << EOF
-      {"auths":{"${CI_REGISTRY}":{"auth":"${GL_AUTH}"}},"credHelpers":{"europe-north1-docker.pkg.dev":"gcloud"}}
-      EOF
   script:
-    - /kaniko/executor
-        --context="${CI_PROJECT_DIR}"
-        --dockerfile="${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile"
-        --destination="${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}"
-        --destination="${SIM_GITLAB_IMAGE}:latest"
-        --destination="${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA}"
-        --destination="${SIM_GCP_IMAGE}:latest"
-        --build-arg="SIM_BASE_IMAGE=${SIM_BASE_IMAGE}"
-        --cache=true
-
-# NOTE: copy_sim_engine REMOVED — Kaniko dual-push eliminates skopeo copy
+    # Auth: GitLab + GCP registries
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - echo "$GCP_SERVICE_ACCOUNT_KEY" > /tmp/gcp-key.json
+    - cat /tmp/gcp-key.json | docker login -u _json_key --password-stdin https://europe-north1-docker.pkg.dev
+    # Build
+    - docker pull "${SIM_BASE_IMAGE}" || true
+    - docker build
+        --build-arg "SIM_BASE_IMAGE=${SIM_BASE_IMAGE}"
+        -t "${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        -t "${SIM_GITLAB_IMAGE}:latest"
+        -t "${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        -t "${SIM_GCP_IMAGE}:latest"
+        -f src/clarissa/sim_engine/Dockerfile
+        .
+    # Push to both registries
+    - docker push "${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+    - docker push "${SIM_GITLAB_IMAGE}:latest"
+    - docker push "${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+    - docker push "${SIM_GCP_IMAGE}:latest"
+    - echo "✅ sim-engine pushed to GitLab + GCP AR"
+  after_script:
+    - rm -f /tmp/gcp-key.json
 
 deploy_sim_engine:
   stage: deploy
