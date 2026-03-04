@@ -495,21 +495,30 @@ build_sim_engine:
 
 deploy_sim_engine:
   stage: deploy
-  image: google/cloud-sdk:slim
+  # Shell runner: Docker available natively for registry-to-registry copy
   tags:
-    - docker-any
+    - nordic-shell
   needs:
     - build_sim_engine
   variables:
     <<: *sim_engine_vars
   <<: *sim_engine_rules
   script:
+    # GCP auth
     - echo "$GCP_SERVICE_ACCOUNT_KEY" > /tmp/gcp-key.json
     - gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
     - gcloud config set project ${GCP_PROJECT}
+    # Copy image: GitLab → GCP AR (Cloud Run requires GCR/AR)
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - gcloud auth configure-docker europe-north1-docker.pkg.dev --quiet
+    - docker pull ${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}
+    - docker tag ${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA} ${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA}
+    - docker tag ${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA} ${SIM_GCP_IMAGE}:latest
+    - docker push ${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${SIM_GCP_IMAGE}:latest
     - |
       gcloud run deploy ${SIM_SERVICE_NAME} \
-        --image=${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA} \
+        --image=${SIM_GCP_IMAGE}:${CI_COMMIT_SHORT_SHA} \
         --region=${GCP_REGION} \
         --platform=managed \
         --allow-unauthenticated \
@@ -597,6 +606,7 @@ relay:clarissa:
   variables:
     OPENAI_API_KEY: ${OPENAI_API_KEY}
     GITLAB_TOKEN: ${GITLAB_TOKEN}
+
 
 
 
