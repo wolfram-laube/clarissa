@@ -240,7 +240,7 @@ class TestMRSTScriptGenerator:
 
     def test_solver_setup(self, simple_request):
         script = generate_mrst_script(simple_request)
-        assert "GenericBlackOilModel" in script
+        assert "ThreePhaseBlackOilModel" in script  # Octave-compat (not GenericBlackOilModel, see mrst_script_generator.py:280)
         assert "NonLinearSolver" in script
         assert "simulateScheduleAD" in script
 
@@ -329,7 +329,8 @@ class TestMRSTBackendPALContract:
 
     def test_version_detected(self, backend):
         mock_result = MagicMock()
-        mock_result.stdout = "GNU Octave, version 8.4.0\n"
+        mock_result.stdout = "GNU Octave, version 8.4.0
+"
         with patch("subprocess.run", return_value=mock_result):
             assert "8.4.0" in backend.version
 
@@ -445,7 +446,8 @@ class TestMRSTBackendRun:
 
         mock_result = MagicMock()
         mock_result.returncode = 0
-        mock_result.stdout = "Simulation completed in 5.00 seconds\n"
+        mock_result.stdout = "Simulation completed in 5.00 seconds
+"
         mock_result.stderr = ""
 
         with patch("subprocess.run", return_value=mock_result):
