@@ -409,13 +409,7 @@ rerun_all_tests:
 # Issue #112 | Epic #110 | ADR-038, ADR-040
 # ── Sim-Engine Pipeline ──────────────────────────────────────────────────
 # Pipeline: build_sim_base (manual) → build_sim_engine → deploy_sim_engine
-# Uses native `docker build` via DinD on Nordic (datacenter upload).
-#
-# ⚡ UPGRADE PATH: Register Shell runner on Nordic, then:
-#    1. Change tag `nordic` → `nordic-shell`
-#    2. Remove `image:` and `services:` blocks
-#    ssh nordic 'gitlab-runner register --executor shell --tag-list nordic-shell,docker-any'
-#
+# Uses native `docker build` on Nordic Shell Runner (datacenter upload).
 # Issue #117 | Epic #110
 
 .sim_engine_vars: &sim_engine_vars
@@ -440,20 +434,10 @@ rerun_all_tests:
       allow_failure: true
     - when: never
 
-# DinD template — remove when switching to nordic-shell
-.dind_docker: &dind_docker
-  image: docker:latest
-  services:
-    - docker:dind
-  variables:
-    DOCKER_TLS_CERTDIR: ""
-    DOCKER_HOST: tcp://docker:2375
-
-
 build_sim_base:
   stage: build
   tags:
-    - shell-any  # Shell runner with native Docker
+    - nordic-shell  # Native docker, datacenter upload
   timeout: 1h
   variables:
     <<: *sim_engine_vars
@@ -475,7 +459,7 @@ build_sim_base:
 build_sim_engine:
   stage: build
   tags:
-    - shell-any  # Shell runner with native Docker (Mac/Yoga/Nordic)
+    - nordic-shell  # Native docker, datacenter upload
   variables:
     <<: *sim_engine_vars
   <<: *sim_engine_rules
