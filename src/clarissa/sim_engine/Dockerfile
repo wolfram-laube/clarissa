@@ -14,9 +14,6 @@ FROM ${SIM_BASE_IMAGE}
 ENV PORT=8080
 
 # ── MPI/ORTE fix for Cloud Run (gVisor sandbox) ──────────────────────────
-# gVisor blocks orted daemon spawn. We neutralize ORTE completely:
-# 1. Redirect orted to /bin/true (immediate success, no daemon)
-# 2. Set MCA vars to prevent socket binding attempts
 ENV OMPI_MCA_orte_launch_agent=/bin/true
 ENV OMPI_MCA_btl=self
 ENV OMPI_MCA_btl_vader_single_copy_mechanism=none
@@ -29,6 +26,10 @@ ENV PMIX_MCA_ptl=tcp
 ENV OMPI_MCA_rmaps_base_oversubscribe=1
 ENV OMPI_ALLOW_RUN_AS_ROOT=1
 ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+
+# ── MRST writable dirs (mrstSettings needs to create config on first run) ─
+ENV HOME=/home/simuser
+RUN mkdir -p /home/simuser/.mrst /home/simuser/.config/octave     && chown -R simuser:simuser /home/simuser
 
 WORKDIR /app
 
