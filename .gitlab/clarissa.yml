@@ -437,13 +437,13 @@ rerun_all_tests:
 
 build_sim_base:
   stage: build
-  image: docker:24
+  # Shell executor — runs directly on Nordic host, no container/dind needed.
+  # Docker is available natively on the host.
   tags:
-    - docker-any  # Nordic Docker Runner — socket mount in runner config
+    - nordic-shell
   timeout: 1h
   variables:
     <<: *sim_engine_vars
-    DOCKER_HOST: unix:///var/run/docker.sock
   rules:
     - if: '$BUILD_SIM_BASE == "true"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
