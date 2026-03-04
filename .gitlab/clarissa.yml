@@ -563,6 +563,10 @@ relay:clarissa:
   tags:
     - docker-any
   rules:
+    - if: '$DEPLOY_SIM == "true"'
+      when: never
+    - if: '$BUILD_SIM_BASE == "true"'
+      when: never
     - changes:
         - handoffs/handoff_to_clarissa.md
       when: always
