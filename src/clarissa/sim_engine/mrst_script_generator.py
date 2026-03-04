@@ -44,6 +44,7 @@ def generate_mrst_script(request: SimRequest, output_mat: str = "results.mat") -
     Returns:
         Complete MATLAB/Octave script as string.
     """
+    has_gas = any(Phase.GAS in w.phases for w in request.wells)
     sections = [
         _header(request),
         _mrst_startup(),
