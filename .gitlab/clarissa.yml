@@ -438,15 +438,12 @@ rerun_all_tests:
 build_sim_base:
   stage: build
   image: docker:24
-  services:
-    - docker:24-dind
   tags:
-    - docker-any  # Nordic Docker Runner — large image, datacenter upload speed
+    - docker-any  # Nordic Docker Runner — socket mount in runner config
   timeout: 1h
   variables:
     <<: *sim_engine_vars
-    DOCKER_TLS_CERTDIR: ""
-    DOCKER_HOST: tcp://docker:2375
+    DOCKER_HOST: unix:///var/run/docker.sock
   rules:
     - if: '$BUILD_SIM_BASE == "true"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
@@ -454,7 +451,7 @@ build_sim_base:
       allow_failure: true
     - when: never
   before_script:
-    - until docker info; do echo "Waiting for docker..."; sleep 2; done
+    - docker info
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
     - |
