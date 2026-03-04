@@ -437,33 +437,35 @@ rerun_all_tests:
 
 build_sim_base:
   stage: build
-  image:
-    name: gcr.io/kaniko-project/executor:v1.19.2-debug
-    entrypoint: [""]
+  image: docker:24
+  services:
+    - docker:24-dind
   tags:
-    - docker-any  # Needs Docker/Kaniko — Nordic Docker Runner has this tag
+    - docker-any  # Nordic Docker Runner — large image, datacenter upload speed
   timeout: 1h
   variables:
     <<: *sim_engine_vars
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
   rules:
     - if: '$BUILD_SIM_BASE == "true"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: manual
       allow_failure: true
     - when: never
+  before_script:
+    - docker info
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
-    - mkdir -p /kaniko/.docker
-    - AUTH=$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')
     - |
-      cat > /kaniko/.docker/config.json << EOF
-      {"auths":{"${CI_REGISTRY}":{"auth":"${AUTH}"}}}
-      EOF
-    - /kaniko/executor
-        --context="${CI_PROJECT_DIR}/src/clarissa/sim_engine"
-        --dockerfile="${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile.sim-base"
-        --destination="${SIM_BASE_IMAGE}"
-        --cache=false
-        --single-snapshot
+      docker build --no-cache \
+        -t ${SIM_BASE_IMAGE} \
+        -f ${CI_PROJECT_DIR}/src/clarissa/sim_engine/Dockerfile.sim-base \
+        ${CI_PROJECT_DIR}/src/clarissa/sim_engine
+      docker push ${SIM_BASE_IMAGE}
+      echo "✅ Pushed: ${SIM_BASE_IMAGE}"
 
 build_sim_engine:
   stage: build
