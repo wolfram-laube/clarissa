@@ -407,7 +407,9 @@ def generate_deck(request: SimRequest) -> str:
     sections = [
         _runspec_section(request),
         _grid_section(request.grid),
-        _props_section(request.fluid),
+        _props_section(request.fluid, has_gas=any(
+            Phase.GAS in w.phases for w in request.wells
+        )),
         _solution_section(request.grid, request.fluid),
         _summary_section(request.wells),
         _schedule_section(request.wells, request.grid, request.timesteps_days),
