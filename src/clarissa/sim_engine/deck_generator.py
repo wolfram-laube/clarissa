@@ -185,10 +185,10 @@ def _props_section(fluid: FluidProperties) -> str:
 
         PVDO
         -- P[psi]     Bo      Viscosity[cP]
-           14.7       1.062   {fluid.oil_viscosity_cp * 1.04:.4f}
-           {_bar_to_psi(fluid.bubble_point_bar):.1f}  1.150   {fluid.oil_viscosity_cp:.4f}
-           {p_ref_psi:.1f}  1.100   {fluid.oil_viscosity_cp * 1.10:.4f}
-           {p_ref_psi * 1.5:.1f}  1.060   {fluid.oil_viscosity_cp * 1.20:.4f} /
+           14.7       1.050   {fluid.oil_viscosity_cp:.4f}
+           {_bar_to_psi(fluid.bubble_point_bar):.1f}  1.040   {fluid.oil_viscosity_cp * 1.04:.4f}
+           {p_ref_psi:.1f}  1.020   {fluid.oil_viscosity_cp * 1.10:.4f}
+           {p_ref_psi * 1.5:.1f}  1.010   {fluid.oil_viscosity_cp * 1.20:.4f} /
 
     """)
 

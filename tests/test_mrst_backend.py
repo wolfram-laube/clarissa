@@ -238,11 +238,18 @@ class TestMRSTScriptGenerator:
         # First step: 30 days = 30*86400 = 2592000 seconds
         assert "2592000.0" in script
 
-    def test_solver_setup(self, simple_request):
-        script = generate_mrst_script(simple_request)
-        assert "GenericBlackOilModel" in script
-        assert "NonLinearSolver" in script
-        assert "simulateScheduleAD" in script
+    def test_solver_setup(self, simple_request, three_phase_request):
+        # Two-phase (oil+water) → TwoPhaseOilWaterModel
+        script_2ph = generate_mrst_script(simple_request)
+        assert "TwoPhaseOilWaterModel" in script_2ph
+        assert "NonLinearSolver" in script_2ph
+        assert "simulateScheduleAD" in script_2ph
+
+        # Three-phase (oil+water+gas) → ThreePhaseBlackOilModel (Octave-compat)
+        script_3ph = generate_mrst_script(three_phase_request)
+        assert "ThreePhaseBlackOilModel" in script_3ph
+        assert "NonLinearSolver" in script_3ph
+        assert "simulateScheduleAD" in script_3ph
 
     def test_export_section(self, simple_request):
         script = generate_mrst_script(simple_request)

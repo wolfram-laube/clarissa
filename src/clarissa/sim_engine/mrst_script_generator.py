@@ -44,6 +44,7 @@ def generate_mrst_script(request: SimRequest, output_mat: str = "results.mat") -
     Returns:
         Complete MATLAB/Octave script as string.
     """
+    has_gas = any(Phase.GAS in w.phases for w in request.wells)
     sections = [
         _header(request),
         _mrst_startup(),
@@ -51,9 +52,9 @@ def generate_mrst_script(request: SimRequest, output_mat: str = "results.mat") -
         _rock_section(request.grid),
         _fluid_section(request.fluid, request),
         _well_section(request.wells, request.grid),
-        _initial_state(request.grid, request.fluid),
+        _initial_state(request.grid, request.fluid, has_gas),
         _schedule_section(request.timesteps_days),
-        _solver_section(),
+        _solver_section(has_gas),
         _run_section(),
         _export_section(output_mat, request),
     ]
@@ -99,9 +100,24 @@ def _mrst_startup() -> str:
     """MRST module loading."""
     return textwrap.dedent("""\
         %% ─── MRST Startup ───────────────────────────────────────────
-        % Ensure MRST is on the path
+        % Add MRST to path from environment or common locations
         if exist('mrstPath', 'file') == 0
-            error('MRST not found. Set MRST_DIR or add to Octave path.');
+            mrst_dir = getenv('MRST_DIR');
+            if isempty(mrst_dir)
+                % Try common install locations
+                for d = {'/opt/mrst', '/usr/local/mrst', '/home/simuser/mrst'}
+                    if exist(d{1}, 'dir')
+                        mrst_dir = d{1};
+                        break;
+                    end
+                end
+            end
+            if ~isempty(mrst_dir) && exist(mrst_dir, 'dir')
+                fprintf('Adding MRST from: %s\\n', mrst_dir);
+                addpath(genpath(mrst_dir));
+            else
+                error('MRST not found. Set MRST_DIR or add to Octave path.');
+            end
         end
         mrstModule add ad-blackoil ad-core ad-props mrst-autodiff deckformat
     """)
@@ -221,14 +237,20 @@ def _comp_injection(well: WellConfig) -> str:
         return "0, 1, 0" if has_gas else "0, 1"
 
 
-def _initial_state(grid: GridParams, fluid: FluidProperties) -> str:
+def _initial_state(grid: GridParams, fluid: FluidProperties, has_gas: bool) -> str:
     """Initial reservoir state."""
     p_init_pa = fluid.initial_pressure_bar * 1e5
+    if has_gas:
+        sat_vec = "[0.0, 1.0, 0.0]"
+        sat_comment = "[Sw, So, Sg]"
+    else:
+        sat_vec = "[0.0, 1.0]"
+        sat_comment = "[Sw, So]"
     return textwrap.dedent(f"""\
         %% ─── Initial State ──────────────────────────────────────────
-        state0 = initResSol(G, {p_init_pa}, [0.0, 1.0]);
+        state0 = initResSol(G, {p_init_pa}, {sat_vec});
         %% state0.pressure = initial pressure in Pa
-        %% state0.s = [Sw, So] initial saturations (fully oil-saturated)
+        %% state0.s = {sat_comment} initial saturations (fully oil-saturated)
     """)
 
 
@@ -252,11 +274,19 @@ def _schedule_section(timesteps_days: list[float]) -> str:
     """)
 
 
-def _solver_section() -> str:
-    """Solver / model setup."""
-    return textwrap.dedent("""\
+def _solver_section(has_gas: bool) -> str:
+    """Solver / model setup.
+
+    Uses Octave-compatible model classes (not GenericBlackOilModel which
+    has OOP incompatibilities with Octave's class system).
+    """
+    if has_gas:
+        model_line = "model = ThreePhaseBlackOilModel(G, rock, fluid);"
+    else:
+        model_line = "model = TwoPhaseOilWaterModel(G, rock, fluid);"
+    return textwrap.dedent(f"""\
         %% ─── Model & Solver ─────────────────────────────────────────
-        model = GenericBlackOilModel(G, rock, fluid, 'gas', false, 'oil', true, 'water', true);
+        {model_line}
         solver = NonLinearSolver('maxIterations', 25, 'maxTimestepCuts', 6);
     """)
 
