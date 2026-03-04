@@ -22,7 +22,7 @@ build_opm_image:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     IMAGE_BASE: $CI_REGISTRY_IMAGE/opm-flow
   before_script:
-    - docker info
+    - until docker info; do echo "Waiting for docker..."; sleep 2; done
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
     - |
@@ -84,7 +84,7 @@ rebuild_opm_image:
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     IMAGE_BASE: $CI_REGISTRY_IMAGE/opm-flow
   before_script:
-    - docker info
+    - until docker info; do echo "Waiting for docker..."; sleep 2; done
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
     - |
@@ -454,7 +454,7 @@ build_sim_base:
       allow_failure: true
     - when: never
   before_script:
-    - docker info
+    - until docker info; do echo "Waiting for docker..."; sleep 2; done
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
     - |
