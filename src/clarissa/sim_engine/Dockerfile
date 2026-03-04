@@ -29,7 +29,9 @@ ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
 # ── MRST writable dirs (mrstSettings needs to create config on first run) ─
 ENV HOME=/home/simuser
-RUN mkdir -p /home/simuser/.mrst /home/simuser/.config/octave     && chown -R simuser:simuser /home/simuser
+RUN mkdir -p /home/simuser/.mrst /home/simuser/.config/octave \
+    && chown -R simuser:simuser /home/simuser \
+    && chown -R simuser:simuser /opt/mrst
 
 WORKDIR /app
 
