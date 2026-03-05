@@ -149,6 +149,23 @@ def _grid_section(grid: GridParams) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _pvtg_table(fluid: "FluidProperties", p_ref_psi: float) -> str:
+    """Dry gas PVT table (PVTG) required by OPM when DISGAS is active.
+
+    Format: P[psia]  Rv[STB/Mscf]  Bg[RB/Mscf]  Mu_g[cP]
+    Simplified constant-composition table for synthetic cases.
+    """
+    bp_psi = _bar_to_psi(fluid.bubble_point_bar)
+    rows = [
+        f"   14.7      0.0  28.300  0.0130 /",
+        f"   {bp_psi * 0.5:.1f}  0.0   3.100  0.0148 /",
+        f"   {bp_psi:.1f}  0.0   1.490  0.0170 /",
+        f"   {p_ref_psi:.1f}  0.0   1.010  0.0200 /",
+        f"   {p_ref_psi * 1.5:.1f}  0.0   0.740  0.0240 /",
+    ]
+    return "\n        ".join(rows)
+
+
 def _pvdo_table(fluid: "FluidProperties", p_ref_psi: float) -> str:
     """Dead oil PVT table (no dissolved gas)."""
     bp_psi = _bar_to_psi(fluid.bubble_point_bar)
@@ -248,6 +265,10 @@ def _props_section(fluid: FluidProperties, has_gas: bool = False) -> str:
         {"PVTO" if has_gas else "PVDO"}
         {"-- Rs[scf/STB]  P[psi]  Bo  Mu[cP]  (PVTO: live oil with dissolved gas)" if has_gas else "-- P[psi]  Bo  Mu[cP]  (PVDO: dead oil)"}
         {_pvto_table(fluid, p_ref_psi) if has_gas else _pvdo_table(fluid, p_ref_psi)}
+
+        {"PVTG" if has_gas else ""}
+        {"-- P[psia]  Rv[STB/Mscf]  Bg[RB/Mscf]  Mu_g[cP]  (dry gas, required with DISGAS)" if has_gas else ""}
+        {_pvtg_table(fluid, p_ref_psi) if has_gas else ""}
 
     """)
 
