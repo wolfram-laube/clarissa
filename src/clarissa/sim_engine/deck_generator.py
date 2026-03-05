@@ -162,6 +162,7 @@ def _pvtg_table(fluid: "FluidProperties", p_ref_psi: float) -> str:
         f"   {bp_psi:.1f}  0.0   1.490  0.0170 /",
         f"   {p_ref_psi:.1f}  0.0   1.010  0.0200 /",
         f"   {p_ref_psi * 1.5:.1f}  0.0   0.740  0.0240 /",
+        "/",  # Eclipse keyword terminator — required after last PVTG entry
     ]
     return "\n        ".join(rows)
 
