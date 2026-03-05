@@ -287,7 +287,9 @@ def _solution_section(grid: GridParams, fluid: FluidProperties, has_gas: bool = 
     depth_ft = _m_to_ft(grid.depth_top)
     reservoir_bottom_ft = _m_to_ft(grid.depth_top + grid.nz * grid.dz)
     p_init_psi = _bar_to_psi(fluid.initial_pressure_bar)
-    bp_psi = _bar_to_psi(fluid.bubble_point_bar)
+
+    woc_ft = reservoir_bottom_ft + 100.0  # 100 ft below reservoir bottom
+    goc_ft = 0.0 if has_gas else depth_ft - 100.0  # DISGAS: no free gas cap above reservoir
 
     # RSVD: Rs[scf/STB] at two depths — linear from 0 at top to Rs_sat at bottom
     # Rs_sat from PVTO table at bubble point (400 scf/STB)
@@ -302,7 +304,7 @@ def _solution_section(grid: GridParams, fluid: FluidProperties, has_gas: bool = 
 
         EQUIL
         -- Datum[ft]  P@datum[psi]  WOC[ft]  Pcow  GOC[ft]  Pcog
-           {depth_ft:.1f}  {p_init_psi:.1f}  {reservoir_bottom_ft + 100:.1f}  0  {depth_ft - 100:.1f}  0  1  0  0 /
+           {depth_ft:.1f}  {p_init_psi:.1f}  {woc_ft:.1f}  0  {goc_ft:.1f}  0  1  0  0 /
         {rsvd_block}
     """)
 

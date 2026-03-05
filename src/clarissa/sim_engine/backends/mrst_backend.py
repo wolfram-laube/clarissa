@@ -180,17 +180,25 @@ class MRSTBackend(SimulatorBackend):
         if on_progress:
             on_progress(0)
 
-        # Step 1: Generate .m script
+        # Step 1: Write Eclipse deck (needed for deck-based PVTO/EQUIL init)
+        from clarissa.sim_engine.deck_generator import generate_deck
+        deck_name = "clarissa_sim.data"
+        deck_path = str(work_path / deck_name)
+        with open(deck_path, "w") as f:
+            f.write(generate_deck(request))
+        logger.info(f"Eclipse deck written to {deck_path}")
+
+        # Step 2: Generate .m script (deck-based fluid + schedule)
         output_mat = "results.mat"
         script_name = "clarissa_sim.m"
         script_path = str(work_path / script_name)
-        write_mrst_script(request, script_path, output_mat)
+        write_mrst_script(request, script_path, output_mat, deck_file=deck_name)
         logger.info(f"MRST script written to {script_path}")
 
         if on_progress:
             on_progress(10)
 
-        # Step 2: Build Octave command
+        # Step 3: Build Octave command
         # Prepend MRST startup if MRST_DIR is set
         env = os.environ.copy()
         if self._mrst_dir:
