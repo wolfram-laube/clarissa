@@ -279,11 +279,23 @@ def _props_section(fluid: FluidProperties, has_gas: bool = False) -> str:
     """)
 
 
-def _solution_section(grid: GridParams, fluid: FluidProperties) -> str:
-    """Generate SOLUTION section with equilibrium data."""
+def _solution_section(grid: GridParams, fluid: FluidProperties, has_gas: bool = False) -> str:
+    """Generate SOLUTION section with equilibrium data.
+
+    DISGAS cases require RSVD (dissolved GOR vs depth) for initialization.
+    """
     depth_ft = _m_to_ft(grid.depth_top)
     reservoir_bottom_ft = _m_to_ft(grid.depth_top + grid.nz * grid.dz)
     p_init_psi = _bar_to_psi(fluid.initial_pressure_bar)
+    bp_psi = _bar_to_psi(fluid.bubble_point_bar)
+
+    # RSVD: Rs[scf/STB] at two depths — linear from 0 at top to Rs_sat at bottom
+    # Rs_sat from PVTO table at bubble point (400 scf/STB)
+    rsvd_block = f"""
+        RSVD
+        -- Depth[ft]  Rs[scf/STB]
+           {depth_ft:.1f}  400.0
+           {reservoir_bottom_ft:.1f}  400.0 /""" if has_gas else ""
 
     return textwrap.dedent(f"""\
         SOLUTION
@@ -291,7 +303,7 @@ def _solution_section(grid: GridParams, fluid: FluidProperties) -> str:
         EQUIL
         -- Datum[ft]  P@datum[psi]  WOC[ft]  Pcow  GOC[ft]  Pcog
            {depth_ft:.1f}  {p_init_psi:.1f}  {reservoir_bottom_ft + 100:.1f}  0  {depth_ft - 100:.1f}  0  1  0  0 /
-
+        {rsvd_block}
     """)
 
 
@@ -452,7 +464,9 @@ def generate_deck(request: SimRequest) -> str:
         _props_section(request.fluid, has_gas=any(
             Phase.GAS in w.phases for w in request.wells
         )),
-        _solution_section(request.grid, request.fluid),
+        _solution_section(request.grid, request.fluid, has_gas=any(
+            Phase.GAS in w.phases for w in request.wells
+        )),
         _summary_section(request.wells),
         _schedule_section(request.wells, request.grid, request.timesteps_days),
     ]
