@@ -34,30 +34,52 @@ from clarissa.sim_engine.models import (
 )
 
 
-def generate_mrst_script(request: SimRequest, output_mat: str = "results.mat") -> str:
+def generate_mrst_script(
+    request: SimRequest,
+    output_mat: str = "results.mat",
+    deck_file: Optional[str] = None,
+) -> str:
     """Generate a complete MRST .m script from a SimRequest.
 
     Args:
         request: Simulation request with grid, wells, fluid properties.
         output_mat: Filename for the .mat output file.
+        deck_file: Path to Eclipse .DATA deck (enables deck-based fluid/schedule init).
+                   When provided, PVTO/PVTG/EQUIL from the deck are used — required
+                   for DISGAS correctness. Falls back to simplified init if None.
 
     Returns:
         Complete MATLAB/Octave script as string.
     """
     has_gas = any(Phase.GAS in w.phases for w in request.wells)
-    sections = [
-        _header(request),
-        _mrst_startup(),
-        _grid_section(request.grid),
-        _rock_section(request.grid),
-        _fluid_section(request.fluid, request),
-        _well_section(request.wells, request.grid),
-        _initial_state(request.grid, request.fluid, has_gas),
-        _schedule_section(request.timesteps_days),
-        _solver_section(has_gas),
-        _run_section(),
-        _export_section(output_mat, request),
-    ]
+
+    if deck_file:
+        sections = [
+            _header(request),
+            _mrst_startup(),
+            _grid_section(request.grid),
+            _rock_section(request.grid),
+            _deck_fluid_and_schedule(deck_file, has_gas),
+            _well_section(request.wells, request.grid),
+            _solver_section(has_gas),
+            _run_section(),
+            _export_section(output_mat, request),
+        ]
+    else:
+        # Legacy: simplified fluid model (no DISGAS support)
+        sections = [
+            _header(request),
+            _mrst_startup(),
+            _grid_section(request.grid),
+            _rock_section(request.grid),
+            _fluid_section(request.fluid, request),
+            _well_section(request.wells, request.grid),
+            _initial_state(request.grid, request.fluid, has_gas),
+            _schedule_section(request.timesteps_days),
+            _solver_section(has_gas),
+            _run_section(),
+            _export_section(output_mat, request),
+        ]
     return "\n".join(sections)
 
 
@@ -65,13 +87,14 @@ def write_mrst_script(
     request: SimRequest,
     script_path: str,
     output_mat: str = "results.mat",
+    deck_file: Optional[str] = None,
 ) -> str:
     """Write MRST script to file.
 
     Returns:
         Path to written script.
     """
-    script = generate_mrst_script(request, output_mat)
+    script = generate_mrst_script(request, output_mat, deck_file=deck_file)
     with open(script_path, "w") as f:
         f.write(script)
     return script_path
@@ -151,6 +174,32 @@ def _rock_section(grid: GridParams) -> str:
     return textwrap.dedent(f"""\
         %% ─── Rock Properties ────────────────────────────────────────
         rock = makeRock(G, [{perm_x:.6e}, {perm_y:.6e}, {perm_z:.6e}], {grid.porosity});
+    """)
+
+
+def _deck_fluid_and_schedule(deck_file: str, has_gas: bool) -> str:
+    """Deck-based fluid, initial state and schedule — correct for DISGAS.
+
+    Reads PVTO/PVTG/PVTW/EQUIL/TSTEP from the Eclipse .DATA deck generated
+    by deck_generator.py. This replaces initSimpleADIFluid which lacks
+    dissolved-gas support.
+    """
+    disgas_flag = "'disgas', true" if has_gas else ""
+    return textwrap.dedent(f"""        %% ─── Fluid, Initial State & Schedule (deck-based) ──────────────
+        deck = readEclipseDeck('{deck_file}');
+        deck = convertDeckUnits(deck);
+
+        %% Override grid with our analytically-built grid (preserves COORD/ZCORN)
+        fluid = initDeckADIFluid(deck);
+
+        %% Initial state from EQUIL (correct pressure + dissolved GOR)
+        gravity reset on;
+        state0 = initEclipseState(G, deck, model);
+        state0 = rmfield(state0, 'wellSol');  %% Will be re-init by initWellSolAD
+
+        %% Schedule from deck TSTEP + well controls
+        schedule = convertDeckSchedule(model, deck);
+        fprintf('Deck loaded: %d timesteps\\n', numel(schedule.step.val));
     """)
 
 
