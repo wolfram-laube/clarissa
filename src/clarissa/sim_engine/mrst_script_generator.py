@@ -120,6 +120,13 @@ def _mrst_startup() -> str:
             end
         end
         mrstModule add ad-blackoil ad-core ad-props mrst-autodiff deckformat
+        % Octave compat: remove MRST's built-in overrides that shadow Octave core
+        % functions (properties, ls, isprop, maxNumCompThreads).
+        % These cause 'matrix cannot be indexed with .' in AD OOP code.
+        problematic = fullfile(mrst_dir, 'utils', 'octave_only', 'builtin');
+        if exist(problematic, 'dir')
+            rmpath(problematic);
+        end
     """)
 
 
@@ -275,11 +282,7 @@ def _schedule_section(timesteps_days: list[float]) -> str:
 
 
 def _solver_section(has_gas: bool) -> str:
-    """Solver / model setup.
-
-    Octave compat strategy: use mrstModule sequential + explicit model
-    to avoid FacilityFlowDiscretization -> properties() conflict.
-    """
+    """Solver / model setup — Octave-compatible."""
     if has_gas:
         model_line = "model = ThreePhaseBlackOilModel(G, rock, fluid);"
     else:
@@ -287,14 +290,6 @@ def _solver_section(has_gas: bool) -> str:
     return textwrap.dedent(f"""\
         %% ─── Model & Solver ─────────────────────────────────────────
         {model_line}
-        % Octave compat: override FacilityModel before validateModel
-        % to avoid properties() built-in conflict in setupStateFunctionGroupings
-        try
-            model.FacilityModel = SimpleWell(W);
-        catch
-            % SimpleWell not available — use struct workaround
-            model.FacilityModel = [];
-        end
         model.useCNVConvergence = false;
         solver = NonLinearSolver('maxIterations', 15, 'maxTimestepCuts', 4);
     """)
