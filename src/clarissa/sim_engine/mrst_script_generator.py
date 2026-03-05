@@ -287,7 +287,11 @@ def _solver_section(has_gas: bool) -> str:
     return textwrap.dedent(f"""\
         %% ─── Model & Solver ─────────────────────────────────────────
         {model_line}
+        % Octave compat: disable CNV convergence (uses struct-indexing incompatible with Octave)
+        model.useCNVConvergence = false;
+        model.toleranceCNV = 1e-3;
         solver = NonLinearSolver('maxIterations', 25, 'maxTimestepCuts', 6);
+        solver.useRelaxation = false;
     """)
 
 
@@ -295,6 +299,9 @@ def _run_section() -> str:
     """Execute simulation."""
     return textwrap.dedent("""\
         %% ─── Run ────────────────────────────────────────────────────
+        % Octave compat: explicit wellSol init avoids struct-indexing error
+        % in checkDependencies (MRST 2021a, Octave 8.x)
+        state0.wellSol = initWellSolAD(W, model, state0);
         fprintf('Starting simulation...\\n');
         tic;
         [wellSols, states, report] = simulateScheduleAD(state0, model, schedule, ...
