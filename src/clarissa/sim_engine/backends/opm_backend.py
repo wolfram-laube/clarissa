@@ -400,7 +400,7 @@ class OPMBackend(SimulatorBackend):
                 arrays = {name: arr_type for name, arr_type, size in rst.arrays(step_idx)}
 
                 # Read pressure (always present)
-                pressure = list(rst["PRESSURE", step_idx]) if "PRESSURE" in arrays else []
+                pressure = [p * 0.0689476 for p in rst["PRESSURE", step_idx]] if "PRESSURE" in arrays else []  # FIELD units: psi→bar
 
                 # Read saturations
                 swat = list(rst["SWAT", step_idx]) if "SWAT" in arrays else []
