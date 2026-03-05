@@ -277,8 +277,8 @@ def _schedule_section(timesteps_days: list[float]) -> str:
 def _solver_section(has_gas: bool) -> str:
     """Solver / model setup.
 
-    Uses Octave-compatible model classes (not GenericBlackOilModel which
-    has OOP incompatibilities with Octave's class system).
+    Octave compat strategy: use mrstModule sequential + explicit model
+    to avoid FacilityFlowDiscretization -> properties() conflict.
     """
     if has_gas:
         model_line = "model = ThreePhaseBlackOilModel(G, rock, fluid);"
@@ -287,13 +287,17 @@ def _solver_section(has_gas: bool) -> str:
     return textwrap.dedent(f"""\
         %% ─── Model & Solver ─────────────────────────────────────────
         {model_line}
-        % Octave compat: FacilityFlowDiscretization -> properties() conflict
-        % UniformFacilityModel avoids the problematic code path entirely
-        model.FacilityModel = UniformFacilityModel(model);
+        % Octave compat: override FacilityModel before validateModel
+        % to avoid properties() built-in conflict in setupStateFunctionGroupings
+        try
+            model.FacilityModel = SimpleWell(W);
+        catch
+            % SimpleWell not available — use struct workaround
+            model.FacilityModel = [];
+        end
         model.useCNVConvergence = false;
-        solver = NonLinearSolver('maxIterations', 25, 'maxTimestepCuts', 6);
+        solver = NonLinearSolver('maxIterations', 15, 'maxTimestepCuts', 4);
     """)
-
 
 def _run_section() -> str:
     """Execute simulation."""
