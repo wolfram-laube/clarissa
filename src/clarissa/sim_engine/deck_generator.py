@@ -152,20 +152,25 @@ def _grid_section(grid: GridParams) -> str:
 def _pvtg_table(fluid: "FluidProperties", p_ref_psi: float) -> str:
     """Dry gas PVT table (PVTG) required by OPM when DISGAS is active.
 
-    Format: P[psia]  Rv[STB/Mscf]  Bg[RB/Mscf]  Mu_g[cP]
-    Simplified constant-composition table for synthetic cases.
+    OPM requires at least one undersaturated gas entry per pressure point.
+    Each block: saturated row (small Rv) + undersaturated row (Rv=0) + /.
     """
     bp_psi = _bar_to_psi(fluid.bubble_point_bar)
-    rows = [
-        f"   14.7      0.0  28.300  0.0130 /",
-        f"   {bp_psi * 0.5:.1f}  0.0   3.100  0.0148 /",
-        f"   {bp_psi:.1f}  0.0   1.490  0.0170 /",
-        f"   {p_ref_psi:.1f}  0.0   1.010  0.0200 /",
-        f"   {p_ref_psi * 1.5:.1f}  0.0   0.740  0.0240 /",
-        "/",  # Eclipse keyword terminator — required after last PVTG entry
+    points = [
+        (14.7,           28.300, 0.0130),
+        (bp_psi * 0.5,    3.100, 0.0148),
+        (bp_psi,          1.490, 0.0170),
+        (p_ref_psi,       1.010, 0.0200),
+        (p_ref_psi * 1.5, 0.740, 0.0240),
     ]
+    rows = []
+    for p, bg, mu in points:
+        # Saturated line: tiny Rv required by OPM validator
+        rows.append(f"   {p:.1f}  1.0e-3  {bg:.3f}  {mu:.4f}")
+        # Undersaturated line (Rv=0) terminates this P-block
+        rows.append(f"           0.0  {bg:.3f}  {mu:.4f} /")
+    rows.append("/")  # Eclipse keyword terminator
     return "\n        ".join(rows)
-
 
 def _pvdo_table(fluid: "FluidProperties", p_ref_psi: float) -> str:
     """Dead oil PVT table (no dissolved gas)."""
