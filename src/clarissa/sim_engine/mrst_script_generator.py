@@ -287,11 +287,11 @@ def _solver_section(has_gas: bool) -> str:
     return textwrap.dedent(f"""\
         %% ─── Model & Solver ─────────────────────────────────────────
         {model_line}
-        % Octave compat: disable CNV convergence (uses struct-indexing incompatible with Octave)
+        % Octave compat: FacilityFlowDiscretization -> properties() conflict
+        % UniformFacilityModel avoids the problematic code path entirely
+        model.FacilityModel = UniformFacilityModel(model);
         model.useCNVConvergence = false;
-        model.toleranceCNV = 1e-3;
         solver = NonLinearSolver('maxIterations', 25, 'maxTimestepCuts', 6);
-        solver.useRelaxation = false;
     """)
 
 
