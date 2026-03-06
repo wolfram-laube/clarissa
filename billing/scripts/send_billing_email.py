@@ -5,7 +5,7 @@ Gmail Billing Draft Creator with PDF Attachments.
 Creates a draft email with invoice and timesheets attached.
 
 Environment Variables:
-  - GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN: Gmail OAuth
+  - GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN_BILLING: Gmail OAuth
   - BILLING_CLIENT: Client ID (e.g., "nemensis")
   - BILLING_PERIOD: Period (e.g., "2026-01")
 """
@@ -28,7 +28,7 @@ def get_access_token():
         data={
             "client_id": os.environ["GMAIL_CLIENT_ID"],
             "client_secret": os.environ["GMAIL_CLIENT_SECRET"],
-            "refresh_token": os.environ["GMAIL_REFRESH_TOKEN"],
+            "refresh_token": os.environ["GMAIL_REFRESH_TOKEN_BILLING"],
             "grant_type": "refresh_token"
         }
     )
