@@ -8,7 +8,7 @@ Environment Variables:
   - EMAIL_LANGUAGE: "de", "en", "es", "fr", etc. (default: de)
   - OPENAI_API_KEY: OpenAI API key
   - ANTHROPIC_API_KEY: Anthropic API key
-  - GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN: Gmail OAuth
+  - GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN_BILLING: Gmail OAuth
 """
 import os
 import json
@@ -241,7 +241,7 @@ def main():
     # Configuration
     CLIENT_ID = os.environ["GMAIL_CLIENT_ID"]
     CLIENT_SECRET = os.environ["GMAIL_CLIENT_SECRET"]
-    REFRESH_TOKEN = os.environ["GMAIL_REFRESH_TOKEN"]
+    REFRESH_TOKEN = os.environ["GMAIL_REFRESH_TOKEN_BILLING"]
     LLM_PROVIDER = os.environ.get("LLM_PROVIDER", "openai").lower()
     EMAIL_LANGUAGE = os.environ.get("EMAIL_LANGUAGE", "de").lower()
 
