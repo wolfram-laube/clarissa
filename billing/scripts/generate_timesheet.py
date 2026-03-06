@@ -17,7 +17,7 @@ Usage:
 Requirements:
     - GitLab issues must have label matching client's gitlab_label (e.g., "client:nemensis")
     - Time is tracked via /spend command on issues
-    - GITLAB_TOKEN environment variable must be set
+    - GITLAB_API_TOKEN environment variable must be set
 """
 
 import argparse
@@ -47,7 +47,7 @@ OUTPUT_DIR = BILLING_DIR / "output"
 # GitLab API
 GITLAB_GRAPHQL_URL = os.environ.get("GITLAB_GRAPHQL_URL", "https://gitlab.com/api/graphql")
 GITLAB_PROJECT_PATH = os.environ.get("GITLAB_PROJECT_PATH", "wolfram_laube/blauweiss_llc/clarissa")
-GITLAB_TOKEN = os.environ.get("GITLAB_TOKEN", "")
+GITLAB_API_TOKEN = os.environ.get("GITLAB_API_TOKEN", "")
 
 
 def load_config() -> dict:
@@ -82,14 +82,14 @@ def fetch_time_entries_graphql(
     Returns:
         dict: {day: [(hours, description, issue_title), ...]}
     """
-    if not GITLAB_TOKEN:
-        print("❌ GITLAB_TOKEN environment variable not set")
+    if not GITLAB_API_TOKEN:
+        print("❌ GITLAB_API_TOKEN environment variable not set")
         print("   Export your GitLab Personal Access Token:")
-        print("   export GITLAB_TOKEN='glpat-xxx'")
+        print("   export GITLAB_API_TOKEN='glpat-xxx'")
         return {}
     
     headers = {
-        "Authorization": f"Bearer {GITLAB_TOKEN}",
+        "Authorization": f"Bearer {GITLAB_API_TOKEN}",
         "Content-Type": "application/json"
     }
     
@@ -403,7 +403,7 @@ Examples:
     %(prog)s --client nemensis --period 2026-01 --all-consultants
     
 Environment:
-    GITLAB_TOKEN        GitLab Personal Access Token (required)
+    GITLAB_API_TOKEN        GitLab Personal Access Token (required)
     GITLAB_PROJECT_PATH Project path (default: wolfram_laube/blauweiss_llc/clarissa)
 """
     )
