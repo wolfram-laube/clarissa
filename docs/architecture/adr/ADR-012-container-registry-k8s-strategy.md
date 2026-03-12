@@ -1,3 +1,9 @@
+> ⚠️ **DEPRECATED** — Diese ADR wurde als company-level BW-ADR-009 in [ops/adr](https://gitlab.com/wolfram_laube/blauweiss_llc/ops/adr) migriert (2026-03-12). Bitte BW-ADR-009 als maßgebliche Referenz verwenden.
+>
+> Die CLARISSA-spezifischen Implementierungsdetails in diesem Dokument bleiben als historische Referenz erhalten.
+
+---
+
 # ADR-012 — Container Registry and Kubernetes Deployment Strategy
 
 ## Status
