@@ -264,13 +264,13 @@ def _well_section(wells: list[WellConfig], grid: GridParams) -> str:
         # MRST addWell: cell indices for perforated layers
         lines.append(f"% Well: {w.name} ({w.well_type.value})")
         lines.append(
-            f"cells_{w.name} = sub2ind(G.cartDims, "
+            f"cells_{w.name.replace('-','_').replace(' ','_')} = sub2ind(G.cartDims, "
             f"{i1}*ones({k_bot1 - k_top1 + 1},1), "
             f"{j1}*ones({k_bot1 - k_top1 + 1},1), "
             f"({k_top1}:{k_bot1})');"
         )
         lines.append(
-            f"W = addWell(W, G, rock, cells_{w.name}, "
+            f"W = addWell(W, G, rock, cells_{w.name.replace('-','_').replace(' ','_')}, "
             f"'Name', '{w.name}', {control}, "
             f"'Comp_i', [{_comp_injection(w)}]);"
         )
