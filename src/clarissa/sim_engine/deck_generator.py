@@ -60,11 +60,14 @@ def _runspec_section(request: SimRequest) -> str:
     has_gas = any(Phase.GAS in w.phases for w in request.wells)
     has_water = any(Phase.WATER in w.phases for w in request.wells)
 
-    phases = "OIL\n"
-    if has_water or True:  # Always include water for simplicity
-        phases += "WATER\n"
+    # Phase keywords — joined with the same 8-space indent as the template
+    # so textwrap.dedent finds a consistent prefix and strips it correctly
+    phase_list = ["OIL"]
+    if has_water or True:  # Always include water
+        phase_list.append("WATER")
     if has_gas:
-        phases += "GAS\nDISGAS\n"
+        phase_list.extend(["GAS", "DISGAS"])
+    phases = "\n        ".join(phase_list)  # 8 spaces = template indent before dedent
 
     return textwrap.dedent(f"""\
         RUNSPEC
