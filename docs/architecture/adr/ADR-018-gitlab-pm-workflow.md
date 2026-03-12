@@ -1,3 +1,9 @@
+> ⚠️ **DEPRECATED** — Diese ADR wurde als company-level BW-ADR-004 in [ops/adr](https://gitlab.com/wolfram_laube/blauweiss_llc/ops/adr) migriert (2026-03-12). Bitte BW-ADR-004 als maßgebliche Referenz verwenden.
+>
+> Die repo-spezifischen Implementierungsdetails bleiben als historische Referenz erhalten.
+
+---
+
 # ADR-018: GitLab-Native Project Management Workflow
 
 **Status:** Accepted  
