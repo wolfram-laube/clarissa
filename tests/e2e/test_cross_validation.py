@@ -256,6 +256,7 @@ class TestSPE1CrossValidation:
         r = spe1_results["opm"]
         assert r.get("converged") is True, f"OPM SPE1 not converged: {r}"
 
+    @pytest.mark.xfail(reason="MRST readEclipseDeck rejects WATER keyword in API decks — see Issue #133", strict=False)
     def test_spe1_mrst_converged(self, spe1_results):
         """SPE1 MRST: simulation converges."""
         r = spe1_results["mrst"]
@@ -269,6 +270,7 @@ class TestSPE1CrossValidation:
             ref * 0.5 <= p <= ref * 1.5
         ), f"OPM SPE1 pressure out of range: {p:.1f} bar (ref={ref} bar)"
 
+    @pytest.mark.xfail(reason="MRST WATER keyword bug #133", strict=False)
     def test_spe1_mrst_pressure_range(self, spe1_results):
         """SPE1 MRST: average final pressure within ±50% of reference (331 bar)."""
         p = avg_pressure(spe1_results["mrst"])
@@ -277,6 +279,7 @@ class TestSPE1CrossValidation:
             ref * 0.5 <= p <= ref * 1.5
         ), f"MRST SPE1 pressure out of range: {p:.1f} bar (ref={ref} bar)"
 
+    @pytest.mark.xfail(reason="MRST WATER keyword bug #133", strict=False)
     def test_spe1_pressure_cross_validation(self, spe1_results):
         """SPE1: OPM vs MRST average pressure within ±15%."""
         p_opm = avg_pressure(spe1_results["opm"])
@@ -287,6 +290,7 @@ class TestSPE1CrossValidation:
             f"MRST={p_mrst:.2f} bar, diff={diff:.1f}% > {PRESSURE_TOL_PCT}%"
         )
 
+    @pytest.mark.xfail(reason="MRST WATER keyword bug #133", strict=False)
     def test_spe1_saturation_cross_validation(self, spe1_results):
         """SPE1: OPM vs MRST average oil saturation within ±20%."""
         s_opm = avg_oil_saturation(spe1_results["opm"])
@@ -328,11 +332,13 @@ class TestSPE5CrossValidation:
         r = spe5_results["opm"]
         assert r.get("converged") is True, f"OPM SPE5 not converged: {r}"
 
+    @pytest.mark.xfail(reason="MRST WATER keyword bug #133", strict=False)
     def test_spe5_mrst_converged(self, spe5_results):
         """SPE5 MRST: simulation converges."""
         r = spe5_results["mrst"]
         assert r.get("converged") is True, f"MRST SPE5 not converged: {r}"
 
+    @pytest.mark.xfail(reason="MRST WATER keyword bug #133", strict=False)
     def test_spe5_pressure_cross_validation(self, spe5_results):
         """SPE5: OPM vs MRST average pressure within ±15%."""
         p_opm = avg_pressure(spe5_results["opm"])
@@ -343,6 +349,7 @@ class TestSPE5CrossValidation:
             f"MRST={p_mrst:.2f} bar, diff={diff:.1f}% > {PRESSURE_TOL_PCT}%"
         )
 
+    @pytest.mark.xfail(reason="MRST WATER keyword bug #133", strict=False)
     def test_spe5_saturation_cross_validation(self, spe5_results):
         """SPE5: OPM vs MRST average oil saturation within ±20%."""
         s_opm = avg_oil_saturation(spe5_results["opm"])
