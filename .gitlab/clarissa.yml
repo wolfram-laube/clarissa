@@ -604,8 +604,63 @@ relay:clarissa:
   variables:
     OPENAI_API_KEY: ${OPENAI_API_KEY}
     GITLAB_API_TOKEN: ${GITLAB_API_TOKEN}
-
-
-
-
-
+# -----------------------------------------------------------------------------
+# E2E CROSS-VALIDATION: SPE1 + SPE5 — OPM vs MRST on Nordic VM
+# Issue #131 | ADR-040 v2
+# Trigger: E2E=true (manual web pipeline) or CI_PIPELINE_SOURCE == "web" + manual
+# Calls deployed Cloud Run sim-engine from Nordic shell runner.
+# -----------------------------------------------------------------------------
+e2e_cross_validation:
+  stage: test
+  tags:
+    - nordic-shell
+  rules:
+    - if: '$E2E == "true"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
+    - when: never
+  variables:
+    SIM_ENGINE_URL: "https://clarissa-sim-engine-518587440396.europe-north1.run.app"
+  before_script:
+    - python3 -m pip install --quiet requests pytest
+  script:
+    - echo "🧪 E2E Cross-Validation: SPE1 + SPE5 (OPM vs MRST)"
+    - echo "Sim-Engine: ${SIM_ENGINE_URL}"
+    - |
+      curl -sf "${SIM_ENGINE_URL}/health" || {
+        echo "❌ Sim-engine unreachable — cold start? Waiting 30s..."
+        sleep 30
+        curl -f "${SIM_ENGINE_URL}/health" || exit 1
+      }
+    - |
+      python3 -m pytest tests/e2e/test_cross_validation.py \
+        -v --tb=short \
+        --junitxml=e2e-junit.xml \
+        -p no:warnings \
+        2>&1 | tee e2e-output.log
+    - |
+      echo "=== E2E Summary ==="
+      if [ -f /tmp/e2e-summary.json ]; then
+        cat /tmp/e2e-summary.json
+        cp /tmp/e2e-summary.json e2e-summary.json
+      fi
+      # Collect per-run results
+      for f in /tmp/spe1_opm_result.json /tmp/spe1_mrst_result.json \
+                /tmp/spe5_opm_result.json /tmp/spe5_mrst_result.json; do
+        [ -f "$f" ] && cp "$f" . && echo "✅ $(basename $f)"
+      done
+  artifacts:
+    when: always
+    expire_in: 14 days
+    reports:
+      junit: e2e-junit.xml
+    paths:
+      - e2e-output.log
+      - e2e-summary.json
+      - spe1_opm_result.json
+      - spe1_mrst_result.json
+      - spe5_opm_result.json
+      - spe5_mrst_result.json
+  timeout: 20m
