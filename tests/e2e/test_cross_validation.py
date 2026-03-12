@@ -55,7 +55,7 @@ SPE1_REQUEST = {
         {
             "name": "INJ-1",
             "well_type": "injector",
-            "i": 1, "j": 1,
+            "i": 0, "j": 0,
             "k_top": 0, "k_bottom": 2,
             "bhp_bar": 415.0,  # 6000 psia
             "phases": ["gas"],
@@ -63,7 +63,7 @@ SPE1_REQUEST = {
         {
             "name": "PROD-1",
             "well_type": "producer",
-            "i": 10, "j": 10,
+            "i": 9, "j": 9,
             "k_top": 0, "k_bottom": 2,
             "bhp_bar": 138.0,  # 2000 psia
             "phases": ["oil", "gas", "water"],
@@ -99,7 +99,7 @@ SPE5_REQUEST = {
         {
             "name": "INJ-SW",
             "well_type": "injector",
-            "i": 1, "j": 1,
+            "i": 0, "j": 0,
             "k_top": 0, "k_bottom": 2,
             "rate_m3_day": 50.0,
             "phases": ["water"],
@@ -107,7 +107,7 @@ SPE5_REQUEST = {
         {
             "name": "INJ-NW",
             "well_type": "injector",
-            "i": 1, "j": 9,
+            "i": 0, "j": 8,
             "k_top": 0, "k_bottom": 2,
             "rate_m3_day": 50.0,
             "phases": ["water"],
@@ -115,7 +115,7 @@ SPE5_REQUEST = {
         {
             "name": "INJ-NE",
             "well_type": "injector",
-            "i": 9, "j": 9,
+            "i": 8, "j": 8,
             "k_top": 0, "k_bottom": 2,
             "rate_m3_day": 50.0,
             "phases": ["water"],
@@ -123,7 +123,7 @@ SPE5_REQUEST = {
         {
             "name": "INJ-SE",
             "well_type": "injector",
-            "i": 9, "j": 1,
+            "i": 8, "j": 0,
             "k_top": 0, "k_bottom": 2,
             "rate_m3_day": 50.0,
             "phases": ["water"],
@@ -132,7 +132,7 @@ SPE5_REQUEST = {
         {
             "name": "PROD-C",
             "well_type": "producer",
-            "i": 5, "j": 5,
+            "i": 4, "j": 4,
             "k_top": 0, "k_bottom": 2,
             "bhp_bar": 150.0,
             "phases": ["oil", "water"],
