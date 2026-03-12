@@ -630,7 +630,7 @@ e2e_cross_validation:
   variables:
     SIM_ENGINE_URL: "https://clarissa-sim-engine-518587440396.europe-north1.run.app"
   before_script:
-    - python3 -m pip install --quiet requests pytest
+    - python3 -m pip install --quiet requests pytest --break-system-packages
   script:
     - echo "E2E Cross-Validation SPE1 + SPE5 (OPM vs MRST)"
     - echo "Sim-Engine ${SIM_ENGINE_URL}"
@@ -654,4 +654,3 @@ e2e_cross_validation:
       - spe5_opm_result.json
       - spe5_mrst_result.json
   timeout: 20m
-
