@@ -504,6 +504,7 @@ deploy_sim_engine:
     - gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
     - gcloud config set project ${GCP_PROJECT}
     # Copy image: GitLab → GCP AR (Cloud Run requires GCR/AR)
+    - unset DOCKER_AUTH_CONFIG  # GCP config takes precedence otherwise
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
     - gcloud auth configure-docker europe-north1-docker.pkg.dev --quiet
     - docker pull ${SIM_GITLAB_IMAGE}:${CI_COMMIT_SHORT_SHA}
