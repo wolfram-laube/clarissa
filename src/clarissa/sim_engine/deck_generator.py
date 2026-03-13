@@ -128,7 +128,11 @@ def _grid_section(grid: GridParams) -> str:
         f"   {n_cells}*{dz_ft:.2f} /",
         "",
         "TOPS",
-        f"   {cells_per_layer}*{depth_ft:.2f} /",
+        # One record, nz entries of cells_per_layer values each, single trailing /
+        "   " + " ".join(
+            f"{cells_per_layer}*{(depth_ft + k * dz_ft):.2f}"
+            for k in range(nz)
+        ) + " /",
         "",
         "PORO",
         f"   {n_cells}*{grid.porosity:.4f} /",
