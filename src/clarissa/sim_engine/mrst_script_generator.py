@@ -59,9 +59,9 @@ def generate_mrst_script(
             _mrst_startup(),
             _grid_section(request.grid),
             _rock_section(request.grid),
-            _deck_fluid_and_schedule(deck_file, has_gas),
             _well_section(request.wells, request.grid),
-            _solver_section(has_gas),
+            _deck_fluid_and_schedule(deck_file, has_gas),  # defines fluid + model
+            _deck_solver_only(),                            # solver only (model already set)
             _run_section(),
             _export_section(output_mat, request),
         ]
@@ -183,14 +183,26 @@ def _deck_fluid_and_schedule(deck_file: str, has_gas: bool) -> str:
     Reads PVTO/PVTG/PVTW/EQUIL/TSTEP from the Eclipse .DATA deck generated
     by deck_generator.py. This replaces initSimpleADIFluid which lacks
     dissolved-gas support.
+
+    NOTE: model is defined here (after fluid) because initEclipseState and
+    convertDeckSchedule both require model — forward-reference bug fix (#137).
     """
     disgas_flag = "'disgas', true" if has_gas else ""
+    model_line = (
+        "model = ThreePhaseBlackOilModel(G, rock, fluid);"
+        if has_gas else
+        "model = TwoPhaseOilWaterModel(G, rock, fluid);"
+    )
     return textwrap.dedent(f"""        %% ─── Fluid, Initial State & Schedule (deck-based) ──────────────
         deck = readEclipseDeck('{deck_file}');
         deck = convertDeckUnits(deck);
 
-        %% Override grid with our analytically-built grid (preserves COORD/ZCORN)
+        %% Fluid from deck PVT tables
         fluid = initDeckADIFluid(deck);
+
+        %% Model must be defined before initEclipseState / convertDeckSchedule
+        {model_line}
+        model.useCNVConvergence = false;
 
         %% Initial state from EQUIL (correct pressure + dissolved GOR)
         gravity reset on;
@@ -342,6 +354,13 @@ def _solver_section(has_gas: bool) -> str:
         model.useCNVConvergence = false;
         solver = NonLinearSolver('maxIterations', 15, 'maxTimestepCuts', 4);
     """)
+
+def _deck_solver_only() -> str:
+    """Solver setup for deck mode — model already defined in _deck_fluid_and_schedule."""
+    return textwrap.dedent("""        %% ─── Solver ─────────────────────────────────────────────────
+        solver = NonLinearSolver('maxIterations', 15, 'maxTimestepCuts', 4);
+    """)
+
 
 def _run_section() -> str:
     """Execute simulation."""
