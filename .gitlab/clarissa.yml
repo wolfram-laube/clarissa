@@ -660,12 +660,21 @@ diagnose_runner:
     - nordic-shell
   rules:
     - if: '$DIAGNOSE == "true"'
+    - if: '$PRUNE == "true"'
   script:
     - echo "=== Disk Usage ==="
     - df -h
-    - echo "=== Docker Disk Usage ==="
-    - docker system df
-    - echo "=== Docker Images ==="
-    - docker images --format "{{.Repository}}:{{.Tag}} {{.Size}}" | sort -k2 -rh | head -20
+    - echo "=== Build dir size ==="
+    - du -sh /home/gitlab-runner/builds/ 2>/dev/null || echo "n/a"
     - echo "=== /var/lib/docker size ==="
-    - du -sh /var/lib/docker 2>/dev/null || echo "no access"
+    - du -sh /var/lib/docker 2>/dev/null || echo "n/a"
+    - |
+      if [ "$PRUNE" = "true" ]; then
+        echo "=== docker system prune -af ==="
+        docker system prune -af --volumes
+        echo "=== After prune ==="
+        df -h
+      else
+        echo "=== Docker disk (read-only) ==="
+        docker system df || true
+      fi
