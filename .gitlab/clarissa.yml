@@ -661,20 +661,23 @@ diagnose_runner:
   rules:
     - if: '$DIAGNOSE == "true"'
     - if: '$PRUNE == "true"'
+    - if: '$WARMUP == "true"'
   script:
     - echo "=== Disk Usage ==="
     - df -h
-    - echo "=== Build dir size ==="
-    - du -sh /home/gitlab-runner/builds/ 2>/dev/null || echo "n/a"
-    - echo "=== /var/lib/docker size ==="
-    - du -sh /var/lib/docker 2>/dev/null || echo "n/a"
+    - echo "=== Docker disk ==="
+    - docker system df || true
     - |
       if [ "$PRUNE" = "true" ]; then
         echo "=== docker system prune -af ==="
         docker system prune -af --volumes
-        echo "=== After prune ==="
         df -h
-      else
-        echo "=== Docker disk (read-only) ==="
-        docker system df || true
+      fi
+    - |
+      if [ "$WARMUP" = "true" ]; then
+        echo "=== Pulling sim-base for cache warmup ==="
+        docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+        docker pull registry.gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/clarissa-sim-engine:latest || true
+        docker system df
+        df -h
       fi
