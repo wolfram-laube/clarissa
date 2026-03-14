@@ -119,7 +119,7 @@ tests:
     - pip cache purge 2>/dev/null || true
     - python -m pip install -e ".[dev]"
   script:
-    - python -m pytest -q --ignore=tests/integration --junitxml=junit.xml
+    - python -m pytest -q --ignore=tests/integration --ignore=tests/e2e --junitxml=junit.xml
   artifacts:
     when: always
     reports:
@@ -604,8 +604,80 @@ relay:clarissa:
   variables:
     OPENAI_API_KEY: ${OPENAI_API_KEY}
     GITLAB_API_TOKEN: ${GITLAB_API_TOKEN}
+# -----------------------------------------------------------------------------
+# E2E CROSS-VALIDATION: SPE1 + SPE5 — OPM vs MRST on Nordic VM
+# Issue #131 | ADR-040 v2
+# Trigger: E2E=true (manual web pipeline) or CI_PIPELINE_SOURCE == "web" + manual
+# Calls deployed Cloud Run sim-engine from Nordic shell runner.
+# -----------------------------------------------------------------------------
 
-
-
-
-
+# -----------------------------------------------------------------------------
+# E2E CROSS-VALIDATION: SPE1 + SPE5 — OPM vs MRST on Nordic VM
+# Issue #131 | ADR-040 v2
+# Trigger: E2E=true (web pipeline variable)
+# -----------------------------------------------------------------------------
+e2e_cross_validation:
+  stage: test
+  tags:
+    - nordic-shell
+  rules:
+    - if: '$E2E == "true"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: manual
+      allow_failure: true
+    - when: never
+  variables:
+    SIM_ENGINE_URL: "https://clarissa-sim-engine-518587440396.europe-north1.run.app"
+  before_script:
+    - python3 -m pip install --quiet --break-system-packages requests pytest
+  script:
+    - echo "E2E Cross-Validation SPE1 + SPE5 (OPM vs MRST)"
+    - echo "Sim-Engine ${SIM_ENGINE_URL}"
+    - curl -sf "${SIM_ENGINE_URL}/health"
+    - python3 -m pytest tests/e2e/test_cross_validation.py -v --tb=short --junitxml=e2e-junit.xml -p no:warnings 2>&1 | tee e2e-output.log
+    - "[ -f /tmp/e2e-summary.json ] && cp /tmp/e2e-summary.json . || true"
+    - "[ -f /tmp/spe1_opm_result.json ] && cp /tmp/spe1_opm_result.json . || true"
+    - "[ -f /tmp/spe1_mrst_result.json ] && cp /tmp/spe1_mrst_result.json . || true"
+    - "[ -f /tmp/spe5_opm_result.json ] && cp /tmp/spe5_opm_result.json . || true"
+    - "[ -f /tmp/spe5_mrst_result.json ] && cp /tmp/spe5_mrst_result.json . || true"
+  artifacts:
+    when: always
+    expire_in: 14 days
+    reports:
+      junit: e2e-junit.xml
+    paths:
+      - e2e-output.log
+      - e2e-summary.json
+      - spe1_opm_result.json
+      - spe1_mrst_result.json
+      - spe5_opm_result.json
+      - spe5_mrst_result.json
+  timeout: 20m
+diagnose_runner:
+  stage: test
+  tags:
+    - nordic-shell
+  rules:
+    - if: '$DIAGNOSE == "true"'
+    - if: '$PRUNE == "true"'
+    - if: '$WARMUP == "true"'
+  script:
+    - echo "=== Disk Usage ==="
+    - df -h
+    - echo "=== Docker disk ==="
+    - docker system df || true
+    - |
+      if [ "$PRUNE" = "true" ]; then
+        echo "=== docker system prune -af ==="
+        docker system prune -af --volumes
+        df -h
+      fi
+    - |
+      if [ "$WARMUP" = "true" ]; then
+        echo "=== Pulling sim-base for cache warmup ==="
+        docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+        docker pull registry.gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/clarissa-sim-engine:latest || true
+        docker system df
+        df -h
+      fi
