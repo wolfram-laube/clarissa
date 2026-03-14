@@ -654,3 +654,18 @@ e2e_cross_validation:
       - spe5_opm_result.json
       - spe5_mrst_result.json
   timeout: 20m
+diagnose_runner:
+  stage: test
+  tags:
+    - nordic-shell
+  rules:
+    - if: '$DIAGNOSE == "true"'
+  script:
+    - echo "=== Disk Usage ==="
+    - df -h
+    - echo "=== Docker Disk Usage ==="
+    - docker system df
+    - echo "=== Docker Images ==="
+    - docker images --format "{{.Repository}}:{{.Tag}} {{.Size}}" | sort -k2 -rh | head -20
+    - echo "=== /var/lib/docker size ==="
+    - du -sh /var/lib/docker 2>/dev/null || echo "no access"
