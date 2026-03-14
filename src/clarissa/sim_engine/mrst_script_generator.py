@@ -204,13 +204,16 @@ def _deck_fluid_and_schedule(deck_file: str, has_gas: bool) -> str:
         {model_line}
         model.useCNVConvergence = false;
 
-        %% Initial state from EQUIL (correct pressure + dissolved GOR)
+        %% Initial state from EQUIL (MRST 2021a compatible — no initEclipseState)
         gravity reset on;
-        state0 = initEclipseState(G, deck, model);
-        state0 = rmfield(state0, 'wellSol');  %% Will be re-init by initWellSolAD
+        p_init  = deck.SOLUTION.EQUIL(1,1) * barsa;
+        sw_init = deck.SOLUTION.EQUIL(1,9);
+        s0      = repmat([sw_init, 1 - sw_init, 0], G.cells.num, 1);
+        state0  = initState(G, W, p_init, s0);
 
-        %% Schedule from deck TSTEP + well controls
-        schedule = convertDeckSchedule(model, deck);
+        %% Schedule from deck TSTEP + well controls (2021a: scheduleFromDeck)
+        schedule = scheduleFromDeck(deck);
+        schedule.control(1).W = W;
         fprintf('Deck loaded: %d timesteps\\n', numel(schedule.step.val));
     """)
 
