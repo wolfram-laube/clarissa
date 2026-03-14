@@ -472,6 +472,7 @@ build_sim_engine:
   <<: *sim_engine_rules
   before_script:
     - docker info
+    - docker image prune -af --filter until=24h || true  # Issue #258 — free disk before build
     - unset DOCKER_AUTH_CONFIG  # GCP config takes precedence otherwise — must unset before GitLab login
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
