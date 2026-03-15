@@ -466,6 +466,7 @@ build_sim_base:
 
 build_sim_engine:
   stage: build
+  timeout: 30 minutes
   tags:
     - nordic-shell
   timeout: 30m
@@ -493,6 +494,7 @@ build_sim_engine:
 
 deploy_sim_engine:
   stage: deploy
+  timeout: 30 minutes
   # Shell runner: Docker available natively for registry-to-registry copy
   tags:
     - nordic-shell
@@ -661,6 +663,7 @@ e2e_cross_validation:
   timeout: 20m
 diagnose_runner:
   stage: test
+  timeout: 10 minutes
   tags:
     - nordic-shell
   timeout: 30m
