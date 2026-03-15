@@ -441,6 +441,7 @@ build_sim_base:
   # Docker is available natively on the host.
   tags:
     - nordic-shell
+  timeout: 30m
   timeout: 1h
   variables:
     <<: *sim_engine_vars
@@ -467,6 +468,7 @@ build_sim_engine:
   stage: build
   tags:
     - nordic-shell
+  timeout: 30m
   variables:
     <<: *sim_engine_vars
   <<: *sim_engine_rules
@@ -494,6 +496,7 @@ deploy_sim_engine:
   # Shell runner: Docker available natively for registry-to-registry copy
   tags:
     - nordic-shell
+  timeout: 30m
   needs:
     - build_sim_engine
   variables:
@@ -621,6 +624,7 @@ e2e_cross_validation:
   stage: test
   tags:
     - nordic-shell
+  timeout: 30m
   rules:
     - if: '$E2E == "true"'
       when: always
@@ -659,6 +663,7 @@ diagnose_runner:
   stage: test
   tags:
     - nordic-shell
+  timeout: 30m
   rules:
     - if: '$DIAGNOSE == "true"'
     - if: '$PRUNE == "true"'
