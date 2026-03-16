@@ -31,7 +31,7 @@ OUTPUT_DIR = BILLING_DIR / "output"
 # GitLab API
 GITLAB_API_URL = os.environ.get("GITLAB_API_URL", "https://gitlab.com/api/v4")
 GITLAB_PROJECT_ID = os.environ.get("GITLAB_PROJECT_ID", "77260390")
-GITLAB_API_TOKEN = os.environ.get("GITLAB_API_TOKEN", "")
+GITLAB_TOKEN = os.environ.get("GITLAB_TOKEN", "")
 
 
 def load_config() -> dict:
@@ -133,7 +133,7 @@ def find_or_create_correction_issue(project_id: str, year: int, month: int, clie
         print("❌ 'requests' not installed")
         return None
     
-    headers = {"PRIVATE-TOKEN": GITLAB_API_TOKEN}
+    headers = {"PRIVATE-TOKEN": GITLAB_TOKEN}
     
     # Search for existing issue
     issue_title = f"⏱️ Timesheet Corrections {year}-{month:02d} [{client_name}]"
@@ -184,7 +184,7 @@ def post_time_correction(project_id: str, issue_iid: int, year: int, month: int,
     except ImportError:
         return False
     
-    headers = {"PRIVATE-TOKEN": GITLAB_API_TOKEN}
+    headers = {"PRIVATE-TOKEN": GITLAB_TOKEN}
     
     day = diff["day"]
     delta = diff["delta"]
@@ -308,9 +308,9 @@ def main():
 ⚠️ Dry run - no changes made to GitLab")
         return
     
-    if not GITLAB_API_TOKEN:
+    if not GITLAB_TOKEN:
         print("
-❌ GITLAB_API_TOKEN not set - cannot sync to GitLab")
+❌ GITLAB_TOKEN not set - cannot sync to GitLab")
         sys.exit(1)
     
     # Find or create correction issue

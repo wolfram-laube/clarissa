@@ -599,7 +599,7 @@ relay:clarissa:
         echo "📤 Pushing CLARISSA response..."
         ENCODED_CONTENT=$(base64 -w 0 handoffs/handoff_to_claude.md)
         curl --silent --request PUT \
-          --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}" \
+          --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
           --header "Content-Type: application/json" \
           --data "{\"branch\": \"main\", \"encoding\": \"base64\", \"content\": \"${ENCODED_CONTENT}\", \"commit_message\": \"feat(relay): CLARISSA auto-response [skip ci]\"}" \
           "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/repository/files/handoffs%2Fhandoff_to_claude.md"
@@ -609,7 +609,7 @@ relay:clarissa:
       fi
   variables:
     OPENAI_API_KEY: ${OPENAI_API_KEY}
-    GITLAB_API_TOKEN: ${GITLAB_API_TOKEN}
+    GITLAB_TOKEN: ${GITLAB_TOKEN}
 # -----------------------------------------------------------------------------
 # E2E CROSS-VALIDATION: SPE1 + SPE5 — OPM vs MRST on Nordic VM
 # Issue #131 | ADR-040 v2
