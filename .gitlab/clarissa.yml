@@ -300,9 +300,7 @@ governance_impact:
 
 architecture_graphs:
   stage: test
-  image:
-    name: ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:latest
-    entrypoint: [""]
+  image: node:20-slim
   tags:
     - docker-any
   rules:
@@ -311,9 +309,14 @@ architecture_graphs:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
     - when: never
-  script:
+  variables:
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
+    PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium"
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq chromium --no-install-recommends
     - mkdir -p docs/architecture/diagrams docs/architecture/rendered
-    - mmdc --version || true
+  script:
+    - npx --yes @mermaid-js/mermaid-cli --version || true
     - bash scripts/render_mermaid.sh || echo "Mermaid render failed; keeping sources."
   artifacts:
     when: always
