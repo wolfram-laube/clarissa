@@ -216,7 +216,7 @@ class TestSPE1SimRequestConversion:
         assert g.nz == 3
 
     def test_porosity_preserved(self, spe1_case2_request):
-        assert spe1_case2_request.grid.porosity == 0.3
+        assert spe1_case2_request.grid.porosity == pytest.approx(0.3)
 
     def test_permeability_mean(self, spe1_case2_request):
         """Mean of 500, 50, 200 mD = 250 mD."""
