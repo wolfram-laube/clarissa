@@ -1,9 +1,13 @@
 # Contributing to CLARISSA
 
+> **GOV-001** — Dieses Dokument ist die CLARISSA-spezifische Implementierung des company-weiten GitLab PM Workflows.  
+> Die kanonische Governance-Entscheidung ist [BW-ADR-004](https://gitlab.com/wolfram_laube/blauweiss_llc/ops/adr/-/blob/main/BW-ADR-004-gitlab-pm-workflow.md) im ops/adr Repository.  
+> Bei Konflikten zwischen diesem Dokument und BW-ADR-004 hat **BW-ADR-004 Vorrang**.
+
 Willkommen! Dieses Dokument beschreibt den kompletten Entwicklungsworkflow für CLARISSA.
 
 > 📖 **Quick Reference:** [Workflow-Cheatsheet](docs/guides/contributing/cheatsheet.md)  
-> 🏗️ **Architektur-Entscheidung:** [ADR-001](docs/architecture/decisions/ADR-001_GitLab-PM-Workflow.md)
+> 🏗️ **Governance:** [BW-ADR-004 (GOV-001)](https://gitlab.com/wolfram_laube/blauweiss_llc/ops/adr/-/blob/main/BW-ADR-004-gitlab-pm-workflow.md) | [ADR-018](docs/architecture/adr/ADR-018-gitlab-pm-workflow.md) (deprecated, CLARISSA-local)
 
 ---
 
