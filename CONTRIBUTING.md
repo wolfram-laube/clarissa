@@ -288,6 +288,67 @@ Im Commit-Body oder MR-Description:
 
 ---
 
+
+---
+
+## Epics
+
+Epics gruppieren mehrere zusammengehörige Issues zu einer übergeordneten Initiative.
+
+### Namenskonvention
+
+```
+[EPIC] Your Epic Title            # neutral
+🔧 EPIC: Your Epic Title          # infrastructure/tooling
+🌍 EPIC: Your Epic Title          # i18n/globalization
+🔗 EPIC: Your Epic Title          # integration/communication
+```
+
+### Pflicht-Labels für Epics
+
+| Label | Pflicht | Hinweis |
+|-------|---------|---------|
+| `type::epic` | ✅ Ja | Immer |
+| `component::*` | ✅ Ja | Primäre Komponente |
+| `priority::*` | ✅ Ja | |
+| `workflow::*` | ❌ Nein | Epics haben **keinen** Workflow-Status — dieser wird via Child-Issues getrackt |
+
+### Pflicht-Struktur (Sections in dieser Reihenfolge)
+
+```markdown
+## Overview        ← Kurzbeschreibung (2-3 Sätze)
+## Business Case   ← Wer profitiert, warum?
+## Scope           ← Child-Issues als Checkbox-Liste mit #IID
+## Technical Context ← optional: Architektur, Optionen-Tabelle
+## Dependencies    ← Issues/ADRs die blockieren
+## ADR References  ← Relevante ADRs
+## Success Criteria ← Definition of Done
+---
+Created: YYYY-MM-DD
+```
+
+### Child-Issue-Verknüpfung
+
+Child-Issues referenzieren das Epic in ihrer Description:
+
+```markdown
+## Context
+Teil von Epic #XX — <Epic Title>
+```
+
+Das Epic trackt alle Child-Issues als Checkboxen im Scope-Block:
+
+```markdown
+## Scope
+- [ ] #111 — 🔍 RESEARCH: Evaluate options
+- [ ] #112 — ⚙️ FEATURE: Implement solution
+- [x] #113 — ✅ DONE: Already merged
+```
+
+### Epic-Template
+
+Verwende `.gitlab/issue_templates/epic.md` beim Erstellen neuer Epics.
+
 ## Ressourcen
 
 | Link | Beschreibung |
