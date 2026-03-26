@@ -66,12 +66,17 @@ Since GitLab Free doesn't offer native Epics, we use parent issues with `[EPIC]`
 ```markdown
 ## [EPIC] Feature Name
 
-Labels: type::epic, priority::X, workflow::in-progress
+Labels: type::epic, component::*, priority::*
+(NO workflow:: label — Epics are tracked via child issues, not workflow states)
 
 ### Child Issues
 - [ ] #XX - Subtask 1
 - [ ] #XX - Subtask 2
 ```
+
+> ⚠️ **Note:** The canonical Epic rules including label invariants are defined in
+> [BW-ADR-004 (GOV-001)](https://gitlab.com/wolfram_laube/blauweiss_llc/ops/adr/-/blob/main/BW-ADR-004-gitlab-pm-workflow.md).
+> This deprecated ADR retains the fix for historical consistency.
 
 ### Workflow Diagram
 

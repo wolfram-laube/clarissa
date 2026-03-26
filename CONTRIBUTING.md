@@ -1,9 +1,13 @@
 # Contributing to CLARISSA
 
+> **GOV-001** — Dieses Dokument ist die CLARISSA-spezifische Implementierung des company-weiten GitLab PM Workflows.  
+> Die kanonische Governance-Entscheidung ist [BW-ADR-004](https://gitlab.com/wolfram_laube/blauweiss_llc/ops/adr/-/blob/main/BW-ADR-004-gitlab-pm-workflow.md) im ops/adr Repository *(private — Zugriff nur für Blauweiss LLC Team-Mitglieder)*.  
+> Bei Konflikten zwischen diesem Dokument und BW-ADR-004 hat **BW-ADR-004 Vorrang**.
+
 Willkommen! Dieses Dokument beschreibt den kompletten Entwicklungsworkflow für CLARISSA.
 
 > 📖 **Quick Reference:** [Workflow-Cheatsheet](docs/guides/contributing/cheatsheet.md)  
-> 🏗️ **Architektur-Entscheidung:** [ADR-001](docs/architecture/decisions/ADR-001_GitLab-PM-Workflow.md)
+> 🏗️ **Governance:** [BW-ADR-004 (GOV-001)](https://gitlab.com/wolfram_laube/blauweiss_llc/ops/adr/-/blob/main/BW-ADR-004-gitlab-pm-workflow.md) | [ADR-018](docs/architecture/adr/ADR-018-gitlab-pm-workflow.md) (deprecated, CLARISSA-local)
 
 ---
 
@@ -288,6 +292,67 @@ Im Commit-Body oder MR-Description:
 
 ---
 
+
+---
+
+## Epics
+
+Epics gruppieren mehrere zusammengehörige Issues zu einer übergeordneten Initiative.
+
+### Namenskonvention
+
+```
+[EPIC] Your Epic Title            # neutral
+🔧 EPIC: Your Epic Title          # infrastructure/tooling
+🌍 EPIC: Your Epic Title          # i18n/globalization
+🔗 EPIC: Your Epic Title          # integration/communication
+```
+
+### Pflicht-Labels für Epics
+
+| Label | Pflicht | Hinweis |
+|-------|---------|---------|
+| `type::epic` | ✅ Ja | Immer |
+| `component::*` | ✅ Ja | Primäre Komponente |
+| `priority::*` | ✅ Ja | |
+| `workflow::*` | ❌ Nein | Epics haben **keinen** Workflow-Status — dieser wird via Child-Issues getrackt |
+
+### Pflicht-Struktur (Sections in dieser Reihenfolge)
+
+```markdown
+## Overview        ← Kurzbeschreibung (2-3 Sätze)
+## Business Case   ← Wer profitiert, warum?
+## Scope           ← Child-Issues als Checkbox-Liste mit #IID
+## Technical Context ← optional: Architektur, Optionen-Tabelle
+## Dependencies    ← Issues/ADRs die blockieren
+## ADR References  ← Relevante ADRs
+## Success Criteria ← Definition of Done
+---
+Created: YYYY-MM-DD
+```
+
+### Child-Issue-Verknüpfung
+
+Child-Issues referenzieren das Epic in ihrer Description:
+
+```markdown
+## Context
+Teil von Epic #XX — <Epic Title>
+```
+
+Das Epic trackt alle Child-Issues als Checkboxen im Scope-Block:
+
+```markdown
+## Scope
+- [ ] #111 — 🔍 RESEARCH: Evaluate options
+- [ ] #112 — ⚙️ FEATURE: Implement solution
+- [x] #113 — ✅ DONE: Already merged
+```
+
+### Epic-Template
+
+Verwende `.gitlab/issue_templates/epic.md` beim Erstellen neuer Epics.
+
 ## Ressourcen
 
 | Link | Beschreibung |
@@ -296,7 +361,7 @@ Im Commit-Body oder MR-Description:
 | [All Issues](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/issues) | Issue-Liste |
 | [Merge Requests](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/merge_requests) | Offene MRs |
 | [Pipelines](https://gitlab.com/wolfram_laube/blauweiss_llc/clarissa/-/pipelines) | CI/CD Status |
-| [ADR-001](docs/architecture/decisions/ADR-001_GitLab-PM-Workflow.md) | Workflow-Entscheidung |
+| [ADR-018](docs/architecture/adr/ADR-018-gitlab-pm-workflow.md) | Workflow-Entscheidung (deprecated, siehe BW-ADR-004) |
 | [Cheatsheet](docs/guides/contributing/cheatsheet.md) | Quick Reference |
 
 ---

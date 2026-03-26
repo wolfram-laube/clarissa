@@ -1,64 +1,58 @@
 <!-- 
   Epic Issue Template
   Use this for larger initiatives spanning multiple issues
-  Naming: "[EPIC] Your Epic Title"
+  
+  Naming convention:
+    [EPIC] Your Epic Title          (neutral)
+    🔧 EPIC: Your Epic Title        (infrastructure)
+    🌍 EPIC: Your Epic Title        (i18n/global)
+    🔗 EPIC: Your Epic Title        (integration/communication)
+  
+  Required Labels:
+    type::epic          (mandatory)
+    component::*        (mandatory, pick the primary component)
+    priority::*         (mandatory)
+    NO workflow:: label (Epics are tracked via child issues, not workflow states)
 -->
 
-## Epic Overview
+## Overview
 
 <!-- Describe the initiative in 2-3 sentences -->
 
-## Goals
+## Business Case
 
-- [ ] Goal 1
-- [ ] Goal 2
-- [ ] Goal 3
+<!-- Who benefits and why? Use team member context if relevant -->
 
-## Child Issues
+## Scope
 
-<!-- Update this table as you create child issues -->
+<!-- List deliverables as child issue references once created -->
 
-| Issue | Description | Status | Weight |
-|-------|-------------|--------|--------|
-| #XX | Child issue 1 | 🔴 Backlog | X |
-| #YY | Child issue 2 | 🔴 Backlog | Y |
-| #ZZ | Child issue 3 | 🔴 Backlog | Z |
-
-**Status Legend:** 🔴 Backlog | 🟡 In Progress | 🟢 Review | ✅ Done
-
-## Dependencies
-
-<!-- Document which issues block others -->
-
-```
-#XX ──blocks──▶ #YY ──blocks──▶ #ZZ
-```
-
-## Timeline
-
-| Milestone | Target Date | Status |
-|-----------|-------------|--------|
-| Phase 1 | YYYY-MM-DD | 🔴 Not Started |
-| Phase 2 | YYYY-MM-DD | 🔴 Not Started |
-| Completion | YYYY-MM-DD | 🔴 Not Started |
+- [ ] #XX — 🔍 RESEARCH: ...
+- [ ] #YY — ⚙️ FEATURE: ...
+- [ ] #ZZ — 🧪 TEST: ...
+- [ ] #WW — 📖 DOCS: ...
 
 ## Technical Context
 
-<!-- Optional: Architecture decisions, tech stack, constraints -->
+<!-- Optional: Architecture decisions, constraints, options table -->
+
+## Dependencies
+
+<!-- Document which issues or ADRs this epic depends on -->
+
+## ADR References
+
+<!-- Link relevant ADRs -->
+
+- ADR-0XX (...)
 
 ## Success Criteria
 
-<!-- Define when this Epic is "done" -->
-
-- [ ] Criterion 1
-- [ ] Criterion 2
 - [ ] All child issues closed
+- [ ] ADR created and merged (if applicable)  
 - [ ] Documentation updated
 
-## Notes
-
-<!-- Any additional context -->
-
 ---
+Created: YYYY-MM-DD
 
-/label ~"type::feature" ~"priority::high" ~"workflow::backlog"
+/label ~"type::epic" ~"component::infrastructure" ~"priority::medium"
