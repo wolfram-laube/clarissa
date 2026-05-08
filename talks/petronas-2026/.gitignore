@@ -1,0 +1,32 @@
+# Generated bundles do NOT live in git — see README.md "Bundle deliverables".
+# This .gitignore is a local belt-and-braces alongside any repo-wide rules.
+
+# PPTX/DOCX outputs
+*.pptx
+*.docx
+
+# HTML players (typically large; lives in Drive)
+*_player.html
+player.html
+
+# PDFs (alternate output)
+*.pdf
+
+# Audio
+*.mp3
+*.wav
+
+# Concept imagery (DALL-E outputs) — checked-in are only the *prompts*,
+# not the images themselves.
+concept_images/
+*.png
+*.jpg
+*.jpeg
+# But preserve diagram renders if we ever check them in (we currently don't)
+!diagrams/*.png
+!diagrams/*.svg
+
+# Stage-output scratch
+build/
+out/
+stage*/

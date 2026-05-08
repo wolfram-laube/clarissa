@@ -1,0 +1,9 @@
+Concretely. For early-career engineers, the syntactic friction comes off the deck-construction work, and the learning curve becomes a learning curve about reservoir physics, not about Eclipse keywords. The intuition still has to be developed — the agent does not replace that — but the engineer iterates on scenarios, not on syntax.
+
+For teams without dedicated specialists, the cost structure changes. Studies that previously did not justify a specialist's time become viable for the asset team's existing engineers.
+
+For uncertainty workflows, generating dozens of parameter-perturbed decks for a Monte Carlo study is the kind of mechanical work nobody should be doing by hand. Clarissa generates the variations, runs them, assembles the results. The engineer chooses the parameters and interprets the output. That is automation of the secretarial work between judgment and result, not automation of judgment itself.
+
+History-matching — the inversion problem — is a separate workflow we are exploring in subsequent work. Clarissa today is forward simulation.
+
+O P M Flow being open-source matters operationally because it removes the licensing barrier when Clarissa gets deployed across a business unit. That is not a small thing.

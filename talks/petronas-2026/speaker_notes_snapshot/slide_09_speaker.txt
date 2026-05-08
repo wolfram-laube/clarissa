@@ -1,0 +1,9 @@
+A few things Clarissa does not do, because honesty about limits is how this kind of system earns trust.
+
+It does not replace senior reservoir engineering judgment. The physics solver catches a defined class of errors. It does not catch scal curves that are formally valid but lithologically wrong. Engineering review stays in the loop, and the audit trail is designed to make that review fast — not to eliminate it.
+
+It does not history-match. The inversion problem is a separate workflow.
+
+It does not currently couple to surface-network simulators or handle proprietary, non-Eclipse-compatible keywords. Each is a known extension point, not a fundamental limitation.
+
+And it does not handle data confidentiality on its own. A deployment must run inside the operator's compute environment, against the operator's data. The architecture supports that; the deployment work is real and not waved away.

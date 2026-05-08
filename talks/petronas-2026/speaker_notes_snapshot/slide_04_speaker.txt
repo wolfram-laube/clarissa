@@ -1,0 +1,7 @@
+The architecture is neurosymbolic — combining a learned, neural component with rule-based, symbolic components. We did not pick this pattern because it is fashionable. We picked it because the alternative — throwing a prompt at a language model and running whatever comes out — does not work.
+
+Language models hallucinate fluently in any domain where the validation signal is weaker than the language signal. Reservoir physics has very strong validation signals — material balance, monotonicity, endpoint consistency — that are entirely outside the model's training distribution. The model has read papers about S W O F tables. It has not run an O P M Flow simulation and watched it diverge.
+
+So the L L M proposes. The physics solver — hand-coded rules, no learning — disposes. O P M Flow executes. Diagnostics from execution feed back into the loop. The harness is the agent; the components are its tools.
+
+This is the same pattern that succeeded in mathematical reasoning systems like Alpha Proof and Alpha Geometry. It is the only pattern we have seen survive contact with real reservoir engineering work.

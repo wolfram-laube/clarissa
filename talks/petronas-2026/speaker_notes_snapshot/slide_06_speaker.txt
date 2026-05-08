@@ -1,0 +1,11 @@
+Any new reservoir simulation tool earns its first credibility by reproducing the S P E Comparative Solution Projects. We tested Clarissa against three.
+
+S P E 1 — Odeh 1981 — is the canonical "is your simulator alive" test. Ten by ten by three, gas injection in the top, production from the bottom, opposite corners.
+
+S P E 5 — Killough and Kossack 1987 — is a seven-by-seven-by-three miscible flood, water-alternating-gas at corner one-one-one, three injection scenarios.
+
+S P E 9 — Killough 1995 — is the stress test. Twenty-four by twenty-five by fifteen, ten-degree dip, twenty-five producers, capillary pressure with rapid variation under small saturation changes. Not a toy.
+
+Critically: Clarissa was given the published text and tabular specifications, not existing input files. It generated the decks from scratch. The decks ran, and the well responses — bottom-hole pressures, rates, G O R — matched the published benchmark spread.
+
+This matters for two reasons. First: public-record industry-standard cases reproduce. Second: the self-repair loop converges on cases of meaningful complexity, including S P E 9.
