@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Deck Provenance SHA256 Manifest (#148)** (2026-05-14)
+  - Documented `tests/fixtures/decks/` provenance with verifiable SHA256 hashes
+  - Manifest covers all vendored fixtures (SPE1, SPE9) and most-used submodule decks (SPE3, SPE5, SPE10 M1/M2, Norne, Sleipner)
+  - Records the exact OPM/opm-data submodule pin (commit `eaa22616`, 2023-05-05) for traceability
+  - Added policy for handling received deck files: verify SHA256, file modified variants as `_VARIANT.DATA`, do not silently overwrite canonical versions
+  - Triggered by an incident where a forwarded `SPE5CASE1.DATA` was missing 2 WAG half-cycles vs the canonical upstream version
+
 - **Voice Roundtrip Notebook (17)** (2026-01-26)
   - Cross-platform voice input testing notebook for local machines
   - Audio recording via `sounddevice` (Mac/Windows/Linux)
