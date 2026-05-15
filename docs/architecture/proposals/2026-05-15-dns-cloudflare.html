@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DNS Strategy Proposal — Cloudflare Migration for CLARISSA</title>
+<style>
+@page {
+  size: A4;
+  margin: 22mm 18mm 22mm 18mm;
+  @bottom-center {
+    content: "Page " counter(page) " of " counter(pages);
+    font-family: 'Helvetica', 'Arial', sans-serif;
+    font-size: 8.5pt;
+    color: #666;
+  }
+}
+:root {
+  --c-text: #1a1a1a;
+  --c-muted: #555;
+  --c-rule: #d0d0d0;
+  --c-accent: #1f4068;
+  --c-accent-soft: #e8eef5;
+  --c-code-bg: #f5f5f5;
+  --c-table-head: #eef2f7;
+  --c-table-stripe: #fafbfc;
+}
+html { font-size: 11pt; }
+body {
+  font-family: 'Charter', 'Georgia', 'Times New Roman', serif;
+  color: var(--c-text);
+  line-height: 1.5;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 24px 28px;
+  background: #fff;
+}
+h1, h2, h3, h4 {
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  color: var(--c-accent);
+  line-height: 1.25;
+  page-break-after: avoid;
+}
+h1 {
+  font-size: 20pt;
+  border-bottom: 2px solid var(--c-accent);
+  padding-bottom: 6px;
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+h2 {
+  font-size: 15pt;
+  margin-top: 28px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--c-rule);
+  padding-bottom: 4px;
+}
+h3 {
+  font-size: 12.5pt;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  color: #2a4a6e;
+}
+h4 {
+  font-size: 11pt;
+  margin-top: 14px;
+  margin-bottom: 6px;
+  color: #3a5a7e;
+}
+h3:where(:not(:first-child)) { margin-top: 18px; }
+p { margin: 0.6em 0; }
+strong { color: #000; }
+a {
+  color: var(--c-accent);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(31, 64, 104, 0.3);
+}
+a:hover { border-bottom-color: var(--c-accent); }
+code {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Menlo', 'Consolas', monospace;
+  font-size: 0.88em;
+  background: var(--c-code-bg);
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid #e8e8e8;
+}
+pre {
+  background: var(--c-code-bg);
+  border: 1px solid #e0e0e0;
+  border-left: 3px solid var(--c-accent);
+  padding: 10px 14px;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 9.5pt;
+  line-height: 1.45;
+  page-break-inside: avoid;
+}
+pre code { background: transparent; border: none; padding: 0; font-size: inherit; }
+ul, ol { margin: 0.5em 0; padding-left: 1.6em; }
+li { margin: 0.2em 0; }
+li > ul, li > ol { margin-top: 0.2em; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 14px 0;
+  font-size: 10pt;
+  page-break-inside: avoid;
+}
+thead { background: var(--c-table-head); }
+th, td {
+  border: 1px solid var(--c-rule);
+  padding: 7px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  font-weight: 600;
+  color: var(--c-accent);
+}
+tbody tr:nth-child(even) { background: var(--c-table-stripe); }
+hr {
+  border: none;
+  border-top: 1px solid var(--c-rule);
+  margin: 24px 0;
+}
+@media print {
+  body { padding: 0; }
+}
+body > p:first-of-type {
+  color: var(--c-muted);
+  font-size: 10pt;
+  line-height: 1.6;
+  border: 1px solid var(--c-rule);
+  background: var(--c-accent-soft);
+  padding: 10px 14px;
+  border-radius: 4px;
+}
+</style>
+</head>
+<body>
+<h1 id="dns-strategy-proposal-cloudflare-migration-for-clarissa-blauweiss-edvcom">DNS Strategy Proposal — Cloudflare Migration for CLARISSA &amp; blauweiss-edv.com</h1>
+<p><strong>Proposal · Vorschlag</strong>
+<strong>Author:</strong> Wolfram Laube (blauweiss EDV LLC) with Claude (Anthropic)
+<strong>Date:</strong> 2026-05-15
+<strong>Status:</strong> Draft for review — Mike, Ian, Douglas
+<strong>Related:</strong> GitLab Issue <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/issues/149">CLARISSA#149</a> — Custom Domain &amp; Marketing Landing</p>
+<hr />
+<h2 id="1-executive-summary-zusammenfassung">1. Executive Summary · Zusammenfassung</h2>
+<h3 id="english">English</h3>
+<p>CLARISSA currently has no presentable public face. The GitLab Pages URL <code>irena-40cc50.gitlab.io</code> is not memorable and not suited for marketing or customer-facing use. We propose to expose CLARISSA at <code>clarissa.blauweiss-edv.com</code>, backed by Cloudflare DNS for API-driven automation.</p>
+<p>The migration is structured in <strong>three phases</strong>, each independently valuable and reversible:</p>
+<ol>
+<li><strong>Phase 1 (now):</strong> Delegate only the <code>clarissa.*</code> subzone to Cloudflare. The main <code>blauweiss-edv.com</code> zone stays at IONOS. Zero risk to existing mail and web hosting.</li>
+<li><strong>Phase 2 (3–12 months, when needed):</strong> Migrate the full <code>blauweiss-edv.com</code> zone to Cloudflare once mail and web hosting have either been migrated to modern providers, or have been verified as importable cleanly.</li>
+<li><strong>Phase 3 (optional, long-term):</strong> Transfer domain registration to Cloudflare Registrar, codify DNS-as-code via Terraform.</li>
+</ol>
+<h3 id="deutsch">Deutsch</h3>
+<p>CLARISSA hat aktuell keine präsentable öffentliche Adresse. Die GitLab-Pages-URL <code>irena-40cc50.gitlab.io</code> ist nicht merkbar und für Marketing oder Kundenkontakt ungeeignet. Wir schlagen vor, CLARISSA unter <code>clarissa.blauweiss-edv.com</code> erreichbar zu machen, mit Cloudflare als DNS-Provider für API-gestützte Automatisierung.</p>
+<p>Die Migration ist in <strong>drei Phasen</strong> strukturiert, jede für sich nutzbar und reversibel:</p>
+<ol>
+<li><strong>Phase 1 (jetzt):</strong> Nur die Subzone <code>clarissa.*</code> an Cloudflare delegieren. Die Hauptzone <code>blauweiss-edv.com</code> bleibt bei IONOS. Null Risiko für bestehende Mail und Webhosting.</li>
+<li><strong>Phase 2 (3–12 Monate, bei Bedarf):</strong> Vollmigration der <code>blauweiss-edv.com</code>-Zone zu Cloudflare, sobald Mail und Webhosting entweder zu modernen Anbietern umgezogen oder als sauber importierbar verifiziert wurden.</li>
+<li><strong>Phase 3 (optional, langfristig):</strong> Domain-Registrierung zu Cloudflare Registrar transferieren, DNS-as-Code via Terraform.</li>
+</ol>
+<hr />
+<h2 id="2-problem-statement-problembeschreibung">2. Problem Statement · Problembeschreibung</h2>
+<h3 id="english_1">English</h3>
+<p><strong>Current situation:</strong>
+- CLARISSA is served via GitLab Pages at <code>irena-40cc50.gitlab.io</code>, a system-generated URL that cannot be customized.
+- The 8-character hash makes the URL unmemorable, hard to read aloud, and inappropriate for SPE Europe 2026 references, business cards, email signatures, or any public-facing context.
+- The <code>blauweiss-edv.com</code> domain is registered at IONOS (1&amp;1), where DNS is also hosted. IONOS does not offer a public DNS API for standard accounts, requiring manual web-UI clicks for every DNS change.
+- Mail (<code>@blauweiss-edv.com</code>) is actively used and hosted at IONOS. Disruption is unacceptable.</p>
+<p><strong>Why this matters now:</strong>
+- Issue #149 commits to a marketing-ready landing page as part of CLARISSA's public surface.
+- Future projects under the same organization (Profile Service, Dialectic AI, AppTrack) will benefit from a DNS workflow that can be automated.</p>
+<h3 id="deutsch_1">Deutsch</h3>
+<p><strong>Aktuelle Situation:</strong>
+- CLARISSA läuft auf GitLab Pages unter <code>irena-40cc50.gitlab.io</code>, einer system-generierten URL, die nicht angepasst werden kann.
+- Der 8-Zeichen-Hash macht die URL nicht merkbar, schwer mündlich kommunizierbar und unpassend für SPE Europe 2026, Visitenkarten, Email-Signaturen oder jeden öffentlichen Kontext.
+- Die Domain <code>blauweiss-edv.com</code> ist bei IONOS (1&amp;1) registriert, DNS liegt ebenfalls dort. IONOS bietet keine öffentliche DNS-API für Standard-Accounts; jede DNS-Änderung erfordert manuelle Web-UI-Klicks.
+- Mail (<code>@blauweiss-edv.com</code>) wird produktiv genutzt und liegt bei IONOS. Eine Unterbrechung ist nicht akzeptabel.</p>
+<p><strong>Warum jetzt:</strong>
+- Issue #149 verpflichtet uns auf eine marketing-fähige Landing-Page als Teil von CLARISSAs öffentlicher Präsenz.
+- Künftige Projekte unter derselben Organisation (Profile Service, Dialectic AI, AppTrack) profitieren von einem automatisierbaren DNS-Workflow.</p>
+<hr />
+<h2 id="3-why-cloudflare-warum-cloudflare">3. Why Cloudflare · Warum Cloudflare</h2>
+<h3 id="english_2">English</h3>
+<p>Three categories of reasons, ordered by relevance to our context:</p>
+<p><strong>3.1 — API Access (the actual trigger)</strong></p>
+<p>IONOS has no open DNS API for standard webhosting accounts. Every DNS record change requires manual web-UI login and clicks. Cloudflare offers a mature REST API addressable with a scoped API token.</p>
+<p>Practical impact:
+- <em>Current ask</em> (creating the <code>clarissa</code> subdomain): IONOS = manual clicks. Cloudflare = two API calls by Claude.
+- <em>Future DNS changes</em> (more subdomains, third-party verifications, certificate challenges): IONOS = manual every time. Cloudflare = automated, documented per issue.
+- <em>Infrastructure-as-Code possible:</em> DNS records can live in a Terraform/Pulumi file, reviewed via MR, with full audit history. Not possible at IONOS.</p>
+<p>This is the only reason that genuinely matters for our current context. The other two categories are nice-to-haves.</p>
+<p><strong>3.2 — Free Bundled Features (optional, ignorable)</strong></p>
+<p>Cloudflare's free plan includes:
+- <em>CDN caching</em> for static content (relevant for GitLab Pages if traffic grows)
+- <em>DDoS protection</em> at L3/L4 (overkill for a demo page, possibly relevant later)
+- <em>Privacy-respecting analytics</em> (no cookies, GDPR-friendly)
+- <em>Page Rules / Redirects</em> (e.g. <code>www.clarissa.*</code> → <code>clarissa.*</code> without code)
+- <em>Workers</em> (edge serverless functions — relevant medium-term for CLARISSA API edge caching)
+- <em>R2 object storage</em> (S3-compatible, no egress fees — backup option)</p>
+<p>We don't need these. But they exist for free if needs arise. IONOS either lacks them or charges for them.</p>
+<p><strong>3.3 — DNS Performance (technically true, practically irrelevant)</strong></p>
+<p>Cloudflare's anycast nameserver network responds under 20ms globally. IONOS responds similarly fast in Europe, slower overseas. Negligible for our Europe-focused use case.</p>
+<p><strong>What Cloudflare does <em>not</em> provide:</strong></p>
+<ul>
+<li><strong>Mail hosting.</strong> Cloudflare is not a mail provider. <code>@blauweiss-edv.com</code> mailboxes stay at IONOS regardless of DNS hosting. (Cloudflare's "Email Routing" is forwarding only, not a full mailbox replacement.)</li>
+<li><strong>Classical webhosting.</strong> Cloudflare has Pages (static) and Workers (serverless), but no PHP/MySQL hosting. If <code>blauweiss-edv.com</code> ever needs dynamic hosting, a separate host (IONOS, Hetzner, etc.) remains necessary.</li>
+<li><strong>.at domain registration.</strong> Cloudflare Registrar supports a limited TLD set. <code>.com</code>/<code>.de</code>/<code>.dev</code>/<code>.ai</code> yes, <code>.at</code> no.</li>
+</ul>
+<h3 id="deutsch_2">Deutsch</h3>
+<p>Drei Kategorien von Gründen, nach Relevanz für unseren Kontext sortiert:</p>
+<p><strong>3.1 — API-Zugriff (der eigentliche Auslöser)</strong></p>
+<p>IONOS hat keine offene DNS-API für Standard-Webhosting-Accounts. Jede DNS-Record-Änderung erfordert manuelles Einloggen ins Web-UI. Cloudflare bietet eine ausgereifte REST-API, ansprechbar mit einem berechtigungsbeschränkten API-Token.</p>
+<p>Praktische Auswirkungen:
+- <em>Aktuelle Anforderung</em> (Anlegen der <code>clarissa</code>-Subdomain): IONOS = manuelle Klicks. Cloudflare = zwei API-Calls durch Claude.
+- <em>Künftige DNS-Änderungen</em> (weitere Subdomains, Drittanbieter-Verifizierungen, Zertifikats-Challenges): IONOS = jedes Mal manuell. Cloudflare = automatisiert, per Issue dokumentiert.
+- <em>Infrastructure-as-Code möglich:</em> DNS-Records können in einem Terraform/Pulumi-File leben, per MR reviewt, mit vollständiger Audit-Historie. Bei IONOS unmöglich.</p>
+<p>Das ist der einzige Grund, der für unseren aktuellen Kontext wirklich zählt. Die anderen zwei Kategorien sind Nice-to-haves.</p>
+<p><strong>3.2 — Kostenlose Beilagen-Features (optional, ignorierbar)</strong></p>
+<p>Cloudflares Free Plan beinhaltet:
+- <em>CDN-Caching</em> für statische Inhalte (relevant für GitLab Pages bei wachsendem Traffic)
+- <em>DDoS-Schutz</em> auf L3/L4 (übertrieben für eine Demo-Page, mittelfristig vielleicht relevant)
+- <em>Datenschutz-konforme Analytics</em> (ohne Cookies, DSGVO-freundlich)
+- <em>Page Rules / Redirects</em> (z.B. <code>www.clarissa.*</code> → <code>clarissa.*</code> ohne Code)
+- <em>Workers</em> (Edge-Serverless-Funktionen — mittelfristig spannend für CLARISSA-API-Edge-Caching)
+- <em>R2 Object Storage</em> (S3-kompatibel, ohne Egress-Kosten — Backup-Option)</p>
+<p>Brauchen wir nicht. Aber sie sind kostenlos verfügbar, falls Bedarf entsteht. IONOS hat sie entweder gar nicht oder als kostenpflichtige Add-ons.</p>
+<p><strong>3.3 — DNS-Performance (technisch wahr, praktisch egal)</strong></p>
+<p>Cloudflares Anycast-Nameserver-Netz antwortet weltweit unter 20ms. IONOS antwortet in Europa ähnlich schnell, in Übersee langsamer. Vernachlässigbar für unseren Europa-fokussierten Use-Case.</p>
+<p><strong>Was Cloudflare <em>nicht</em> bietet:</strong></p>
+<ul>
+<li><strong>Mail-Hosting.</strong> Cloudflare ist kein Mail-Provider. <code>@blauweiss-edv.com</code>-Postfächer bleiben bei IONOS, egal wo das DNS liegt. (Cloudflares „Email Routing" ist nur Forwarding, kein vollständiger Mail-Ersatz.)</li>
+<li><strong>Klassisches Webhosting.</strong> Cloudflare hat Pages (statisch) und Workers (serverless), aber kein PHP/MySQL-Hosting. Falls <code>blauweiss-edv.com</code> jemals dynamisches Hosting braucht, bleibt ein separater Hoster (IONOS, Hetzner, etc.) nötig.</li>
+<li><strong>.at-Domain-Registrierung.</strong> Cloudflare Registrar unterstützt ein begrenztes TLD-Set. <code>.com</code>/<code>.de</code>/<code>.dev</code>/<code>.ai</code> ja, <code>.at</code> nicht.</li>
+</ul>
+<hr />
+<h2 id="4-migration-strategy-three-phases-migrationsstrategie-drei-phasen">4. Migration Strategy — Three Phases · Migrationsstrategie — Drei Phasen</h2>
+<h3 id="english_3">English</h3>
+<h4 id="phase-1-now-subzone-delegation-for-clarissa-demo">Phase 1 (now): Subzone Delegation for CLARISSA Demo</h4>
+<p><strong>Goal:</strong> <code>clarissa.blauweiss-edv.com</code> live as the demo URL, zero risk to existing infrastructure.</p>
+<p><strong>Steps:</strong>
+1. Create Cloudflare account, add subzone <code>clarissa.blauweiss-edv.com</code> (not the apex).
+2. At IONOS: one-time addition of two NS records pointing the subzone to Cloudflare nameservers. This is the only step requiring IONOS access.
+3. At Cloudflare (via API): set CNAME <code>clarissa</code> → <code>irena-40cc50.gitlab.io</code> and TXT record for GitLab Pages domain verification.
+4. GitLab Pages: configure custom domain. Let's Encrypt certificate is automatically issued.
+5. Result: demo page live at clean URL. IONOS practically not needed for CLARISSA after this point.</p>
+<p><strong>Risk:</strong> minimal. Existing mail and main website remain untouched. Safety valve: if anything fails, deleting the NS records at IONOS removes Cloudflare's authority over the subzone — full rollback in one record removal.</p>
+<p><strong>IONOS dependency:</strong> one-time, ~5 minutes of clicks. After Phase 1, IONOS access is not needed for CLARISSA-related work.</p>
+<h4 id="phase-2-312-months-when-needed-full-zone-migration">Phase 2 (3–12 months, when needed): Full Zone Migration</h4>
+<p><strong>Triggers</strong> (any one is sufficient):
+- We want more subdomains for other projects and find IONOS clicking tedious.
+- We want to migrate mail away from IONOS (to Google Workspace, Microsoft 365, Migadu, Fastmail, etc. — any provider with better spam filtering and modern IMAP).
+- We want to migrate the main website <code>blauweiss-edv.com</code> from IONOS shared hosting to something modern (Cloudflare Pages, Vercel, Netlify, own VPS).</p>
+<p><strong>Steps:</strong>
+1. <em>If mail is migrated:</em> first set up new mail provider, configure mailboxes, sync messages. Obtain MX/SPF/DKIM/DMARC records from new provider.
+2. <em>If website is migrated:</em> set up new hosting, deploy content, verify under temporary URL.
+3. At Cloudflare: create the main zone <code>blauweiss-edv.com</code>, add all records (from IONOS scan or new mail/web provider).
+4. Verify via direct Cloudflare-NS query before flipping NS at IONOS.
+5. At IONOS: switch nameservers to Cloudflare.
+6. Existing <code>clarissa.*</code> subzone merges seamlessly into the main zone.</p>
+<p><strong>Risk:</strong> well-controlled, because mail and website are not migrated <em>simultaneously</em> with DNS. The actual heavy lifting happens <em>before</em> the DNS switch. The DNS switch is then "flip a switch", not "perform open-heart surgery".</p>
+<h4 id="phase-3-optional-long-term-optimizations">Phase 3 (optional, long-term): Optimizations</h4>
+<ul>
+<li>Transfer domain registration from IONOS to Cloudflare Registrar (saves ~5 €/year, one fewer vendor; 60-day transfer lock applies).</li>
+<li>Codify DNS records as Terraform/Pulumi — records in Git, reviews via MR.</li>
+<li>Cloudflare Workers for edge API caching if CLARISSA-API traffic grows.</li>
+<li>Page Rules for <code>www.</code> → apex redirects, other routing policies.</li>
+</ul>
+<h3 id="deutsch_3">Deutsch</h3>
+<h4 id="phase-1-jetzt-subzone-delegation-fur-clarissa-demo">Phase 1 (jetzt): Subzone-Delegation für CLARISSA-Demo</h4>
+<p><strong>Ziel:</strong> <code>clarissa.blauweiss-edv.com</code> als Demo-URL live, null Risiko für bestehende Infrastruktur.</p>
+<p><strong>Schritte:</strong>
+1. Cloudflare-Account anlegen, Subzone <code>clarissa.blauweiss-edv.com</code> hinzufügen (nicht die Apex-Domain).
+2. Bei IONOS: einmaliges Anlegen von zwei NS-Records, die die Subzone auf Cloudflare-Nameserver zeigen. Das ist der einzige Schritt, der IONOS-Zugang braucht.
+3. Bei Cloudflare (via API): CNAME <code>clarissa</code> → <code>irena-40cc50.gitlab.io</code> und TXT-Record für GitLab-Pages-Domain-Verifizierung setzen.
+4. GitLab Pages: Custom Domain konfigurieren. Let's-Encrypt-Zertifikat wird automatisch ausgestellt.
+5. Resultat: Demo-Page live unter sauberer URL. IONOS praktisch nicht mehr nötig für CLARISSA nach diesem Punkt.</p>
+<p><strong>Risiko:</strong> minimal. Bestehende Mail und Hauptwebseite bleiben unangetastet. Sicherheitsventil: wenn etwas fehlschlägt, entfernt das Löschen der NS-Records bei IONOS Cloudflares Autorität über die Subzone — vollständiger Rollback durch eine einzige Record-Entfernung.</p>
+<p><strong>IONOS-Abhängigkeit:</strong> einmalig, ~5 Minuten Klicks. Nach Phase 1 ist kein IONOS-Zugang mehr nötig für CLARISSA-bezogene Arbeit.</p>
+<h4 id="phase-2-312-monate-bei-bedarf-vollmigration-der-zone">Phase 2 (3–12 Monate, bei Bedarf): Vollmigration der Zone</h4>
+<p><strong>Auslöser</strong> (einer reicht):
+- Wir wollen weitere Subdomains für andere Projekte und merken, dass IONOS-Klickerei nervt.
+- Wir wollen Mail von IONOS wegmigrieren (zu Google Workspace, Microsoft 365, Migadu, Fastmail, etc. — irgendein Provider mit besseren Spam-Filtern und modernem IMAP).
+- Wir wollen die Hauptwebseite <code>blauweiss-edv.com</code> von IONOS-Shared-Hosting auf was Modernes umstellen (Cloudflare Pages, Vercel, Netlify, eigener VPS).</p>
+<p><strong>Schritte:</strong>
+1. <em>Falls Mail migriert wird:</em> zuerst neuen Mail-Provider aufsetzen, Postfächer einrichten, Mails synchronisieren. MX/SPF/DKIM/DMARC-Records vom neuen Provider holen.
+2. <em>Falls Webseite migriert wird:</em> neues Hosting aufsetzen, Inhalte deployen, unter temporärer URL verifizieren.
+3. Bei Cloudflare: Hauptzone <code>blauweiss-edv.com</code> anlegen, alle Records eintragen (von IONOS-Scan oder neuem Mail/Web-Provider).
+4. Via direkter Cloudflare-NS-Query verifizieren, <em>bevor</em> NS bei IONOS umgestellt wird.
+5. Bei IONOS: Nameserver auf Cloudflare umstellen.
+6. Bestehende <code>clarissa.*</code>-Subzone integriert sich nahtlos in die Hauptzone.</p>
+<p><strong>Risiko:</strong> gut kontrolliert, weil Mail und Webseite nicht <em>gleichzeitig</em> mit DNS migriert werden. Die eigentliche Schwerarbeit passiert <em>vor</em> dem DNS-Switch. Der DNS-Switch ist dann „Schalter umlegen", nicht „Operation am offenen Herzen".</p>
+<h4 id="phase-3-optional-langfristig-optimierungen">Phase 3 (optional, langfristig): Optimierungen</h4>
+<ul>
+<li>Domain-Registrierung von IONOS zu Cloudflare Registrar transferieren (spart ~5 €/Jahr, ein Anbieter weniger; 60-Tage-Transfer-Sperre beachten).</li>
+<li>DNS-Records als Terraform/Pulumi codifizieren — Records in Git, Reviews via MR.</li>
+<li>Cloudflare Workers für Edge-API-Caching, falls CLARISSA-API-Traffic wächst.</li>
+<li>Page Rules für <code>www.</code> → Apex-Redirects, andere Routing-Politik.</li>
+</ul>
+<hr />
+<h2 id="5-risk-analysis-risikoanalyse">5. Risk Analysis · Risikoanalyse</h2>
+<h3 id="english_4">English</h3>
+<h4 id="mail-continuity">Mail continuity</h4>
+<p>The mail account <code>@blauweiss-edv.com</code> is in active use. Disruption is unacceptable. Risk assessment by phase:</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Mail risk</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase 1 (subzone)</td>
+<td><strong>None</strong></td>
+<td>IONOS zone untouched. Subzone only handles <code>clarissa.*</code> subdomain.</td>
+</tr>
+<tr>
+<td>Phase 2 (full zone), unprepared</td>
+<td>Medium (10–20%)</td>
+<td>Cloudflare's auto-scan may miss DKIM records with unusual selector names.</td>
+</tr>
+<tr>
+<td>Phase 2 (full zone), with stop-and-verify</td>
+<td>Very low (&lt;2%)</td>
+<td>All records cross-checked between IONOS and Cloudflare before NS switch.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="verification-strategy-for-phase-2">Verification strategy for Phase 2</h4>
+<p>Cloudflare's nameservers respond to queries <em>before</em> they become authoritative for the world. This enables pre-flight verification:</p>
+<pre><code class="language-bash">dig @abby.ns.cloudflare.com MX blauweiss-edv.com
+dig @abby.ns.cloudflare.com TXT blauweiss-edv.com
+dig @abby.ns.cloudflare.com TXT _dmarc.blauweiss-edv.com
+dig @abby.ns.cloudflare.com TXT default._domainkey.blauweiss-edv.com
+</code></pre>
+<p>If Cloudflare returns the same records as IONOS would, the NS switch is safe. Claude can run this verification automatically.</p>
+<h4 id="rollback-semantics">Rollback semantics</h4>
+<ul>
+<li><strong>Phase 1 rollback:</strong> delete NS records at IONOS. Subzone authority dissolves immediately at IONOS level; propagation to resolvers takes minutes to hours depending on TTL.</li>
+<li><strong>Phase 2 rollback:</strong> switch NS back to IONOS defaults. Propagation takes 6–24 hours during which DNS answers are globally inconsistent (some resolvers still cached Cloudflare answers). Rollback is a real safety net for catastrophic errors, not a casual "let me think about it" mechanism.</li>
+</ul>
+<h4 id="vendor-lock-in">Vendor lock-in</h4>
+<p>Cloudflare zones are exportable in BIND format. Migrating away to another DNS provider is straightforward. Cloudflare is not a sticky lock-in.</p>
+<h3 id="deutsch_4">Deutsch</h3>
+<h4 id="mail-kontinuitat">Mail-Kontinuität</h4>
+<p>Der Mail-Account <code>@blauweiss-edv.com</code> wird produktiv genutzt. Eine Unterbrechung ist nicht akzeptabel. Risikobewertung pro Phase:</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Mail-Risiko</th>
+<th>Grund</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase 1 (Subzone)</td>
+<td><strong>Null</strong></td>
+<td>IONOS-Zone unangetastet. Subzone behandelt nur die <code>clarissa.*</code>-Subdomain.</td>
+</tr>
+<tr>
+<td>Phase 2 (Vollzone), unvorbereitet</td>
+<td>Mittel (10–20%)</td>
+<td>Cloudflares Auto-Scan kann DKIM-Records mit ungewöhnlichen Selector-Namen übersehen.</td>
+</tr>
+<tr>
+<td>Phase 2 (Vollzone), mit Stopp-und-Verifiziere</td>
+<td>Sehr gering (&lt;2%)</td>
+<td>Alle Records werden zwischen IONOS und Cloudflare abgeglichen, bevor NS umgestellt wird.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="verifizierungs-strategie-fur-phase-2">Verifizierungs-Strategie für Phase 2</h4>
+<p>Cloudflares Nameserver beantworten Queries <em>bevor</em> sie für die Welt autoritativ werden. Das ermöglicht Pre-Flight-Verifikation:</p>
+<pre><code class="language-bash">dig @abby.ns.cloudflare.com MX blauweiss-edv.com
+dig @abby.ns.cloudflare.com TXT blauweiss-edv.com
+dig @abby.ns.cloudflare.com TXT _dmarc.blauweiss-edv.com
+dig @abby.ns.cloudflare.com TXT default._domainkey.blauweiss-edv.com
+</code></pre>
+<p>Wenn Cloudflare dieselben Records zurückgibt wie IONOS, ist der NS-Switch safe. Claude kann diese Verifikation automatisiert durchführen.</p>
+<h4 id="rollback-semantik">Rollback-Semantik</h4>
+<ul>
+<li><strong>Phase-1-Rollback:</strong> NS-Records bei IONOS löschen. Subzone-Autorität löst sich sofort auf IONOS-Ebene auf; Propagation zu Resolvern dauert Minuten bis Stunden, je nach TTL.</li>
+<li><strong>Phase-2-Rollback:</strong> NS bei IONOS auf Defaults zurücksetzen. Propagation dauert 6–24 Stunden, während derer DNS-Antworten global inkonsistent sind (manche Resolver haben noch Cloudflare-Antworten gecacht). Rollback ist ein echtes Sicherheitsnetz für katastrophale Fehler, kein lockerer „Lass mich nochmal überlegen"-Mechanismus.</li>
+</ul>
+<h4 id="vendor-lock-in_1">Vendor-Lock-in</h4>
+<p>Cloudflare-Zonen sind im BIND-Format exportierbar. Eine Migration zu einem anderen DNS-Provider ist geradlinig. Cloudflare ist kein klebriger Lock-in.</p>
+<hr />
+<h2 id="6-alternatives-considered-geprufte-alternativen">6. Alternatives Considered · Geprüfte Alternativen</h2>
+<h3 id="english_5">English</h3>
+<table>
+<thead>
+<tr>
+<th>Alternative</th>
+<th>Pro</th>
+<th>Con</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Stay at IONOS</strong></td>
+<td>No migration needed.</td>
+<td>No API access, manual clicks for every change, no IaC possible. Doesn't solve the actual problem.</td>
+<td>Rejected.</td>
+</tr>
+<tr>
+<td><strong>nip.io / sslip.io wildcard DNS</strong></td>
+<td>No DNS setup at all.</td>
+<td>Cannot set TXT records → no GitLab Pages domain verification → no Let's Encrypt cert. Hostname routing also broken.</td>
+<td>Technically infeasible.</td>
+</tr>
+<tr>
+<td><strong>Register new <code>.de</code> or <code>.dev</code> domain at Cloudflare</strong></td>
+<td>Zero IONOS dependency. Fresh marketing identity option.</td>
+<td>Costs ~10 €/year. Splits brand identity from <code>.com</code>. Doesn't solve the root API access issue for the main domain.</td>
+<td>Viable as a parallel path, but doesn't replace the strategic move to Cloudflare.</td>
+</tr>
+<tr>
+<td><strong>Full IONOS → Cloudflare migration in one step</strong></td>
+<td>Solves API access immediately.</td>
+<td>Higher mail-risk surface. Requires more IONOS access than Phase 1.</td>
+<td>Rejected as Phase 1, deferred to Phase 2 once mail/web concerns are independently addressed.</td>
+</tr>
+<tr>
+<td><strong>Subzone delegation (proposed)</strong></td>
+<td>Minimal IONOS access, zero mail risk, full API access for CLARISSA. Sets up Phase 2 to be easier, not harder.</td>
+<td>Requires running two Cloudflare zones temporarily during Phase 2 transition (cosmetic, not technical issue).</td>
+<td><strong>Recommended.</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="deutsch_5">Deutsch</h3>
+<table>
+<thead>
+<tr>
+<th>Alternative</th>
+<th>Pro</th>
+<th>Contra</th>
+<th>Verdikt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bei IONOS bleiben</strong></td>
+<td>Keine Migration nötig.</td>
+<td>Kein API-Zugriff, manuelle Klicks für jede Änderung, kein IaC möglich. Löst das eigentliche Problem nicht.</td>
+<td>Verworfen.</td>
+</tr>
+<tr>
+<td><strong>nip.io / sslip.io Wildcard-DNS</strong></td>
+<td>Kein DNS-Setup nötig.</td>
+<td>Kann keine TXT-Records setzen → keine GitLab-Pages-Domain-Verifikation → kein Let's-Encrypt-Zertifikat. Hostname-Routing auch kaputt.</td>
+<td>Technisch nicht machbar.</td>
+</tr>
+<tr>
+<td><strong>Neue <code>.de</code>- oder <code>.dev</code>-Domain bei Cloudflare registrieren</strong></td>
+<td>Null IONOS-Abhängigkeit. Frische Marketing-Identität optional.</td>
+<td>Kostet ~10 €/Jahr. Spaltet Markenidentität von <code>.com</code>. Löst das eigentliche API-Zugriffsproblem für die Hauptdomain nicht.</td>
+<td>Als paralleler Pfad denkbar, ersetzt aber nicht den strategischen Schritt zu Cloudflare.</td>
+</tr>
+<tr>
+<td><strong>Vollmigration IONOS → Cloudflare in einem Schritt</strong></td>
+<td>Löst API-Zugriff sofort.</td>
+<td>Höhere Mail-Risiko-Fläche. Erfordert mehr IONOS-Zugang als Phase 1.</td>
+<td>Als Phase 1 verworfen, auf Phase 2 verschoben, sobald Mail/Web-Themen unabhängig adressiert sind.</td>
+</tr>
+<tr>
+<td><strong>Subzone-Delegation (vorgeschlagen)</strong></td>
+<td>Minimaler IONOS-Zugang, null Mail-Risiko, voller API-Zugriff für CLARISSA. Macht Phase 2 später <em>einfacher</em>, nicht schwerer.</td>
+<td>Erfordert temporär zwei Cloudflare-Zonen während Phase-2-Übergang (kosmetisch, kein technisches Problem).</td>
+<td><strong>Empfohlen.</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-concrete-steps-for-phase-1-konkrete-schritte-fur-phase-1">7. Concrete Steps for Phase 1 · Konkrete Schritte für Phase 1</h2>
+<h3 id="english_6">English</h3>
+<p><strong>Prerequisite — once-off action requiring IONOS access:</strong>
+After Cloudflare account creation and subzone setup (which produces two nameserver names like <code>abby.ns.cloudflare.com</code> and <code>jim.ns.cloudflare.com</code>), enter the following two NS records in the IONOS DNS panel for <code>blauweiss-edv.com</code>:</p>
+<pre><code>clarissa    NS    abby.ns.cloudflare.com    (TTL: 1h or default)
+clarissa    NS    jim.ns.cloudflare.com     (TTL: 1h or default)
+</code></pre>
+<p><strong>Everything else is handled by Claude via API:</strong>
+1. Verify subzone delegation is active (<code>dig NS clarissa.blauweiss-edv.com</code> shows Cloudflare NS).
+2. Create GitLab Pages custom domain via GitLab API → obtain TXT verification token.
+3. Set DNS records at Cloudflare via API:
+   - <code>clarissa.blauweiss-edv.com</code> CNAME → <code>irena-40cc50.gitlab.io</code> (proxied=false)
+   - <code>_gitlab-pages-verification-code.clarissa.blauweiss-edv.com</code> TXT → <code>&lt;token&gt;</code>
+4. Poll GitLab Pages domain endpoint until <code>verified=true</code> and certificate is provisioned.
+5. Set <code>clarissa.blauweiss-edv.com</code> as primary domain in GitLab Pages → automatic 308 redirects from <code>irena-40cc50.gitlab.io</code> activate.
+6. Update Issue #149 with completion status, ADR entry.</p>
+<p><strong>Estimated total time:</strong> Phase 1 active work ~30 minutes (most of which is waiting for DNS propagation and cert provisioning).</p>
+<h3 id="deutsch_6">Deutsch</h3>
+<p><strong>Voraussetzung — einmalige Aktion mit IONOS-Zugang:</strong>
+Nach Cloudflare-Account-Erstellung und Subzone-Setup (woraus zwei Nameserver-Namen wie <code>abby.ns.cloudflare.com</code> und <code>jim.ns.cloudflare.com</code> entstehen), folgende zwei NS-Records im IONOS-DNS-Panel für <code>blauweiss-edv.com</code> eintragen:</p>
+<pre><code>clarissa    NS    abby.ns.cloudflare.com    (TTL: 1h oder Default)
+clarissa    NS    jim.ns.cloudflare.com     (TTL: 1h oder Default)
+</code></pre>
+<p><strong>Alles andere wird von Claude via API erledigt:</strong>
+1. Subzone-Delegation als aktiv verifizieren (<code>dig NS clarissa.blauweiss-edv.com</code> zeigt Cloudflare-NS).
+2. GitLab-Pages-Custom-Domain via GitLab-API anlegen → TXT-Verifizierungs-Token holen.
+3. DNS-Records bei Cloudflare via API setzen:
+   - <code>clarissa.blauweiss-edv.com</code> CNAME → <code>irena-40cc50.gitlab.io</code> (proxied=false)
+   - <code>_gitlab-pages-verification-code.clarissa.blauweiss-edv.com</code> TXT → <code>&lt;token&gt;</code>
+4. GitLab-Pages-Domain-Endpoint pollen bis <code>verified=true</code> und Zertifikat ausgestellt.
+5. <code>clarissa.blauweiss-edv.com</code> als Primary Domain in GitLab Pages setzen → automatische 308-Redirects von <code>irena-40cc50.gitlab.io</code> aktiv.
+6. Issue #149 mit Abschluss-Status updaten, ADR-Eintrag.</p>
+<p><strong>Geschätzte Gesamtzeit:</strong> Phase-1-aktive Arbeit ~30 Minuten (davon Großteil Warten auf DNS-Propagation und Cert-Provisionierung).</p>
+<hr />
+<h2 id="8-decision-request-entscheidungsanfrage">8. Decision Request · Entscheidungsanfrage</h2>
+<h3 id="english_7">English</h3>
+<p>We request team approval to proceed with <strong>Phase 1: Subzone Delegation</strong> as described above.</p>
+<p>Reviewers:
+- <strong>Wolfram Laube</strong> — final decision (account holder, IONOS access)
+- <strong>Mike, Ian, Douglas</strong> — review for technical soundness and any concerns we may have missed</p>
+<p>Phase 2 and Phase 3 are not part of this decision and will be re-evaluated separately when triggers occur.</p>
+<h3 id="deutsch_7">Deutsch</h3>
+<p>Wir bitten um Team-Freigabe für <strong>Phase 1: Subzone-Delegation</strong> wie oben beschrieben.</p>
+<p>Reviewer:
+- <strong>Wolfram Laube</strong> — finale Entscheidung (Account-Inhaber, IONOS-Zugang)
+- <strong>Mike, Ian, Douglas</strong> — Review auf technische Stimmigkeit und übersehene Bedenken</p>
+<p>Phase 2 und Phase 3 sind nicht Teil dieser Entscheidung und werden separat re-evaluiert, sobald Auslöser eintreten.</p>
+<hr />
+<h2 id="appendix-anhang">Appendix · Anhang</h2>
+<h3 id="glossary-glossar">Glossary · Glossar</h3>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>English</th>
+<th>Deutsch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Apex domain</td>
+<td>The bare domain without subdomain (e.g., <code>blauweiss-edv.com</code>).</td>
+<td>Die nackte Domain ohne Subdomain (z.B. <code>blauweiss-edv.com</code>).</td>
+</tr>
+<tr>
+<td>Subzone</td>
+<td>A subdomain delegated to a different authoritative DNS provider.</td>
+<td>Eine Subdomain, die an einen anderen autoritativen DNS-Provider delegiert ist.</td>
+</tr>
+<tr>
+<td>NS record</td>
+<td>Nameserver record — tells the DNS hierarchy where to look for authoritative answers.</td>
+<td>Nameserver-Record — sagt der DNS-Hierarchie, wo autoritative Antworten zu finden sind.</td>
+</tr>
+<tr>
+<td>CNAME</td>
+<td>Canonical name record — aliases one domain to another.</td>
+<td>Canonical-Name-Record — verweist eine Domain auf eine andere.</td>
+</tr>
+<tr>
+<td>TTL</td>
+<td>Time to Live — how long a DNS record may be cached.</td>
+<td>Time to Live — wie lange ein DNS-Record gecacht werden darf.</td>
+</tr>
+<tr>
+<td>MX</td>
+<td>Mail Exchange record — tells senders where to deliver mail for the domain.</td>
+<td>Mail-Exchange-Record — sagt Absendern, wohin Mail für die Domain zugestellt werden soll.</td>
+</tr>
+<tr>
+<td>SPF/DKIM/DMARC</td>
+<td>Email authentication standards published as TXT records.</td>
+<td>E-Mail-Authentifizierungs-Standards, publiziert als TXT-Records.</td>
+</tr>
+<tr>
+<td>ACME challenge</td>
+<td>Protocol step for automated certificate issuance (Let's Encrypt).</td>
+<td>Protokoll-Schritt für automatisierte Zertifikats-Ausstellung (Let's Encrypt).</td>
+</tr>
+<tr>
+<td>Anycast</td>
+<td>Routing technique where multiple servers share the same IP, traffic goes to the nearest.</td>
+<td>Routing-Technik, bei der mehrere Server dieselbe IP teilen, Traffic geht zum nächsten.</td>
+</tr>
+<tr>
+<td>IaC</td>
+<td>Infrastructure as Code — managing infrastructure via versioned configuration files.</td>
+<td>Infrastructure as Code — Infrastruktur-Verwaltung via versionierte Konfigurationsdateien.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="references-referenzen">References · Referenzen</h3>
+<ul>
+<li>GitLab Issue <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa/-/issues/149">CLARISSA#149</a> — Custom Domain &amp; Marketing Landing</li>
+<li><a href="https://developers.cloudflare.com/dns/">Cloudflare DNS Documentation</a></li>
+<li><a href="https://docs.gitlab.com/ee/user/project/pages/custom_domains_ssl_tls_certification/">GitLab Pages Custom Domain Documentation</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc1034">RFC 1034</a> — DNS concepts and facilities (incl. zone delegation)</li>
+</ul>
+</body>
+</html>
