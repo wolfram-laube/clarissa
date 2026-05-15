@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **ADR-042 DNS Provider Strategy (#150)** (2026-05-15)
+  - New ADR documenting the choice of Cloudflare as DNS provider for CLARISSA, via subzone delegation
+  - Phase 1 (immediate): subzone `clarissa.blauweiss-edv.com` delegated to Cloudflare, main zone stays at IONOS
+  - Phase 2 (deferred, trigger-driven): full zone migration tracked as backlog issue #154
+  - Phase 3 (optional, long-term): domain registrar transfer + DNS-as-Code via Terraform
+  - Companion bilingual (EN/DE) long-form proposal document at `docs/architecture/proposals/2026-05-15-dns-cloudflare.md` (plus PDF + HTML renderings for team review by Mike, Ian, Doug)
+  - Updated `docs/architecture/adr/index.md` to include ADR-042 and previously-missing ADR-029, ADR-030, ADR-041
+  - Companion issues: #150 (ADR MR tracker), #151 (DNS Phase 1 execution), #152 (landing page), #153 (demo 404 fix), #154 (Phase 2 backlog)
+  - Related: #149 (CLARISSA Phase 1 public surface)
+
 - **Deck Provenance SHA256 Manifest (#148)** (2026-05-14)
   - Documented `tests/fixtures/decks/` provenance with verifiable SHA256 hashes
   - Manifest covers all vendored fixtures (SPE1, SPE9) and most-used submodule decks (SPE3, SPE5, SPE10 M1/M2, Norne, Sleipner)

@@ -30,6 +30,9 @@ ADRs document significant architectural decisions, their rationale, and conseque
 | [016](ADR-016-runner-load-balancing.md) | Runner Load Balancing | Accepted |
 | [017](ADR-017-gdrive-folder-structure.md) | GDrive Folder Structure | Accepted |
 | [019](ADR-019-billing-folder-structure.md) | Billing Folder Structure (Contractors) | Accepted |
+| [029](ADR-029-deployment-infrastructure-strategy.md) | Deployment & Infrastructure Strategy | Deprecated (→ BW-ADR-010) |
+| [030](ADR-030-multi-target-deployment-strategy.md) | Multi-Target Deployment Strategy | Proposed |
+| [042](ADR-042-dns-provider-strategy.md) | DNS Provider Strategy — Cloudflare via Subzone Delegation | Accepted |
 
 ### Repository & Process
 | ADR | Title | Status |
@@ -55,6 +58,7 @@ ADRs document significant architectural decisions, their rationale, and conseque
 | [027](ADR-027-bidirectional-sync-strategy.md) | Bidirectional Repo Sync | Accepted |
 | [028](ADR-028-voice-input-architecture.md) | 🎤 Voice Input Architecture | Accepted |
 | [031](ADR-031-portal-location-strategy.md) | Portal Location Strategy | Accepted |
+| [041](ADR-041-voice-service-extraction.md) | 🎤 Voice Service Extraction | Proposed |
 
 ### Superseded
 | ADR | Title | Status | Superseded By |
@@ -87,7 +91,9 @@ ADRs document significant architectural decisions, their rationale, and conseque
 | LLM strategy | ADR-025 |
 | Testing & validation | ADR-026 |
 | Repository sync | ADR-027 |
-| Voice interface 🎤 | ADR-028 |
+| Voice interface 🎤 | ADR-028, ADR-041 |
+| Deployment & infrastructure | ADR-029, ADR-030 |
+| DNS strategy | ADR-042 |
 
 ## Cross-References
 
