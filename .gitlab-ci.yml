@@ -159,33 +159,12 @@ stages:
 # -----------------------------------------------------------------------------
 pages:
   stage: deploy
+  image: python:3.11
   tags:
-    - shell-any
+    - docker-any
   script:
-    # Just copy static files - skip mkdocs build (jupyter deps are broken)
-    - mkdir -p public/js public/locales public/ops
-    - cp docs/portal.html public/
-    - cp -r docs/js/* public/js/
-    - cp -r docs/locales/* public/locales/
-    - cp -r docs/ops public/ops
-    - mkdir -p public/viewer && cp docs/viewer/*.html public/viewer/
-    - cp docs/ops/i18n.md public/ops/ 2>/dev/null || echo "ops/i18n.md not found"
-    - cp docs/index.md public/ 2>/dev/null || echo "No index.md"
-    # Create simple index.html redirect to portal
-    - |
-      cat > public/index.html << 'HTML'
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta http-equiv="refresh" content="0; url=portal.html">
-        <title>Blauweiss Operations</title>
-      </head>
-      <body>
-        <p>Redirecting to <a href="portal.html">Operations Portal</a>...</p>
-      </body>
-      </html>
-      HTML
+    - pip install mkdocs-material
+    - mkdocs build --strict
     - echo "=== Deployed ===" && ls -la public/
   artifacts:
     paths:
