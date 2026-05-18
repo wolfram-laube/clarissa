@@ -163,7 +163,7 @@ pages:
   tags:
     - nordic
   script:
-    - pip install mkdocs-material mkdocs-jupyter
+    - pip install mkdocs-material mkdocs-jupyter --break-system-packages
     - mkdocs build  # --strict disabled: pre-existing broken nav refs (tech-debt)
     - echo "=== Deployed ===" && ls -la public/
   artifacts:
