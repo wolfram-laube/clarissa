@@ -161,7 +161,7 @@ pages:
   stage: deploy
   image: python:3.11
   tags:
-    - docker-any
+    - yoga-docker
   script:
     - pip install mkdocs-material mkdocs-jupyter
     - mkdocs build  # --strict disabled: pre-existing broken nav refs (tech-debt)
