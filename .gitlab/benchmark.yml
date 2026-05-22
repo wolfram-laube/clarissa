@@ -1,5 +1,4 @@
 # Runner Benchmark - All 12 Runners
-# 4 Machines × 3 Executors
 
 .benchmark_base:
   stage: test
@@ -8,7 +7,7 @@
     - echo "=== Runner Benchmark ==="
     - echo "Host:" $(hostname)
     - date
-    - 'python3 -c "import time; s=time.time(); n=500000; sieve=[1]*n; exec("for p in range(2,int(n**.5)+1):\n if sieve[p]:\n  for i in range(p*p,n,p): sieve[i]=0"); print(f"{sum(sieve)-2} primes in {time.time()-s:.2f}s")"'
+    - python3 -c "import time; s=time.time(); print(sum(1 for i in range(2,500000) if all(i%j for j in range(2,int(i**0.5)+1))),'primes in',round(time.time()-s,2),'s')"
     - echo "=== Done ==="
   rules:
     - when: manual
