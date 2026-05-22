@@ -1,0 +1,74 @@
+# Runner Benchmark - All 12 Runners
+# 4 Machines × 3 Executors
+
+.benchmark_base:
+  stage: test
+  timeout: 5 minutes
+  script:
+    - echo "=== Runner Benchmark ==="
+    - echo "Host:" $(hostname)
+    - date
+    - 'python3 -c "import time; s=time.time(); n=500000; sieve=[1]*n; exec("for p in range(2,int(n**.5)+1):\n if sieve[p]:\n  for i in range(p*p,n,p): sieve[i]=0"); print(f"{sum(sieve)-2} primes in {time.time()-s:.2f}s")"'
+    - echo "=== Done ==="
+  rules:
+    - when: manual
+
+# Mac #1
+benchmark-mac1-shell:
+  extends: .benchmark_base
+  tags: [mac-group-shell]
+
+benchmark-mac1-docker:
+  extends: .benchmark_base
+  tags: [mac-docker]
+  image: python:3.11-slim
+
+benchmark-mac1-k8s:
+  extends: .benchmark_base
+  tags: [mac-k8s]
+  image: python:3.11-slim
+
+# Mac #2
+benchmark-mac2-shell:
+  extends: .benchmark_base
+  tags: [mac2-shell]
+
+benchmark-mac2-docker:
+  extends: .benchmark_base
+  tags: [mac2-docker]
+  image: python:3.11-slim
+
+benchmark-mac2-k8s:
+  extends: .benchmark_base
+  tags: [mac2-k8s]
+  image: python:3.11-slim
+
+# Linux Yoga
+benchmark-linux-shell:
+  extends: .benchmark_base
+  tags: [linux-shell]
+
+benchmark-linux-docker:
+  extends: .benchmark_base
+  tags: [linux-docker]
+  image: python:3.11-slim
+
+benchmark-linux-k8s:
+  extends: .benchmark_base
+  tags: [linux-k8s]
+  image: python:3.11-slim
+
+# GCP VM
+benchmark-gcp-shell:
+  extends: .benchmark_base
+  tags: [gcp-shell]
+
+benchmark-gcp-docker:
+  extends: .benchmark_base
+  tags: [gcp-docker]
+  image: python:3.11-slim
+
+benchmark-gcp-k8s:
+  extends: .benchmark_base
+  tags: [gcp-k8s]
+  image: python:3.11-slim
