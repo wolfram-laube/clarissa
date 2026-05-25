@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLARISSA — Conversational AI for Reservoir Simulation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f0f1a;
+            --surface: #1a1a2e;
+            --surface2: #252542;
+            --text: #e4e4f0;
+            --subtext: #9090a8;
+            --accent: #6c5ce7;
+            --accent-light: #a29bfe;
+            --green: #00cec9;
+            --gradient: linear-gradient(135deg, #6c5ce7 0%, #00cec9 100%);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px 20px;
+            background: radial-gradient(ellipse at top, #1a1a3e 0%, var(--bg) 70%);
+        }
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: var(--surface2);
+            border: 1px solid var(--accent);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--accent-light);
+            margin-bottom: 24px;
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+            color: var(--subtext);
+            max-width: 700px;
+            margin-bottom: 40px;
+        }
+        
+        /* CTA Buttons */
+        .cta-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .cta-primary {
+            background: var(--gradient);
+            color: white;
+        }
+        .cta-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(108, 92, 231, 0.4);
+        }
+        .cta-secondary {
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--surface2);
+        }
+        .cta-secondary:hover {
+            border-color: var(--accent);
+            background: var(--surface);
+        }
+        
+        /* Features Grid */
+        .features {
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .features h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 50px;
+            color: var(--text);
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        .feature-card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid var(--surface2);
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+        }
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+        .feature-card p {
+            color: var(--subtext);
+            font-size: 0.95rem;
+        }
+        
+        /* Tech Stack */
+        .tech-stack {
+            padding: 60px 20px;
+            background: var(--surface);
+            text-align: center;
+        }
+        .tech-stack h2 {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: var(--subtext);
+        }
+        .tech-badges {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .tech-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--surface2);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+        
+        /* Team Section */
+        .team {
+            padding: 80px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .team h2 {
+            font-size: 2rem;
+            margin-bottom: 40px;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+        .team-member {
+            padding: 24px;
+        }
+        .team-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 16px;
+        }
+        .team-member h4 {
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+        .team-member p {
+            color: var(--subtext);
+            font-size: 0.85rem;
+        }
+        
+        /* Status Bar */
+        .status-bar {
+            padding: 16px 20px;
+            background: var(--surface2);
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--subtext);
+        }
+        .status-bar span {
+            color: var(--green);
+        }
+        
+        /* Footer */
+        footer {
+            padding: 40px 20px;
+            text-align: center;
+            border-top: 1px solid var(--surface2);
+        }
+        footer p {
+            color: var(--subtext);
+            font-size: 0.85rem;
+        }
+        footer a {
+            color: var(--accent-light);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <span>●</span> v0.2.0 — OPM Flow Integration · SPE Europe 2026 Paper in Draft
+    </div>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-badge">🔬 Research Preview</div>
+        <h1>CLARISSA</h1>
+        <p class="hero-subtitle">
+            Conversational AI for Reservoir Simulation — Natural language interface 
+            to complex petroleum engineering workflows. Ask questions, run simulations, 
+            get insights.
+        </p>
+        <div class="cta-group">
+            <a href="demos/index.html" class="cta cta-primary">
+                🎮 Live Demo
+            </a>
+            <a href="tutorials/voice-showcase/" class="cta cta-secondary">
+                🎤 Voice Demo
+            </a>
+            <a href="getting-started-en/" class="cta cta-secondary">
+                📖 Documentation
+            </a>
+        </div>
+    </section>
+    
+    <!-- Features -->
+    <section class="features">
+        <h2>What CLARISSA Does</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3>Natural Language Interface</h3>
+                <p>Ask questions in plain English. "What's the oil recovery after 10 years?" 
+                   CLARISSA translates to simulation parameters automatically.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Multi-Simulator Support</h3>
+                <p>Works with OPM Flow (open-source) and commercial simulators. 
+                   One interface, multiple backends.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧠</div>
+                <h3>Physics-Aware AI</h3>
+                <p>Hybrid architecture combining LLM reasoning with physics constraints. 
+                   No hallucinated reservoir properties.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎤</div>
+                <h3>Voice Input</h3>
+                <p>Hands-free operation. Dictate simulation scenarios while reviewing 
+                   results. Powered by Whisper.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Visual Results</h3>
+                <p>Interactive charts, 3D reservoir views, and automated reporting. 
+                   From simulation to presentation in minutes.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Air-Gapped Ready</h3>
+                <p>Deploy on-premises with local LLMs. Your proprietary data stays 
+                   within your infrastructure.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Tech Stack -->
+    <section class="tech-stack">
+        <h2>Powered By</h2>
+        <div class="tech-badges">
+            <div class="tech-badge">🛢️ OPM Flow</div>
+            <div class="tech-badge">🐍 Python</div>
+            <div class="tech-badge">☁️ GCP Cloud Run</div>
+            <div class="tech-badge">🤖 Anthropic Claude</div>
+            <div class="tech-badge">🧠 OpenAI</div>
+            <div class="tech-badge">🎤 Whisper</div>
+            <div class="tech-badge">⚡ FastAPI</div>
+        </div>
+    </section>
+    
+    <!-- Team -->
+    <section class="team">
+        <h2>Team</h2>
+        <div class="team-grid">
+            <div class="team-member">
+                <div class="team-avatar">WL</div>
+                <h4>Wolfram Laube</h4>
+                <p>Lead · Architecture · AI</p>
+            </div>
+            <div class="team-member">
+                <div class="team-avatar">DP</div>
+                <h4>Douglas Perschke</h4>
+                <p>Reservoir Engineering</p>
+            </div>
+            <div class="team-member">
+                <div class="team-avatar">MM</div>
+                <h4>Michal Matejka</h4>
+                <p>Simulation · MRST</p>
+            </div>
+            <div class="team-member">
+                <div class="team-avatar">IH</div>
+                <h4>Ian</h4>
+                <p>Integration · Testing</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <p>
+            © 2026 <a href="https://blauweiss-edv.at">blauweiss EDV</a> · Schärding, Austria
+            <br>
+            <a href="architecture/README/">Architecture</a> · 
+            <a href="publications/spe-europe-2026/">SPE Europe 2026</a> · 
+            <a href="https://gitlab.com/wolfram_laube/blauweiss_llc/projects/clarissa">GitLab</a>
+        </p>
+    </footer>
+</body>
+</html>
