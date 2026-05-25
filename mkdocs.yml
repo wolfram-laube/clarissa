@@ -144,6 +144,7 @@ nav:
       - "🎬 Demo Recording": tools/recording/README.md
   - "⚙️ Infrastructure":
     - Overview: infrastructure.md
+    - "🚀 Runner Onboarding": ONBOARDING_RUNNER.md
     - CI/CD:
       - CI Pipeline Guide: ci/README.md
       - CI Workflow Automation: CI_WORKFLOW_AUTOMATION.md
