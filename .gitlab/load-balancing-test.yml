@@ -1,17 +1,12 @@
 # Load Balancing & Fallback Test Pipeline
 # Ref: Issue #155, ADR-015
 
-stages:
-  - fallback-test
-  - load-balance-test
-  - summary
-
 # ============================================================
-# FALLBACK TEST - Generische Tags mit Redundanz
+# FALLBACK TESTS - Generische Tags
 # ============================================================
 
 fallback-shell:
-  stage: fallback-test
+  stage: test
   tags: [shell-any]
   script:
     - echo "=== Fallback Test Shell ==="
@@ -21,7 +16,7 @@ fallback-shell:
     - when: manual
 
 fallback-docker:
-  stage: fallback-test
+  stage: test
   tags: [docker-any]
   image: python:3.11-slim
   script:
@@ -31,7 +26,7 @@ fallback-docker:
     - when: manual
 
 fallback-k8s:
-  stage: fallback-test
+  stage: test
   tags: [k8s-any]
   image: python:3.11-slim
   script:
@@ -45,7 +40,7 @@ fallback-k8s:
 # ============================================================
 
 load-balance-shell:
-  stage: load-balance-test
+  stage: test
   tags: [shell-any]
   parallel: 8
   script:
@@ -62,16 +57,16 @@ load-balance-shell:
 # ============================================================
 
 platform-mac:
-  stage: load-balance-test
+  stage: test
   tags: [mac-any]
   script:
     - echo "macOS Runner $CI_RUNNER_DESCRIPTION"
-    - sw_vers 2>/dev/null || echo "Docker/K8s executor"
+    - sw_vers 2>/dev/null || echo "Docker/K8s"
   rules:
     - when: manual
 
 platform-linux:
-  stage: load-balance-test
+  stage: test
   tags: [linux-any]
   script:
     - echo "Linux Runner $CI_RUNNER_DESCRIPTION"
@@ -80,7 +75,7 @@ platform-linux:
     - when: manual
 
 platform-gcp:
-  stage: load-balance-test
+  stage: test
   tags: [gcp-any]
   script:
     - echo "GCP Runner $CI_RUNNER_DESCRIPTION"
