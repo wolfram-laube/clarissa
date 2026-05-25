@@ -1,0 +1,126 @@
+# Load Balancing & Fallback Test Pipeline
+# Ref: Issue #155, ADR-015
+
+stages:
+  - fallback-test
+  - load-balance-test
+  - matrix-test
+
+# ============================================================
+# FALLBACK TEST - Generische Tags mit Redundanz
+# ============================================================
+
+fallback-shell:
+  stage: fallback-test
+  tags: [shell-any]  # 4 Runner verfügbar
+  script:
+    - echo "=== Fallback Test: Shell ==="
+    - echo "Runner: $CI_RUNNER_DESCRIPTION"
+    - echo "Host: $(hostname)"
+    - echo "Wenn einer offline → nächster übernimmt"
+  rules:
+    - when: manual
+
+fallback-docker:
+  stage: fallback-test
+  tags: [docker-any]  # 4 Runner verfügbar
+  image: python:3.11-slim
+  script:
+    - echo "=== Fallback Test: Docker ==="
+    - echo "Runner: $CI_RUNNER_DESCRIPTION"
+    - python3 -c "import platform; print(f'Platform: {platform.system()}')"
+  rules:
+    - when: manual
+
+fallback-k8s:
+  stage: fallback-test
+  tags: [k8s-any]  # 4 Runner verfügbar
+  image: python:3.11-slim
+  script:
+    - echo "=== Fallback Test: K8s ==="
+    - echo "Runner: $CI_RUNNER_DESCRIPTION"
+    - python3 -c "print('K8s Pod running!')"
+  rules:
+    - when: manual
+
+# ============================================================
+# LOAD BALANCE TEST - Parallele Jobs verteilen sich
+# ============================================================
+
+load-balance-shell:
+  stage: load-balance-test
+  tags: [shell-any]
+  parallel: 8
+  script:
+    - echo "=== Load Balance Test ==="
+    - echo "Job $CI_NODE_INDEX of $CI_NODE_TOTAL"
+    - echo "Runner: $CI_RUNNER_DESCRIPTION"
+    - echo "Host: $(hostname)"
+    - sleep 5  # Zeit für Verteilung
+  rules:
+    - when: manual
+
+load-balance-docker:
+  stage: load-balance-test
+  tags: [docker-any]
+  image: alpine
+  parallel: 4
+  script:
+    - echo "Job $CI_NODE_INDEX on $CI_RUNNER_DESCRIPTION"
+    - sleep 3
+  rules:
+    - when: manual
+
+# ============================================================
+# MATRIX TEST - Alle Executor-Typen parallel
+# ============================================================
+
+matrix-all-executors:
+  stage: matrix-test
+  parallel:
+    matrix:
+      - EXECUTOR: shell
+        RUNNER_TAG: shell-any
+      - EXECUTOR: docker
+        RUNNER_TAG: docker-any
+      - EXECUTOR: k8s
+        RUNNER_TAG: k8s-any
+  tags: ["${RUNNER_TAG}"]
+  image: python:3.11-slim
+  script:
+    - echo "=== Matrix Test: $EXECUTOR ==="
+    - echo "Runner: $CI_RUNNER_DESCRIPTION"
+    - python3 -c "print('Executor type:', '$EXECUTOR')"
+  rules:
+    - when: manual
+
+# ============================================================
+# PLATFORM TEST - Mac vs Linux vs GCP
+# ============================================================
+
+platform-mac:
+  stage: matrix-test
+  tags: [mac-any]  # 6 Runner
+  script:
+    - echo "macOS Runner: $CI_RUNNER_DESCRIPTION"
+    - sw_vers 2>/dev/null || echo "Not macOS shell"
+  rules:
+    - when: manual
+
+platform-linux:
+  stage: matrix-test
+  tags: [linux-any]  # 3 Runner
+  script:
+    - echo "Linux Runner: $CI_RUNNER_DESCRIPTION"
+    - uname -a
+  rules:
+    - when: manual
+
+platform-gcp:
+  stage: matrix-test
+  tags: [gcp-any]  # 3 Runner
+  script:
+    - echo "GCP Runner: $CI_RUNNER_DESCRIPTION"
+    - curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/zone 2>/dev/null || echo "Not GCP metadata"
+  rules:
+    - when: manual
