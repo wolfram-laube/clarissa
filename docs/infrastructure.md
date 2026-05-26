@@ -145,15 +145,19 @@ gcloud compute ssh gitlab-runner-nordic --zone=europe-north2-a --project=myk8spr
 
 ## GitLab CI Variables
 
-Diese Werte sind als CI Variables gesetzt (Settings → CI/CD → Variables):
+Diese Werte sind als CI Variables gesetzt (Gruppen-Ebene: Settings → CI/CD → Variables):
 
-| Variable | Masked | Purpose |
-|----------|--------|---------|
-| `GITLAB_TOKEN` | ❌ | CI push-back to repo |
-| `OPENAI_API_KEY` | ✅ | relay.py (ChatGPT) |
-| `ANTHROPIC_API_KEY` | ✅ | claude_relay.py (Claude) |
-| `GOOGLE_DRIVE_FOLDER_ID` | ❌ | Sync packages |
-| `GOOGLE_SERVICE_ACCOUNT_KEY` | ❌ | GDrive API |
+| Variable | Masked | Purpose | Status |
+|----------|--------|---------|--------|
+| `GITLAB_TOKEN` | ✅ | CI push-back to repo | ✅ |
+| `OPENAI_API_KEY` | ✅ | relay.py (ChatGPT) | ✅ |
+| `ANTHROPIC_API_KEY` | ✅ | claude_relay.py (Claude) | ✅ |
+| `GOOGLE_DRIVE_FOLDER_ID` | ❌ | Sync packages | ✅ |
+| `GOOGLE_SERVICE_ACCOUNT_KEY` | ❌ | GDrive API | ✅ |
+
+> ℹ️ Alle Variablen sind auf **Gruppen-Ebene** (`wolfram_laube/blauweiss_llc`) gesetzt und werden an alle Projekte vererbt.
+>
+> 🔐 **Security Hinweis:** Token-Separierung geplant (siehe Issue #156)
 
 ---
 
