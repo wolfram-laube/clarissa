@@ -8,6 +8,7 @@
 github-push:
   stage: deploy
   tags: [shell-any]
+  needs: []  # Run immediately, no stage dependencies
   variables:
     GIT_STRATEGY: clone
     GIT_DEPTH: 0  # Full history für push
@@ -30,6 +31,7 @@ github-push:
 github-pull:
   stage: deploy
   tags: [shell-any]
+  needs: []
   variables:
     GIT_STRATEGY: clone
     GIT_DEPTH: 0
@@ -58,6 +60,7 @@ github-pull:
 github-status:
   stage: test
   tags: [shell-any]
+  needs: []
   script:
     - echo "📊 GitHub Sync Status"
     - git remote add github https://${GITHUB_TOKEN}@github.com/wolfram-laube/clarissa.git 2>/dev/null || true
