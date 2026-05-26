@@ -41,7 +41,8 @@ include:
   # - local: '.gitlab/gmail-drafts.yml'    # MOVED TO backoffice
   # - local: '.gitlab/gdrive-upload.yml'   # MOVED TO backoffice
   - local: '.gitlab/benchmark.yml'
-  - local: '.gitlab/load-balancing-test.yml'        # Runner Benchmarks
+  - local: '.gitlab/load-balancing-test.yml'
+  - local: '.gitlab/github-sync.yml'        # Runner Benchmarks
   # - local: '.gitlab/fix-shell-runner.yml' # MOVED TO backoffice
   # - local: '.gitlab/parallel-jobs.yml'    # MOVED TO backoffice
 
