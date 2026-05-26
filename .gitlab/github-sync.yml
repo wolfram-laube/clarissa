@@ -1,0 +1,78 @@
+# GitHub Bidirectional Sync
+# Ref: Issue #157, ADR-027
+
+# ============================================================
+# GITLAB → GITHUB (automatisch bei main push)
+# ============================================================
+
+github-push:
+  stage: deploy
+  tags: [shell-any]
+  variables:
+    GIT_STRATEGY: clone
+    GIT_DEPTH: 0  # Full history für push
+  script:
+    - echo "🔄 Syncing to GitHub..."
+    - git remote add github https://${GITHUB_TOKEN}@github.com/wolfram-laube/clarissa.git || true
+    - git remote set-url github https://${GITHUB_TOKEN}@github.com/wolfram-laube/clarissa.git
+    - git fetch --all
+    - git push github HEAD:main --force-with-lease
+    - echo "✅ Pushed to GitHub"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: on_success
+    - when: never
+
+# ============================================================
+# GITHUB → GITLAB (manuell für externe PRs)
+# ============================================================
+
+github-pull:
+  stage: deploy
+  tags: [shell-any]
+  variables:
+    GIT_STRATEGY: clone
+    GIT_DEPTH: 0
+  script:
+    - echo "🔄 Pulling from GitHub..."
+    - git remote add github https://${GITHUB_TOKEN}@github.com/wolfram-laube/clarissa.git || true
+    - git remote set-url github https://${GITHUB_TOKEN}@github.com/wolfram-laube/clarissa.git
+    - git fetch github main
+    - |
+      if git diff --quiet HEAD github/main; then
+        echo "✅ Already in sync"
+      else
+        echo "⚠️ Differences found:"
+        git log HEAD..github/main --oneline
+        echo ""
+        echo "To merge: git merge github/main"
+      fi
+  rules:
+    - when: manual
+  allow_failure: true
+
+# ============================================================
+# SYNC STATUS CHECK
+# ============================================================
+
+github-status:
+  stage: test
+  tags: [shell-any]
+  script:
+    - echo "📊 GitHub Sync Status"
+    - git remote add github https://${GITHUB_TOKEN}@github.com/wolfram-laube/clarissa.git 2>/dev/null || true
+    - git fetch github main 2>/dev/null || echo "⚠️ Cannot fetch GitHub"
+    - |
+      GITLAB_SHA=$(git rev-parse HEAD)
+      GITHUB_SHA=$(git rev-parse github/main 2>/dev/null || echo "unknown")
+      echo "GitLab HEAD: $GITLAB_SHA"
+      echo "GitHub main: $GITHUB_SHA"
+      if [ "$GITLAB_SHA" = "$GITHUB_SHA" ]; then
+        echo "✅ In Sync!"
+      else
+        echo "⚠️ Out of Sync"
+        git log --oneline HEAD...github/main 2>/dev/null | head -10
+      fi
+  rules:
+    - when: manual
+  allow_failure: true
