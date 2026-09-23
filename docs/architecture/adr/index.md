@@ -86,7 +86,7 @@ ADRs document significant architectural decisions, their rationale, and conseque
 | CLARISSA core design | ADR-024 |
 | LLM strategy | ADR-025 |
 | Testing & validation | ADR-026 |
-| Repository sync | ADR-027 |
+| Repository sync | ADR-042 |
 | Voice interface 🎤 | ADR-028 |
 
 ## Cross-References

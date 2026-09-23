@@ -1,4 +1,4 @@
-# ADR-027: Bidirectional Repository Synchronization Strategy
+# ADR-042: Bidirectional Repository Synchronization Strategy
 
 ## Status
 **Accepted** (2026-01-24)
