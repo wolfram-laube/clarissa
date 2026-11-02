@@ -43,6 +43,7 @@ include:
   - local: '.gitlab/benchmark.yml'
   - local: '.gitlab/load-balancing-test.yml'
   - local: '.gitlab/github-sync.yml'        # Runner Benchmarks
+  - local: '.gitlab/docs-generalization.yml' # Generalisierungs-Doku: PDF pro Modul + MkDocs-Build im MR
   # - local: '.gitlab/fix-shell-runner.yml' # MOVED TO backoffice
   # - local: '.gitlab/parallel-jobs.yml'    # MOVED TO backoffice
 

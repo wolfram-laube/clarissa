@@ -1,0 +1,93 @@
+# =============================================================================
+# Generalisierungs-Doku: ein unabhaengiger Build-Job pro Modul + Gesamtdokument
+# Markdown -> LaTeX-Quelle (.tex) -> PDF, beides als Artefakt.
+# Jeder Job laeuft nur, wenn sich sein Ordner aendert (MR und main).
+# =============================================================================
+
+.gen_pdf:
+  stage: build
+  image:
+    name: pandoc/latex:latest
+    entrypoint: [""]
+  tags:
+    - docker-any
+  variables:
+    SITE: "https://clarissa.blauweiss-ai.com/architecture/generalization/"
+    FILTER: "$CI_PROJECT_DIR/docs/architecture/generalization/md-links.lua"
+  before_script:
+    - tlmgr update --self || true
+    - tlmgr install babel-german hyphen-german polyglossia || true
+  script:
+    - cd "$DOC_DIR"
+    - pandoc --defaults pandoc.yaml --lua-filter "$FILTER" -M site-base="$SITE_BASE" -s -o "$DOC_NAME.tex"
+    - pandoc --defaults pandoc.yaml --lua-filter "$FILTER" -M site-base="$SITE_BASE"
+    - ls -la
+  artifacts:
+    name: "$DOC_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - "$DOC_DIR/*.tex"
+      - "$DOC_DIR/*.pdf"
+    expire_in: 4 weeks
+
+docs_gen_gesamt:
+  extends: .gen_pdf
+  variables:
+    DOC_DIR: docs/architecture/generalization
+    DOC_NAME: clarissa-generalisierung
+    SITE_BASE: "https://clarissa.blauweiss-ai.com/architecture/generalization/"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "main"'
+      changes:
+        - docs/architecture/generalization/**/*
+        - .gitlab/docs-generalization.yml
+
+docs_gen_simulator_adapter:
+  extends: .gen_pdf
+  variables:
+    DOC_DIR: docs/architecture/generalization/simulator-adapter
+    DOC_NAME: simulator-adapter
+    SITE_BASE: "https://clarissa.blauweiss-ai.com/architecture/generalization/simulator-adapter/"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "main"'
+      changes:
+        - docs/architecture/generalization/simulator-adapter/**/*
+        - .gitlab/docs-generalization.yml
+
+docs_gen_nsai_adapter:
+  extends: .gen_pdf
+  variables:
+    DOC_DIR: docs/architecture/generalization/nsai-adapter
+    DOC_NAME: nsai-adapter
+    SITE_BASE: "https://clarissa.blauweiss-ai.com/architecture/generalization/nsai-adapter/"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "main"'
+      changes:
+        - docs/architecture/generalization/nsai-adapter/**/*
+        - .gitlab/docs-generalization.yml
+
+docs_gen_dialectic_ai_adapter:
+  extends: .gen_pdf
+  variables:
+    DOC_DIR: docs/architecture/generalization/dialectic-ai-adapter
+    DOC_NAME: dialectic-ai-adapter
+    SITE_BASE: "https://clarissa.blauweiss-ai.com/architecture/generalization/dialectic-ai-adapter/"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "main"'
+      changes:
+        - docs/architecture/generalization/dialectic-ai-adapter/**/*
+        - .gitlab/docs-generalization.yml
+
+# Webseite im MR testweise bauen (ohne Deployment), damit Fehler vor main auffallen.
+docs_site_build_mr:
+  stage: test
+  image: python:3.11
+  tags:
+    - docker-any
+  script:
+    - pip install mkdocs-material mkdocs-jupyter --break-system-packages
+    - mkdocs build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - docs/**/*
+        - mkdocs.yml
