@@ -1,0 +1,14 @@
+# Gesamt-PDF: Zentraldokument + alle Module (keine Kopien).
+# Aufruf aus diesem Ordner: pandoc --defaults pandoc.yaml
+input-files:
+  - index.md
+  - simulator-adapter/index.md
+  - nsai-adapter/index.md
+  - dialectic-ai-adapter/index.md
+output-file: clarissa-generalisierung.pdf
+pdf-engine: xelatex
+shift-heading-level-by: 0
+metadata:
+  lang: de-AT
+  title: CLARISSA – Generalisierung
+toc: true

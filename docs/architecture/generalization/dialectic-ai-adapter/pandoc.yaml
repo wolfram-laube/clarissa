@@ -1,0 +1,7 @@
+# Eigenständiges PDF dieses Moduls. Aufruf aus diesem Ordner: pandoc --defaults pandoc.yaml
+input-files:
+  - index.md
+output-file: dialectic-ai-adapter.pdf
+pdf-engine: xelatex
+metadata:
+  lang: de-AT
